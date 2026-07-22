@@ -1,0 +1,458 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Design tokens — ported from free-nextjs-admin-dashboard-main (TailAdmin).
+   This is the single source of truth for color/typography/shadow tokens.
+   ───────────────────────────────────────────────────────────────────────── */
+@theme {
+  --font-*: initial;
+  --font-outfit: Outfit, sans-serif;
+
+  --breakpoint-*: initial;
+  --breakpoint-2xsm: 375px;
+  --breakpoint-xsm: 425px;
+  --breakpoint-3xl: 2000px;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+
+  --text-title-2xl: 72px;
+  --text-title-2xl--line-height: 90px;
+  --text-title-xl: 60px;
+  --text-title-xl--line-height: 72px;
+  --text-title-lg: 48px;
+  --text-title-lg--line-height: 60px;
+  --text-title-md: 36px;
+  --text-title-md--line-height: 44px;
+  --text-title-sm: 30px;
+  --text-title-sm--line-height: 38px;
+  --text-theme-xl: 20px;
+  --text-theme-xl--line-height: 30px;
+  --text-theme-sm: 14px;
+  --text-theme-sm--line-height: 20px;
+  --text-theme-xs: 12px;
+  --text-theme-xs--line-height: 18px;
+
+  --color-current: currentColor;
+  --color-transparent: transparent;
+  --color-white: #ffffff;
+  --color-black: #0a0a0a;
+
+  --color-brand-25: var(--app-primary-light);
+  --color-brand-50: var(--app-primary-light);
+  --color-brand-100: color-mix(in oklab, var(--app-primary) 18%, white);
+  --color-brand-200: color-mix(in oklab, var(--app-primary) 28%, white);
+  --color-brand-300: color-mix(in oklab, var(--app-primary) 42%, white);
+  --color-brand-400: color-mix(in oklab, var(--app-primary) 72%, white);
+  --color-brand-500: var(--app-primary);
+  --color-brand-600: var(--app-primary-hover);
+  --color-brand-700: color-mix(in oklab, var(--app-primary) 84%, black);
+  --color-brand-800: color-mix(in oklab, var(--app-primary) 72%, black);
+  --color-brand-900: color-mix(in oklab, var(--app-primary) 58%, black);
+  --color-brand-950: color-mix(in oklab, var(--app-primary) 42%, black);
+
+  --color-blue-light-25: #f5fbff;
+  --color-blue-light-50: #f0f9ff;
+  --color-blue-light-100: #e0f2fe;
+  --color-blue-light-200: #b9e6fe;
+  --color-blue-light-300: #7cd4fd;
+  --color-blue-light-400: #36bffa;
+  --color-blue-light-500: #0ba5ec;
+  --color-blue-light-600: #0086c9;
+  --color-blue-light-700: #026aa2;
+  --color-blue-light-800: #065986;
+  --color-blue-light-900: #0b4a6f;
+  --color-blue-light-950: #062c41;
+
+  --color-gray-25: #fcfcfd;
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f2f4f7;
+  --color-gray-200: #e4e7ec;
+  --color-gray-300: #d0d5dd;
+  --color-gray-400: #98a2b3;
+  --color-gray-500: #667085;
+  --color-gray-600: #475467;
+  --color-gray-700: #344054;
+  --color-gray-800: #1f1f1f;
+  --color-gray-900: #121212;
+  --color-gray-950: #0a0a0a;
+  --color-gray-dark: #171717;
+
+  --color-orange-25: #fffaf5;
+  --color-orange-50: #fff6ed;
+  --color-orange-100: #ffead5;
+  --color-orange-200: #fddcab;
+  --color-orange-300: #feb273;
+  --color-orange-400: #fd853a;
+  --color-orange-500: #fb6514;
+  --color-orange-600: #ec4a0a;
+  --color-orange-700: #c4320a;
+  --color-orange-800: #9c2a10;
+  --color-orange-900: #7e2410;
+  --color-orange-950: #511c10;
+
+  --color-success-25: #f6fef9;
+  --color-success-50: #ecfdf3;
+  --color-success-100: #d1fadf;
+  --color-success-200: #a6f4c5;
+  --color-success-300: #6ce9a6;
+  --color-success-400: #32d583;
+  --color-success-500: #12b76a;
+  --color-success-600: #039855;
+  --color-success-700: #027a48;
+  --color-success-800: #05603a;
+  --color-success-900: #054f31;
+  --color-success-950: #053321;
+
+  --color-error-25: #fffbfa;
+  --color-error-50: #fef3f2;
+  --color-error-100: #fee4e2;
+  --color-error-200: #fecdca;
+  --color-error-300: #fda29b;
+  --color-error-400: #f97066;
+  --color-error-500: #f04438;
+  --color-error-600: #d92d20;
+  --color-error-700: #b42318;
+  --color-error-800: #912018;
+  --color-error-900: #7a271a;
+  --color-error-950: #55160c;
+
+  --color-warning-25: #fffcf5;
+  --color-warning-50: #fffaeb;
+  --color-warning-100: #fef0c7;
+  --color-warning-200: #fedf89;
+  --color-warning-300: #fec84b;
+  --color-warning-400: #fdb022;
+  --color-warning-500: #f79009;
+  --color-warning-600: #dc6803;
+  --color-warning-700: #b54708;
+  --color-warning-800: #93370d;
+  --color-warning-900: #7a2e0e;
+  --color-warning-950: #4e1d09;
+
+  --color-theme-pink-500: #ee46bc;
+  --color-theme-purple-500: #7a5af8;
+
+  --shadow-theme-md:
+    0px 4px 8px -2px rgba(16, 24, 40, 0.1),
+    0px 2px 4px -2px rgba(16, 24, 40, 0.06);
+  --shadow-theme-lg:
+    0px 12px 16px -4px rgba(16, 24, 40, 0.08),
+    0px 4px 6px -2px rgba(16, 24, 40, 0.03);
+  --shadow-theme-sm:
+    0px 1px 3px 0px rgba(16, 24, 40, 0.1),
+    0px 1px 2px 0px rgba(16, 24, 40, 0.06);
+  --shadow-theme-xs: 0px 1px 2px 0px rgba(16, 24, 40, 0.05);
+  --shadow-theme-xl:
+    0px 20px 24px -4px rgba(16, 24, 40, 0.08),
+    0px 8px 8px -4px rgba(16, 24, 40, 0.03);
+  --shadow-focus-ring: 0px 0px 0px 4px rgba(70, 95, 255, 0.12);
+
+  --z-index-1: 1;
+  --z-index-9: 9;
+  --z-index-99: 99;
+  --z-index-999: 999;
+  --z-index-9999: 9999;
+  --z-index-99999: 99999;
+  --z-index-999999: 999999;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Semantic tokens consumed by shadcn ui/ primitives (Button, Card, Input,
+   Select, Table, Badge). Re-derived from the TailAdmin palette above so the
+   existing radix/cva-based components pick up the new look automatically.
+   ───────────────────────────────────────────────────────────────────────── */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-outfit);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+:root {
+  --app-primary: #4249C6;
+  --app-primary-light: #EEF0FF;
+  --app-primary-hover: #343BB0;
+  --app-sidebar-text: #ffffff;
+  --app-sidebar-muted: rgba(255,255,255,.84);
+  --app-sidebar-hover: rgba(255,255,255,.12);
+  --app-sidebar-active-bg: rgba(255,255,255,.16);
+  --app-sidebar-active-text: #ffffff;
+
+  --background: var(--color-gray-25);
+  --foreground: var(--color-gray-900);
+  --card: var(--color-white);
+  --card-foreground: var(--color-gray-900);
+  --popover: var(--color-white);
+  --popover-foreground: var(--color-gray-900);
+  --primary: var(--color-brand-500);
+  --primary-foreground: var(--color-white);
+  --secondary: var(--color-gray-100);
+  --secondary-foreground: var(--color-gray-900);
+  --muted: var(--color-gray-100);
+  --muted-foreground: var(--color-gray-500);
+  --accent: var(--color-gray-100);
+  --accent-foreground: var(--color-gray-900);
+  --destructive: var(--color-error-500);
+  --border: var(--color-gray-200);
+  --input: var(--color-gray-300);
+  --ring: var(--color-brand-300);
+}
+
+.dark {
+  --background: var(--color-gray-900);
+  --foreground: var(--color-gray-25);
+  --card: var(--color-gray-800);
+  --card-foreground: var(--color-gray-25);
+  --popover: var(--color-gray-800);
+  --popover-foreground: var(--color-gray-25);
+  --primary: var(--color-brand-500);
+  --primary-foreground: var(--color-white);
+  --secondary: var(--color-gray-800);
+  --secondary-foreground: var(--color-gray-25);
+  --muted: var(--color-gray-800);
+  --muted-foreground: var(--color-gray-400);
+  --accent: var(--color-gray-800);
+  --accent-foreground: var(--color-gray-25);
+  --destructive: var(--color-error-500);
+  --border: color-mix(in oklab, white 10%, transparent);
+  --input: color-mix(in oklab, white 15%, transparent);
+  --ring: var(--color-brand-400);
+}
+
+/*
+  Tailwind v4 changed the default border color to `currentColor`; restore the
+  v3-style default so components that don't set an explicit border color
+  still look right (same compatibility shim TailAdmin ships).
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+  body {
+    @apply relative font-normal font-outfit bg-background text-foreground;
+  }
+}
+
+/* Sidebar nav item utilities, ported from TailAdmin */
+@utility menu-item {
+  @apply relative flex items-center w-full gap-3 px-3 py-2 font-medium rounded-lg text-theme-sm;
+}
+
+@utility menu-item-active {
+  background: var(--app-sidebar-active-bg);
+  color: var(--app-sidebar-active-text);
+}
+
+@utility menu-item-inactive {
+  color: var(--app-sidebar-muted);
+  &:hover {
+    background: var(--app-sidebar-hover);
+    color: var(--app-sidebar-text);
+  }
+}
+
+@utility menu-item-icon {
+  color: var(--app-sidebar-muted);
+  .group:hover & {
+    color: var(--app-sidebar-text);
+  }
+}
+
+@utility menu-item-icon-active {
+  color: var(--app-sidebar-active-text);
+}
+
+@utility menu-item-icon-inactive {
+  color: var(--app-sidebar-muted);
+  .group:hover & {
+    color: var(--app-sidebar-text);
+  }
+}
+
+@utility menu-item-arrow {
+  @apply relative;
+}
+
+@utility menu-item-arrow-active {
+  @apply rotate-180;
+  color: var(--app-sidebar-active-text);
+}
+
+@utility menu-item-arrow-inactive {
+  color: var(--app-sidebar-muted);
+  .group:hover & {
+    color: var(--app-sidebar-text);
+  }
+}
+
+@utility menu-dropdown-item {
+  @apply relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-theme-sm font-medium;
+}
+
+@utility menu-dropdown-item-active {
+  @apply bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400;
+}
+
+@utility menu-dropdown-item-inactive {
+  @apply text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5;
+}
+
+@utility no-scrollbar {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@utility custom-scrollbar {
+  &::-webkit-scrollbar {
+    @apply size-1.5;
+  }
+
+  &::-webkit-scrollbar-track {
+    @apply rounded-full;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    @apply bg-gray-200 rounded-full dark:bg-gray-700;
+  }
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #344054;
+}
+
+.lashvae-column-dividers {
+  border-collapse: collapse;
+}
+
+.lashvae-column-dividers thead th {
+  border-top: 1px solid #f2f4f7;
+  border-bottom: 1px solid #f2f4f7;
+}
+
+.lashvae-column-dividers th:not(:last-child),
+.lashvae-column-dividers td:not(:last-child) {
+  border-right: 1px solid #f2f4f7;
+}
+
+.dark .lashvae-column-dividers thead th {
+  border-top-color: rgba(255, 255, 255, 0.05);
+  border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
+.dark .lashvae-column-dividers th:not(:last-child),
+.dark .lashvae-column-dividers td:not(:last-child) {
+  border-right-color: rgba(255, 255, 255, 0.05);
+}
+
+/* ApexCharts dark/light overrides, ported from TailAdmin (needed once
+   charts on the Overview page migrate off Recharts). */
+.apexcharts-legend-text {
+  @apply pl-5! !text-gray-700 dark:!text-gray-400;
+}
+
+.apexcharts-text {
+  @apply !fill-gray-700 dark:!fill-gray-400;
+}
+
+.apexcharts-tooltip.apexcharts-theme-light {
+  @apply gap-1 !rounded-lg !border-gray-200 p-3 !shadow-theme-sm dark:!border-gray-800 dark:!bg-gray-900;
+}
+
+.apexcharts-tooltip-series-group {
+  @apply !p-0;
+}
+.apexcharts-tooltip-y-group {
+  @apply !p-0;
+}
+.apexcharts-tooltip-title {
+  @apply !mb-0 !border-b-0 !bg-transparent !p-0 !text-[10px] !leading-4 !text-gray-800 dark:!text-white/90;
+}
+.apexcharts-tooltip-text {
+  @apply !text-theme-xs !text-gray-700 dark:!text-white/90;
+}
+.apexcharts-tooltip-text-y-value {
+  @apply !font-medium;
+}
+
+.apexcharts-gridline {
+  @apply !stroke-gray-100 dark:!stroke-gray-800;
+}
+
+.billing-banner {
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.billing-banner-warning {
+  background: linear-gradient(90deg, #fbbf24, #f59e0b);
+  color: #1f2937;
+}
+
+.billing-banner-error {
+  background: linear-gradient(90deg, #ef4444, #dc2626);
+  color: white;
+}
+
+.billing-banner a {
+  text-decoration: underline;
+  font-weight: 600;
+  margin-left: 4px;
+  color: inherit;
+}
+
+.billing-banner button {
+  background: transparent;
+  border: none;
+  color: inherit;
+  font-size: 22px;
+  cursor: pointer;
+  opacity: 0.6;
+  line-height: 1;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+}
+
+.billing-banner button:hover {
+  opacity: 1;
+}

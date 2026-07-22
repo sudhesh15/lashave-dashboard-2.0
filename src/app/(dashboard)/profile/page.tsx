@@ -1,0 +1,1014 @@
+'use client';
+
+import SubscriptionTab from '@/components/profile/SubscriptionTab';
+import { RequireAuth } from '@/components/require-auth';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { apiFetch, clearToken } from '@/lib/api';
+import type { ApexOptions } from 'apexcharts';
+import emailjs from '@emailjs/browser';
+import {
+  BadgeCheck,
+  Camera,
+  CheckCircle2,
+  CreditCard,
+  Headphones,
+  Loader2,
+  LockKeyhole,
+  Mail,
+  Pencil,
+  Save,
+  ShieldCheck,
+  Trash2,
+  User,
+  X,
+} from 'lucide-react';
+import dynamic from 'next/dynamic';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
+
+const ReactApexChart = dynamic(() => import('react-apexcharts'), {
+  ssr: false,
+});
+
+type MeResp = {
+  user: {
+    id: number;
+    email: string;
+    role: string;
+    tenant_id: string;
+    first_name: string | null;
+    last_name: string | null;
+    phone: string | null;
+    location: string | null;
+    avatar_url: string | null;
+  };
+  tenant: {
+    id: string;
+    name: string;
+    industry: string | null;
+    website: string | null;
+    address: string | null;
+  } | null;
+};
+
+type NavId = 'overview' | 'details' | 'security' | 'subscription' | 'support';
+
+const NAV: { id: NavId; label: string; icon: React.ReactNode }[] = [
+  { id: 'overview', label: 'Overview', icon: <User className='h-4 w-4' /> },
+  { id: 'details', label: 'Details', icon: <Pencil className='h-4 w-4' /> },
+  { id: 'security', label: 'Security', icon: <ShieldCheck className='h-4 w-4' /> },
+  { id: 'subscription', label: 'Subscription', icon: <CreditCard className='h-4 w-4' /> },
+  { id: 'support', label: 'Support', icon: <Headphones className='h-4 w-4' /> },
+];
+
+const SUPPORT_SUBJECTS = [
+  'General Inquiry',
+  'Technical Support',
+  'Billing & Payments',
+  'Partnership',
+  'Feedback',
+  'Other',
+];
+
+function errorMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback;
+}
+
+function nameFromEmail(email: string) {
+  return email
+    .split('@')[0]
+    .replace(/[._-]/g, ' ')
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function displayName(me: MeResp) {
+  const name = [me.user.first_name, me.user.last_name].filter(Boolean).join(' ').trim();
+  return name || nameFromEmail(me.user.email);
+}
+
+function initials(name: string) {
+  return name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase();
+}
+
+function fieldValue(value?: string | null) {
+  return value?.trim() || 'Not set';
+}
+
+function profileScore(me: MeResp) {
+  const values = [
+    me.user.email,
+    me.user.first_name,
+    me.user.last_name,
+    me.user.phone,
+    me.user.location,
+    me.user.avatar_url,
+    me.tenant?.name,
+    me.tenant?.industry,
+    me.tenant?.website,
+    me.tenant?.address,
+  ];
+  const complete = values.filter((value) => Boolean(value?.trim())).length;
+  return Math.round((complete / values.length) * 100);
+}
+
+function Card({
+  children,
+  className = '',
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={`rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+function SectionHeader({ title, subtitle }: { title: string; subtitle: string }) {
+  return (
+    <div className='mb-5'>
+      <h3 className='text-lg font-semibold text-gray-800 dark:text-white/90'>{title}</h3>
+      <p className='mt-1 text-theme-sm text-gray-500 dark:text-gray-400'>{subtitle}</p>
+    </div>
+  );
+}
+
+function FormField({
+  label,
+  value,
+  onChange,
+  type = 'text',
+  placeholder,
+  disabled,
+  required,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  type?: string;
+  placeholder?: string;
+  disabled?: boolean;
+  required?: boolean;
+}) {
+  return (
+    <label className='block'>
+      <span className='mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400'>
+        {label}
+        {required && <span className='text-error-500'> *</span>}
+      </span>
+      <Input
+        type={type}
+        value={value}
+        placeholder={placeholder}
+        disabled={disabled}
+        onChange={(event) => onChange(event.target.value)}
+        className='h-11 rounded-lg border-gray-300 shadow-theme-xs focus-visible:border-brand-300 focus-visible:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900'
+      />
+    </label>
+  );
+}
+
+function AlertBox({
+  children,
+  tone = 'error',
+}: {
+  children: React.ReactNode;
+  tone?: 'error' | 'success' | 'info';
+}) {
+  const classes =
+    tone === 'success'
+      ? 'border-success-500/20 bg-success-50 text-success-600 dark:bg-success-500/10 dark:text-success-500'
+      : tone === 'info'
+        ? 'border-brand-500/20 bg-brand-50 text-brand-500 dark:bg-brand-500/10 dark:text-brand-400'
+        : 'border-error-500/20 bg-error-50 text-error-600 dark:bg-error-500/10 dark:text-error-500';
+
+  return <div className={`rounded-xl border px-4 py-3 text-theme-sm ${classes}`}>{children}</div>;
+}
+
+function SaveButton({
+  loading,
+  saved,
+  onClick,
+}: {
+  loading: boolean;
+  saved: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <Button type='button' onClick={onClick} disabled={loading} className='h-11 px-5'>
+      {loading ? (
+        <>
+          <Loader2 className='h-4 w-4 animate-spin' />
+          Saving
+        </>
+      ) : saved ? (
+        <>
+          <CheckCircle2 className='h-4 w-4' />
+          Saved
+        </>
+      ) : (
+        <>
+          <Save className='h-4 w-4' />
+          Save Changes
+        </>
+      )}
+    </Button>
+  );
+}
+
+function AvatarUploader({
+  me,
+  photoUrl,
+  onUploaded,
+}: {
+  me: MeResp;
+  photoUrl: string | null;
+  onUploaded: (url: string) => void;
+}) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [err, setErr] = useState('');
+  const name = displayName(me);
+
+  async function handleFile(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setErr('');
+    setUploading(true);
+    try {
+      const form = new FormData();
+      form.append('avatar', file);
+      const response = await apiFetch<{ url: string }>('/admin/profile/avatar', {
+        auth: true,
+        method: 'POST',
+        body: form,
+      });
+      onUploaded(response.url);
+      window.dispatchEvent(new Event('avatar-updated'));
+    } catch (error) {
+      setErr(errorMessage(error, 'Upload failed. Try again.'));
+    } finally {
+      setUploading(false);
+      event.target.value = '';
+    }
+  }
+
+  return (
+    <div className='flex flex-col items-center gap-3'>
+      <button
+        type='button'
+        onClick={() => fileRef.current?.click()}
+        className='group relative h-24 w-24 overflow-hidden rounded-full border border-gray-200 bg-gray-100 text-xl font-semibold text-gray-700 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-300'
+        aria-label='Change profile photo'
+      >
+        {photoUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={photoUrl} alt={name} className='h-full w-full object-cover' />
+        ) : (
+          initials(name)
+        )}
+        <span className='absolute inset-0 flex items-center justify-center bg-gray-900/50 text-white opacity-0 transition group-hover:opacity-100'>
+          {uploading ? <Loader2 className='h-5 w-5 animate-spin' /> : <Camera className='h-5 w-5' />}
+        </span>
+      </button>
+      <input ref={fileRef} type='file' accept='image/*' className='hidden' onChange={handleFile} />
+      {err && <p className='text-theme-xs text-error-500'>{err}</p>}
+    </div>
+  );
+}
+
+function CompletionChart({ score }: { score: number }) {
+  const options: ApexOptions = {
+    chart: { sparkline: { enabled: true }, fontFamily: 'Outfit, sans-serif' },
+    colors: ['#465FFF'],
+    plotOptions: {
+      radialBar: {
+        hollow: { size: '72%' },
+        track: { background: '#E5E7EB' },
+        dataLabels: {
+          name: { show: false },
+          value: {
+            formatter: (value) => `${Math.round(value)}%`,
+            color: '#1D2939',
+            fontSize: '24px',
+            fontWeight: 700,
+          },
+        },
+      },
+    },
+    stroke: { lineCap: 'round' },
+  };
+
+  return (
+    <Card className='p-5'>
+      <SectionHeader title='Profile Completion' subtitle='Completed account and workspace fields' />
+      <div className='mx-auto max-w-[260px]'>
+        <ReactApexChart options={options} series={[score]} type='radialBar' height={230} />
+      </div>
+      <p className='text-center text-theme-sm text-gray-500 dark:text-gray-400'>
+        Keep profile and company information current for better account management.
+      </p>
+    </Card>
+  );
+}
+
+function MetaCard({
+  me,
+  photoUrl,
+  setPhotoUrl,
+}: {
+  me: MeResp;
+  photoUrl: string | null;
+  setPhotoUrl: (url: string | null) => void;
+}) {
+  const name = displayName(me);
+
+  return (
+    <Card className='p-5 lg:p-6'>
+      <div className='flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between'>
+        <div className='flex flex-col items-center gap-6 text-center xl:flex-row xl:text-left'>
+          <AvatarUploader me={me} photoUrl={photoUrl} onUploaded={setPhotoUrl} />
+          <div>
+            <h2 className='text-xl font-semibold text-gray-800 dark:text-white/90'>{name}</h2>
+            <div className='mt-2 flex flex-col items-center gap-2 text-theme-sm text-gray-500 dark:text-gray-400 xl:flex-row'>
+              <span>{me.user.email}</span>
+              <span className='hidden h-3.5 w-px bg-gray-300 dark:bg-gray-700 xl:block' />
+              <span>{fieldValue(me.user.location)}</span>
+            </div>
+          </div>
+        </div>
+        <span className='inline-flex items-center justify-center gap-2 rounded-full bg-brand-50 px-3 py-1 text-theme-sm font-medium capitalize text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400'>
+          <BadgeCheck className='h-4 w-4' />
+          {me.user.role}
+        </span>
+      </div>
+    </Card>
+  );
+}
+
+function InfoItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className='mb-2 text-theme-xs text-gray-500 dark:text-gray-400'>{label}</p>
+      <p className='break-words text-theme-sm font-medium text-gray-800 dark:text-white/90'>{value}</p>
+    </div>
+  );
+}
+
+function OverviewTab({ me }: { me: MeResp }) {
+  return (
+    <div className='grid grid-cols-1 gap-6 xl:grid-cols-12'>
+      <div className='space-y-6 xl:col-span-8'>
+        <Card className='p-5 lg:p-6'>
+          <SectionHeader title='Personal Information' subtitle='Primary account profile fields' />
+          <div className='grid grid-cols-1 gap-5 md:grid-cols-2'>
+            <InfoItem label='First Name' value={fieldValue(me.user.first_name)} />
+            <InfoItem label='Last Name' value={fieldValue(me.user.last_name)} />
+            <InfoItem label='Email Address' value={me.user.email} />
+            <InfoItem label='Phone' value={fieldValue(me.user.phone)} />
+            <InfoItem label='Location' value={fieldValue(me.user.location)} />
+            <InfoItem label='Role' value={me.user.role} />
+          </div>
+        </Card>
+
+        <Card className='p-5 lg:p-6'>
+          <SectionHeader title='Company Information' subtitle='Workspace details attached to this account' />
+          <div className='grid grid-cols-1 gap-5 md:grid-cols-2'>
+            <InfoItem label='Company Name' value={fieldValue(me.tenant?.name)} />
+            <InfoItem label='Industry' value={fieldValue(me.tenant?.industry)} />
+            <InfoItem label='Website' value={fieldValue(me.tenant?.website)} />
+            <InfoItem label='Address' value={fieldValue(me.tenant?.address)} />
+          </div>
+        </Card>
+      </div>
+      <div className='xl:col-span-4'>
+        <CompletionChart score={profileScore(me)} />
+      </div>
+    </div>
+  );
+}
+
+function DetailsTab({ me }: { me: MeResp }) {
+  const nameParts = (
+    me.user.first_name ? `${me.user.first_name} ${me.user.last_name ?? ''}`.trim() : nameFromEmail(me.user.email)
+  ).split(' ');
+  const [mode, setMode] = useState<'personal' | 'company'>('personal');
+  const [firstName, setFirstName] = useState(nameParts[0] ?? '');
+  const [lastName, setLastName] = useState(nameParts.slice(1).join(' ') ?? '');
+  const [email, setEmail] = useState(me.user.email);
+  const [phone, setPhone] = useState(me.user.phone ?? '');
+  const [location, setLocation] = useState(me.user.location ?? '');
+  const [companyName, setCompanyName] = useState(me.tenant?.name ?? '');
+  const [industry, setIndustry] = useState(me.tenant?.industry ?? '');
+  const [website, setWebsite] = useState(me.tenant?.website ?? '');
+  const [address, setAddress] = useState(me.tenant?.address ?? '');
+  const [loading, setLoading] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [apiErr, setApiErr] = useState('');
+  const [otpCode, setOtpCode] = useState('');
+  const [showOtp, setShowOtp] = useState(false);
+  const [otpBusy, setOtpBusy] = useState(false);
+  const [otpError, setOtpError] = useState('');
+  const [otpInfo, setOtpInfo] = useState('');
+  const [emailVerified, setEmailVerified] = useState(false);
+  const [resendAt, setResendAt] = useState<number | null>(null);
+  const [now, setNow] = useState(0);
+
+  useEffect(() => {
+    if (!resendAt) return;
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, [resendAt]);
+
+  const resendSeconds = resendAt ? Math.max(0, Math.ceil((resendAt - now) / 1000)) : 0;
+
+  async function handleSendEmailOtp() {
+    if (!email.trim()) {
+      setOtpError('Please enter an email address first.');
+      return;
+    }
+
+    setOtpError('');
+    setOtpBusy(true);
+    try {
+      await apiFetch('/admin/profile/send-email-otp', {
+        auth: true,
+        method: 'POST',
+        body: { email: email.trim() },
+      });
+      setOtpCode('');
+      setShowOtp(true);
+      setResendAt(Date.now() + 59000);
+      setOtpInfo('Verification code sent to your email.');
+    } catch (error) {
+      setOtpError(errorMessage(error, 'Failed to send verification code.'));
+    } finally {
+      setOtpBusy(false);
+    }
+  }
+
+  async function handleVerifyEmailOtp() {
+    const code = otpCode.replace(/\s/g, '');
+    if (code.length < 6) {
+      setOtpError('Please enter the full 6-digit code.');
+      return;
+    }
+
+    setOtpError('');
+    setOtpBusy(true);
+    try {
+      await apiFetch('/admin/profile/verify-email-otp', {
+        auth: true,
+        method: 'POST',
+        body: { email: email.trim(), code },
+      });
+      setOtpCode('');
+      setShowOtp(false);
+      setEmailVerified(true);
+      setOtpInfo('Email verified.');
+    } catch (error) {
+      setOtpError(errorMessage(error, 'Invalid or expired code.'));
+    } finally {
+      setOtpBusy(false);
+    }
+  }
+
+  async function handleSave() {
+    setApiErr('');
+    setLoading(true);
+    try {
+      if (mode === 'personal') {
+        await apiFetch('/admin/profile/personal', {
+          auth: true,
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ first_name: firstName, last_name: lastName, email, phone, location }),
+        });
+      } else {
+        await apiFetch('/admin/profile/company', {
+          auth: true,
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ company_name: companyName, industry, website, address }),
+        });
+      }
+      setSaved(true);
+      window.setTimeout(() => setSaved(false), 2500);
+    } catch (error) {
+      setApiErr(errorMessage(error, 'Failed to save. Please try again.'));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <Card className='p-5 lg:p-6'>
+      <div className='mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
+        <SectionHeader title='Details' subtitle='Update your personal or company information' />
+        <SaveButton loading={loading} saved={saved} onClick={() => void handleSave()} />
+      </div>
+
+      {apiErr && <div className='mb-5'><AlertBox>{apiErr}</AlertBox></div>}
+
+      <div className='mb-6 inline-flex rounded-lg border border-gray-200 bg-gray-50 p-1 dark:border-gray-800 dark:bg-gray-900'>
+        {(['personal', 'company'] as const).map((item) => (
+          <button
+            key={item}
+            type='button'
+            onClick={() => setMode(item)}
+            className={`rounded-md px-4 py-2 text-theme-sm font-medium capitalize transition ${
+              mode === item
+                ? 'bg-white text-brand-500 shadow-theme-xs dark:bg-white/[0.05] dark:text-brand-400'
+                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white/90'
+            }`}
+          >
+            {item}
+          </button>
+        ))}
+      </div>
+
+      {mode === 'personal' ? (
+        <div className='space-y-5'>
+          <div className='grid grid-cols-1 gap-5 md:grid-cols-2'>
+            <FormField label='First Name' value={firstName} onChange={setFirstName} />
+            <FormField label='Last Name' value={lastName} onChange={setLastName} />
+          </div>
+          <div>
+            <FormField
+              label='Email Address'
+              value={email}
+              onChange={(value) => {
+                setEmail(value);
+                setOtpCode('');
+                setOtpError('');
+                setOtpInfo('');
+                setShowOtp(false);
+                setEmailVerified(false);
+              }}
+              type='email'
+              placeholder='name@company.com'
+            />
+            <div className='mt-3 flex flex-col gap-3 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-900 sm:flex-row sm:items-center sm:justify-between'>
+              <div className='flex items-start gap-3'>
+                <Mail className='mt-0.5 h-4 w-4 text-gray-500 dark:text-gray-400' />
+                <div>
+                  <p className='text-theme-sm font-medium text-gray-800 dark:text-white/90'>
+                    {emailVerified ? 'Email verified' : 'Email verification'}
+                  </p>
+                  <p className='mt-1 text-theme-xs text-gray-500 dark:text-gray-400'>
+                    Verify this address before saving sensitive account changes.
+                  </p>
+                </div>
+              </div>
+              <Button
+                type='button'
+                variant={emailVerified ? 'outline' : 'default'}
+                size='sm'
+                disabled={otpBusy || !email.trim()}
+                onClick={() => {
+                  if (!emailVerified) void handleSendEmailOtp();
+                }}
+              >
+                {otpBusy ? <Loader2 className='h-4 w-4 animate-spin' /> : emailVerified ? <CheckCircle2 className='h-4 w-4' /> : <Mail className='h-4 w-4' />}
+                {showOtp ? 'Resend Code' : emailVerified ? 'Verified' : 'Verify Email'}
+              </Button>
+            </div>
+            {showOtp && (
+              <div className='mt-3 rounded-xl border border-brand-500/20 bg-brand-50 p-4 dark:bg-brand-500/10'>
+                <p className='text-theme-sm font-semibold text-gray-800 dark:text-white/90'>Enter verification code</p>
+                <p className='mt-1 text-theme-xs text-gray-500 dark:text-gray-400'>We sent a 6-digit code to {email.trim()}.</p>
+                <Input
+                  value={otpCode}
+                  onChange={(event) => setOtpCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
+                  placeholder='000000'
+                  className='mt-4 h-11 max-w-[180px] rounded-lg border-gray-300 text-center text-lg tracking-[0.35em] shadow-theme-xs focus-visible:border-brand-300 focus-visible:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900'
+                />
+                <div className='mt-4 flex flex-wrap items-center gap-3'>
+                  <Button type='button' size='sm' onClick={() => void handleVerifyEmailOtp()} disabled={otpBusy}>
+                    {otpBusy && <Loader2 className='h-4 w-4 animate-spin' />}
+                    Verify Code
+                  </Button>
+                  <Button
+                    type='button'
+                    size='sm'
+                    variant='outline'
+                    disabled={otpBusy || resendSeconds > 0}
+                    onClick={() => void handleSendEmailOtp()}
+                  >
+                    {resendSeconds > 0 ? `Resend in ${resendSeconds}s` : 'Resend Code'}
+                  </Button>
+                  <Button type='button' size='sm' variant='ghost' onClick={() => setShowOtp(false)}>
+                    Cancel
+                  </Button>
+                </div>
+                {otpError && <div className='mt-3'><AlertBox>{otpError}</AlertBox></div>}
+                {otpInfo && <div className='mt-3'><AlertBox tone='success'>{otpInfo}</AlertBox></div>}
+              </div>
+            )}
+          </div>
+          <div className='grid grid-cols-1 gap-5 md:grid-cols-2'>
+            <FormField label='Phone Number' value={phone} onChange={setPhone} type='tel' placeholder='+1 555 000 0000' />
+            <FormField label='Location' value={location} onChange={setLocation} placeholder='City, Country' />
+          </div>
+        </div>
+      ) : (
+        <div className='grid grid-cols-1 gap-5 md:grid-cols-2'>
+          <FormField label='Company Name' value={companyName} onChange={setCompanyName} />
+          <FormField label='Industry' value={industry} onChange={setIndustry} placeholder='e.g. SaaS, Healthcare' />
+          <FormField label='Website' value={website} onChange={setWebsite} placeholder='https://yourcompany.com' />
+          <FormField label='Address' value={address} onChange={setAddress} placeholder='123 Main St, City' />
+        </div>
+      )}
+    </Card>
+  );
+}
+
+function DeleteAccountSection() {
+  const [showModal, setShowModal] = useState(false);
+  const [confirmText, setConfirmText] = useState('');
+  const [deleting, setDeleting] = useState(false);
+  const [err, setErr] = useState('');
+  const router = useRouter();
+
+  async function handleDelete() {
+    if (confirmText !== 'DELETE') return;
+    setErr('');
+    setDeleting(true);
+
+    try {
+      await apiFetch('/admin/auth/delete-account', {
+        auth: true,
+        method: 'DELETE',
+      });
+      clearToken();
+      router.push('/login');
+    } catch (error) {
+      setErr(errorMessage(error, 'Failed to delete account. Please try again.'));
+      setDeleting(false);
+    }
+  }
+
+  return (
+    <>
+      <Card className='border-error-500/20 bg-error-50 p-5 dark:bg-error-500/10'>
+        <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
+          <div className='flex items-start gap-3'>
+            <div className='flex h-11 w-11 items-center justify-center rounded-xl bg-error-500/10 text-error-500'>
+              <Trash2 className='h-5 w-5' />
+            </div>
+            <div>
+              <h3 className='text-theme-sm font-semibold text-error-600 dark:text-error-500'>Delete Account</h3>
+              <p className='mt-1 text-theme-sm text-error-600/80 dark:text-error-500/80'>
+                Permanently delete your account and associated workspace data.
+              </p>
+            </div>
+          </div>
+          <Button type='button' variant='destructive' onClick={() => setShowModal(true)}>
+            Delete Account
+          </Button>
+        </div>
+      </Card>
+
+      {showModal && (
+        <div className='fixed inset-0 z-[10000] flex items-center justify-center bg-gray-400/50 p-4 backdrop-blur-[12px]'>
+          <div className='w-full max-w-[440px] rounded-2xl border border-gray-200 bg-white p-6 shadow-theme-lg dark:border-gray-800 dark:bg-gray-900'>
+            <div className='mb-5 flex items-start justify-between gap-4'>
+              <div>
+                <h3 className='text-lg font-semibold text-gray-800 dark:text-white/90'>Delete your account?</h3>
+                <p className='mt-1 text-theme-sm text-gray-500 dark:text-gray-400'>
+                  This action cannot be undone. Type DELETE to confirm.
+                </p>
+              </div>
+              <button type='button' onClick={() => setShowModal(false)} disabled={deleting} className='text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white/90'>
+                <X className='h-5 w-5' />
+              </button>
+            </div>
+            {err && <div className='mb-4'><AlertBox>{err}</AlertBox></div>}
+            <FormField label='Confirmation' value={confirmText} onChange={setConfirmText} placeholder='DELETE' disabled={deleting} />
+            <div className='mt-6 flex justify-end gap-3'>
+              <Button type='button' variant='outline' onClick={() => setShowModal(false)} disabled={deleting}>
+                Cancel
+              </Button>
+              <Button type='button' variant='destructive' disabled={confirmText !== 'DELETE' || deleting} onClick={() => void handleDelete()}>
+                {deleting && <Loader2 className='h-4 w-4 animate-spin' />}
+                Permanently Delete
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+function SecurityTab() {
+  const [current, setCurrent] = useState('');
+  const [next, setNext] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [show, setShow] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [formErr, setFormErr] = useState('');
+  const [apiErr, setApiErr] = useState('');
+
+  const strength = next.length >= 12 ? 'Strong' : next.length >= 8 ? 'Medium' : next ? 'Weak' : 'Not set';
+  const strengthPct = next.length >= 12 ? 100 : next.length >= 8 ? 66 : next ? 33 : 0;
+
+  async function handleSave() {
+    setFormErr('');
+    setApiErr('');
+
+    if (!current || !next || !confirm) {
+      setFormErr('All fields are required.');
+      return;
+    }
+    if (next.length < 8) {
+      setFormErr('New password must be at least 8 characters.');
+      return;
+    }
+    if (next !== confirm) {
+      setFormErr('Passwords do not match.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await apiFetch('/admin/profile/password', {
+        auth: true,
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ current_password: current, new_password: next }),
+      });
+      setCurrent('');
+      setNext('');
+      setConfirm('');
+      setSaved(true);
+      window.setTimeout(() => setSaved(false), 2500);
+    } catch (error) {
+      setApiErr(errorMessage(error, 'Failed to update password. Please try again.'));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className='space-y-6'>
+      <Card className='p-5 lg:p-6'>
+        <div className='mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
+          <SectionHeader title='Security' subtitle='Manage your password and account access' />
+          <SaveButton loading={loading} saved={saved} onClick={() => void handleSave()} />
+        </div>
+        <div className='mb-6 rounded-2xl border border-gray-200 bg-gray-50 p-5 dark:border-gray-800 dark:bg-gray-900'>
+          <div className='flex items-start gap-3'>
+            <div className='flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400'>
+              <LockKeyhole className='h-5 w-5' />
+            </div>
+            <div>
+              <p className='text-theme-sm font-semibold text-gray-800 dark:text-white/90'>Password strength: {strength}</p>
+              <div className='mt-3 h-2 w-full max-w-[320px] rounded-full bg-gray-200 dark:bg-gray-800'>
+                <div className='h-2 rounded-full bg-brand-500 transition-all' style={{ width: `${strengthPct}%` }} />
+              </div>
+            </div>
+          </div>
+        </div>
+        {(formErr || apiErr) && <div className='mb-5'><AlertBox>{formErr || apiErr}</AlertBox></div>}
+        <div className='grid grid-cols-1 gap-5'>
+          <FormField label='Current Password' value={current} onChange={setCurrent} type={show ? 'text' : 'password'} />
+          <FormField label='New Password' value={next} onChange={setNext} type={show ? 'text' : 'password'} />
+          <FormField label='Confirm New Password' value={confirm} onChange={setConfirm} type={show ? 'text' : 'password'} />
+          <label className='inline-flex items-center gap-2 text-theme-sm text-gray-600 dark:text-gray-400'>
+            <input type='checkbox' checked={show} onChange={(event) => setShow(event.target.checked)} className='h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500/20' />
+            Show password fields
+          </label>
+        </div>
+      </Card>
+      <DeleteAccountSection />
+    </div>
+  );
+}
+
+function SupportPanel() {
+  const [fullname, setFullname] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [subject, setSubject] = useState('');
+  const [message, setMessage] = useState('');
+  const [agreed, setAgreed] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [status, setStatus] = useState<'success' | 'error' | null>(null);
+  const [fieldError, setFieldError] = useState('');
+
+  const canSubmit = agreed && fullname && email && subject && message && !sending;
+
+  async function handleSubmit() {
+    if (!canSubmit) return;
+    setSending(true);
+    setStatus(null);
+    setFieldError('');
+
+    const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    const isValidPhone = !phone.trim() || /^[+]?[0-9\s\-()]{7,20}$/.test(phone);
+    const isValidName = /^[A-Za-z\s.'-]+$/.test(fullname.trim()) && fullname.trim().length >= 2;
+
+    if (!isValidName || !isValidEmail || !isValidPhone) {
+      setFieldError(
+        !isValidName
+          ? 'Please enter your full name.'
+          : !isValidEmail
+            ? 'Please enter a valid email address.'
+            : 'Please enter a valid phone number.',
+      );
+      setSending(false);
+      return;
+    }
+
+    try {
+      await emailjs.send(
+        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
+        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!,
+        {
+          fullname: fullname.trim(),
+          email,
+          phone,
+          subject,
+          message,
+          to_email: 'dpo@lashvae.com',
+        },
+        process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!,
+      );
+
+      setStatus('success');
+      setFullname('');
+      setEmail('');
+      setPhone('');
+      setSubject('');
+      setMessage('');
+      setAgreed(false);
+    } catch {
+      setStatus('error');
+    } finally {
+      setSending(false);
+    }
+  }
+
+  return (
+    <Card className='p-5 lg:p-6'>
+      <SectionHeader title='Support' subtitle='Send a message to the Lashvae team' />
+      <div className='space-y-5'>
+        {fieldError && <AlertBox>{fieldError}</AlertBox>}
+        {status === 'success' && <AlertBox tone='success'>Your message has been sent.</AlertBox>}
+        {status === 'error' && <AlertBox>Unable to send your message. Please try again.</AlertBox>}
+        <div className='grid grid-cols-1 gap-5 md:grid-cols-2'>
+          <FormField label='Full Name' value={fullname} onChange={setFullname} placeholder='Enter your full name' required />
+          <FormField label='Email Address' value={email} onChange={setEmail} type='email' placeholder='Enter your email address' required />
+          <FormField label='Phone Number' value={phone} onChange={setPhone} type='tel' placeholder='Enter your phone number' />
+          <label className='block'>
+            <span className='mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400'>Subject <span className='text-error-500'>*</span></span>
+            <select
+              value={subject}
+              onChange={(event) => setSubject(event.target.value)}
+              className='h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90'
+            >
+              <option value='' disabled>Select a topic</option>
+              {SUPPORT_SUBJECTS.map((item) => (
+                <option key={item} value={item}>{item}</option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <label className='block'>
+          <span className='mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400'>Your Message <span className='text-error-500'>*</span></span>
+          <Textarea
+            value={message}
+            onChange={(event) => setMessage(event.target.value)}
+            placeholder='Tell us about your question or request.'
+            className='min-h-[150px] rounded-lg border-gray-300 shadow-theme-xs focus-visible:border-brand-300 focus-visible:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900'
+          />
+        </label>
+        <label className='flex items-start gap-3 rounded-xl border border-gray-200 bg-gray-50 p-4 text-theme-sm text-gray-600 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400'>
+          <input type='checkbox' checked={agreed} onChange={(event) => setAgreed(event.target.checked)} className='mt-0.5 h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500/20' />
+          <span>I agree to the Privacy Policy and consent to being contacted regarding my inquiry.</span>
+        </label>
+        <div className='flex justify-end'>
+          <Button type='button' disabled={!canSubmit} onClick={() => void handleSubmit()} className='h-11 px-5'>
+            {sending && <Loader2 className='h-4 w-4 animate-spin' />}
+            Send Message
+          </Button>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+function LoadingProfile() {
+  return (
+    <div className='mx-auto max-w-screen-2xl p-4 md:p-6'>
+      <div className='rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6'>
+        <div className='mb-5 h-6 w-24 animate-pulse rounded-md bg-gray-100 dark:bg-white/[0.05] lg:mb-7' />
+        <div className='space-y-6'>
+          <div className='h-[148px] animate-pulse rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.05]' />
+          <div className='h-[420px] animate-pulse rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.05]' />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ProfileContent() {
+  const searchParams = useSearchParams();
+  const initialNav = searchParams.get('activeNav') === 'subscription' ? 'subscription' : 'overview';
+  const [activeNav, setActiveNav] = useState<NavId>(initialNav);
+  const [me, setMe] = useState<MeResp | null>(null);
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const [fetchErr, setFetchErr] = useState('');
+
+  const loadProfile = useCallback(async () => {
+    setFetchErr('');
+    try {
+      const data = await apiFetch<MeResp>('/admin/profile/me', { auth: true });
+      setMe(data);
+      setPhotoUrl(data.user.avatar_url);
+    } catch (error) {
+      setFetchErr(errorMessage(error, 'Failed to load profile.'));
+    }
+  }, []);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void loadProfile();
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [loadProfile]);
+
+  return (
+    <div className='mx-auto max-w-screen-2xl p-4 md:p-6'>
+      <div className='rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6'>
+        <h3 className='mb-5 text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-7'>
+          Profile
+        </h3>
+
+        {fetchErr && (
+          <div className='mb-6'>
+            <AlertBox>{fetchErr}</AlertBox>
+          </div>
+        )}
+
+        {!me && !fetchErr ? (
+          <div className='space-y-6'>
+            <div className='h-[148px] animate-pulse rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.05]' />
+            <div className='h-[420px] animate-pulse rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.05]' />
+          </div>
+        ) : me ? (
+          <div className='space-y-6'>
+            <MetaCard me={me} photoUrl={photoUrl} setPhotoUrl={setPhotoUrl} />
+
+            <div className='overflow-x-auto'>
+              <nav className='inline-flex min-w-full gap-2 rounded-xl border border-gray-200 bg-gray-50 p-1 dark:border-gray-800 dark:bg-gray-900 sm:min-w-0'>
+                {NAV.map((item) => (
+                  <button
+                    key={item.id}
+                    type='button'
+                    onClick={() => setActiveNav(item.id)}
+                    className={`inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg px-3 text-theme-sm font-medium transition ${
+                      activeNav === item.id
+                        ? 'bg-white text-brand-500 shadow-theme-xs dark:bg-white/[0.05] dark:text-brand-400'
+                        : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white/90'
+                    }`}
+                  >
+                    {item.icon}
+                    {item.label}
+                  </button>
+                ))}
+              </nav>
+            </div>
+
+            {activeNav === 'overview' && <OverviewTab me={me} />}
+            {activeNav === 'details' && <DetailsTab me={me} />}
+            {activeNav === 'security' && <SecurityTab />}
+            {activeNav === 'subscription' && <SubscriptionTab me={me} />}
+            {activeNav === 'support' && <SupportPanel />}
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+export default function ProfilePage() {
+  return (
+    <RequireAuth>
+      <Suspense fallback={<LoadingProfile />}>
+        <ProfileContent />
+      </Suspense>
+    </RequireAuth>
+  );
+}
