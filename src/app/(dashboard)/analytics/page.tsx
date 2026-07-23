@@ -10,6 +10,7 @@ import {
   AlertTriangle,
   Check,
   Copy,
+  Eye,
   Globe,
   Inbox,
   Mail,
@@ -20,20 +21,30 @@ import {
   Target,
   Users,
   Zap,
-  Eye,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import PageBreadcrumb from '@/components/common/PageBreadcrumb';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { getPageItems, TablePagination } from '@/components/ui/table-pagination';
 import { Modal } from '@/components/ui/modal';
+import {
+  getPageItems,
+  TablePagination,
+} from '@/components/ui/table-pagination';
 import { useOutsideClick } from '@/hooks/useOutsideClick';
 
-const ReactApexChart = dynamic(() => import('react-apexcharts'), { ssr: false });
+const ReactApexChart = dynamic(() => import('react-apexcharts'), {
+  ssr: false,
+});
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type TopicItem = { topic: string; count: number };
@@ -165,7 +176,16 @@ const CHANNEL_CFG: Record<string, { color: string; logo: React.ReactNode }> = {
     color: '#FF0000',
     logo: <img src='/youtube.svg' width={16} height={16} alt='YouTube' />,
   },
+  google: {
+    color: '#4285F4',
+    logo: <img src='/google-map.svg' width={16} height={16} alt='Google' />,
+  },
+  website: {
+    color: '#465FFF',
+    logo: <img src='/globe.svg' width={16} height={16} alt='Google' />
+  }
 };
+
 
 const DEPTH_BUCKETS = [
   { key: '1-2', label: '1–2' },
@@ -186,12 +206,37 @@ type Segment = 'hot' | 'watching' | 'won' | 'cold';
 
 const SEGMENT_CFG: Record<
   Segment,
-  { label: string; color: string; bg: string; badge: 'warning' | 'success' | 'light' | 'error' }
+  {
+    label: string;
+    color: string;
+    bg: string;
+    badge: 'warning' | 'success' | 'light' | 'error';
+  }
 > = {
-  hot: { label: 'Hot', color: PALETTE.orange, bg: `${PALETTE.orange}18`, badge: 'warning' },
-  watching: { label: 'Watching', color: PALETTE.warning, bg: `${PALETTE.warning}16`, badge: 'warning' },
-  won: { label: 'Won', color: PALETTE.success, bg: `${PALETTE.success}16`, badge: 'success' },
-  cold: { label: 'Cold', color: PALETTE.gray, bg: `${PALETTE.gray}14`, badge: 'light' },
+  hot: {
+    label: 'Hot',
+    color: PALETTE.orange,
+    bg: `${PALETTE.orange}18`,
+    badge: 'warning',
+  },
+  watching: {
+    label: 'Watching',
+    color: PALETTE.warning,
+    bg: `${PALETTE.warning}16`,
+    badge: 'warning',
+  },
+  won: {
+    label: 'Won',
+    color: PALETTE.success,
+    bg: `${PALETTE.success}16`,
+    badge: 'success',
+  },
+  cold: {
+    label: 'Cold',
+    color: PALETTE.gray,
+    bg: `${PALETTE.gray}14`,
+    badge: 'light',
+  },
 };
 
 // ─── Adapters ────────────────────────────────────────────────────────────────
@@ -235,10 +280,30 @@ function adaptDepth(raw: any): DepthItem[] {
   const avgIntent = raw?.avg_intent_detected_at_message ?? null;
   const avgLead = raw?.avg_lead_created_at_message ?? null;
   return [
-    { bucket: '1-2', count: dist['1_to_2'] ?? 0, avg_intent_msg: avgIntent, avg_lead_msg: avgLead },
-    { bucket: '3-5', count: dist['3_to_5'] ?? 0, avg_intent_msg: avgIntent, avg_lead_msg: avgLead },
-    { bucket: '6-10', count: dist['6_to_10'] ?? 0, avg_intent_msg: avgIntent, avg_lead_msg: avgLead },
-    { bucket: '10+', count: dist['over_10'] ?? 0, avg_intent_msg: avgIntent, avg_lead_msg: avgLead },
+    {
+      bucket: '1-2',
+      count: dist['1_to_2'] ?? 0,
+      avg_intent_msg: avgIntent,
+      avg_lead_msg: avgLead,
+    },
+    {
+      bucket: '3-5',
+      count: dist['3_to_5'] ?? 0,
+      avg_intent_msg: avgIntent,
+      avg_lead_msg: avgLead,
+    },
+    {
+      bucket: '6-10',
+      count: dist['6_to_10'] ?? 0,
+      avg_intent_msg: avgIntent,
+      avg_lead_msg: avgLead,
+    },
+    {
+      bucket: '10+',
+      count: dist['over_10'] ?? 0,
+      avg_intent_msg: avgIntent,
+      avg_lead_msg: avgLead,
+    },
   ];
 }
 
@@ -342,9 +407,15 @@ function ChartCard({
 }) {
   return (
     <div className={cn(CARD, 'px-5 pb-5 pt-5 sm:px-6 sm:pt-6')}>
-      <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">{title}</h3>
-      {subtitle && <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{subtitle}</p>}
-      <div className="mt-5">{children}</div>
+      <h3 className='text-lg font-semibold text-gray-800 dark:text-white/90'>
+        {title}
+      </h3>
+      {subtitle && (
+        <p className='mt-1 text-sm text-gray-500 dark:text-gray-400'>
+          {subtitle}
+        </p>
+      )}
+      <div className='mt-5'>{children}</div>
     </div>
   );
 }
@@ -364,11 +435,11 @@ function CustomerTabControls({
   onExport: () => void;
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <div className="relative">
+    <div className='flex flex-wrap items-center gap-2'>
+      <div className='relative'>
         <button
           onClick={() => setSortDropdownOpen(!sortDropdownOpen)}
-          className="flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-gray-200 bg-white px-3.5 py-2 text-xs font-semibold text-gray-600 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+          className='flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-gray-200 bg-white px-3.5 py-2 text-xs font-semibold text-gray-600 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300'
         >
           <span>
             Sort:{' '}
@@ -378,12 +449,17 @@ function CustomerTabControls({
                 ? 'Score'
                 : 'Last Updated'}
           </span>
-          <span className={cn('text-[10px] transition-transform', sortDropdownOpen && 'rotate-180')}>
+          <span
+            className={cn(
+              'text-[10px] transition-transform',
+              sortDropdownOpen && 'rotate-180',
+            )}
+          >
             ▾
           </span>
         </button>
         {sortDropdownOpen && (
-          <div className="absolute right-0 top-[calc(100%+6px)] z-20 min-w-[150px] overflow-hidden rounded-lg border border-gray-200 bg-white shadow-theme-lg dark:border-gray-700 dark:bg-gray-900">
+          <div className='absolute right-0 top-[calc(100%+6px)] z-20 min-w-[150px] overflow-hidden rounded-lg border border-gray-200 bg-white shadow-theme-lg dark:border-gray-700 dark:bg-gray-900'>
             {(
               [
                 { label: 'A–Z', value: 'name' },
@@ -407,7 +483,7 @@ function CustomerTabControls({
                   )}
                 >
                   {opt.label}
-                  {active && <Check size={12} className="ml-1.5 inline" />}
+                  {active && <Check size={12} className='ml-1.5 inline' />}
                 </div>
               );
             })}
@@ -415,7 +491,7 @@ function CustomerTabControls({
         )}
       </div>
 
-      <Button variant="outline" size="sm" onClick={onExport}>
+      <Button variant='outline' size='sm' onClick={onExport}>
         Export CSV
       </Button>
     </div>
@@ -443,12 +519,12 @@ function WeeklyReportButton() {
   }
 
   return (
-    <div className="flex flex-col items-end gap-1.5">
-      <Button onClick={generateReport} disabled={reporting} variant="outline">
+    <div className='flex flex-col items-end gap-1.5'>
+      <Button onClick={generateReport} disabled={reporting} variant='outline'>
         {reporting ? 'Generating…' : 'Weekly Report'}
       </Button>
       {reportMsg && (
-        <div className="max-w-[220px] text-right text-xs text-gray-500 dark:text-gray-400">
+        <div className='max-w-[220px] text-right text-xs text-gray-500 dark:text-gray-400'>
           {reportMsg}
         </div>
       )}
@@ -467,9 +543,18 @@ function EngagementBarChart({
 }) {
   const options: ApexOptions = {
     colors: [PALETTE.brand],
-    chart: { fontFamily: 'Outfit, sans-serif', type: 'bar', toolbar: { show: false } },
+    chart: {
+      fontFamily: 'Outfit, sans-serif',
+      type: 'bar',
+      toolbar: { show: false },
+    },
     plotOptions: {
-      bar: { horizontal: false, columnWidth: '45%', borderRadius: 5, borderRadiusApplication: 'end' },
+      bar: {
+        horizontal: false,
+        columnWidth: '45%',
+        borderRadius: 5,
+        borderRadiusApplication: 'end',
+      },
     },
     dataLabels: { enabled: false },
     stroke: { show: true, width: 4, colors: ['transparent'] },
@@ -477,24 +562,47 @@ function EngagementBarChart({
       categories: data.map((d) => d.label),
       axisBorder: { show: false },
       axisTicks: { show: false },
-      labels: { style: { colors: isDark ? AXIS_LABEL.dark : AXIS_LABEL.light, fontSize: '12px' } },
+      labels: {
+        style: {
+          colors: isDark ? AXIS_LABEL.dark : AXIS_LABEL.light,
+          fontSize: '12px',
+        },
+      },
     },
     yaxis: {
-      labels: { style: { colors: isDark ? AXIS_LABEL.dark : AXIS_LABEL.light, fontSize: '12px' } },
+      labels: {
+        style: {
+          colors: isDark ? AXIS_LABEL.dark : AXIS_LABEL.light,
+          fontSize: '12px',
+        },
+      },
     },
     grid: {
       borderColor: isDark ? GRID_LINE.dark : GRID_LINE.light,
       yaxis: { lines: { show: true } },
     },
     fill: { opacity: 1 },
-    tooltip: { theme: isDark ? 'dark' : 'light', y: { formatter: (val: number) => `${val} users` } },
+    tooltip: {
+      theme: isDark ? 'dark' : 'light',
+      y: { formatter: (val: number) => `${val} users` },
+    },
   };
   const series = [{ name: 'Users', data: data.map((d) => d.value) }];
-  return <ReactApexChart options={options} series={series} type="bar" height={220} />;
+  return (
+    <ReactApexChart options={options} series={series} type='bar' height={220} />
+  );
 }
 
-function ActivityAreaChart({ data, isDark }: { data: TimeseriesPoint[]; isDark: boolean }) {
-  const categories = data.map((d) => formatActivityBucket(d.bucket) ?? d.bucket);
+function ActivityAreaChart({
+  data,
+  isDark,
+}: {
+  data: TimeseriesPoint[];
+  isDark: boolean;
+}) {
+  const categories = data.map(
+    (d) => formatActivityBucket(d.bucket) ?? d.bucket,
+  );
   const options: ApexOptions = {
     legend: {
       show: true,
@@ -504,7 +612,12 @@ function ActivityAreaChart({ data, isDark }: { data: TimeseriesPoint[]; isDark: 
       labels: { colors: isDark ? AXIS_LABEL.dark : AXIS_LABEL.light },
     },
     colors: [PALETTE.brand, PALETTE.success, PALETTE.orange, PALETTE.error],
-    chart: { fontFamily: 'Outfit, sans-serif', type: 'area', toolbar: { show: false }, zoom: { enabled: false } },
+    chart: {
+      fontFamily: 'Outfit, sans-serif',
+      type: 'area',
+      toolbar: { show: false },
+      zoom: { enabled: false },
+    },
     stroke: { curve: 'smooth', width: 2 },
     fill: { type: 'gradient', gradient: { opacityFrom: 0.4, opacityTo: 0 } },
     markers: { size: 0, hover: { size: 5 } },
@@ -520,10 +633,20 @@ function ActivityAreaChart({ data, isDark }: { data: TimeseriesPoint[]; isDark: 
       categories,
       axisBorder: { show: false },
       axisTicks: { show: false },
-      labels: { style: { colors: isDark ? AXIS_LABEL.dark : AXIS_LABEL.light, fontSize: '11px' } },
+      labels: {
+        style: {
+          colors: isDark ? AXIS_LABEL.dark : AXIS_LABEL.light,
+          fontSize: '11px',
+        },
+      },
     },
     yaxis: {
-      labels: { style: { colors: isDark ? AXIS_LABEL.dark : AXIS_LABEL.light, fontSize: '11px' } },
+      labels: {
+        style: {
+          colors: isDark ? AXIS_LABEL.dark : AXIS_LABEL.light,
+          fontSize: '11px',
+        },
+      },
     },
   };
   const series = [
@@ -532,7 +655,14 @@ function ActivityAreaChart({ data, isDark }: { data: TimeseriesPoint[]; isDark: 
     { name: 'Leads', data: data.map((d) => d.leads) },
     { name: 'Errors', data: data.map((d) => d.errors) },
   ];
-  return <ReactApexChart options={options} series={series} type="area" height={300} />;
+  return (
+    <ReactApexChart
+      options={options}
+      series={series}
+      type='area'
+      height={300}
+    />
+  );
 }
 
 function TopicDonutChart({
@@ -560,26 +690,51 @@ function TopicDonutChart({
           size: '65%',
           labels: {
             show: true,
-            total: { show: true, label: 'Total', color: isDark ? '#F9FAFB' : '#101828' },
+            total: {
+              show: true,
+              label: 'Total',
+              color: isDark ? '#F9FAFB' : '#101828',
+            },
           },
         },
       },
     },
   };
   const series = data.map((d) => d.value);
-  return <ReactApexChart options={options} series={series} type="donut" height={280} />;
+  return (
+    <ReactApexChart
+      options={options}
+      series={series}
+      type='donut'
+      height={280}
+    />
+  );
 }
 
-function ConversionGauge({ value, isDark }: { value: number; isDark: boolean }) {
+function ConversionGauge({
+  value,
+  isDark,
+}: {
+  value: number;
+  isDark: boolean;
+}) {
   const options: ApexOptions = {
     colors: [PALETTE.brand],
-    chart: { fontFamily: 'Outfit, sans-serif', type: 'radialBar', sparkline: { enabled: true } },
+    chart: {
+      fontFamily: 'Outfit, sans-serif',
+      type: 'radialBar',
+      sparkline: { enabled: true },
+    },
     plotOptions: {
       radialBar: {
         startAngle: -90,
         endAngle: 90,
         hollow: { size: '70%' },
-        track: { background: isDark ? '#1D2939' : '#E4E7EC', strokeWidth: '100%', margin: 5 },
+        track: {
+          background: isDark ? '#1D2939' : '#E4E7EC',
+          strokeWidth: '100%',
+          margin: 5,
+        },
         dataLabels: {
           name: { show: false },
           value: {
@@ -597,7 +752,14 @@ function ConversionGauge({ value, isDark }: { value: number; isDark: boolean }) 
     labels: ['Conversion'],
   };
   const series = [value];
-  return <ReactApexChart options={options} series={series} type="radialBar" height={260} />;
+  return (
+    <ReactApexChart
+      options={options}
+      series={series}
+      type='radialBar'
+      height={260}
+    />
+  );
 }
 
 // ─── Shared atoms ────────────────────────────────────────────────────────────
@@ -605,19 +767,42 @@ function MetricCard({
   label,
   value,
   icon,
+  tone = 'brand',
 }: {
   label: string;
   value: string | number;
   icon: React.ReactNode;
+  tone?: 'brand' | 'success' | 'warning' | 'error' | 'gray';
 }) {
+  const toneClass: Record<string, string> = {
+    brand:
+      'bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400',
+    success:
+      'bg-success-50 text-success-600 dark:bg-success-500/15 dark:text-success-500',
+    warning:
+      'bg-warning-50 text-warning-600 dark:bg-warning-500/15 dark:text-orange-400',
+    error:
+      'bg-error-50 text-error-600 dark:bg-error-500/15 dark:text-error-500',
+    gray: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+  };
+
   return (
     <div className={cn(CARD, 'p-5 md:p-6')}>
-      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800">
+      <div
+        className={cn(
+          'flex h-12 w-12 items-center justify-center rounded-xl',
+          toneClass[tone],
+        )}
+      >
         {icon}
       </div>
-      <div className="mt-5">
-        <span className="text-sm text-gray-500 dark:text-gray-400">{label}</span>
-        <h4 className="mt-2 text-title-sm font-bold text-gray-800 dark:text-white/90">{value}</h4>
+      <div className='mt-5'>
+        <span className='text-sm text-gray-500 dark:text-gray-400'>
+          {label}
+        </span>
+        <h4 className='mt-2 text-title-sm font-bold text-gray-800 dark:text-white/90'>
+          {value}
+        </h4>
       </div>
     </div>
   );
@@ -625,9 +810,9 @@ function MetricCard({
 
 function Empty({ label }: { label: string }) {
   return (
-    <div className="flex flex-col items-center py-8 text-center">
-      <Inbox size={26} className="mb-2 text-gray-300 dark:text-gray-700" />
-      <p className="text-sm text-gray-400 dark:text-gray-500">{label}</p>
+    <div className='flex flex-col items-center py-8 text-center'>
+      <Inbox size={26} className='mb-2 text-gray-300 dark:text-gray-700' />
+      <p className='text-sm text-gray-400 dark:text-gray-500'>{label}</p>
     </div>
   );
 }
@@ -646,29 +831,37 @@ function CustomerTableRow({
   const ini = getInitials(label);
   const hue = getHue(label);
   const profilePic =
-    lead.profile_pic_url || lead.meta?.instagram_profile?.profile_pic_url || null;
+    lead.profile_pic_url ||
+    lead.meta?.instagram_profile?.profile_pic_url ||
+    null;
   const seg = getSegment(lead);
   const segCfg = SEGMENT_CFG[seg];
   const pipeCfg = PIPE_CFG[lead.status] || PIPE_CFG.new;
-  const score = lead.meta?.score ?? 0;
   const phone = lead.contacts?.phones?.[0] || '';
+  const email = lead.contacts?.emails?.[0] || '';
   const preview = getLeadLastText(lead);
   const conversationHref = `/conversations/${lead.conversation_id}`;
 
   return (
     <tr
       onClick={onClick}
-      className="cursor-pointer transition hover:bg-gray-50 dark:hover:bg-white/[0.02]"
+      className='cursor-pointer transition hover:bg-gray-50 dark:hover:bg-white/[0.02]'
     >
-      <td className="px-5 py-3 sm:px-6">
-        <div className="flex items-center gap-3">
+      <td className='px-5 py-3 sm:px-6'>
+        <div className='flex items-center gap-3'>
           {profilePic ? (
-            <img src={profilePic} alt={label} className="h-9 w-9 shrink-0 rounded-full object-cover" />
+            <img
+              src={profilePic}
+              alt={label}
+              className='h-9 w-9 shrink-0 rounded-full object-cover'
+            />
           ) : (
             <div
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-theme-xs font-semibold"
+              className='flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-theme-xs font-semibold'
               style={{
-                background: isDark ? `hsla(${hue},40%,28%,0.50)` : `hsl(${hue},35%,94%)`,
+                background: isDark
+                  ? `hsla(${hue},40%,28%,0.50)`
+                  : `hsl(${hue},35%,94%)`,
                 color: isDark ? `hsl(${hue},55%,72%)` : `hsl(${hue},45%,38%)`,
                 border: `1px solid ${isDark ? `hsla(${hue},40%,50%,0.20)` : `hsla(${hue},40%,65%,0.30)`}`,
               }}
@@ -676,60 +869,54 @@ function CustomerTableRow({
               {ini}
             </div>
           )}
-          <div className="min-w-0">
-            <span className="group relative block max-w-[220px] text-theme-sm font-medium text-gray-800 dark:text-white/90">
-              <span className="block truncate">{label}</span>
-              <span className="pointer-events-none absolute left-0 top-full z-50 mt-1 hidden max-w-[280px] group-hover:block">
-                <span className="absolute -top-1 left-3 h-2 w-2 rotate-45 rounded-[2px] bg-gray-900" />
-                <span className="relative block rounded-md bg-gray-900 px-2.5 py-1.5 text-xs font-medium text-white shadow-lg">
+          <div className='min-w-0'>
+            <span className='group relative block max-w-[220px] text-theme-sm font-medium text-gray-800 dark:text-white/90'>
+              <span className='block truncate'>{label}</span>
+              <span className='pointer-events-none absolute left-0 top-full z-50 mt-1 hidden max-w-[280px] group-hover:block'>
+                <span className='absolute -top-1 left-3 h-2 w-2 rotate-45 rounded-[2px] bg-gray-900' />
+                <span className='relative block rounded-md bg-gray-900 px-2.5 py-1.5 text-xs font-medium text-white shadow-lg'>
                   {label}
                 </span>
               </span>
             </span>
-            <span className="mt-1 block max-w-[260px] truncate text-theme-xs text-gray-500 dark:text-gray-400">
+            <span className='mt-1 block max-w-[260px] truncate text-theme-xs text-gray-500 dark:text-gray-400'>
               {preview}
             </span>
           </div>
         </div>
       </td>
 
-      <td className="px-6 py-3 text-theme-sm text-gray-500 dark:text-gray-400">
-        <span className="capitalize">{lead.channel || 'Unknown'}</span>
+      <td className='px-6 py-3'>
+        {CHANNEL_CFG[(lead.channel || '').toLowerCase()]?.logo || (
+          <Globe size={16} className='text-gray-400 dark:text-gray-500' />
+        )}
       </td>
 
-      <td className="px-6 py-3 text-theme-sm text-gray-500 dark:text-gray-400">
+      <td className='px-6 py-3 text-theme-sm text-gray-500 dark:text-gray-400'>
+        <span className='block max-w-[200px] truncate'>{email || '-'}</span>
+      </td>
+
+      <td className='px-6 py-3 text-theme-sm text-gray-500 dark:text-gray-400'>
         {phone || '-'}
       </td>
 
-      <td className="px-6 py-3 text-theme-sm capitalize text-gray-500 dark:text-gray-400">
-        {(lead.intent || 'Unclassified').replace(/_/g, ' ')}
+      <td className='px-6 py-3 text-theme-sm capitalize text-gray-500 dark:text-gray-400'>
+        <span style={{ color: pipeCfg.color }}>{lead.status || 'new'}</span>
       </td>
 
-      <td className="px-6 py-3 text-theme-sm capitalize text-gray-500 dark:text-gray-400">
-        <span
-          style={{ color: pipeCfg.color }}
-        >
-          {lead.status || 'new'}
-        </span>
-      </td>
-
-      <td className="px-6 py-3">
+      <td className='px-6 py-3'>
         <Badge color={segCfg.badge}>{segCfg.label}</Badge>
       </td>
 
-      <td className="px-6 py-3 text-theme-sm font-semibold text-gray-800 dark:text-white/90">
-        {score}
-      </td>
-
-      <td className="px-6 py-3 text-theme-sm text-gray-500 dark:text-gray-400">
+      <td className='px-6 py-3 text-theme-sm text-gray-500 dark:text-gray-400'>
         {ago(lead.updated_at)}
       </td>
 
-      <td className="px-6 py-3">
+      <td className='px-6 py-3'>
         <Link
           href={conversationHref}
           onClick={(event) => event.stopPropagation()}
-          className="inline-flex h-8 items-center gap-2 whitespace-nowrap rounded-lg bg-brand-500 px-3 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-brand-600"
+          className='inline-flex h-8 items-center gap-2 whitespace-nowrap rounded-lg bg-brand-500 px-3 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-brand-600'
         >
           <Eye size={14} />
           View conversation
@@ -748,10 +935,15 @@ function InfoItem({
   color?: string;
 }) {
   return (
-    <div className="min-w-0">
-      <p className="mb-1.5 text-xs leading-normal text-gray-500 dark:text-gray-400">{label}</p>
+    <div className='min-w-0'>
+      <p className='mb-1.5 text-xs leading-normal text-gray-500 dark:text-gray-400'>
+        {label}
+      </p>
       <p
-        className={cn('truncate text-sm font-medium', !color && 'text-gray-800 dark:text-white/90')}
+        className={cn(
+          'truncate text-sm font-medium',
+          !color && 'text-gray-800 dark:text-white/90',
+        )}
         style={color ? { color } : undefined}
       >
         {value}
@@ -774,7 +966,9 @@ function CustomerModal({
   const ini = getInitials(label);
   const hue = getHue(lead.external_user_id || label);
   const profilePic =
-    lead.profile_pic_url || lead.meta?.instagram_profile?.profile_pic_url || null;
+    lead.profile_pic_url ||
+    lead.meta?.instagram_profile?.profile_pic_url ||
+    null;
   const score = lead.meta?.score ?? 0;
   const seg = getSegment(lead);
   const segCfg = SEGMENT_CFG[seg];
@@ -797,7 +991,8 @@ function CustomerModal({
   const builtinTriggers = (lead.meta?.triggers || [])
     .filter((t) => !t.startsWith('custom:') && !t.startsWith('contact:'))
     .map((t) => t.replace(/^(intent|service):/, '').replace(/\(\d+\)$/, ''));
-  const scoreColor = score >= 8 ? PALETTE.success : score >= 5 ? PALETTE.warning : PALETTE.brand;
+  const scoreColor =
+    score >= 8 ? PALETTE.success : score >= 5 ? PALETTE.warning : PALETTE.brand;
   const [copied, setCopied] = useState<string | null>(null);
 
   const copyText = (text: string, key: string) => {
@@ -808,17 +1003,23 @@ function CustomerModal({
   };
 
   return (
-    <Modal isOpen onClose={onClose} className="m-4 max-w-[700px]">
-      <div className="no-scrollbar relative flex max-h-[85vh] w-full flex-col overflow-hidden rounded-3xl bg-white dark:bg-gray-900">
+    <Modal isOpen onClose={onClose} className='m-4 max-w-[700px]'>
+      <div className='no-scrollbar relative flex max-h-[85vh] w-full flex-col overflow-hidden rounded-3xl bg-white dark:bg-gray-900'>
         {/* Header */}
-        <div className="flex flex-col items-center gap-4 border-b border-gray-100 px-6 pb-6 pr-14 pt-8 dark:border-gray-800 sm:flex-row sm:items-center sm:text-left">
+        <div className='flex flex-col items-center gap-4 border-b border-gray-100 px-6 pb-6 pr-14 pt-8 dark:border-gray-800 sm:flex-row sm:items-center sm:text-left'>
           {profilePic ? (
-            <img src={profilePic} alt={label} className="h-20 w-20 shrink-0 rounded-full border border-gray-200 object-cover dark:border-gray-800" />
+            <img
+              src={profilePic}
+              alt={label}
+              className='h-20 w-20 shrink-0 rounded-full border border-gray-200 object-cover dark:border-gray-800'
+            />
           ) : (
             <div
-              className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full border border-gray-200 text-lg font-bold dark:border-gray-800"
+              className='flex h-20 w-20 shrink-0 items-center justify-center rounded-full border border-gray-200 text-lg font-bold dark:border-gray-800'
               style={{
-                background: isDark ? `hsla(${hue},40%,28%,0.50)` : `hsl(${hue},35%,94%)`,
+                background: isDark
+                  ? `hsla(${hue},40%,28%,0.50)`
+                  : `hsl(${hue},35%,94%)`,
                 color: isDark ? `hsl(${hue},55%,72%)` : `hsl(${hue},45%,38%)`,
               }}
             >
@@ -826,14 +1027,21 @@ function CustomerModal({
             </div>
           )}
 
-          <div className="min-w-0">
-            <h4 className="mb-2 truncate text-lg font-semibold text-gray-800 dark:text-white/90">
+          <div className='min-w-0'>
+            <h4 className='mb-2 truncate text-lg font-semibold text-gray-800 dark:text-white/90'>
               {label}
             </h4>
-            <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
-              <Badge color="light" className="capitalize">{lead.channel}</Badge>
+            <div className='flex flex-wrap items-center justify-center gap-2 sm:justify-start'>
+              <span className='inline-flex h-7 w-7 items-center justify-center rounded-full border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800'>
+                {CHANNEL_CFG[(lead.channel || '').toLowerCase()]?.logo || (
+                  <Globe
+                    size={14}
+                    className='text-gray-400 dark:text-gray-500'
+                  />
+                )}
+              </span>
               <span
-                className="w-fit rounded-full px-2.5 py-0.5 text-xs font-medium capitalize"
+                className='w-fit rounded-full px-2.5 py-0.5 text-xs font-medium capitalize'
                 style={{ color: pipeCfg.color, background: pipeCfg.bg }}
               >
                 {lead.status}
@@ -844,119 +1052,183 @@ function CustomerModal({
         </div>
 
         {/* Scrollable body */}
-        <div className="custom-scrollbar flex-1 overflow-y-auto px-6 py-6">
+        <div className='custom-scrollbar flex-1 overflow-y-auto px-6 py-6'>
           {lastText && (
-            <div className="mb-6 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-white/[0.03]">
-              <p className="mb-1 text-xs text-gray-500 dark:text-gray-400">Last message</p>
-              <p className="text-sm italic leading-relaxed text-gray-700 dark:text-gray-300">
+            <div className='mb-6 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-white/[0.03]'>
+              <p className='mb-1 text-xs text-gray-500 dark:text-gray-400'>
+                Last message
+              </p>
+              <p className='text-sm italic leading-relaxed text-gray-700 dark:text-gray-300'>
                 &ldquo;{lastText}&rdquo;
               </p>
             </div>
           )}
 
-          <h5 className="mb-4 text-base font-medium text-gray-800 dark:text-white/90">Engagement</h5>
-          <div className="grid grid-cols-2 gap-x-6 gap-y-5 lg:grid-cols-3">
-            <InfoItem label="Source" value={lead.source || '—'} />
-            <InfoItem label="Service" value={(lead.service || '—').replace(/_/g, ' ')} />
-            <InfoItem label="Intent" value={(lead.intent || '—').replace(/_/g, ' ')} />
-            <InfoItem label="Score" value={`${score} / 12`} color={scoreColor} />
-            <InfoItem label="Conversation" value={`#${lead.conversation_id}`} />
-            <InfoItem label="Last Active" value={ago(lead.updated_at)} />
+          <h5 className='mb-4 text-base font-medium text-gray-800 dark:text-white/90'>
+            Engagement
+          </h5>
+          <div className='grid grid-cols-2 gap-x-6 gap-y-5 lg:grid-cols-3'>
+            <InfoItem label='Source' value={lead.source || '—'} />
+            <InfoItem
+              label='Service'
+              value={(lead.service || '—').replace(/_/g, ' ')}
+            />
+            <InfoItem
+              label='Intent'
+              value={(lead.intent || '—').replace(/_/g, ' ')}
+            />
+            <InfoItem
+              label='Score'
+              value={`${score} / 12`}
+              color={scoreColor}
+            />
+            <InfoItem label='Conversation' value={`#${lead.conversation_id}`} />
+            <InfoItem label='Last Active' value={ago(lead.updated_at)} />
           </div>
 
           {(emails.length > 0 || phones.length > 0) && (
             <>
-              <div className="my-6 h-px bg-gray-100 dark:bg-gray-800" />
-              <h5 className="mb-4 text-base font-medium text-gray-800 dark:text-white/90">Contact Information</h5>
-              <div className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
+              <div className='my-6 h-px bg-gray-100 dark:bg-gray-800' />
+              <h5 className='mb-4 text-base font-medium text-gray-800 dark:text-white/90'>
+                Contact Information
+              </h5>
+              <div className='grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2'>
                 {emails.length > 0 && (
                   <div>
-                    <div className="mb-1.5 flex items-center justify-between">
-                      <p className="text-xs leading-normal text-gray-500 dark:text-gray-400">Email</p>
+                    <div className='mb-1.5 flex items-center justify-between'>
+                      <p className='text-xs leading-normal text-gray-500 dark:text-gray-400'>
+                        Email
+                      </p>
                       <button
                         onClick={() => copyText(emails[0], 'email')}
-                        className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+                        className='text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300'
                       >
-                        {copied === 'email' ? <Check size={13} /> : <Copy size={13} />}
+                        {copied === 'email' ? (
+                          <Check size={13} />
+                        ) : (
+                          <Copy size={13} />
+                        )}
                       </button>
                     </div>
-                    <p className="truncate text-sm font-medium text-gray-800 dark:text-white/90">{emails[0]}</p>
+                    <p className='truncate text-sm font-medium text-gray-800 dark:text-white/90'>
+                      {emails[0]}
+                    </p>
                   </div>
                 )}
                 {phones.length > 0 && (
                   <div>
-                    <div className="mb-1.5 flex items-center justify-between">
-                      <p className="text-xs leading-normal text-gray-500 dark:text-gray-400">Phone</p>
+                    <div className='mb-1.5 flex items-center justify-between'>
+                      <p className='text-xs leading-normal text-gray-500 dark:text-gray-400'>
+                        Phone
+                      </p>
                       <button
                         onClick={() => copyText(phones[0], 'phone')}
-                        className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+                        className='text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300'
                       >
-                        {copied === 'phone' ? <Check size={13} /> : <Copy size={13} />}
+                        {copied === 'phone' ? (
+                          <Check size={13} />
+                        ) : (
+                          <Copy size={13} />
+                        )}
                       </button>
                     </div>
-                    <p className="truncate text-sm font-medium text-gray-800 dark:text-white/90">{phones[0]}</p>
+                    <p className='truncate text-sm font-medium text-gray-800 dark:text-white/90'>
+                      {phones[0]}
+                    </p>
                   </div>
                 )}
               </div>
             </>
           )}
 
-          <div className="my-6 h-px bg-gray-100 dark:bg-gray-800" />
-          <h5 className="mb-4 text-base font-medium text-gray-800 dark:text-white/90">Signals</h5>
-          <div className="grid grid-cols-2 gap-x-6 gap-y-5 lg:grid-cols-3">
-            <InfoItem label="Mood" value={mood.label} color={mood.color} />
+          <div className='my-6 h-px bg-gray-100 dark:bg-gray-800' />
+          <h5 className='mb-4 text-base font-medium text-gray-800 dark:text-white/90'>
+            Signals
+          </h5>
+          <div className='grid grid-cols-2 gap-x-6 gap-y-5 lg:grid-cols-3'>
+            <InfoItem label='Mood' value={mood.label} color={mood.color} />
             <div>
-              <p className="mb-1.5 text-xs leading-normal text-gray-500 dark:text-gray-400">Urgency</p>
+              <p className='mb-1.5 text-xs leading-normal text-gray-500 dark:text-gray-400'>
+                Urgency
+              </p>
               <Badge color={urgCfg.color}>{urgCfg.label}</Badge>
             </div>
             <InfoItem
-              label="Objections"
-              value={objections.length > 0 ? `${objections.length} detected` : 'None'}
+              label='Objections'
+              value={
+                objections.length > 0 ? `${objections.length} detected` : 'None'
+              }
               color={objections.length > 0 ? PALETTE.error : undefined}
             />
           </div>
 
           {(customTriggers.length > 0 || builtinTriggers.length > 0) && (
-            <div className="mt-6">
-              <p className="mb-2.5 text-xs leading-normal text-gray-500 dark:text-gray-400">Keywords &amp; Triggers</p>
-              <div className="flex flex-wrap gap-2">
+            <div className='mt-6'>
+              <p className='mb-2.5 text-xs leading-normal text-gray-500 dark:text-gray-400'>
+                Keywords &amp; Triggers
+              </p>
+              <div className='flex flex-wrap gap-2'>
                 {customTriggers.map((kw) => (
-                  <Badge key={kw} color="warning">{kw}</Badge>
+                  <Badge key={kw} color='warning'>
+                    {kw}
+                  </Badge>
                 ))}
-                {Array.from(new Set(builtinTriggers)).slice(0, 8).map((t) => (
-                  <Badge key={`builtin-${t}`} color="light">{t.replace(/_/g, ' ')}</Badge>
-                ))}
+                {Array.from(new Set(builtinTriggers))
+                  .slice(0, 8)
+                  .map((t) => (
+                    <Badge key={`builtin-${t}`} color='light'>
+                      {t.replace(/_/g, ' ')}
+                    </Badge>
+                  ))}
               </div>
             </div>
           )}
 
           {objections.length > 0 && (
-            <div className="mt-6">
-              <p className="mb-2.5 text-xs leading-normal text-gray-500 dark:text-gray-400">Sales Objections</p>
-              <div className="flex flex-wrap gap-2">
+            <div className='mt-6'>
+              <p className='mb-2.5 text-xs leading-normal text-gray-500 dark:text-gray-400'>
+                Sales Objections
+              </p>
+              <div className='flex flex-wrap gap-2'>
                 {objections.map((o) => (
-                  <Badge key={o} color="error">{o}</Badge>
+                  <Badge key={o} color='error'>
+                    {o}
+                  </Badge>
                 ))}
               </div>
             </div>
           )}
 
-          <div className="mt-6">
-            <p className="mb-3 text-xs leading-normal text-gray-500 dark:text-gray-400">Pipeline Progress</p>
-            <div className="flex gap-1.5">
+          <div className='mt-6'>
+            <p className='mb-3 text-xs leading-normal text-gray-500 dark:text-gray-400'>
+              Pipeline Progress
+            </p>
+            <div className='flex gap-1.5'>
               {['new', 'contacted', 'qualified', 'won'].map((stage) => {
                 const sc = PIPE_CFG[stage] || PIPE_CFG.new;
                 const order = ['new', 'contacted', 'qualified', 'won'];
                 const done = order.indexOf(stage) <= order.indexOf(lead.status);
                 return (
-                  <div key={stage} className="flex-1">
+                  <div key={stage} className='flex-1'>
                     <div
-                      className="mb-1.5 h-1.5 rounded-full"
-                      style={{ background: done ? sc.color : isDark ? 'rgba(255,255,255,.08)' : 'rgba(15,23,42,.08)' }}
+                      className='mb-1.5 h-1.5 rounded-full'
+                      style={{
+                        background: done
+                          ? sc.color
+                          : isDark
+                            ? 'rgba(255,255,255,.08)'
+                            : 'rgba(15,23,42,.08)',
+                      }}
                     />
                     <div
-                      className="text-[11px] font-medium capitalize"
-                      style={{ color: done ? sc.color : isDark ? 'rgba(255,255,255,.28)' : 'rgba(15,23,42,.32)' }}
+                      className='text-[11px] font-medium capitalize'
+                      style={{
+                        color: done
+                          ? sc.color
+                          : isDark
+                            ? 'rgba(255,255,255,.28)'
+                            : 'rgba(15,23,42,.32)',
+                      }}
                     >
                       {stage}
                     </div>
@@ -968,11 +1240,14 @@ function CustomerModal({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 border-t border-gray-100 px-6 py-4 dark:border-gray-800">
-          <Button variant="outline" onClick={onClose}>
+        <div className='flex items-center justify-end gap-3 border-t border-gray-100 px-6 py-4 dark:border-gray-800'>
+          <Button variant='outline' onClick={onClose}>
             Close
           </Button>
-          <Link href={`/conversations/${lead.conversation_id}`} onClick={onClose}>
+          <Link
+            href={`/conversations/${lead.conversation_id}`}
+            onClick={onClose}
+          >
             <Button>Open Conversation</Button>
           </Link>
         </div>
@@ -1000,37 +1275,56 @@ function ChannelDropdown({
   }, [open]);
 
   return (
-    <div className="relative min-w-[160px]" onClick={(e) => e.stopPropagation()}>
+    <div
+      className='relative min-w-[160px]'
+      onClick={(e) => e.stopPropagation()}
+    >
       <button
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3.5 py-2.5 text-left text-xs font-semibold text-gray-700 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+        className='flex w-full items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3.5 py-2.5 text-left text-xs font-semibold text-gray-700 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300'
       >
         {chanFilter ? (
           <>
             {cfg?.logo}
-            <span>{chanFilter.charAt(0).toUpperCase() + chanFilter.slice(1)}</span>
+            <span>
+              {chanFilter.charAt(0).toUpperCase() + chanFilter.slice(1)}
+            </span>
           </>
         ) : (
           <>
-            <Globe size={14} className="text-gray-400 dark:text-gray-500" />
+            <Globe size={14} className='text-gray-400 dark:text-gray-500' />
             <span>All Channels</span>
           </>
         )}
-        <span className={cn('ml-auto text-[10px] text-gray-400 transition-transform dark:text-gray-500', open && 'rotate-180')}>
+        <span
+          className={cn(
+            'ml-auto text-[10px] text-gray-400 transition-transform dark:text-gray-500',
+            open && 'rotate-180',
+          )}
+        >
           ▾
         </span>
       </button>
 
       {open && (
-        <div className="absolute inset-x-0 top-[calc(100%+6px)] z-20 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-theme-lg dark:border-gray-700 dark:bg-gray-900">
+        <div className='absolute inset-x-0 top-[calc(100%+6px)] z-20 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-theme-lg dark:border-gray-700 dark:bg-gray-900'>
           {[
-            { value: '', label: 'All Channels', logo: <Globe size={15} className="text-gray-400 dark:text-gray-500" />, color: PALETTE.brand },
-            ...['instagram', 'facebook', 'whatsapp', 'telegram', 'youtube'].map((ch) => ({
-              value: ch,
-              label: ch.charAt(0).toUpperCase() + ch.slice(1),
-              logo: CHANNEL_CFG[ch]?.logo,
-              color: CHANNEL_CFG[ch]?.color || PALETTE.brand,
-            })),
+            {
+              value: '',
+              label: 'All Channels',
+              logo: (
+                <Globe size={15} className='text-gray-400 dark:text-gray-500' />
+              ),
+              color: PALETTE.brand,
+            },
+            ...['instagram', 'facebook', 'whatsapp', 'telegram', 'youtube'].map(
+              (ch) => ({
+                value: ch,
+                label: ch.charAt(0).toUpperCase() + ch.slice(1),
+                logo: CHANNEL_CFG[ch]?.logo,
+                color: CHANNEL_CFG[ch]?.color || PALETTE.brand,
+              }),
+            ),
           ].map((opt, i, arr) => {
             const isActive = chanFilter === opt.value;
             return (
@@ -1042,16 +1336,21 @@ function ChannelDropdown({
                 }}
                 className={cn(
                   'flex cursor-pointer items-center gap-2 px-3.5 py-2.5 text-xs transition',
-                  i < arr.length - 1 && 'border-b border-gray-100 dark:border-gray-800',
+                  i < arr.length - 1 &&
+                    'border-b border-gray-100 dark:border-gray-800',
                   isActive
                     ? 'font-bold'
                     : 'font-medium text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-white/[0.03]',
                 )}
-                style={isActive ? { color: opt.color, background: `${opt.color}14` } : undefined}
+                style={
+                  isActive
+                    ? { color: opt.color, background: `${opt.color}14` }
+                    : undefined
+                }
               >
                 {opt.logo}
                 <span>{opt.label}</span>
-                {isActive && <Check size={12} className="ml-auto" />}
+                {isActive && <Check size={12} className='ml-auto' />}
               </div>
             );
           })}
@@ -1074,11 +1373,20 @@ function CustomersTab({
   type CustomerSegment = 'total' | 'active' | 'trending' | 'dormant';
   type CustomerFilterKey = 'channel' | 'contact';
 
-  const SEGMENT_CFG_TAB: Record<CustomerSegment, { label: string; description: string }> = {
+  const SEGMENT_CFG_TAB: Record<
+    CustomerSegment,
+    { label: string; description: string }
+  > = {
     total: { label: 'Total Contacts', description: 'All captured contacts' },
-    active: { label: 'Active Conversations', description: 'Updated in the last 7 days' },
+    active: {
+      label: 'Active Conversations',
+      description: 'Updated in the last 7 days',
+    },
     trending: { label: 'Trending Contacts', description: 'Score 7 or higher' },
-    dormant: { label: 'Dormant Leads', description: 'Inactive for more than 7 days' },
+    dormant: {
+      label: 'Dormant Leads',
+      description: 'Inactive for more than 7 days',
+    },
   };
 
   const [leads, setLeads] = useState<LeadItem[]>([]);
@@ -1098,14 +1406,23 @@ function CustomersTab({
   const ACTIVE_DAYS = 7;
   const TRENDING_SCORE = 7;
 
-  useOutsideClick(channelFilterRef, () => setOpenFilter(null), openFilter === 'channel');
-  useOutsideClick(contactFilterRef, () => setOpenFilter(null), openFilter === 'contact');
+  useOutsideClick(
+    channelFilterRef,
+    () => setOpenFilter(null),
+    openFilter === 'channel',
+  );
+  useOutsideClick(
+    contactFilterRef,
+    () => setOpenFilter(null),
+    openFilter === 'contact',
+  );
 
   const isActiveLead = useCallback(
     (lead: LeadItem) =>
       Boolean(
         lead.updated_at &&
-          (now - new Date(lead.updated_at).getTime()) / (1000 * 60 * 60 * 24) <= ACTIVE_DAYS,
+        (now - new Date(lead.updated_at).getTime()) / (1000 * 60 * 60 * 24) <=
+          ACTIVE_DAYS,
       ),
     [now],
   );
@@ -1119,7 +1436,8 @@ function CustomersTab({
     (lead: LeadItem) => {
       if (segFilter === 'total') return true;
       if (segFilter === 'active') return isActiveLead(lead);
-      if (segFilter === 'trending') return (lead.meta?.score ?? 0) >= TRENDING_SCORE;
+      if (segFilter === 'trending')
+        return (lead.meta?.score ?? 0) >= TRENDING_SCORE;
       return isDormantLead(lead);
     },
     [isActiveLead, isDormantLead, segFilter],
@@ -1129,7 +1447,9 @@ function CustomersTab({
     () => ({
       total: leads.length,
       active: leads.filter(isActiveLead).length,
-      trending: leads.filter((lead) => (lead.meta?.score ?? 0) >= TRENDING_SCORE).length,
+      trending: leads.filter(
+        (lead) => (lead.meta?.score ?? 0) >= TRENDING_SCORE,
+      ).length,
       dormant: leads.filter(isDormantLead).length,
     }),
     [isActiveLead, isDormantLead, leads],
@@ -1150,7 +1470,10 @@ function CustomersTab({
         if (debQ.trim()) qs.set('q', debQ.trim());
         if (chanFilter) qs.set('channel', chanFilter);
 
-        const data = await apiFetch<{ items: LeadItem[]; total: number }>(`/admin/leads?${qs}`, { auth: true });
+        const data = await apiFetch<{ items: LeadItem[]; total: number }>(
+          `/admin/leads?${qs}`,
+          { auth: true },
+        );
         setLeads(data.items || []);
       } finally {
         setLoading(false);
@@ -1166,20 +1489,40 @@ function CustomersTab({
   const displayed = useMemo(() => {
     let list = leads.filter(segmentMatches);
     if (sortOption === 'name') {
-      list = [...list].sort((a, b) => (a.display_name ?? '').localeCompare(b.display_name ?? ''));
+      list = [...list].sort((a, b) =>
+        (a.display_name ?? '').localeCompare(b.display_name ?? ''),
+      );
     } else if (sortOption === 'score') {
-      list = [...list].sort((a, b) => (b.meta?.score ?? 0) - (a.meta?.score ?? 0));
+      list = [...list].sort(
+        (a, b) => (b.meta?.score ?? 0) - (a.meta?.score ?? 0),
+      );
     } else {
       list = [...list].sort(
-        (a, b) => new Date(b.updated_at ?? 0).getTime() - new Date(a.updated_at ?? 0).getTime(),
+        (a, b) =>
+          new Date(b.updated_at ?? 0).getTime() -
+          new Date(a.updated_at ?? 0).getTime(),
       );
     }
     return list;
   }, [leads, segmentMatches, sortOption]);
 
-  const knownChannels = ['instagram', 'facebook', 'whatsapp', 'telegram', 'youtube', 'website', 'google'];
+  const knownChannels = [
+    'instagram',
+    'facebook',
+    'whatsapp',
+    'telegram',
+    'youtube',
+    'website',
+    'google',
+  ];
   const channels = useMemo(
-    () => Array.from(new Set([...knownChannels, ...leads.map((lead) => lead.channel).filter(Boolean)])).sort(),
+    () =>
+      Array.from(
+        new Set([
+          ...knownChannels,
+          ...leads.map((lead) => lead.channel).filter(Boolean),
+        ]),
+      ).sort(),
     [leads],
   );
   const channelCounts = useMemo(
@@ -1205,7 +1548,14 @@ function CustomersTab({
   useEffect(() => {
     if (exportTrigger === 0) return;
     if (!displayed.length) return;
-    const headers = ['Name', 'Channel', 'Score', 'Pipeline', 'Intent', 'Last Updated'];
+    const headers = [
+      'Name',
+      'Channel',
+      'Score',
+      'Pipeline',
+      'Intent',
+      'Last Updated',
+    ];
     const rows = displayed.map((lead) => [
       `"${lead.display_name || lead.external_user_id}"`,
       lead.channel,
@@ -1214,7 +1564,10 @@ function CustomersTab({
       lead.intent || '',
       lead.updated_at || 'N/A',
     ]);
-    const csvContent = [headers.join(','), ...rows.map((row) => row.join(','))].join('\n');
+    const csvContent = [
+      headers.join(','),
+      ...rows.map((row) => row.join(',')),
+    ].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -1227,52 +1580,61 @@ function CustomersTab({
 
   return (
     <>
-      {modal && <CustomerModal lead={modal} onClose={() => setModal(null)} isDark={isDark} />}
-      <div className="min-w-0 max-w-full overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-        <div className="flex flex-col gap-2 border-b border-gray-100 px-5 py-5 dark:border-white/[0.05] sm:flex-row sm:items-center sm:justify-between sm:px-6">
-          <h3 className="text-base font-semibold text-gray-800 dark:text-white/90">
+      {modal && (
+        <CustomerModal
+          lead={modal}
+          onClose={() => setModal(null)}
+          isDark={isDark}
+        />
+      )}
+      <div className='min-w-0 max-w-full overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]'>
+        <div className='flex flex-col gap-2 border-b border-gray-100 px-5 py-5 dark:border-white/[0.05] sm:flex-row sm:items-center sm:justify-between sm:px-6'>
+          <h3 className='text-base font-semibold text-gray-800 dark:text-white/90'>
             Customers
           </h3>
-          <div className="text-theme-sm font-medium text-gray-500 dark:text-gray-400">
+          <div className='text-theme-sm font-medium text-gray-500 dark:text-gray-400'>
             {displayed.length} contacts
           </div>
         </div>
 
-        <div className="min-w-0 px-5 py-5 sm:px-6">
-          <div className="flex flex-col gap-4 rounded-t-xl border border-b-0 border-gray-200 bg-white px-5 py-4 dark:border-white/[0.05] dark:bg-white/[0.01] lg:flex-row lg:items-center lg:justify-between">
+        <div className='min-w-0 px-5 py-5 sm:px-6'>
+          <div className='flex flex-col gap-4 rounded-t-xl border border-b-0 border-gray-200 bg-white px-5 py-4 dark:border-white/[0.05] dark:bg-white/[0.01] lg:flex-row lg:items-center lg:justify-between'>
             <div>
-              <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90">
+              <h4 className='text-lg font-semibold text-gray-800 dark:text-white/90'>
                 {activeContactFilter.label}
               </h4>
-              <p className="mt-1 text-theme-sm text-gray-500 dark:text-gray-400">
+              <p className='mt-1 text-theme-sm text-gray-500 dark:text-gray-400'>
                 {activeContactFilter.description}
               </p>
             </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
-              <div className="relative w-full sm:w-[260px]">
-                <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400" />
+            <div className='flex min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end'>
+              <div className='relative w-full sm:w-[260px]'>
+                <Search className='pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400' />
                 <input
-                  type="search"
+                  type='search'
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Search name, intent, service"
-                  className="h-11 w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-11 pr-4 text-theme-sm text-gray-800 shadow-theme-xs outline-none placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-gray-500"
+                  placeholder='Search name, intent, service'
+                  className='h-11 w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-11 pr-4 text-theme-sm text-gray-800 shadow-theme-xs outline-none placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-gray-500'
                 />
               </div>
 
-              <div ref={channelFilterRef} className="relative">
+              <div ref={channelFilterRef} className='relative'>
                 <Button
-                  variant="outline"
-                  onClick={() => setOpenFilter(openFilter === 'channel' ? null : 'channel')}
+                  variant='outline'
+                  onClick={() =>
+                    setOpenFilter(openFilter === 'channel' ? null : 'channel')
+                  }
+                  className='min-w-0'
                 >
-                  <Radio size={14} />
-                  {activeChannelLabel}
+                  <Radio size={14} className='shrink-0' />
+                  <span className='truncate'>{activeChannelLabel}</span>
                 </Button>
                 {openFilter === 'channel' && (
-                  <div className="absolute right-0 z-20 mt-2 w-64 overflow-hidden rounded-xl border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-800 dark:bg-gray-900">
+                  <div className='absolute right-0 z-20 mt-2 w-64 overflow-hidden rounded-xl border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-800 dark:bg-gray-900'>
                     <button
-                      type="button"
+                      type='button'
                       onClick={() => {
                         setChanFilter('');
                         setOpenFilter(null);
@@ -1284,11 +1646,13 @@ function CustomersTab({
                           : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/[0.04]',
                       )}
                     >
-                      <span className="inline-flex items-center gap-2">
+                      <span className='inline-flex items-center gap-2'>
                         <Globe size={14} />
                         All Channels
                       </span>
-                      <span className="text-xs text-gray-400 dark:text-gray-500">{leads.length}</span>
+                      <span className='text-xs text-gray-400 dark:text-gray-500'>
+                        {leads.length}
+                      </span>
                     </button>
                     {channels.map((channel) => {
                       const active = chanFilter === channel;
@@ -1296,7 +1660,7 @@ function CustomersTab({
                       return (
                         <button
                           key={channel}
-                          type="button"
+                          type='button'
                           onClick={() => {
                             setChanFilter(channel);
                             setOpenFilter(null);
@@ -1308,11 +1672,11 @@ function CustomersTab({
                               : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/[0.04]',
                           )}
                         >
-                          <span className="inline-flex items-center gap-2">
+                          <span className='inline-flex items-center gap-2'>
                             {logo || <Globe size={14} />}
                             {channel}
                           </span>
-                          <span className="text-xs text-gray-400 dark:text-gray-500">
+                          <span className='text-xs text-gray-400 dark:text-gray-500'>
                             {channelCounts[channel] || 0}
                           </span>
                         </button>
@@ -1322,23 +1686,32 @@ function CustomersTab({
                 )}
               </div>
 
-              <div ref={contactFilterRef} className="relative">
+              <div ref={contactFilterRef} className='relative'>
                 <Button
-                  variant="outline"
-                  onClick={() => setOpenFilter(openFilter === 'contact' ? null : 'contact')}
+                  variant='outline'
+                  onClick={() =>
+                    setOpenFilter(openFilter === 'contact' ? null : 'contact')
+                  }
                 >
                   <SlidersHorizontal size={14} />
                   {activeContactFilter.label}
                 </Button>
                 {openFilter === 'contact' && (
-                  <div className="absolute right-0 z-20 mt-2 w-64 overflow-hidden rounded-xl border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-800 dark:bg-gray-900">
-                    {(['total', 'active', 'trending', 'dormant'] as CustomerSegment[]).map((segment) => {
+                  <div className='absolute right-0 z-20 mt-2 w-64 overflow-hidden rounded-xl border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-800 dark:bg-gray-900'>
+                    {(
+                      [
+                        'total',
+                        'active',
+                        'trending',
+                        'dormant',
+                      ] as CustomerSegment[]
+                    ).map((segment) => {
                       const active = segFilter === segment;
                       const cfg = SEGMENT_CFG_TAB[segment];
                       return (
                         <button
                           key={segment}
-                          type="button"
+                          type='button'
                           onClick={() => {
                             setSegFilter(segment);
                             setOpenFilter(null);
@@ -1351,7 +1724,7 @@ function CustomersTab({
                           )}
                         >
                           <span>{cfg.label}</span>
-                          <span className="text-xs text-gray-400 dark:text-gray-500">
+                          <span className='text-xs text-gray-400 dark:text-gray-500'>
                             {segCounts[segment] || 0}
                           </span>
                         </button>
@@ -1363,36 +1736,47 @@ function CustomersTab({
             </div>
           </div>
 
-          <div className="min-w-0 max-w-full overflow-hidden rounded-b-xl border border-gray-200 dark:border-white/[0.05]">
-            <div className="w-full overflow-x-auto">
-              <table className="lashvae-column-dividers min-w-[1420px] table-fixed">
+          <div className='min-w-0 max-w-full overflow-hidden rounded-b-xl border border-gray-200 dark:border-white/[0.05]'>
+            <div className='w-full overflow-x-auto'>
+              <table className='lashvae-column-dividers min-h-72 min-w-[1420px] table-fixed'>
                 <colgroup>
-                  <col className="w-[340px]" />
-                  <col className="w-[145px]" />
-                  <col className="w-[155px]" />
-                  <col className="w-[180px]" />
-                  <col className="w-[150px]" />
-                  <col className="w-[140px]" />
-                  <col className="w-[100px]" />
-                  <col className="w-[145px]" />
-                  <col className="w-[220px]" />
+                  <col className='w-[300px]' />
+                  <col className='w-[90px]' />
+                  <col className='w-[220px]' />
+                  <col className='w-[155px]' />
+                  <col className='w-[150px]' />
+                  <col className='w-[140px]' />
+                  <col className='w-[145px]' />
+                  <col className='w-[220px]' />
                 </colgroup>
-                <thead className="border-b border-gray-100 dark:border-white/[0.05]">
+                <thead className='border-b border-gray-100 dark:border-white/[0.05]'>
                   <tr>
-                    {['Customer', 'Channel', 'Phone', 'Intent', 'Pipeline', 'Segment', 'Score', 'Last active', 'Actions'].map((header) => (
+                    {[
+                      'Customer',
+                      'Channel',
+                      'Email',
+                      'Phone',
+                      'Pipeline',
+                      'Segment',
+                      'Last active',
+                      'Actions',
+                    ].map((header) => (
                       <th
                         key={header}
-                        className="px-5 py-3 text-left text-base font-medium text-gray-500 dark:text-gray-400"
+                        className='px-5 py-3 text-left text-base font-medium text-gray-500 dark:text-gray-400'
                       >
                         {header}
                       </th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+                <tbody className='divide-y divide-gray-100 dark:divide-white/[0.05]'>
                   {loading && (
                     <tr>
-                      <td colSpan={9} className="px-5 py-14 text-center text-theme-sm text-gray-500 dark:text-gray-400">
+                      <td
+                        colSpan={8}
+                        className='px-5 py-14 text-center text-theme-sm text-gray-500 dark:text-gray-400'
+                      >
                         Loading customers
                       </td>
                     </tr>
@@ -1400,20 +1784,34 @@ function CustomersTab({
 
                   {!loading && displayed.length === 0 && (
                     <tr>
-                      <td colSpan={9} className="px-5 py-14 text-center text-theme-sm text-gray-500 dark:text-gray-400">
-                        {search.trim() ? 'No customers match this search' : 'No customers match these filters'}
+                      <td
+                        colSpan={8}
+                        className='px-5 py-14 text-center text-theme-sm text-gray-500 dark:text-gray-400'
+                      >
+                        {search.trim()
+                          ? 'No customers match this search'
+                          : 'No customers match these filters'}
                       </td>
                     </tr>
                   )}
 
                   {!loading &&
                     pagedDisplayed.map((lead) => (
-                      <CustomerTableRow key={lead.id} lead={lead} onClick={() => setModal(lead)} isDark={isDark} />
+                      <CustomerTableRow
+                        key={lead.id}
+                        lead={lead}
+                        onClick={() => setModal(lead)}
+                        isDark={isDark}
+                      />
                     ))}
                 </tbody>
               </table>
             </div>
-            <TablePagination page={customersPage} totalItems={displayed.length} onPageChange={setCustomersPage} />
+            <TablePagination
+              page={customersPage}
+              totalItems={displayed.length}
+              onPageChange={setCustomersPage}
+            />
           </div>
         </div>
       </div>
@@ -1433,7 +1831,11 @@ function formatActivityBucket(bucket?: string | null) {
 
   if (!Number.isNaN(parsed.getTime())) {
     return hasTime
-      ? parsed.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false })
+      ? parsed.toLocaleTimeString('en-GB', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false,
+        })
       : parsed.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
   }
 
@@ -1446,9 +1848,13 @@ function formatActivityBucket(bucket?: string | null) {
 
 // ─── Overview Tab ────────────────────────────────────────────────────────────
 function OverviewTab({ isDark }: { isDark: boolean }) {
-  const [overview, setOverview] = useState<ReturnType<typeof adaptOverview> | null>(null);
+  const [overview, setOverview] = useState<ReturnType<
+    typeof adaptOverview
+  > | null>(null);
   const [depth, setDepth] = useState<DepthItem[]>([]);
-  const [returning, setReturning] = useState<ReturnType<typeof adaptReturning> | null>(null);
+  const [returning, setReturning] = useState<ReturnType<
+    typeof adaptReturning
+  > | null>(null);
   const [topics, setTopics] = useState<TopicItem[]>([]);
   const [timeseries, setTimeseries] = useState<TimeseriesPoint[]>([]);
   const [pipeline, setPipeline] = useState<Record<string, number>>({});
@@ -1475,7 +1881,8 @@ function OverviewTab({ isDark }: { isDark: boolean }) {
         } else if (raw?.pipeline && typeof raw.pipeline === 'object') {
           flat = raw.pipeline;
         } else if (typeof raw === 'object' && raw !== null) {
-          for (const [k, v] of Object.entries(raw)) if (typeof v === 'number') flat[k] = v as number;
+          for (const [k, v] of Object.entries(raw))
+            if (typeof v === 'number') flat[k] = v as number;
         }
         setPipeline(flat);
       }
@@ -1495,11 +1902,16 @@ function OverviewTab({ isDark }: { isDark: boolean }) {
     color: TOPIC_CFG[t.topic]?.color ?? PALETTE.gray,
   }));
   const convRate =
-    overview && overview.conversations > 0 ? Math.round((overview.leads / overview.conversations) * 100) : 0;
+    overview && overview.conversations > 0
+      ? Math.round((overview.leads / overview.conversations) * 100)
+      : 0;
 
   const peakBucket =
     timeseries.length > 0
-      ? timeseries.reduce((a, b) => (b.messages > a.messages ? b : a), timeseries[0])
+      ? timeseries.reduce(
+          (a, b) => (b.messages > a.messages ? b : a),
+          timeseries[0],
+        )
       : null;
 
   const peakLabel = formatActivityBucket(peakBucket?.bucket);
@@ -1508,84 +1920,135 @@ function OverviewTab({ isDark }: { isDark: boolean }) {
   const peakSubtitle = peakUsesTime ? 'busiest time slot' : 'busiest day';
 
   return (
-    <div className="grid grid-cols-12 gap-4 md:gap-6">
-      <div className="col-span-12 space-y-4 xl:col-span-7 md:space-y-6">
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:gap-6">
-          <MetricCard label="Conversations" value={overview?.conversations ?? '—'} icon={<MessageSquare className="size-6 text-gray-800 dark:text-white/90" />} />
-          <MetricCard label="Messages" value={overview?.messages ?? '—'} icon={<Mail className="size-6 text-gray-800 dark:text-white/90" />} />
-          <MetricCard label="Leads" value={overview?.leads ?? '—'} icon={<Target className="size-6 text-gray-800 dark:text-white/90" />} />
-          <MetricCard label="Handoffs" value={overview?.handoffs ?? '—'} icon={<Users className="size-6 text-gray-800 dark:text-white/90" />} />
-          <MetricCard label="Avg Latency" value={overview ? `${num(overview.avg_latency_ms)}ms` : '—'} icon={<Zap className="size-6 text-gray-800 dark:text-white/90" />} />
+    <div className='grid grid-cols-12 gap-4 md:gap-6'>
+      <div className='col-span-12 space-y-4 xl:col-span-7 md:space-y-6'>
+        <div className='grid grid-cols-2 gap-4 sm:grid-cols-3 md:gap-6'>
           <MetricCard
-            label="Error Rate"
-            value={overview && overview.conversations ? pct(overview.errors / overview.conversations) : '—'}
-            icon={<AlertTriangle className="size-6 text-gray-800 dark:text-white/90" />}
+            label='Conversations'
+            value={overview?.conversations ?? '—'}
+            icon={<MessageSquare className='size-6' />}
+            tone='brand'
+          />
+          <MetricCard
+            label='Messages'
+            value={overview?.messages ?? '—'}
+            icon={<Mail className='size-6' />}
+            tone='gray'
+          />
+          <MetricCard
+            label='Leads'
+            value={overview?.leads ?? '—'}
+            icon={<Target className='size-6' />}
+            tone='success'
+          />
+          <MetricCard
+            label='Handoffs'
+            value={overview?.handoffs ?? '—'}
+            icon={<Users className='size-6' />}
+            tone='warning'
+          />
+          <MetricCard
+            label='Avg Latency'
+            value={overview ? `${num(overview.avg_latency_ms)}ms` : '—'}
+            icon={<Zap className='size-6' />}
+            tone='brand'
+          />
+          <MetricCard
+            label='Error Rate'
+            value={
+              overview && overview.conversations
+                ? pct(overview.errors / overview.conversations)
+                : '—'
+            }
+            icon={<AlertTriangle className='size-6' />}
+            tone='error'
           />
         </div>
 
-        <ChartCard title="Message Engagement" subtitle="How many users sent a given number of messages">
+        <ChartCard
+          title='Message Engagement'
+          subtitle='How many users sent a given number of messages'
+        >
           {depth.length > 0 ? (
             <EngagementBarChart data={depthBars} isDark={isDark} />
           ) : (
-            <Empty label="Appears after new conversations" />
+            <Empty label='Appears after new conversations' />
           )}
         </ChartCard>
       </div>
 
-      <div className="col-span-12 xl:col-span-5">
-        <ChartCard title="Conversion Rate" subtitle="Leads captured per conversation">
+      <div className='col-span-12 xl:col-span-5'>
+        <ChartCard
+          title='Conversion Rate'
+          subtitle='Leads captured per conversation'
+        >
           {overview ? (
             <>
               <ConversionGauge value={convRate} isDark={isDark} />
-              <p className="mx-auto -mt-6 max-w-[280px] text-center text-sm text-gray-500 dark:text-gray-400">
-                {overview.leads} of {overview.conversations} conversations became leads.
+              <p className='mx-auto -mt-6 max-w-[280px] text-center text-sm text-gray-500 dark:text-gray-400'>
+                {overview.leads} of {overview.conversations} conversations
+                became leads.
               </p>
             </>
           ) : (
-            <Empty label="No conversion data yet" />
+            <Empty label='No conversion data yet' />
           )}
         </ChartCard>
       </div>
 
-      <div className="col-span-12">
-        <ChartCard title="Activity Over Time" subtitle="Messages, conversations, leads and errors">
+      <div className='col-span-12'>
+        <ChartCard
+          title='Activity Over Time'
+          subtitle='Messages, conversations, leads and errors'
+        >
           {timeseries.length > 1 ? (
-            <div className="max-w-full overflow-x-auto custom-scrollbar">
-              <div className="min-w-[720px] xl:min-w-full">
+            <div className='max-w-full overflow-x-auto custom-scrollbar'>
+              <div className='min-w-[720px] xl:min-w-full'>
                 <ActivityAreaChart data={timeseries} isDark={isDark} />
               </div>
             </div>
           ) : (
-            <Empty label="Timeseries data appears after activity" />
+            <Empty label='Timeseries data appears after activity' />
           )}
         </ChartCard>
       </div>
 
-      <div className="col-span-12 xl:col-span-5">
-        <ChartCard title="Topic Breakdown" subtitle="What customers are asking about">
-          {topics.length > 0 ? <TopicDonutChart data={topicDonut} isDark={isDark} /> : <Empty label="Appears after new conversations" />}
+      <div className='col-span-12 xl:col-span-5'>
+        <ChartCard
+          title='Topic Breakdown'
+          subtitle='What customers are asking about'
+        >
+          {topics.length > 0 ? (
+            <TopicDonutChart data={topicDonut} isDark={isDark} />
+          ) : (
+            <Empty label='Appears after new conversations' />
+          )}
         </ChartCard>
       </div>
 
-      <div className="col-span-12 space-y-4 xl:col-span-7 md:space-y-6">
-        <ChartCard title="Pipeline Funnel" subtitle="Leads by pipeline stage">
+      <div className='col-span-12 space-y-4 xl:col-span-7 md:space-y-6'>
+        <ChartCard title='Pipeline Funnel' subtitle='Leads by pipeline stage'>
           {Object.keys(pipeline).length > 0 ? (
-            <div className="flex flex-col gap-2">
+            <div className='flex flex-col gap-2'>
               {PIPELINE_STAGES.map((s) => {
                 const count = pipeline[s.key] || 0;
-                const tot = Object.values(pipeline).reduce((a, v) => a + v, 0) || 1;
+                const tot =
+                  Object.values(pipeline).reduce((a, v) => a + v, 0) || 1;
                 return (
-                  <div key={s.key} className="flex items-center gap-3">
-                    <span className="w-20 shrink-0 text-xs font-medium capitalize text-gray-500 dark:text-gray-400">
+                  <div key={s.key} className='flex items-center gap-3'>
+                    <span className='w-20 shrink-0 text-xs font-medium capitalize text-gray-500 dark:text-gray-400'>
                       {s.key}
                     </span>
-                    <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-gray-100 dark:bg-white/[0.05]">
+                    <div className='h-2.5 flex-1 overflow-hidden rounded-full bg-gray-100 dark:bg-white/[0.05]'>
                       <div
-                        className="h-full rounded-full transition-all duration-700"
-                        style={{ background: s.color, width: `${Math.max((count / tot) * 100, count > 0 ? 5 : 1)}%` }}
+                        className='h-full rounded-full transition-all duration-700'
+                        style={{
+                          background: s.color,
+                          width: `${Math.max((count / tot) * 100, count > 0 ? 5 : 1)}%`,
+                        }}
                       />
                     </div>
-                    <span className="w-6 shrink-0 text-right text-sm font-semibold text-gray-800 dark:text-white/90">
+                    <span className='w-6 shrink-0 text-right text-sm font-semibold text-gray-800 dark:text-white/90'>
                       {count}
                     </span>
                   </div>
@@ -1593,41 +2056,59 @@ function OverviewTab({ isDark }: { isDark: boolean }) {
               })}
             </div>
           ) : (
-            <Empty label="No leads yet" />
+            <Empty label='No leads yet' />
           )}
         </ChartCard>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6">
-          <ChartCard title="Returning Users" subtitle="Customers who came back">
+        <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6'>
+          <ChartCard title='Returning Users' subtitle='Customers who came back'>
             {returning ? (
-              <div className="flex items-center gap-4">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-brand-500 dark:text-brand-400">{pct(returning.return_rate)}</div>
-                  <div className="mt-1 text-xs text-gray-400 dark:text-gray-500">return rate</div>
-                </div>
-                <div className="flex flex-1 flex-col gap-2">
-                  <div className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 dark:border-gray-800 dark:bg-white/[0.03]">
-                    <div className="text-[10px] uppercase tracking-wide text-gray-400 dark:text-gray-500">Total returning</div>
-                    <div className="text-base font-bold text-gray-800 dark:text-white/90">{num(returning.total_returning)}</div>
+              <div className='flex items-center gap-4'>
+                <div className='text-center'>
+                  <div className='text-3xl font-bold text-brand-500 dark:text-brand-400'>
+                    {pct(returning.return_rate)}
                   </div>
-                  <div className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 dark:border-gray-800 dark:bg-white/[0.03]">
-                    <div className="text-[10px] uppercase tracking-wide text-gray-400 dark:text-gray-500">Avg returns/user</div>
-                    <div className="text-base font-bold text-gray-800 dark:text-white/90">{num(returning.avg_returns, 1)}</div>
+                  <div className='mt-1 text-xs text-gray-400 dark:text-gray-500'>
+                    return rate
+                  </div>
+                </div>
+                <div className='flex flex-1 flex-col gap-2'>
+                  <div className='rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 dark:border-gray-800 dark:bg-white/[0.03]'>
+                    <div className='text-[10px] uppercase tracking-wide text-gray-400 dark:text-gray-500'>
+                      Total returning
+                    </div>
+                    <div className='text-base font-bold text-gray-800 dark:text-white/90'>
+                      {num(returning.total_returning)}
+                    </div>
+                  </div>
+                  <div className='rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 dark:border-gray-800 dark:bg-white/[0.03]'>
+                    <div className='text-[10px] uppercase tracking-wide text-gray-400 dark:text-gray-500'>
+                      Avg returns/user
+                    </div>
+                    <div className='text-base font-bold text-gray-800 dark:text-white/90'>
+                      {num(returning.avg_returns, 1)}
+                    </div>
                   </div>
                 </div>
               </div>
             ) : (
-              <Empty label="No returning user data yet" />
+              <Empty label='No returning user data yet' />
             )}
           </ChartCard>
 
           {peakLabel && (
             <ChartCard title={peakTitle} subtitle={peakSubtitle}>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-gray-800 dark:text-white/90">{peakLabel}</div>
-                <div className="mt-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 dark:border-gray-800 dark:bg-white/[0.03]">
-                  <div className="text-[10px] uppercase tracking-wide text-gray-400 dark:text-gray-500">Peak messages</div>
-                  <div className="text-base font-bold text-gray-800 dark:text-white/90">{peakBucket?.messages ?? 0}</div>
+              <div className='text-center'>
+                <div className='text-3xl font-bold text-gray-800 dark:text-white/90'>
+                  {peakLabel}
+                </div>
+                <div className='mt-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 dark:border-gray-800 dark:bg-white/[0.03]'>
+                  <div className='text-[10px] uppercase tracking-wide text-gray-400 dark:text-gray-500'>
+                    Peak messages
+                  </div>
+                  <div className='text-base font-bold text-gray-800 dark:text-white/90'>
+                    {peakBucket?.messages ?? 0}
+                  </div>
                 </div>
               </div>
             </ChartCard>
@@ -1645,7 +2126,9 @@ export default function AnalyticsPage() {
   const { isDark } = useTheme();
 
   const [tab, setTab] = useState<Tab>('overview');
-  const [sortOption, setSortOption] = useState<'name' | 'score' | 'updated'>('updated');
+  const [sortOption, setSortOption] = useState<'name' | 'score' | 'updated'>(
+    'updated',
+  );
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
   const [exportTrigger, setExportTrigger] = useState(0);
 
@@ -1656,9 +2139,9 @@ export default function AnalyticsPage() {
 
   return (
     <RequireAuth>
-      <PageBreadcrumb pageTitle="Analytics" />
+      <PageBreadcrumb pageTitle='Analytics' />
 
-      <div className="mb-6 flex flex-wrap items-start justify-end gap-4">
+      <div className='mb-6 flex flex-wrap items-start justify-end gap-4'>
         {tab === 'overview' && <WeeklyReportButton />}
         {tab === 'customers' && (
           <CustomerTabControls
@@ -1671,7 +2154,7 @@ export default function AnalyticsPage() {
         )}
       </div>
 
-      <div className="mb-6 inline-flex gap-1 rounded-xl border border-gray-200 bg-gray-100 p-1 dark:border-gray-800 dark:bg-white/[0.03]">
+      <div className='mb-6 inline-flex gap-1 rounded-xl border border-gray-200 bg-gray-100 p-1 dark:border-gray-800 dark:bg-white/[0.03]'>
         {TABS.map((t) => {
           const active = tab === t.id;
           return (
@@ -1694,7 +2177,11 @@ export default function AnalyticsPage() {
       <div key={tab}>
         {tab === 'overview' && <OverviewTab isDark={isDark} />}
         {tab === 'customers' && (
-          <CustomersTab isDark={isDark} sortOption={sortOption} exportTrigger={exportTrigger} />
+          <CustomersTab
+            isDark={isDark}
+            sortOption={sortOption}
+            exportTrigger={exportTrigger}
+          />
         )}
       </div>
     </RequireAuth>
