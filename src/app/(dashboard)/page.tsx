@@ -1,9 +1,12 @@
 'use client';
+import Link from 'next/link';
 
-import type {
-  AttentionItem,
-  FaqGap,
-  TopicItem,
+import {
+  ATTENTION_CFG,
+  AttentionCfg,
+  type AttentionItem,
+  type FaqGap,
+  type TopicItem,
 } from '@/components/dashboard/DashboardPanels';
 import { OnboardingCard } from '@/components/overview/onboarding/OnboardingCard';
 import { OnboardingDrawer } from '@/components/overview/onboarding/OnboardingDrawer';
@@ -893,6 +896,16 @@ function timeAgo(iso: string | null) {
   return `${Math.floor(seconds / 86400)}d ago`;
 }
 
+const FALLBACK_CFG: AttentionCfg = {
+  dot: 'bg-gray-400',
+  badge: 'bg-gray-100 text-gray-600 dark:bg-gray-500/[0.12] dark:text-gray-300',
+  label: 'attention',
+};
+
+function getAttentionCfg(type: string): AttentionCfg {
+  return ATTENTION_CFG[type] ?? FALLBACK_CFG;
+}
+
 function attentionLabel(type: string) {
   return type.replace(/_/g, ' ');
 }
@@ -916,30 +929,43 @@ function AttentionCard({
         <EmptyBlock label='No attention items right now' />
       ) : (
         <div className='overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800'>
-          {items.slice(0, 8).map((item, index) => (
-            <div
-              key={`${item.type}-${item.created_at}-${index}`}
-              className='flex gap-3 border-b border-gray-200 px-4 py-3 last:border-b-0 dark:border-gray-800'
-            >
-              <span className='mt-2 h-2 w-2 shrink-0 rounded-full bg-brand-500' />
-              <div className='min-w-0 flex-1'>
-                <div className='flex items-center justify-between gap-3'>
-                  <p className='truncate text-theme-sm font-medium text-gray-800 dark:text-white/90'>
-                    {item.sender_name || 'Unknown customer'}
+          {items.slice(0, 8).map((item, index) => {
+            const cfg = getAttentionCfg(item.type);
+            const href = item.conversation_id
+              ? `/conversations/${item.conversation_id}`
+              : '/conversations';
+
+            return (
+              <Link
+                key={`${item.type}-${item.created_at}-${index}`}
+                href={href}
+                className='flex gap-3 border-b border-gray-200 px-4 py-3 last:border-b-0 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/[0.03]'
+              >
+                <span
+                  className={`mt-2 h-2 w-2 shrink-0 rounded-full ${cfg.dot}`}
+                />
+                <div className='min-w-0 flex-1'>
+                  <div className='flex items-center justify-between gap-3'>
+                    <p className='truncate text-theme-sm font-medium text-gray-800 dark:text-white/90'>
+                      {item.sender_name || 'Unknown customer'}
+                    </p>
+                    <span
+                      className={`shrink-0 rounded-full px-2.5 py-1 text-theme-xs font-medium capitalize ${cfg.badge}`}
+                    >
+                      {cfg.label}
+                    </span>
+                  </div>
+                  <p className='mt-1 line-clamp-2 text-theme-sm text-gray-500 dark:text-gray-400'>
+                    {item.message ||
+                      'Review this conversation for next action.'}
                   </p>
-                  <span className='shrink-0 rounded-full bg-brand-50 px-2.5 py-1 text-theme-xs font-medium capitalize text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400'>
-                    {attentionLabel(item.type)}
-                  </span>
+                  <p className='mt-2 text-theme-xs text-gray-400 dark:text-gray-500'>
+                    {timeAgo(item.created_at)} · {item.tenant_id || 'Tenant'}
+                  </p>
                 </div>
-                <p className='mt-1 line-clamp-2 text-theme-sm text-gray-500 dark:text-gray-400'>
-                  {item.message || 'Review this conversation for next action.'}
-                </p>
-                <p className='mt-2 text-theme-xs text-gray-400 dark:text-gray-500'>
-                  {timeAgo(item.created_at)} · {item.tenant_id || 'Tenant'}
-                </p>
-              </div>
-            </div>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       )}
     </Card>
