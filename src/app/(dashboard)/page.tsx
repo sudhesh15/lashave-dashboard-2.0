@@ -615,6 +615,30 @@ function PipelineChart({
   );
 }
 
+// helper
+const TOPIC_COLOR_MAP: Record<string, string> = {
+  pricing: '#60A5FA',
+  booking: '#22D3EE',
+  appointment: '#2DD4BF',
+  support: '#FCA5A5',
+  product: '#C4B5FD',
+  availability: '#F0ABFC',
+  complaint: '#FB7185',
+  refund: '#FDBA74',
+  hours: '#FCD34D',
+  general_interest: '#CBD5E1',
+  integration: '#93C5FD',
+  demo: '#67E8F9',
+};
+
+function getTopicColor(topic: string): string {
+  const lower = topic.toLowerCase();
+  for (const [key, color] of Object.entries(TOPIC_COLOR_MAP)) {
+    if (lower.includes(key)) return color;
+  }
+  return '#94A3B8'; // fallback slate
+}
+
 function TopicsCard({
   topics,
   loading,
@@ -638,20 +662,24 @@ function TopicsCard({
         <div className='space-y-4'>
           {topics.slice(0, 8).map((topic) => {
             const pct = Math.round((topic.count / max) * 100);
+            const color = getTopicColor(topic.topic);
             return (
               <div key={topic.topic}>
                 <div className='mb-2 flex justify-between gap-3 text-theme-sm'>
                   <span className='font-medium capitalize text-gray-700 dark:text-gray-300'>
                     {topic.topic.replace(/_/g, ' ')}
                   </span>
-                  <span className='text-gray-500 dark:text-gray-400'>
+                  <span className='font-semibold' style={{ color }}>
                     {topic.count}
                   </span>
                 </div>
                 <div className='h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800'>
                   <div
-                    className='h-full rounded-full bg-brand-500'
-                    style={{ width: `${pct}%` }}
+                    className='h-full rounded-full transition-all'
+                    style={{
+                      width: `${pct}%`,
+                      background: `linear-gradient(90deg, ${color}, ${color}99)`,
+                    }}
                   />
                 </div>
               </div>
