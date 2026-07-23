@@ -182,10 +182,9 @@ const CHANNEL_CFG: Record<string, { color: string; logo: React.ReactNode }> = {
   },
   website: {
     color: '#465FFF',
-    logo: <img src='/globe.svg' width={16} height={16} alt='Google' />
-  }
+    logo: <img src='/globe.svg' width={16} height={16} alt='Google' />,
+  },
 };
-
 
 const DEPTH_BUCKETS = [
   { key: '1-2', label: '1–2' },
@@ -1027,7 +1026,7 @@ function CustomerModal({
             </div>
           )}
 
-          <div className='min-w-0'>
+          <div className='min-w-0 flex-1'>
             <h4 className='mb-2 truncate text-lg font-semibold text-gray-800 dark:text-white/90'>
               {label}
             </h4>
@@ -1047,6 +1046,44 @@ function CustomerModal({
                 {lead.status}
               </span>
               <Badge color={segCfg.badge}>{segCfg.label}</Badge>
+            </div>
+
+            <div className='mt-3 flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 sm:justify-start'>
+              <div className='flex items-center gap-1.5'>
+                <Mail size={12} className='text-gray-400 dark:text-gray-500' />
+                <span className='max-w-[180px] truncate text-xs text-gray-500 dark:text-gray-400'>
+                  {emails[0] || 'No email'}
+                </span>
+                {emails[0] && (
+                  <button
+                    onClick={() => copyText(emails[0], 'email')}
+                    className='text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300'
+                  >
+                    {copied === 'email' ? (
+                      <Check size={12} />
+                    ) : (
+                      <Copy size={12} />
+                    )}
+                  </button>
+                )}
+              </div>
+              <div className='flex items-center gap-1.5'>
+                <span className='text-xs text-gray-500 dark:text-gray-400'>
+                  {phones[0] || 'No phone'}
+                </span>
+                {phones[0] && (
+                  <button
+                    onClick={() => copyText(phones[0], 'phone')}
+                    className='text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300'
+                  >
+                    {copied === 'phone' ? (
+                      <Check size={12} />
+                    ) : (
+                      <Copy size={12} />
+                    )}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -1085,61 +1122,6 @@ function CustomerModal({
             <InfoItem label='Conversation' value={`#${lead.conversation_id}`} />
             <InfoItem label='Last Active' value={ago(lead.updated_at)} />
           </div>
-
-          {(emails.length > 0 || phones.length > 0) && (
-            <>
-              <div className='my-6 h-px bg-gray-100 dark:bg-gray-800' />
-              <h5 className='mb-4 text-base font-medium text-gray-800 dark:text-white/90'>
-                Contact Information
-              </h5>
-              <div className='grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2'>
-                {emails.length > 0 && (
-                  <div>
-                    <div className='mb-1.5 flex items-center justify-between'>
-                      <p className='text-xs leading-normal text-gray-500 dark:text-gray-400'>
-                        Email
-                      </p>
-                      <button
-                        onClick={() => copyText(emails[0], 'email')}
-                        className='text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300'
-                      >
-                        {copied === 'email' ? (
-                          <Check size={13} />
-                        ) : (
-                          <Copy size={13} />
-                        )}
-                      </button>
-                    </div>
-                    <p className='truncate text-sm font-medium text-gray-800 dark:text-white/90'>
-                      {emails[0]}
-                    </p>
-                  </div>
-                )}
-                {phones.length > 0 && (
-                  <div>
-                    <div className='mb-1.5 flex items-center justify-between'>
-                      <p className='text-xs leading-normal text-gray-500 dark:text-gray-400'>
-                        Phone
-                      </p>
-                      <button
-                        onClick={() => copyText(phones[0], 'phone')}
-                        className='text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300'
-                      >
-                        {copied === 'phone' ? (
-                          <Check size={13} />
-                        ) : (
-                          <Copy size={13} />
-                        )}
-                      </button>
-                    </div>
-                    <p className='truncate text-sm font-medium text-gray-800 dark:text-white/90'>
-                      {phones[0]}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </>
-          )}
 
           <div className='my-6 h-px bg-gray-100 dark:bg-gray-800' />
           <h5 className='mb-4 text-base font-medium text-gray-800 dark:text-white/90'>
