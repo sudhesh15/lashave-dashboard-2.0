@@ -18,6 +18,8 @@ import {
   FileText,
   Film,
   Flame,
+  Globe,
+  GlobeIcon,
   Hash,
   Lightbulb,
   Loader2,
@@ -502,6 +504,39 @@ function MagazineGrid({
 }
 
 /* ─────────────────────── Campaigns timeline ─────────────────────── */
+
+
+const CHANNEL_CFG: Record<string, { color: string; logo: React.ReactNode }> = {
+  instagram: {
+    color: '#E4405F',
+    logo: <img src='/instagram.svg' width={12} height={12} alt='Instagram' />,
+  },
+  facebook: {
+    color: '#1877F2',
+    logo: <img src='/facebook.svg' width={12} height={12} alt='Facebook' />,
+  },
+  whatsapp: {
+    color: '#25D366',
+    logo: <img src='/whatsapp.svg' width={12} height={12} alt='WhatsApp' />,
+  },
+  telegram: {
+    color: '#229ED9',
+    logo: <img src='/telegram.svg' width={12} height={12} alt='Telegram' />,
+  },
+  youtube: {
+    color: '#FF0000',
+    logo: <img src='/youtube.svg' width={12} height={12} alt='YouTube' />,
+  },
+  google: {
+    color: '#4285F4',
+    logo: <img src='/google-map.svg' width={12} height={12} alt='Google' />,
+  },
+  website: {
+    color: '#465FFF',
+    logo: <Globe size={12} className='text-brand-500' />,
+  },
+};
+
 function CampaignTimeline({
   items,
   empty,
@@ -527,30 +562,49 @@ function CampaignTimeline({
         const title = itemTitle(item);
         const isCached = cache && cache[title.toLowerCase()];
         return (
-          <div key={`${title}-${idx}`} className="rounded-xl border border-gray-200 p-4 dark:border-gray-800">
-            <div className="mb-2 flex flex-wrap items-center gap-2">
-              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400">
-                {idx === 0 ? <Trophy size={13} /> : <span className="text-xs font-semibold">{idx + 1}</span>}
+          <div
+            key={`${title}-${idx}`}
+            className='rounded-xl border border-gray-200 p-4 dark:border-gray-800'
+          >
+            <div className='mb-2 flex flex-wrap items-center gap-2'>
+              <span className='flex h-7 w-7 items-center justify-center rounded-lg bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'>
+                {idx === 0 ? (
+                  <Trophy size={13} />
+                ) : (
+                  <span className='text-xs font-semibold'>{idx + 1}</span>
+                )}
               </span>
-              {item.priority && <Badge color={priorityBadgeColor(item.priority)}>{item.priority}</Badge>}
+              {item.priority && (
+                <Badge color={priorityBadgeColor(item.priority)}>
+                  {item.priority}
+                </Badge>
+              )}
               {item.day && (
-                <span className="ml-auto flex items-center gap-1 text-xs text-gray-400 dark:text-gray-500">
+                <span className='ml-auto flex items-center gap-1 text-xs text-gray-400 dark:text-gray-500'>
                   <CalendarDays size={11} /> {item.day}
                 </span>
               )}
             </div>
-            <h3 className="text-sm font-semibold text-gray-800 dark:text-white/90">{title}</h3>
-            <p className="mt-1.5 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+            <h3 className='text-sm font-semibold text-gray-800 dark:text-white/90'>
+              {title}
+            </h3>
+            <p className='mt-1.5 text-xs leading-relaxed text-gray-500 dark:text-gray-400'>
               {compactText(itemDescription(item))}
             </p>
-            <div className="mt-3 flex items-center justify-between gap-2">
+            <div className='mt-3 flex items-center justify-between gap-2'>
               {item.channels?.length ? (
-                <div className="flex flex-wrap gap-1.5">
+                <div className='flex flex-wrap gap-1.5'>
                   {item.channels.map((ch) => (
                     <span
                       key={ch}
-                      className="rounded-md bg-gray-100 px-2 py-0.5 text-[11px] text-gray-500 dark:bg-white/[0.06] dark:text-gray-400"
+                      className='inline-flex items-center gap-1 rounded-md bg-gray-100 px-2 py-0.5 text-[11px] text-gray-500 dark:bg-white/[0.06] dark:text-gray-400'
                     >
+                      {CHANNEL_CFG[ch.toLowerCase()]?.logo || (
+                        <GlobeIcon
+                          size={11}
+                          className='text-gray-400 dark:text-gray-500'
+                        />
+                      )}
                       {ch}
                     </span>
                   ))}
@@ -558,9 +612,13 @@ function CampaignTimeline({
               ) : (
                 <span />
               )}
-              <div className="flex items-center gap-1.5">
+              <div className='flex items-center gap-1.5'>
                 {onAction && (
-                  <Button variant="outline" size="sm" onClick={() => onAction(item)}>
+                  <Button
+                    variant='outline'
+                    size='sm'
+                    onClick={() => onAction(item)}
+                  >
                     {isCached ? (
                       <>
                         <Eye size={12} /> View
@@ -574,12 +632,14 @@ function CampaignTimeline({
                 )}
                 {isCached && onRegenerate && (
                   <Button
-                    variant="outline"
-                    size="icon-sm"
+                    variant='outline'
+                    size='icon-sm'
                     onClick={() => onRegenerate(item)}
                     disabled={!canRegenerate}
                     title={
-                      canRegenerate ? 'Regenerate' : `Available on ${nextRegenDate?.toLocaleDateString('en-GB')}`
+                      canRegenerate
+                        ? 'Regenerate'
+                        : `Available on ${nextRegenDate?.toLocaleDateString('en-GB')}`
                     }
                   >
                     <RefreshCw size={12} />
