@@ -292,6 +292,16 @@ function StatusChart({
     </Card>
   );
 }
+const PLATFORM_BRAND_GRADIENTS: Record<string, [string, string]> = {
+  'website': ['#465FFF', '#7592FF'],
+  'instagram': ['#833AB4', '#F77737'],
+  'telegram': ['#2AABEE', '#229ED9'],
+  'facebook': ['#1877F2', '#0C63D4'],
+  'whatsapp': ['#25D366', '#128C7E'],
+  'youtube': ['#FF0000', '#CC0000'],
+  'google reviews': ['#4285F4', '#34A853'],
+  'google': ['#4285F4', '#34A853'],
+};
 
 function PlatformChart({
   channels,
@@ -309,30 +319,56 @@ function PlatformChart({
     return Object.entries(counts);
   }, [channels]);
 
-  const options: ApexOptions = {
-    colors: [BRAND],
-    chart: {
-      fontFamily: 'Outfit, sans-serif',
-      type: 'bar',
-      height: 230,
-      toolbar: { show: false },
+const gradients = rows.map(
+  ([label]) => PLATFORM_BRAND_GRADIENTS[label.toLowerCase()] || [BRAND, BRAND],
+);
+const colors = gradients.map(([from]) => from);
+const gradientToColors = gradients.map(([, to]) => to);
+
+const options: ApexOptions = {
+  colors,
+  fill: {
+    type: 'gradient',
+    gradient: {
+      type: 'vertical',
+      shadeIntensity: 0,
+      gradientToColors,
+      inverseColors: false,
+      opacityFrom: 1,
+      opacityTo: 1,
+      stops: [0, 100],
     },
-    plotOptions: { bar: { borderRadius: 5, columnWidth: '42%', borderRadiusApplication: 'end' } },
-    dataLabels: { enabled: false },
-    grid: {
-      borderColor: isDark ? '#1D2939' : '#F2F4F7',
-      yaxis: { lines: { show: true } },
-      xaxis: { lines: { show: false } },
+  },
+  chart: {
+    fontFamily: 'Outfit, sans-serif',
+    type: 'bar',
+    height: 230,
+    toolbar: { show: false },
+  },
+  plotOptions: {
+    bar: {
+      borderRadius: 5,
+      columnWidth: '42%',
+      borderRadiusApplication: 'end',
+      distributed: true,
     },
-    xaxis: {
-      categories: rows.map(([label]) => label),
-      axisBorder: { show: false },
-      axisTicks: { show: false },
-      labels: { style: { colors: isDark ? '#98A2B3' : '#667085' } },
-    },
-    yaxis: { labels: { style: { colors: isDark ? '#98A2B3' : '#667085' } } },
-    tooltip: { theme: isDark ? 'dark' : 'light' },
-  };
+  },
+  legend: { show: false },
+  dataLabels: { enabled: false },
+  grid: {
+    borderColor: isDark ? '#1D2939' : '#F2F4F7',
+    yaxis: { lines: { show: true } },
+    xaxis: { lines: { show: false } },
+  },
+  xaxis: {
+    categories: rows.map(([label]) => label),
+    axisBorder: { show: false },
+    axisTicks: { show: false },
+    labels: { style: { colors: isDark ? '#98A2B3' : '#667085' }, rotate: 0 },
+  },
+  yaxis: { labels: { style: { colors: isDark ? '#98A2B3' : '#667085' } } },
+  tooltip: { theme: isDark ? 'dark' : 'light' },
+};
 
   return (
     <Card className='p-5 sm:p-6'>
@@ -898,34 +934,7 @@ function ChannelsInner() {
           </div>
         )}
 
-        <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 md:gap-6'>
-          <MetricCard
-            label='Active channels'
-            value={active.length}
-            sub={`${channels.length} total`}
-            icon={<CheckCircle2 className='h-6 w-6' />}
-            tone='success'
-          />
-          <MetricCard
-            label='Offline channels'
-            value={offline.length}
-            sub='paused'
-            icon={<WifiOff className='h-6 w-6' />}
-            tone={offline.length > 0 ? 'warning' : 'primary'}
-          />
-          <MetricCard
-            label='Messages'
-            value={overview?.total_messages ?? 0}
-            sub={`${overview?.open_conversations ?? 0} open chats`}
-            icon={<MessageCircle className='h-6 w-6' />}
-          />
-          <MetricCard
-            label='AI latency'
-            value={formatLatency(overview?.avg_latency_ms)}
-            sub='average response'
-            icon={<Plug className='h-6 w-6' />}
-          />
-        </div>
+    
 
         <div className='mt-6 grid grid-cols-1 gap-6 xl:grid-cols-12'>
           <div className='xl:col-span-5'>
