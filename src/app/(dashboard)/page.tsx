@@ -1550,26 +1550,7 @@ ${about}`.trim();
           </div>
         </div>
 
-        <div className='mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3'>
-          <MetricCard
-            label='Returning Users'
-            value={returningTotal}
-            sub='repeat contacts'
-            icon={<RefreshCw className='h-6 w-6' />}
-          />
-          <MetricCard
-            label='AI Errors'
-            value={overview?.total_errors ?? 0}
-            sub='total'
-            icon={<Bot className='h-6 w-6' />}
-          />
-          <MetricCard
-            label='Complaints'
-            value={overview?.total_complaints ?? 0}
-            sub='total'
-            icon={<CircleHelp className='h-6 w-6' />}
-          />
-        </div>
+        
 
         <div className='mt-6 grid grid-cols-1 gap-6 xl:grid-cols-12'>
           <div className='xl:col-span-7'>
