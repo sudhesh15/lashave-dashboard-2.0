@@ -505,6 +505,21 @@ function ConfirmModal({
   );
 }
 
+const logos: Record<string, string> = {
+  facebook: '/brand-logo/facebook.png',
+  google: '/brand-logo/google-map.png',
+  google_maps: '/brand-logo/google-map.png',
+  google_map: '/brand-logo/google-map.png',
+  google_review: '/brand-logo/google-map.png',
+  google_reviews: '/brand-logo/google-map.png',
+  instagram: '/brand-logo/instagram.png',
+  meta: '/brand-logo/meta.png',
+  telegram: '/brand-logo/telegram.png',
+  website: '/brand-logo/website.png',
+  whatsapp: '/brand-logo/whatsapp.png',
+  youtube: '/brand-logo/youtube.png',
+};
+
 function ChannelsInner() {
   const { isDark } = useTheme();
   const searchParams = useSearchParams();
@@ -838,7 +853,9 @@ function ChannelsInner() {
           currentLocationId={locationTarget.location_id ?? null}
           onClose={() => setLocationTarget(null)}
           onSaved={(loc) => {
-            setSuccess(`Now managing reviews for ${loc.location_name || 'the selected location'}.`);
+            setSuccess(
+              `Now managing reviews for ${loc.location_name || 'the selected location'}.`,
+            );
             void load();
           }}
         />
@@ -900,12 +917,15 @@ function ChannelsInner() {
       <div className='mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 lg:px-8'>
         <div className='mb-6 flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between'>
           <div>
-            <p className='text-theme-sm font-medium text-brand-500 dark:text-brand-400'>Channels</p>
+            <p className='text-theme-sm font-medium text-brand-500 dark:text-brand-400'>
+              Channels
+            </p>
             <h1 className='mt-1 text-title-sm font-bold text-gray-800 dark:text-white/90'>
               Channel management
             </h1>
             <p className='mt-2 max-w-2xl text-theme-sm text-gray-500 dark:text-gray-400'>
-              Connect, monitor, pause, and configure customer communication channels.
+              Connect, monitor, pause, and configure customer communication
+              channels.
             </p>
           </div>
           <button
@@ -922,7 +942,9 @@ function ChannelsInner() {
           <div className='mb-6 flex items-center gap-3 rounded-xl border border-success-200 bg-success-50 px-4 py-3 text-theme-sm font-medium text-success-700 dark:border-success-500/20 dark:bg-success-500/10 dark:text-success-500'>
             <Check className='h-4 w-4' />
             <span className='flex-1'>{success}</span>
-            <button type='button' onClick={() => setSuccess('')}>Close</button>
+            <button type='button' onClick={() => setSuccess('')}>
+              Close
+            </button>
           </div>
         )}
 
@@ -930,15 +952,19 @@ function ChannelsInner() {
           <div className='mb-6 flex items-start gap-3 rounded-xl border border-error-200 bg-error-50 px-4 py-3 text-theme-sm font-medium text-error-700 dark:border-error-500/20 dark:bg-error-500/10 dark:text-error-500'>
             <AlertTriangle className='mt-0.5 h-4 w-4 shrink-0' />
             <span className='flex-1'>{err}</span>
-            <button type='button' onClick={() => setErr('')}>Close</button>
+            <button type='button' onClick={() => setErr('')}>
+              Close
+            </button>
           </div>
         )}
 
-    
-
         <div className='mt-6 grid grid-cols-1 gap-6 xl:grid-cols-12'>
           <div className='xl:col-span-5'>
-            <StatusChart activeCount={active.length} offlineCount={offline.length} isDark={isDark} />
+            <StatusChart
+              activeCount={active.length}
+              offlineCount={offline.length}
+              isDark={isDark}
+            />
           </div>
           <div className='xl:col-span-7'>
             <PlatformChart channels={channels} isDark={isDark} />
@@ -948,9 +974,12 @@ function ChannelsInner() {
         <Card className='mt-6 overflow-hidden'>
           <div className='flex flex-col gap-2 border-b border-gray-100 px-5 py-5 dark:border-white/[0.05] sm:flex-row sm:items-center sm:justify-between sm:px-6'>
             <div>
-              <h3 className='text-base font-semibold text-gray-800 dark:text-white/90'>Connected Channels</h3>
+              <h3 className='text-base font-semibold text-gray-800 dark:text-white/90'>
+                Connected Channels
+              </h3>
               <p className='mt-1 text-theme-sm text-gray-500 dark:text-gray-400'>
-                Manage account status, verification, settings, and disconnect actions.
+                Manage account status, verification, settings, and disconnect
+                actions.
               </p>
             </div>
             <div className='text-theme-sm font-medium text-gray-500 dark:text-gray-400'>
@@ -981,8 +1010,18 @@ function ChannelsInner() {
                   </colgroup>
                   <thead className='border-b border-gray-100 dark:border-white/[0.05]'>
                     <tr>
-                      {['Channel', 'Platform', 'Status', 'Token', 'Updated', 'Actions'].map((header) => (
-                        <th key={header} className='px-5 py-3 text-left text-base font-medium text-gray-500 dark:text-gray-400'>
+                      {[
+                        'Channel',
+                        'Platform',
+                        'Status',
+                        'Token',
+                        'Updated',
+                        'Actions',
+                      ].map((header) => (
+                        <th
+                          key={header}
+                          className='px-5 py-3 text-left text-base font-medium text-gray-500 dark:text-gray-400'
+                        >
                           {header}
                         </th>
                       ))}
@@ -991,23 +1030,34 @@ function ChannelsInner() {
                   <tbody className='divide-y divide-gray-100 dark:divide-white/[0.05]'>
                     {loading ? (
                       <tr>
-                        <td colSpan={6} className='px-5 py-14 text-center text-theme-sm text-gray-500 dark:text-gray-400'>
+                        <td
+                          colSpan={6}
+                          className='px-5 py-14 text-center text-theme-sm text-gray-500 dark:text-gray-400'
+                        >
                           Loading channels
                         </td>
                       </tr>
                     ) : channels.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className='px-5 py-14 text-center text-theme-sm text-gray-500 dark:text-gray-400'>
+                        <td
+                          colSpan={6}
+                          className='px-5 py-14 text-center text-theme-sm text-gray-500 dark:text-gray-400'
+                        >
                           No channels connected yet
                         </td>
                       </tr>
                     ) : (
                       pagedChannels.map((channel) => {
                         const token = getTokenStatus(channel);
-                        const isGoogle = channel.platform?.toLowerCase().trim() === 'google';
-                        const isWebsite = channel.platform?.toLowerCase().trim() === 'website';
+                        const isGoogle =
+                          channel.platform?.toLowerCase().trim() === 'google';
+                        const isWebsite =
+                          channel.platform?.toLowerCase().trim() === 'website';
                         return (
-                          <tr key={channel.id} className='transition hover:bg-gray-50 dark:hover:bg-white/[0.02]'>
+                          <tr
+                            key={channel.id}
+                            className='transition hover:bg-gray-50 dark:hover:bg-white/[0.02]'
+                          >
                             <td className='px-5 py-3 sm:px-6'>
                               <div className='flex items-center gap-3'>
                                 <div className='flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-100 ring-1 ring-gray-200 dark:bg-gray-800 dark:ring-gray-700'>
@@ -1020,9 +1070,12 @@ function ChannelsInner() {
                                   />
                                 </div>
                                 <div className='min-w-0'>
-                                  <p className='truncate text-theme-sm font-medium text-gray-800 dark:text-white/90'>{channelName(channel)}</p>
+                                  <p className='truncate text-theme-sm font-medium text-gray-800 dark:text-white/90'>
+                                    {channelName(channel)}
+                                  </p>
                                   <p className='mt-1 truncate text-theme-xs text-gray-500 dark:text-gray-400'>
-                                    {channel.location_name || channel.platform_account_id}
+                                    {channel.location_name ||
+                                      channel.platform_account_id}
                                   </p>
                                 </div>
                               </div>
@@ -1031,46 +1084,61 @@ function ChannelsInner() {
                               {platformLabel(channel.platform)}
                             </td>
                             <td className='px-6 py-3'>
-                              <span className={`inline-flex rounded-full px-2.5 py-1 text-theme-xs font-medium ${
-                                channel.is_active
-                                  ? 'bg-success-50 text-success-600 dark:bg-success-500/15 dark:text-success-500'
-                                  : 'bg-warning-50 text-warning-600 dark:bg-warning-500/15 dark:text-orange-400'
-                              }`}>
+                              <span
+                                className={`inline-flex rounded-full px-2.5 py-1 text-theme-xs font-medium ${
+                                  channel.is_active
+                                    ? 'bg-success-50 text-success-600 dark:bg-success-500/15 dark:text-success-500'
+                                    : 'bg-warning-50 text-warning-600 dark:bg-warning-500/15 dark:text-orange-400'
+                                }`}
+                              >
                                 {channel.is_active ? 'Active' : 'Offline'}
                               </span>
                             </td>
                             <td className='px-6 py-3'>
-                              <span className={`inline-flex rounded-full px-2.5 py-1 text-theme-xs font-medium ${
-                                token?.status === 'expired'
-                                  ? 'bg-error-50 text-error-600 dark:bg-error-500/15 dark:text-error-500'
-                                  : token?.status === 'expiring'
-                                    ? 'bg-warning-50 text-warning-600 dark:bg-warning-500/15 dark:text-orange-400'
-                                    : 'bg-gray-100 text-gray-700 dark:bg-white/5 dark:text-white/80'
-                              }`}>
-                                {token ? (token.status === 'ok' ? `${token.daysLeft} days left` : token.status) : 'Not applicable'}
+                              <span
+                                className={`inline-flex rounded-full px-2.5 py-1 text-theme-xs font-medium ${
+                                  token?.status === 'expired'
+                                    ? 'bg-error-50 text-error-600 dark:bg-error-500/15 dark:text-error-500'
+                                    : token?.status === 'expiring'
+                                      ? 'bg-warning-50 text-warning-600 dark:bg-warning-500/15 dark:text-orange-400'
+                                      : 'bg-gray-100 text-gray-700 dark:bg-white/5 dark:text-white/80'
+                                }`}
+                              >
+                                {token
+                                  ? token.status === 'ok'
+                                    ? `${token.daysLeft} days left`
+                                    : token.status
+                                  : 'Not applicable'}
                               </span>
                             </td>
                             <td className='px-6 py-3 text-theme-sm text-gray-500 dark:text-gray-400'>
-                              {formatDate(channel.updated_at || channel.created_at)}
+                              {formatDate(
+                                channel.updated_at || channel.created_at,
+                              )}
                             </td>
                             <td className='px-6 py-3'>
                               <div className='flex items-center gap-2'>
                                 <button
                                   type='button'
                                   onClick={() => {
-                                    void handleVerify(channel.id).then((result) => {
-                                      if (result.ok) {
-                                        setErr('');
-                                        setSuccess(
-                                          result.account_name
-                                            ? `Verified ${result.account_name}.`
-                                            : 'Channel verified.',
+                                    void handleVerify(channel.id).then(
+                                      (result) => {
+                                        if (result.ok) {
+                                          setErr('');
+                                          setSuccess(
+                                            result.account_name
+                                              ? `Verified ${result.account_name}.`
+                                              : 'Channel verified.',
+                                          );
+                                          return;
+                                        }
+                                        setSuccess('');
+                                        setErr(
+                                          result.error ||
+                                            'Verification failed.',
                                         );
-                                        return;
-                                      }
-                                      setSuccess('');
-                                      setErr(result.error || 'Verification failed.');
-                                    });
+                                      },
+                                    );
                                   }}
                                   className='inline-flex h-8 items-center gap-2 whitespace-nowrap rounded-lg bg-brand-500 px-3 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-brand-600'
                                 >
@@ -1078,10 +1146,18 @@ function ChannelsInner() {
                                 </button>
                                 <button
                                   type='button'
-                                  onClick={() => channel.is_active ? setPauseTarget(channel) : void handleToggle(channel.id, true)}
+                                  onClick={() =>
+                                    channel.is_active
+                                      ? setPauseTarget(channel)
+                                      : void handleToggle(channel.id, true)
+                                  }
                                   className='inline-flex h-8 items-center gap-2 whitespace-nowrap rounded-lg border border-gray-200 bg-white px-3 text-theme-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-white/[0.03]'
                                 >
-                                  {channel.is_active ? <PauseCircle className='h-4 w-4' /> : <Power className='h-4 w-4' />}
+                                  {channel.is_active ? (
+                                    <PauseCircle className='h-4 w-4' />
+                                  ) : (
+                                    <Power className='h-4 w-4' />
+                                  )}
                                   {channel.is_active ? 'Pause' : 'Activate'}
                                 </button>
                                 {isGoogle && (
@@ -1096,7 +1172,9 @@ function ChannelsInner() {
                                 {isWebsite && (
                                   <button
                                     type='button'
-                                    onClick={() => router.push('/customize-chat')}
+                                    onClick={() =>
+                                      router.push('/customize-chat')
+                                    }
                                     className='inline-flex h-8 items-center gap-2 whitespace-nowrap rounded-lg bg-brand-500 px-3 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-brand-600'
                                   >
                                     Manage
@@ -1105,7 +1183,13 @@ function ChannelsInner() {
                                 <div className='relative'>
                                   <button
                                     type='button'
-                                    onClick={() => setOpenMenuId(openMenuId === channel.id ? null : channel.id)}
+                                    onClick={() =>
+                                      setOpenMenuId(
+                                        openMenuId === channel.id
+                                          ? null
+                                          : channel.id,
+                                      )
+                                    }
                                     className='flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03]'
                                   >
                                     <MoreVertical className='h-4 w-4' />
@@ -1147,12 +1231,19 @@ function ChannelsInner() {
                 </table>
               </div>
             </div>
-            <TablePagination page={channelsPage} totalItems={channels.length} onPageChange={setChannelsPage} />
+            <TablePagination
+              page={channelsPage}
+              totalItems={channels.length}
+              onPageChange={setChannelsPage}
+            />
           </div>
         </Card>
         {(available.length > 0 || !websiteIsConnected) && (
           <Card className='mt-6 p-5 sm:p-6'>
-            <ChartHeader title='Add Channel' subtitle='Connect another source using the approved channel setup flow' />
+            <ChartHeader
+              title='Add Channel'
+              subtitle='Connect another source using the approved channel setup flow'
+            />
             <div className='grid gap-4 md:grid-cols-2 xl:grid-cols-3'>
               {!websiteIsConnected && (
                 <button
@@ -1163,24 +1254,52 @@ function ChannelsInner() {
                   <div className='mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'>
                     <Globe2 className='h-5 w-5' />
                   </div>
-                  <h4 className='text-theme-sm font-semibold text-gray-800 dark:text-white/90'>Website Chatbot</h4>
-                  <p className='mt-1 text-theme-sm text-gray-500 dark:text-gray-400'>Add AI chat to your website using one script tag.</p>
+                  <h4 className='text-theme-sm font-semibold text-gray-800 dark:text-white/90'>
+                    Website Chatbot
+                  </h4>
+                  <p className='mt-1 text-theme-sm text-gray-500 dark:text-gray-400'>
+                    Add AI chat to your website using one script tag.
+                  </p>
                 </button>
               )}
-              {available.map((platform) => (
-                <button
-                  key={platform}
-                  type='button'
-                  onClick={() => openConnect(platform)}
-                  className='rounded-xl border border-gray-200 p-5 text-left transition hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/[0.03]'
-                >
-                  <div className='mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'>
-                    <Plug className='h-5 w-5' />
-                  </div>
-                  <h4 className='text-theme-sm font-semibold text-gray-800 dark:text-white/90'>{platformLabel(platform)}</h4>
-                  <p className='mt-1 text-theme-sm text-gray-500 dark:text-gray-400'>Connect and manage this channel from Lashvae.</p>
-                </button>
-              ))}
+              {available.map((platform) => {
+                const platformKey = platform
+                  .toLowerCase()
+                  .trim()
+                  .replace(/[\s-]+/g, '_');
+                const logo = logos[platformKey];
+
+                return (
+                  <button
+                    key={platform}
+                    type='button'
+                    onClick={() => openConnect(platform)}
+                    className='rounded-xl border border-gray-200 p-5 text-left transition hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/[0.03]'
+                  >
+                    <div className='mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-gray-100 p-2 dark:bg-gray-800'>
+                      {logo ? (
+                        <Image
+                          src={logo}
+                          alt={`${platformLabel(platform)} logo`}
+                          width={28}
+                          height={28}
+                          className='h-7 w-7 object-contain'
+                        />
+                      ) : (
+                        <Plug className='h-5 w-5 text-gray-700 dark:text-gray-300' />
+                      )}
+                    </div>
+
+                    <h4 className='text-theme-sm font-semibold text-gray-800 dark:text-white/90'>
+                      {platformLabel(platform)}
+                    </h4>
+
+                    <p className='mt-1 text-theme-sm text-gray-500 dark:text-gray-400'>
+                      Connect and manage this channel from Lashvae.
+                    </p>
+                  </button>
+                );
+              })}
             </div>
           </Card>
         )}
