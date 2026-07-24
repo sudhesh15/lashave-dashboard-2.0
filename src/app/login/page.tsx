@@ -128,7 +128,7 @@ function Field({
           type={isPassword && visible ? 'text' : type}
           placeholder={placeholder}
           autoComplete={autoComplete}
-          className='h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-theme-sm text-gray-800 shadow-theme-xs outline-none placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800'
+          className='h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-theme-sm text-gray-800 shadow-theme-xs outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-3 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-blue-400'
         />
         {isPassword && (
           <button
@@ -180,7 +180,7 @@ function SubmitButton({
     <button
       type='submit'
       disabled={loading || disabled}
-      className='flex w-full items-center justify-center rounded-lg bg-brand-500 px-4 py-3 text-theme-sm font-medium text-white shadow-theme-xs transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-60'
+      className='flex w-full items-center justify-center rounded-lg bg-blue-600 px-4 py-3 text-theme-sm font-medium text-white shadow-theme-xs transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:focus:ring-offset-gray-900'
     >
       {loading ? 'Please wait...' : children}
     </button>
@@ -487,249 +487,259 @@ function AuthPageInner() {
       <div className='flex min-h-screen flex-col lg:flex-row-reverse'>
         <section className='flex w-full flex-1 items-center justify-center px-4 py-8 sm:px-6 lg:w-1/2 lg:px-10'>
           <div className='w-full max-w-md'>
-        <div className='mb-8 text-center sm:text-left'>
-          <h1 className='mb-2 text-title-sm font-semibold text-gray-800 dark:text-white/90 sm:text-title-md'>
-            {title}
-          </h1>
-          <p className='text-theme-sm text-gray-500 dark:text-gray-400'>
-            {subtitle}
-          </p>
-        </div>
+            <div className='mb-8 text-center sm:text-left'>
+              <h1 className='mb-2 text-title-sm font-semibold text-gray-800 dark:text-white/90 sm:text-title-md'>
+                {title}
+              </h1>
+              <p className='text-theme-sm text-gray-500 dark:text-gray-400'>
+                {subtitle}
+              </p>
+            </div>
 
-        {showTabs && (
-          <div className='mb-6 grid grid-cols-2 gap-2 rounded-lg bg-gray-100 p-1 dark:bg-white/[0.05]'>
-            {(['login', 'signup'] as const).map((item) => (
-              <button
-                key={item}
-                type='button'
-                onClick={() => {
-                  setTab(item);
-                  go(item);
-                }}
-                className={`rounded-md px-3 py-2.5 text-theme-sm font-medium transition ${
-                  tab === item
-                    ? 'bg-white text-brand-500 shadow-theme-xs dark:bg-gray-900 dark:text-brand-400'
-                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-                }`}
-              >
-                {item === 'login' ? 'Sign In' : 'Sign Up'}
-              </button>
-            ))}
-          </div>
-        )}
+            {showTabs && (
+              <div className='mb-6 grid grid-cols-2 gap-2 rounded-lg bg-gray-100 p-1 dark:bg-white/[0.05]'>
+                {(['login', 'signup'] as const).map((item) => (
+                  <button
+                    key={item}
+                    type='button'
+                    onClick={() => {
+                      setTab(item);
+                      go(item);
+                    }}
+                    className={`rounded-md px-3 py-2.5 text-theme-sm font-medium transition ${
+                      tab === item
+                        ? 'bg-white text-blue-600 shadow-theme-xs dark:bg-gray-900 dark:text-blue-400'
+                        : 'text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400'
+                    }`}
+                  >
+                    {item === 'login' ? 'Sign In' : 'Sign Up'}
+                  </button>
+                ))}
+              </div>
+            )}
 
-        <div className='space-y-5'>
-          <Alert message={err} />
-          <Alert message={info} type='success' />
+            <div className='space-y-5'>
+              <Alert message={err} />
+              <Alert message={info} type='success' />
 
-          {screen === 'login' && (
-            <form className='space-y-6' onSubmit={submit(doLogin)}>
-              <Field
-                label='Email'
-                type='email'
-                value={lEmail}
-                onChange={setLEmail}
-                placeholder='Enter your email'
-                autoComplete='email'
-              />
-              <Field
-                label='Password'
-                type='password'
-                value={lPass}
-                onChange={setLPass}
-                placeholder='Enter your password'
-                autoComplete='current-password'
-              />
-              <div className='flex justify-end'>
+              {screen === 'login' && (
+                <form className='space-y-6' onSubmit={submit(doLogin)}>
+                  <Field
+                    label='Email'
+                    type='email'
+                    value={lEmail}
+                    onChange={setLEmail}
+                    placeholder='Enter your email'
+                    autoComplete='email'
+                  />
+                  <Field
+                    label='Password'
+                    type='password'
+                    value={lPass}
+                    onChange={setLPass}
+                    placeholder='Enter your password'
+                    autoComplete='current-password'
+                  />
+                  <div className='flex justify-end'>
+                    <button
+                      type='button'
+                      onClick={() => go('forgot')}
+                      className='text-theme-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300'
+                    >
+                      Forgot password?
+                    </button>
+                  </div>
+                  <SubmitButton loading={busy}>Sign In</SubmitButton>
+                </form>
+              )}
+
+              {screen === 'signup' && (
+                <form className='space-y-5' onSubmit={submit(doSignup)}>
+                  <div className='grid grid-cols-1 gap-5 sm:grid-cols-2'>
+                    <Field
+                      label='First Name'
+                      value={sFname}
+                      onChange={setSFname}
+                      placeholder='Enter first name'
+                    />
+                    <Field
+                      label='Last Name'
+                      value={sLname}
+                      onChange={setSLname}
+                      placeholder='Enter last name'
+                    />
+                  </div>
+                  <Field
+                    label='Email'
+                    type='email'
+                    value={sEmail}
+                    onChange={setSEmail}
+                    placeholder='Enter your email'
+                    autoComplete='email'
+                  />
+                  <Field
+                    label='Password'
+                    type='password'
+                    value={sPass}
+                    onChange={setSPass}
+                    placeholder='Enter your password'
+                    autoComplete='new-password'
+                  />
+                  <Field
+                    label='Confirm Password'
+                    type='password'
+                    value={sConfirm}
+                    onChange={setSConfirm}
+                    placeholder='Confirm your password'
+                    autoComplete='new-password'
+                  />
+                  <label className='flex items-start gap-3 text-theme-sm text-gray-500 dark:text-gray-400'>
+                    <input
+                      type='checkbox'
+                      checked={agreeTerms}
+                      onChange={(event) => setAgreeTerms(event.target.checked)}
+                      className='mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500'
+                    />
+                    <span>
+                      I agree to the{' '}
+                      <a
+                        href='https://lashvae.com/terms'
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        className='text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300'
+                      >
+                        Terms and Conditions
+                      </a>{' '}
+                      and{' '}
+                      <a
+                        href='https://lashvae.com/privacy-policy'
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        className='text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300'
+                      >
+                        Privacy Policy
+                      </a>
+                      .
+                    </span>
+                  </label>
+                  <SubmitButton loading={busy} disabled={!agreeTerms}>
+                    Sign Up
+                  </SubmitButton>
+                </form>
+              )}
+
+              {screen === 'signup-otp' && (
+                <form
+                  className='space-y-5'
+                  onSubmit={submit(doVerifySignupOTP)}
+                >
+                  <OtpInput value={signupOTP} onChange={setSignupOTP} />
+                  <div className='text-center text-theme-sm text-gray-500 dark:text-gray-400'>
+                    {signupTimer.done ? (
+                      <button
+                        type='button'
+                        onClick={() => void resendSignupOTP()}
+                        className='font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300'
+                      >
+                        Resend code
+                      </button>
+                    ) : (
+                      <>
+                        Resend in 0:{String(signupTimer.secs).padStart(2, '0')}
+                      </>
+                    )}
+                  </div>
+                  <SubmitButton loading={busy}>Verify Account</SubmitButton>
+                </form>
+              )}
+
+              {screen === 'forgot' && (
+                <form className='space-y-6' onSubmit={submit(doForgot)}>
+                  <Field
+                    label='Email'
+                    type='email'
+                    value={fEmail}
+                    onChange={setFEmail}
+                    placeholder='Enter your email'
+                    autoComplete='email'
+                  />
+                  <SubmitButton loading={busy}>Send Reset Code</SubmitButton>
+                </form>
+              )}
+
+              {screen === 'forgot-otp' && (
+                <form
+                  className='space-y-5'
+                  onSubmit={submit(doVerifyForgotOTP)}
+                >
+                  <OtpInput value={forgotOTP} onChange={setForgotOTP} />
+                  <div className='text-center text-theme-sm text-gray-500 dark:text-gray-400'>
+                    {forgotTimer.done ? (
+                      <button
+                        type='button'
+                        onClick={() => void resendForgotOTP()}
+                        className='font-medium text-brand-500 hover:text-brand-600 dark:text-brand-400'
+                      >
+                        Resend code
+                      </button>
+                    ) : (
+                      <>
+                        Resend in 0:{String(forgotTimer.secs).padStart(2, '0')}
+                      </>
+                    )}
+                  </div>
+                  <SubmitButton loading={busy}>Verify Code</SubmitButton>
+                </form>
+              )}
+
+              {screen === 'new-pass' && (
+                <form className='space-y-6' onSubmit={submit(doResetPassword)}>
+                  <Field
+                    label='New Password'
+                    type='password'
+                    value={newPass}
+                    onChange={setNewPass}
+                    placeholder='Enter new password'
+                    autoComplete='new-password'
+                  />
+                  <Field
+                    label='Confirm New Password'
+                    type='password'
+                    value={newPassConfirm}
+                    onChange={setNewPassConfirm}
+                    placeholder='Confirm new password'
+                    autoComplete='new-password'
+                  />
+                  <SubmitButton loading={busy}>Update Password</SubmitButton>
+                </form>
+              )}
+
+              {screen === 'success' && (
                 <button
                   type='button'
-                  onClick={() => go('forgot')}
-                  className='text-theme-sm font-medium text-brand-500 hover:text-brand-600 dark:text-brand-400'
+                  onClick={() => {
+                    setTab('login');
+                    go('login');
+                  }}
+                  className='flex w-full items-center justify-center rounded-lg bg-brand-500 px-4 py-3 text-theme-sm font-medium text-white shadow-theme-xs transition hover:bg-brand-600'
                 >
-                  Forgot password?
+                  Back to Sign In
                 </button>
-              </div>
-              <SubmitButton loading={busy}>Sign In</SubmitButton>
-            </form>
-          )}
+              )}
+            </div>
 
-          {screen === 'signup' && (
-            <form className='space-y-5' onSubmit={submit(doSignup)}>
-              <div className='grid grid-cols-1 gap-5 sm:grid-cols-2'>
-                <Field
-                  label='First Name'
-                  value={sFname}
-                  onChange={setSFname}
-                  placeholder='Enter first name'
-                />
-                <Field
-                  label='Last Name'
-                  value={sLname}
-                  onChange={setSLname}
-                  placeholder='Enter last name'
-                />
-              </div>
-              <Field
-                label='Email'
-                type='email'
-                value={sEmail}
-                onChange={setSEmail}
-                placeholder='Enter your email'
-                autoComplete='email'
-              />
-              <Field
-                label='Password'
-                type='password'
-                value={sPass}
-                onChange={setSPass}
-                placeholder='Enter your password'
-                autoComplete='new-password'
-              />
-              <Field
-                label='Confirm Password'
-                type='password'
-                value={sConfirm}
-                onChange={setSConfirm}
-                placeholder='Confirm your password'
-                autoComplete='new-password'
-              />
-              <label className='flex items-start gap-3 text-theme-sm text-gray-500 dark:text-gray-400'>
-                <input
-                  type='checkbox'
-                  checked={agreeTerms}
-                  onChange={(event) => setAgreeTerms(event.target.checked)}
-                  className='mt-1 h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500'
-                />
-                <span>
-                  I agree to the{' '}
-                  <a
-                    href='https://lashvae.com/terms'
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    className='text-brand-500 hover:text-brand-600 dark:text-brand-400'
-                  >
-                    Terms and Conditions
-                  </a>{' '}
-                  and{' '}
-                  <a
-                    href='https://lashvae.com/privacy-policy'
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    className='text-brand-500 hover:text-brand-600 dark:text-brand-400'
-                  >
-                    Privacy Policy
-                  </a>
-                  .
-                </span>
-              </label>
-              <SubmitButton loading={busy} disabled={!agreeTerms}>
-                Sign Up
-              </SubmitButton>
-            </form>
-          )}
-
-          {screen === 'signup-otp' && (
-            <form className='space-y-5' onSubmit={submit(doVerifySignupOTP)}>
-              <OtpInput value={signupOTP} onChange={setSignupOTP} />
-              <div className='text-center text-theme-sm text-gray-500 dark:text-gray-400'>
-                {signupTimer.done ? (
-                  <button
-                    type='button'
-                    onClick={() => void resendSignupOTP()}
-                    className='font-medium text-brand-500 hover:text-brand-600 dark:text-brand-400'
-                  >
-                    Resend code
-                  </button>
-                ) : (
-                  <>Resend in 0:{String(signupTimer.secs).padStart(2, '0')}</>
-                )}
-              </div>
-              <SubmitButton loading={busy}>Verify Account</SubmitButton>
-            </form>
-          )}
-
-          {screen === 'forgot' && (
-            <form className='space-y-6' onSubmit={submit(doForgot)}>
-              <Field
-                label='Email'
-                type='email'
-                value={fEmail}
-                onChange={setFEmail}
-                placeholder='Enter your email'
-                autoComplete='email'
-              />
-              <SubmitButton loading={busy}>Send Reset Code</SubmitButton>
-            </form>
-          )}
-
-          {screen === 'forgot-otp' && (
-            <form className='space-y-5' onSubmit={submit(doVerifyForgotOTP)}>
-              <OtpInput value={forgotOTP} onChange={setForgotOTP} />
-              <div className='text-center text-theme-sm text-gray-500 dark:text-gray-400'>
-                {forgotTimer.done ? (
-                  <button
-                    type='button'
-                    onClick={() => void resendForgotOTP()}
-                    className='font-medium text-brand-500 hover:text-brand-600 dark:text-brand-400'
-                  >
-                    Resend code
-                  </button>
-                ) : (
-                  <>Resend in 0:{String(forgotTimer.secs).padStart(2, '0')}</>
-                )}
-              </div>
-              <SubmitButton loading={busy}>Verify Code</SubmitButton>
-            </form>
-          )}
-
-          {screen === 'new-pass' && (
-            <form className='space-y-6' onSubmit={submit(doResetPassword)}>
-              <Field
-                label='New Password'
-                type='password'
-                value={newPass}
-                onChange={setNewPass}
-                placeholder='Enter new password'
-                autoComplete='new-password'
-              />
-              <Field
-                label='Confirm New Password'
-                type='password'
-                value={newPassConfirm}
-                onChange={setNewPassConfirm}
-                placeholder='Confirm new password'
-                autoComplete='new-password'
-              />
-              <SubmitButton loading={busy}>Update Password</SubmitButton>
-            </form>
-          )}
-
-          {screen === 'success' && (
-            <button
-              type='button'
-              onClick={() => {
-                setTab('login');
-                go('login');
-              }}
-              className='flex w-full items-center justify-center rounded-lg bg-brand-500 px-4 py-3 text-theme-sm font-medium text-white shadow-theme-xs transition hover:bg-brand-600'
-            >
-              Back to Sign In
-            </button>
-          )}
-        </div>
-
-        {screen !== 'login' && (
-          <button
-            type='button'
-            onClick={() => {
-              setTab('login');
-              go('login');
-            }}
-            className='mt-6 text-center text-theme-sm font-medium text-gray-500 transition hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-          >
-            Back to Sign In
-          </button>
-        )}
+            {screen !== 'login' && (
+              <button
+                type='button'
+                onClick={() => {
+                  setTab('login');
+                  go('login');
+                }}
+                className='mt-6 text-center text-theme-sm font-medium text-gray-500 transition hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+              >
+                Back to Sign In
+              </button>
+            )}
           </div>
         </section>
 
