@@ -27,10 +27,23 @@ import {
 import dynamic from 'next/dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import { cn } from '@/lib/utils';
 
 const ReactApexChart = dynamic(() => import('react-apexcharts'), {
   ssr: false,
 });
+
+
+type FormFieldProps = {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  onBlur?: () => void;
+  type?: string;
+  placeholder?: string;
+  required?: boolean;
+  error?: string;
+};
 
 type MeResp = {
   user: {
@@ -146,37 +159,35 @@ function FormField({
   label,
   value,
   onChange,
+  onBlur,
   type = 'text',
   placeholder,
-  disabled,
   required,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  type?: string;
-  placeholder?: string;
-  disabled?: boolean;
-  required?: boolean;
-}) {
+  error,
+}: FormFieldProps) {
   return (
     <label className='block'>
       <span className='mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400'>
         {label}
         {required && <span className='text-error-500'> *</span>}
       </span>
-      <Input
+      <input
         type={type}
         value={value}
-        placeholder={placeholder}
-        disabled={disabled}
         onChange={(event) => onChange(event.target.value)}
-        className='h-11 rounded-lg border-gray-300 shadow-theme-xs focus-visible:border-brand-300 focus-visible:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900'
+        onBlur={onBlur}
+        placeholder={placeholder}
+        className={cn(
+          'h-11 w-full rounded-lg border bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:outline-hidden focus:ring-3 dark:bg-gray-900 dark:text-white/90',
+          error
+            ? 'border-error-500 focus:border-error-500 focus:ring-error-500/10'
+            : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10 dark:border-gray-700',
+        )}
       />
+      {error && <p className='mt-1.5 text-xs text-error-500'>{error}</p>}
     </label>
   );
 }
-
 function AlertBox({
   children,
   tone = 'error',
@@ -805,42 +816,110 @@ function SupportPanel() {
   const [agreed, setAgreed] = useState(false);
   const [sending, setSending] = useState(false);
   const [status, setStatus] = useState<'success' | 'error' | null>(null);
-  const [fieldError, setFieldError] = useState('');
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
 
-  const canSubmit = agreed && fullname && email && subject && message && !sending;
+  // Validation rules
+  const validators = {
+    fullname: (value: string) => {
+      const trimmed = value.trim();
+      if (!trimmed) return 'Full name is required.';
+      if (trimmed.length < 2) return 'Name must be at least 2 characters.';
+      if (!/^[A-Za-z\s.'-]+$/.test(trimmed))
+        return "Name can only contain letters, spaces, and . ' -";
+      return '';
+    },
+    email: (value: string) => {
+      const trimmed = value.trim();
+      if (!trimmed) return 'Email is required.';
+      if (!trimmed.includes('@')) return 'Email must contain an @ symbol.';
+      if (!trimmed.includes('.'))
+        return 'Email must contain a domain (e.g. .com).';
+      if (!/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(trimmed))
+        return 'Please enter a valid email (e.g. name@example.com).';
+      return '';
+    },
+    phone: (value: string) => {
+      const trimmed = value.trim();
+      if (!trimmed) return ''; // optional
+      const digitsOnly = trimmed.replace(/[\s\-()+]/g, '');
+      if (!/^\d+$/.test(digitsOnly))
+        return 'Phone can only contain digits, spaces, +, -, (, ).';
+      if (digitsOnly.length < 7) return 'Phone must be at least 7 digits.';
+      if (digitsOnly.length > 15) return 'Phone must be at most 15 digits.';
+      return '';
+    },
+    subject: (value: string) => {
+      if (!value) return 'Please select a subject.';
+      return '';
+    },
+    message: (value: string) => {
+      const trimmed = value.trim();
+      if (!trimmed) return 'Message is required.';
+      if (trimmed.length < 10) return 'Message must be at least 10 characters.';
+      return '';
+    },
+  };
+
+  const validateField = (name: keyof typeof validators, value: string) => {
+    const error = validators[name](value);
+    setErrors((prev) => ({ ...prev, [name]: error }));
+    return error;
+  };
+
+  const validateAll = () => {
+    const newErrors: Record<string, string> = {
+      fullname: validators.fullname(fullname),
+      email: validators.email(email),
+      phone: validators.phone(phone),
+      subject: validators.subject(subject),
+      message: validators.message(message),
+    };
+    setErrors(newErrors);
+    setTouched({
+      fullname: true,
+      email: true,
+      phone: true,
+      subject: true,
+      message: true,
+    });
+    return Object.values(newErrors).every((e) => !e);
+  };
+
+  const handleBlur = (name: keyof typeof validators, value: string) => {
+    setTouched((prev) => ({ ...prev, [name]: true }));
+    validateField(name, value);
+  };
+
+  // Auto-touch on first keystroke + validate live
+  const handleChange = (
+    name: keyof typeof validators,
+    value: string,
+    setter: (v: string) => void,
+  ) => {
+    setter(value);
+    setTouched((prev) => ({ ...prev, [name]: true }));
+    validateField(name, value);
+  };
+
+  const canSubmit = agreed && !sending;
 
   async function handleSubmit() {
-    if (!canSubmit) return;
-    setSending(true);
     setStatus(null);
-    setFieldError('');
+    if (!validateAll()) return;
+    if (!agreed) return;
 
-    const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    const isValidPhone = !phone.trim() || /^[+]?[0-9\s\-()]{7,20}$/.test(phone);
-    const isValidName = /^[A-Za-z\s.'-]+$/.test(fullname.trim()) && fullname.trim().length >= 2;
-
-    if (!isValidName || !isValidEmail || !isValidPhone) {
-      setFieldError(
-        !isValidName
-          ? 'Please enter your full name.'
-          : !isValidEmail
-            ? 'Please enter a valid email address.'
-            : 'Please enter a valid phone number.',
-      );
-      setSending(false);
-      return;
-    }
-
+    setSending(true);
     try {
       await emailjs.send(
         process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
         process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!,
         {
           fullname: fullname.trim(),
-          email,
-          phone,
+          email: email.trim(),
+          phone: phone.trim(),
           subject,
-          message,
+          message: message.trim(),
           to_email: 'dpo@lashvae.com',
         },
         process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!,
@@ -853,7 +932,10 @@ function SupportPanel() {
       setSubject('');
       setMessage('');
       setAgreed(false);
-    } catch {
+      setErrors({});
+      setTouched({});
+    } catch (err) {
+      console.error('EMAILJS_ERROR:', err);
       setStatus('error');
     } finally {
       setSending(false);
@@ -862,44 +944,125 @@ function SupportPanel() {
 
   return (
     <Card className='p-5 lg:p-6'>
-      <SectionHeader title='Support' subtitle='Send a message to the Lashvae team' />
+      <SectionHeader
+        title='Support'
+        subtitle='Send a message to the Lashvae team'
+      />
       <div className='space-y-5'>
-        {fieldError && <AlertBox>{fieldError}</AlertBox>}
-        {status === 'success' && <AlertBox tone='success'>Your message has been sent.</AlertBox>}
-        {status === 'error' && <AlertBox>Unable to send your message. Please try again.</AlertBox>}
+        {status === 'success' && (
+          <AlertBox tone='success'>Your message has been sent.</AlertBox>
+        )}
+        {status === 'error' && (
+          <AlertBox>Unable to send your message. Please try again.</AlertBox>
+        )}
+
         <div className='grid grid-cols-1 gap-5 md:grid-cols-2'>
-          <FormField label='Full Name' value={fullname} onChange={setFullname} placeholder='Enter your full name' required />
-          <FormField label='Email Address' value={email} onChange={setEmail} type='email' placeholder='Enter your email address' required />
-          <FormField label='Phone Number' value={phone} onChange={setPhone} type='tel' placeholder='Enter your phone number' />
+          <FormField
+            label='Full Name'
+            value={fullname}
+            onChange={(v) => handleChange('fullname', v, setFullname)}
+            onBlur={() => handleBlur('fullname', fullname)}
+            placeholder='Enter your full name'
+            required
+            error={touched.fullname ? errors.fullname : ''}
+          />
+
+          <FormField
+            label='Email Address'
+            value={email}
+            onChange={(v) => handleChange('email', v, setEmail)}
+            onBlur={() => handleBlur('email', email)}
+            type='email'
+            placeholder='Enter your email address'
+            required
+            error={touched.email ? errors.email : ''}
+          />
+
+          <FormField
+            label='Phone Number'
+            value={phone}
+            onChange={(v) => handleChange('phone', v, setPhone)}
+            onBlur={() => handleBlur('phone', phone)}
+            type='tel'
+            placeholder='Enter your phone number'
+            error={touched.phone ? errors.phone : ''}
+          />
+
           <label className='block'>
-            <span className='mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400'>Subject <span className='text-error-500'>*</span></span>
+            <span className='mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400'>
+              Subject <span className='text-error-500'>*</span>
+            </span>
             <select
               value={subject}
-              onChange={(event) => setSubject(event.target.value)}
-              className='h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90'
+              onChange={(event) =>
+                handleChange('subject', event.target.value, setSubject)
+              }
+              onBlur={() => handleBlur('subject', subject)}
+              className={cn(
+                'h-11 w-full rounded-lg border bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:outline-hidden focus:ring-3 dark:bg-gray-900 dark:text-white/90',
+                touched.subject && errors.subject
+                  ? 'border-error-500 focus:border-error-500 focus:ring-error-500/10'
+                  : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10 dark:border-gray-700',
+              )}
             >
-              <option value='' disabled>Select a topic</option>
+              <option value='' disabled>
+                Select a topic
+              </option>
               {SUPPORT_SUBJECTS.map((item) => (
-                <option key={item} value={item}>{item}</option>
+                <option key={item} value={item}>
+                  {item}
+                </option>
               ))}
             </select>
+            {touched.subject && errors.subject && (
+              <p className='mt-1.5 text-xs text-error-500'>{errors.subject}</p>
+            )}
           </label>
         </div>
+
         <label className='block'>
-          <span className='mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400'>Your Message <span className='text-error-500'>*</span></span>
+          <span className='mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400'>
+            Your Message <span className='text-error-500'>*</span>
+          </span>
           <Textarea
             value={message}
-            onChange={(event) => setMessage(event.target.value)}
+            onChange={(event) =>
+              handleChange('message', event.target.value, setMessage)
+            }
+            onBlur={() => handleBlur('message', message)}
             placeholder='Tell us about your question or request.'
-            className='min-h-[150px] rounded-lg border-gray-300 shadow-theme-xs focus-visible:border-brand-300 focus-visible:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900'
+            className={cn(
+              'min-h-[150px] rounded-lg shadow-theme-xs dark:bg-gray-900',
+              touched.message && errors.message
+                ? 'border-error-500 focus-visible:border-error-500 focus-visible:ring-error-500/10'
+                : 'border-gray-300 focus-visible:border-brand-300 focus-visible:ring-brand-500/10 dark:border-gray-700',
+            )}
           />
+          {touched.message && errors.message && (
+            <p className='mt-1.5 text-xs text-error-500'>{errors.message}</p>
+          )}
         </label>
+
         <label className='flex items-start gap-3 rounded-xl border border-gray-200 bg-gray-50 p-4 text-theme-sm text-gray-600 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400'>
-          <input type='checkbox' checked={agreed} onChange={(event) => setAgreed(event.target.checked)} className='mt-0.5 h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500/20' />
-          <span>I agree to the Privacy Policy and consent to being contacted regarding my inquiry.</span>
+          <input
+            type='checkbox'
+            checked={agreed}
+            onChange={(event) => setAgreed(event.target.checked)}
+            className='mt-0.5 h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500/20'
+          />
+          <span>
+            I agree to the Privacy Policy and consent to being contacted
+            regarding my inquiry.
+          </span>
         </label>
+
         <div className='flex justify-end'>
-          <Button type='button' disabled={!canSubmit} onClick={() => void handleSubmit()} className='h-11 px-5'>
+          <Button
+            type='button'
+            disabled={!canSubmit}
+            onClick={() => void handleSubmit()}
+            className='h-11 px-5'
+          >
             {sending && <Loader2 className='h-4 w-4 animate-spin' />}
             Send Message
           </Button>
@@ -908,7 +1071,6 @@ function SupportPanel() {
     </Card>
   );
 }
-
 function LoadingProfile() {
   return (
     <div className='mx-auto max-w-screen-2xl p-4 md:p-6'>
