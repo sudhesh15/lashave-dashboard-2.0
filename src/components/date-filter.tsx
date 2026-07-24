@@ -23,11 +23,15 @@ export function DateFilter({
   onToggle: () => void;
   onClose: () => void;
 }) {
-  const toDateStr = (d: Date) => d.toISOString().split('T')[0];
+  const toDateStr = (d: Date) => {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
   const daysAgo = (n: number) => {
     const d = new Date();
     d.setDate(d.getDate() - n);
-    d.setHours(0, 0, 0, 0);
     return toDateStr(d);
   };
 
@@ -39,22 +43,24 @@ export function DateFilter({
     });
 
   return (
-    <div className="relative shrink-0">
+    <div className='relative shrink-0'>
       <Button
-        variant="outline"
+        variant='outline'
         onClick={onToggle}
         className={cn(
           dateRange &&
             'border-brand-300 bg-brand-50 text-brand-500 dark:border-brand-500/30 dark:bg-brand-500/15 dark:text-brand-400',
         )}
       >
-        <Calendar className="size-4" />
-        {dateRange ? `${formatDate(dateRange.from)} to ${formatDate(dateRange.to)}` : 'Date'}
+        <Calendar className='size-4' />
+        {dateRange
+          ? `${formatDate(dateRange.from)} to ${formatDate(dateRange.to)}`
+          : 'Date'}
       </Button>
 
       {open && (
-        <div className="absolute right-0 top-[calc(100%+8px)] z-50 w-72 rounded-xl border border-gray-200 bg-white p-4 shadow-theme-lg dark:border-gray-800 dark:bg-gray-900">
-          <div className="grid grid-cols-3 gap-2">
+        <div className='absolute right-0 top-[calc(100%+8px)] z-50 w-72 rounded-xl border border-gray-200 bg-white p-4 shadow-theme-lg dark:border-gray-800 dark:bg-gray-900'>
+          <div className='grid grid-cols-3 gap-2'>
             {[
               { label: 'Today', days: 0 },
               { label: '7 days', days: 7 },
@@ -62,7 +68,7 @@ export function DateFilter({
             ].map((preset) => (
               <button
                 key={preset.label}
-                type="button"
+                type='button'
                 onClick={() => {
                   if (activePreset === preset.days) {
                     setActivePreset(null);
@@ -71,7 +77,10 @@ export function DateFilter({
                   }
 
                   setActivePreset(preset.days);
-                  setDateRange({ from: daysAgo(preset.days), to: toDateStr(new Date()) });
+                  setDateRange({
+                    from: daysAgo(preset.days),
+                    to: toDateStr(new Date()),
+                  });
                 }}
                 className={cn(
                   'rounded-lg border px-2 py-2 text-theme-xs font-medium transition',
@@ -85,11 +94,11 @@ export function DateFilter({
             ))}
           </div>
 
-          <div className="mt-4 grid gap-3">
-            <label className="grid gap-1.5 text-theme-xs font-medium text-gray-500 dark:text-gray-400">
+          <div className='mt-4 grid gap-3'>
+            <label className='grid gap-1.5 text-theme-xs font-medium text-gray-500 dark:text-gray-400'>
               From
               <input
-                type="date"
+                type='date'
                 value={dateRange?.from ?? ''}
                 onChange={(event) => {
                   setActivePreset(null);
@@ -98,14 +107,14 @@ export function DateFilter({
                     to: dateRange?.to ?? toDateStr(new Date()),
                   });
                 }}
-                className="h-9 rounded-lg border border-gray-300 bg-transparent px-3 text-theme-sm text-gray-700 outline-none focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-gray-300"
+                className='h-9 rounded-lg border border-gray-300 bg-transparent px-3 text-theme-sm text-gray-700 outline-none focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-gray-300'
               />
             </label>
 
-            <label className="grid gap-1.5 text-theme-xs font-medium text-gray-500 dark:text-gray-400">
+            <label className='grid gap-1.5 text-theme-xs font-medium text-gray-500 dark:text-gray-400'>
               To
               <input
-                type="date"
+                type='date'
                 value={dateRange?.to ?? ''}
                 onChange={(event) => {
                   setActivePreset(null);
@@ -114,16 +123,16 @@ export function DateFilter({
                     to: event.target.value,
                   });
                 }}
-                className="h-9 rounded-lg border border-gray-300 bg-transparent px-3 text-theme-sm text-gray-700 outline-none focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-gray-300"
+                className='h-9 rounded-lg border border-gray-300 bg-transparent px-3 text-theme-sm text-gray-700 outline-none focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-gray-300'
               />
             </label>
           </div>
 
           {dateRange && (
             <Button
-              variant="outline"
-              size="sm"
-              className="mt-4 w-full"
+              variant='outline'
+              size='sm'
+              className='mt-4 w-full'
               onClick={() => {
                 setActivePreset(null);
                 setDateRange(null);

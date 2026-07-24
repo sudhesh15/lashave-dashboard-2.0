@@ -1,48 +1,54 @@
-"use client";
+'use client';
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import Image from "next/image";
+import { DateFilter } from '@/components/date-filter';
+import { RequireAuth } from '@/components/require-auth';
+import { apiFetch } from '@/lib/api';
+import { cn } from '@/lib/utils';
 import {
-  CalendarDays,
-  Clock,
-  Save,
-  RotateCcw,
-  XCircle,
-  RefreshCw,
   AlertCircle,
-  SlidersHorizontal,
-  Phone,
-  CheckCircle2,
-  CalendarClock,
   Ban,
-  List,
   CalendarCheck,
+  CalendarClock,
+  CalendarDays,
   CalendarX,
-  Mail,
-  User,
-  FileText,
-  Tag,
-  MessageSquare,
-  Plus,
-  Loader2,
-  Search,
+  CheckCircle2,
   ChevronsUpDown,
+  Clock,
+  FileText,
+  List,
+  Loader2,
+  Mail,
+  MessageSquare,
+  Phone,
+  Plus,
+  RefreshCw,
+  RotateCcw,
+  Save,
+  Search,
+  SlidersHorizontal,
+  Tag,
   Trash2,
-} from "lucide-react";
-import { apiFetch } from "@/lib/api";
-import { useSearchParams } from "next/navigation";
-import { DateFilter } from "@/components/date-filter";
-import { RequireAuth } from "@/components/require-auth";
-import { cn } from "@/lib/utils";
+  User,
+  XCircle,
+} from 'lucide-react';
+import Image from 'next/image';
+import { useSearchParams } from 'next/navigation';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Modal } from "@/components/ui/modal";
-import { Textarea } from "@/components/ui/textarea";
-import { TablePagination } from "@/components/ui/table-pagination";
-import { useOutsideClick } from "@/hooks/useOutsideClick";
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Modal } from '@/components/ui/modal';
+import { TablePagination } from '@/components/ui/table-pagination';
+import { Textarea } from '@/components/ui/textarea';
+import { useOutsideClick } from '@/hooks/useOutsideClick';
 
 /* Types */
 type AvailabilityItem = {
@@ -65,7 +71,7 @@ type CustomerField = {
   id: number;
   field_key: string;
   label: string;
-  field_type: "text" | "number" | "dropdown";
+  field_type: 'text' | 'number' | 'dropdown';
   required: boolean;
   options: string[];
   is_active: boolean;
@@ -106,60 +112,60 @@ type Booking = {
   } | null;
 };
 
-type TabKey = "all" | "today" | "upcoming" | "confirmed" | "cancelled";
+type TabKey = 'all' | 'today' | 'upcoming' | 'confirmed' | 'cancelled';
 type BookingSortKey =
-  | "created"
-  | "customer"
-  | "phone"
-  | "email"
-  | "channel"
-  | "date"
-  | "time"
-  | "status";
-type SortDirection = "asc" | "desc";
+  | 'created'
+  | 'customer'
+  | 'phone'
+  | 'email'
+  | 'channel'
+  | 'date'
+  | 'time'
+  | 'status';
+type SortDirection = 'asc' | 'desc';
 
 const DAYS = [
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-  "Sunday",
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+  'Sunday',
 ];
 const ITEMS_PER_PAGE = 8;
 
 const defaultAvailability: AvailabilityItem[] = DAYS.map((_, index) => ({
   day_of_week: index,
-  start_time: "10:00",
-  end_time: "19:00",
+  start_time: '10:00',
+  end_time: '19:00',
   is_active: index <= 4,
 }));
 
-type StatusColor = "success" | "warning" | "error" | "info" | "light";
+type StatusColor = 'success' | 'warning' | 'error' | 'info' | 'light';
 
 const STATUS_CONFIG: Record<
   string,
   { label: string; color: StatusColor; icon: React.ReactNode }
 > = {
   confirmed: {
-    label: "Confirmed",
-    color: "success",
+    label: 'Confirmed',
+    color: 'success',
     icon: <CheckCircle2 size={11} />,
   },
   rescheduled: {
-    label: "Rescheduled",
-    color: "warning",
+    label: 'Rescheduled',
+    color: 'warning',
     icon: <CalendarClock size={11} />,
   },
   cancelled: {
-    label: "Cancelled",
-    color: "error",
+    label: 'Cancelled',
+    color: 'error',
     icon: <Ban size={11} />,
   },
   completed: {
-    label: "Completed",
-    color: "info",
+    label: 'Completed',
+    color: 'info',
     icon: <CheckCircle2 size={11} />,
   },
 };
@@ -180,7 +186,7 @@ function isUpcoming(dateStr: string) {
 
 const getTimeMinutes = (value: string) => {
   const timePart = value.slice(11, 16); // "15:00"
-  const [h, m] = timePart.split(":").map(Number);
+  const [h, m] = timePart.split(':').map(Number);
   return h * 60 + m;
 };
 
@@ -188,12 +194,13 @@ const getDateKey = (value: string) => {
   return value.slice(0, 10); // "2026-06-15"
 };
 
+
 const getTodayLocalKey = () => {
   const now = new Date();
 
   const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
 
   return `${year}-${month}-${day}`;
 };
@@ -204,8 +211,8 @@ const getCurrentLocalMinutes = () => {
 };
 
 const isBookingCompleted = (booking: Booking) => {
-  if (booking.status === "cancelled") return false;
-  if (booking.status === "completed") return true;
+  if (booking.status === 'cancelled') return false;
+  if (booking.status === 'completed') return true;
 
   const bookingDate = getDateKey(booking.booking_date);
   const today = getTodayLocalKey();
@@ -219,18 +226,16 @@ const isBookingCompleted = (booking: Booking) => {
   return bookingEndMinutes < nowMinutes;
 };
 
-const COMPLETED_BOOKINGS_STORAGE_KEY = "lashvae_completed_booking_ids";
+const COMPLETED_BOOKINGS_STORAGE_KEY = 'lashvae_completed_booking_ids';
 
 const getCompletedBookingIds = () => {
-  if (typeof window === "undefined") return new Set<number>();
+  if (typeof window === 'undefined') return new Set<number>();
 
   try {
     const raw = window.localStorage.getItem(COMPLETED_BOOKINGS_STORAGE_KEY);
     const ids = raw ? (JSON.parse(raw) as unknown[]) : [];
     return new Set(
-      ids
-        .map((id) => Number(id))
-        .filter((id) => Number.isFinite(id) && id > 0),
+      ids.map((id) => Number(id)).filter((id) => Number.isFinite(id) && id > 0),
     );
   } catch {
     return new Set<number>();
@@ -238,7 +243,7 @@ const getCompletedBookingIds = () => {
 };
 
 const saveCompletedBookingId = (bookingId: number) => {
-  if (typeof window === "undefined") return;
+  if (typeof window === 'undefined') return;
 
   const ids = getCompletedBookingIds();
   ids.add(bookingId);
@@ -249,7 +254,7 @@ const saveCompletedBookingId = (bookingId: number) => {
 };
 
 const removeCompletedBookingId = (bookingId: number) => {
-  if (typeof window === "undefined") return;
+  if (typeof window === 'undefined') return;
 
   const ids = getCompletedBookingIds();
   ids.delete(bookingId);
@@ -264,17 +269,17 @@ const applyCompletedOverrides = (items: Booking[]) => {
   if (!completedIds.size) return items;
 
   return items.map((booking) =>
-    completedIds.has(booking.id) && booking.status !== "cancelled"
-      ? { ...booking, status: "completed" }
+    completedIds.has(booking.id) && booking.status !== 'cancelled'
+      ? { ...booking, status: 'completed' }
       : booking,
   );
 };
 
 const SELECT_CLASS =
-  "h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-3.5 py-2.5 pr-8 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800";
+  'h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-3.5 py-2.5 pr-8 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800';
 
 const TIME_INPUT_CLASS =
-  "h-10 w-full rounded-lg border border-gray-300 bg-white px-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 disabled:opacity-40 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90";
+  'h-10 w-full rounded-lg border border-gray-300 bg-white px-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 disabled:opacity-40 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90';
 
 /* Avatar */
 function Avatar({
@@ -287,7 +292,7 @@ function Avatar({
   size?: number;
 }) {
   const [imgError, setImgError] = useState(false);
-  const clean = name.startsWith("@") ? name.slice(1) : name;
+  const clean = name.startsWith('@') ? name.slice(1) : name;
   const initials = clean.slice(0, 2).toUpperCase();
 
   if (src && !imgError) {
@@ -302,8 +307,8 @@ function Avatar({
         style={{
           height: size,
           width: size,
-          borderRadius: "50%",
-          objectFit: "cover",
+          borderRadius: '50%',
+          objectFit: 'cover',
           flexShrink: 0,
         }}
       />
@@ -315,16 +320,16 @@ function Avatar({
       style={{
         height: size,
         width: size,
-        borderRadius: "50%",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
+        borderRadius: '50%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
         fontSize: size * 0.31,
         fontWeight: 800,
-        color: "#344054",
+        color: '#344054',
         flexShrink: 0,
-        background: "#F2F4F7",
-        border: "1px solid #EAECF0",
+        background: '#F2F4F7',
+        border: '1px solid #EAECF0',
       }}
     >
       {initials}
@@ -342,15 +347,15 @@ function DetailRow({
   value: string;
 }) {
   return (
-    <div className="flex items-center gap-3">
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-400 dark:bg-white/[0.06] dark:text-gray-500">
+    <div className='flex items-center gap-3'>
+      <div className='flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-400 dark:bg-white/[0.06] dark:text-gray-500'>
         {icon}
       </div>
-      <div className="min-w-0">
-        <span className="block text-[11px] font-semibold text-gray-400 dark:text-gray-500">
+      <div className='min-w-0'>
+        <span className='block text-[11px] font-semibold text-gray-400 dark:text-gray-500'>
           {label}
         </span>
-        <span className="block truncate text-sm font-bold text-gray-800 dark:text-white/90">
+        <span className='block truncate text-sm font-bold text-gray-800 dark:text-white/90'>
           {value}
         </span>
       </div>
@@ -360,18 +365,18 @@ function DetailRow({
 
 /* Tab config */
 const TABS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
-  { key: "all", label: "All", icon: <List size={13} /> },
-  { key: "today", label: "Today", icon: <CalendarDays size={13} /> },
-  { key: "upcoming", label: "Upcoming", icon: <CalendarCheck size={13} /> },
-  { key: "confirmed", label: "Confirmed", icon: <CheckCircle2 size={13} /> },
-  { key: "cancelled", label: "Cancelled", icon: <CalendarX size={13} /> },
+  { key: 'all', label: 'All', icon: <List size={13} /> },
+  { key: 'today', label: 'Today', icon: <CalendarDays size={13} /> },
+  { key: 'upcoming', label: 'Upcoming', icon: <CalendarCheck size={13} /> },
+  { key: 'confirmed', label: 'Confirmed', icon: <CheckCircle2 size={13} /> },
+  { key: 'cancelled', label: 'Cancelled', icon: <CalendarX size={13} /> },
 ];
 
 /* Main page */
 function AvailabilityContent() {
   const searchParams = useSearchParams();
 
-  const isWeekly = searchParams.get("weekly") === "true";
+  const isWeekly = searchParams.get('weekly') === 'true';
 
   const [availability, setAvailability] =
     useState<AvailabilityItem[]>(defaultAvailability);
@@ -383,16 +388,18 @@ function AvailabilityContent() {
     booking_enabled: false,
     booking_slot_duration_minutes: 30,
     booking_buffer_minutes: 0,
-    booking_timezone: "UTC",
-    tenant_id: "",
+    booking_timezone: 'UTC',
+    tenant_id: '',
   });
   const [showAvailabilityPanel, setShowAvailabilityPanel] = useState<
     true | false
   >(isWeekly ? true : false);
-  const [activeTab, setActiveTab] = useState<TabKey>("all");
+  const [activeTab, setActiveTab] = useState<TabKey>('all');
   const [currentPage, setCurrentPage] = useState(1);
-  const [bookingSearch, setBookingSearch] = useState("");
-  const [openBookingFilter, setOpenBookingFilter] = useState<"status" | "date" | null>(null);
+  const [bookingSearch, setBookingSearch] = useState('');
+  const [openBookingFilter, setOpenBookingFilter] = useState<
+    'status' | 'date' | null
+  >(null);
   const [bookingDateRange, setBookingDateRange] = useState<{
     from: string;
     to: string;
@@ -403,21 +410,29 @@ function AvailabilityContent() {
   const [bookingDatePreset, setBookingDatePreset] = useState<number | null>(0);
   const bookingFilterRef = useRef<HTMLDivElement>(null);
   const bookingDateFilterRef = useRef<HTMLDivElement>(null);
-  useOutsideClick(bookingFilterRef, () => setOpenBookingFilter(null), openBookingFilter === "status");
-  useOutsideClick(bookingDateFilterRef, () => setOpenBookingFilter(null), openBookingFilter === "date");
+  useOutsideClick(
+    bookingFilterRef,
+    () => setOpenBookingFilter(null),
+    openBookingFilter === 'status',
+  );
+  useOutsideClick(
+    bookingDateFilterRef,
+    () => setOpenBookingFilter(null),
+    openBookingFilter === 'date',
+  );
   const [bookingSort, setBookingSort] = useState<{
     key: BookingSortKey;
     direction: SortDirection;
-  }>({ key: "created", direction: "desc" });
+  }>({ key: 'created', direction: 'desc' });
   const [rescheduleBooking, setRescheduleBooking] = useState<Booking | null>(
     null,
   );
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [rescheduleForm, setRescheduleForm] = useState({
-    booking_date: "",
-    start_time: "",
-    end_time: "",
-    notes: "",
+    booking_date: '',
+    start_time: '',
+    end_time: '',
+    notes: '',
   });
   const [bookingToCancel, setBookingToCancel] = useState<number | null>(null);
   const [bookingToComplete, setBookingToComplete] = useState<Booking | null>(
@@ -426,14 +441,14 @@ function AvailabilityContent() {
 
   const [showManualBooking, setShowManualBooking] = useState(false);
   const [customerFields, setCustomerFields] = useState<CustomerField[]>([]);
-  const [manualDate, setManualDate] = useState("");
+  const [manualDate, setManualDate] = useState('');
   const [manualSlots, setManualSlots] = useState<BookingSlot[]>([]);
-  const [selectedManualSlot, setSelectedManualSlot] = useState("");
+  const [selectedManualSlot, setSelectedManualSlot] = useState('');
   const [manualValues, setManualValues] = useState<Record<string, string>>({
-    name: "",
+    name: '',
   });
-  const [manualNotes, setManualNotes] = useState("");
-  const [manualError, setManualError] = useState("");
+  const [manualNotes, setManualNotes] = useState('');
+  const [manualError, setManualError] = useState('');
   const [loadingManualSlots, setLoadingManualSlots] = useState(false);
   const [creatingManualBooking, setCreatingManualBooking] = useState(false);
 
@@ -442,15 +457,15 @@ function AvailabilityContent() {
   /* Tab counts */
   const tabCounts = useMemo(
     () => ({
-      all: bookings.filter((b) => b.status !== "cancelled").length,
+      all: bookings.filter((b) => b.status !== 'cancelled').length,
       today: bookings.filter((b) => isToday(b.start_time)).length,
       upcoming: bookings.filter(
-        (b) => isUpcoming(b.start_time) && !["cancelled"].includes(b.status),
+        (b) => isUpcoming(b.start_time) && !['cancelled'].includes(b.status),
       ).length,
       confirmed: bookings.filter((b) =>
-        ["confirmed", "rescheduled"].includes(b.status),
+        ['confirmed', 'rescheduled'].includes(b.status),
       ).length,
-      cancelled: bookings.filter((b) => b.status === "cancelled").length,
+      cancelled: bookings.filter((b) => b.status === 'cancelled').length,
     }),
     [bookings],
   );
@@ -459,26 +474,29 @@ function AvailabilityContent() {
   const filteredBookings = useMemo(() => {
     const byTab = (() => {
       switch (activeTab) {
-        case "today":
+        case 'today':
           return bookings.filter((b) => isToday(b.start_time));
-        case "upcoming":
+        case 'upcoming':
           return bookings.filter(
-            (b) => isUpcoming(b.start_time) && b.status !== "cancelled",
+            (b) => isUpcoming(b.start_time) && b.status !== 'cancelled',
           );
-        case "confirmed":
+        case 'confirmed':
           return bookings.filter((b) =>
-            ["confirmed", "rescheduled"].includes(b.status),
+            ['confirmed', 'rescheduled'].includes(b.status),
           );
-        case "cancelled":
-          return bookings.filter((b) => b.status === "cancelled");
+        case 'cancelled':
+          return bookings.filter((b) => b.status === 'cancelled');
         default:
-          return bookings.filter((b) => b.status !== "cancelled");
+          return bookings.filter((b) => b.status !== 'cancelled');
       }
     })();
 
     const byDate = bookingDateRange
       ? byTab.filter((booking) => {
-          const key = (booking.start_time || booking.booking_date || "").slice(0, 10);
+          const key = (booking.start_time || booking.booking_date || '').slice(
+            0,
+            10,
+          );
           if (!key) return false;
           return key >= bookingDateRange.from && key <= bookingDateRange.to;
         })
@@ -501,7 +519,7 @@ function AvailabilityContent() {
         booking.instagram_profile?.username,
       ]
         .filter(Boolean)
-        .join(" ")
+        .join(' ')
         .toLowerCase()
         .includes(query),
     );
@@ -513,34 +531,39 @@ function AvailabilityContent() {
         booking.instagram_profile?.username ||
         booking.customer_name ||
         booking.customer_phone ||
-        "Customer";
+        'Customer';
       const effectiveStatus = isBookingCompleted(booking)
-        ? "completed"
+        ? 'completed'
         : booking.status;
 
       switch (bookingSort.key) {
-        case "created":
-          return booking.created_at || booking.booking_date || booking.start_time || "";
-        case "customer":
+        case 'created':
+          return (
+            booking.created_at ||
+            booking.booking_date ||
+            booking.start_time ||
+            ''
+          );
+        case 'customer':
           return displayName.toLowerCase();
-        case "phone":
+        case 'phone':
           return (
             booking.customer_details?.phone ||
             booking.customer_phone ||
-            ""
+            ''
           ).toLowerCase();
-        case "email":
-          return (booking.customer_details?.email || "").toLowerCase();
-        case "channel":
-          return (booking.channel || "Direct").toLowerCase();
-        case "date":
-          return booking.booking_date || "";
-        case "time":
-          return booking.start_time || "";
-        case "status":
+        case 'email':
+          return (booking.customer_details?.email || '').toLowerCase();
+        case 'channel':
+          return (booking.channel || 'Direct').toLowerCase();
+        case 'date':
+          return booking.booking_date || '';
+        case 'time':
+          return booking.start_time || '';
+        case 'status':
           return effectiveStatus.toLowerCase();
         default:
-          return "";
+          return '';
       }
     };
 
@@ -549,10 +572,10 @@ function AvailabilityContent() {
       const second = getSortValue(b);
       const comparison = first.localeCompare(second, undefined, {
         numeric: true,
-        sensitivity: "base",
+        sensitivity: 'base',
       });
 
-      return bookingSort.direction === "asc" ? comparison : -comparison;
+      return bookingSort.direction === 'asc' ? comparison : -comparison;
     });
   }, [filteredBookings, bookingSort]);
 
@@ -561,9 +584,9 @@ function AvailabilityContent() {
       current.key === key
         ? {
             key,
-            direction: current.direction === "asc" ? "desc" : "asc",
+            direction: current.direction === 'asc' ? 'desc' : 'asc',
           }
-        : { key, direction: "asc" },
+        : { key, direction: 'asc' },
     );
   };
 
@@ -595,13 +618,13 @@ function AvailabilityContent() {
     try {
       setLoading(true);
       const settingsRes = await apiFetch<BookingSettings>(
-        "/admin/booking/settings",
+        '/admin/booking/settings',
         { auth: true },
       );
       setBookingSettings(settingsRes);
 
       const customerFieldsRes = await apiFetch<{ items: CustomerField[] }>(
-        "/admin/booking/customer-info",
+        '/admin/booking/customer-info',
         { auth: true },
       );
       setCustomerFields(
@@ -615,7 +638,7 @@ function AvailabilityContent() {
       }
 
       const availabilityRes = await apiFetch<{ items: AvailabilityItem[] }>(
-        "/admin/booking/availability",
+        '/admin/booking/availability',
         { auth: true },
       );
       const items = availabilityRes.items || [];
@@ -631,7 +654,7 @@ function AvailabilityContent() {
       }
 
       const bookingsRes = await apiFetch<{ items: Booking[] }>(
-        "/admin/bookings",
+        '/admin/bookings',
         { auth: true },
       );
       setBookings(applyCompletedOverrides(bookingsRes.items || []));
@@ -652,12 +675,12 @@ function AvailabilityContent() {
   const saveAvailability = async () => {
     try {
       setSavingAvailability(true);
-      await apiFetch("/admin/booking/availability", {
-        method: "PUT",
+      await apiFetch('/admin/booking/availability', {
+        method: 'PUT',
         body: { items: availability },
         auth: true,
       });
-      alert("Availability saved");
+      alert('Availability saved');
       await loadPage();
     } finally {
       setSavingAvailability(false);
@@ -672,7 +695,7 @@ function AvailabilityContent() {
     try {
       setActionLoading(bookingToCancel);
       await apiFetch(`/admin/booking/${bookingToCancel}/cancel`, {
-        method: "POST",
+        method: 'POST',
         auth: true,
       });
       if (bookingToCancel) removeCompletedBookingId(bookingToCancel);
@@ -688,42 +711,42 @@ function AvailabilityContent() {
   const completeBookingRequest = async (bookingId: number) => {
     const attempts: Array<{
       path: string;
-      method: "POST" | "PUT" | "PATCH";
+      method: 'POST' | 'PUT' | 'PATCH';
       body?: { status: string };
     }> = [
       {
         path: `/admin/booking/${bookingId}/status`,
-        method: "PUT",
-        body: { status: "completed" },
+        method: 'PUT',
+        body: { status: 'completed' },
       },
       {
         path: `/admin/booking/${bookingId}/status`,
-        method: "PATCH",
-        body: { status: "completed" },
+        method: 'PATCH',
+        body: { status: 'completed' },
       },
       {
         path: `/admin/bookings/${bookingId}/status`,
-        method: "PUT",
-        body: { status: "completed" },
+        method: 'PUT',
+        body: { status: 'completed' },
       },
       {
         path: `/admin/bookings/${bookingId}/status`,
-        method: "PATCH",
-        body: { status: "completed" },
+        method: 'PATCH',
+        body: { status: 'completed' },
       },
       {
         path: `/admin/booking/${bookingId}/complete`,
-        method: "POST",
+        method: 'POST',
       },
       {
         path: `/admin/booking/${bookingId}`,
-        method: "PATCH",
-        body: { status: "completed" },
+        method: 'PATCH',
+        body: { status: 'completed' },
       },
       {
         path: `/admin/bookings/${bookingId}`,
-        method: "PATCH",
-        body: { status: "completed" },
+        method: 'PATCH',
+        body: { status: 'completed' },
       },
     ];
 
@@ -743,7 +766,7 @@ function AvailabilityContent() {
 
     throw lastError instanceof Error
       ? lastError
-      : new Error("Unable to mark booking as completed");
+      : new Error('Unable to mark booking as completed');
   };
 
   const markBookingCompleted = (booking: Booking) => {
@@ -756,7 +779,7 @@ function AvailabilityContent() {
 
     try {
       setActionLoading(booking.id);
-      const completedBooking = { ...booking, status: "completed" };
+      const completedBooking = { ...booking, status: 'completed' };
       saveCompletedBookingId(booking.id);
       setBookings((prev) =>
         prev.map((item) => (item.id === booking.id ? completedBooking : item)),
@@ -765,7 +788,7 @@ function AvailabilityContent() {
         prev?.id === booking.id ? completedBooking : prev,
       );
       void completeBookingRequest(booking.id).catch((error) => {
-        console.warn("Booking completion endpoint unavailable", error);
+        console.warn('Booking completion endpoint unavailable', error);
       });
       setBookingToComplete(null);
       await loadPage();
@@ -780,7 +803,7 @@ function AvailabilityContent() {
       booking_date: booking.booking_date.slice(0, 16),
       start_time: booking.start_time.slice(0, 16),
       end_time: booking.end_time.slice(0, 16),
-      notes: booking.notes || "Rescheduled from dashboard",
+      notes: booking.notes || 'Rescheduled from dashboard',
     });
   };
 
@@ -789,7 +812,7 @@ function AvailabilityContent() {
     try {
       setActionLoading(rescheduleBooking.id);
       await apiFetch(`/admin/booking/${rescheduleBooking.id}/reschedule`, {
-        method: "POST",
+        method: 'POST',
         body: { ...rescheduleForm },
         auth: true,
       });
@@ -814,12 +837,12 @@ function AvailabilityContent() {
   };
 
   const resetManualBookingForm = () => {
-    setManualDate("");
+    setManualDate('');
     setManualSlots([]);
-    setSelectedManualSlot("");
-    setManualValues({ name: "" });
-    setManualNotes("");
-    setManualError("");
+    setSelectedManualSlot('');
+    setManualValues({ name: '' });
+    setManualNotes('');
+    setManualError('');
   };
 
   const closeManualBooking = () => {
@@ -829,18 +852,18 @@ function AvailabilityContent() {
 
   const loadManualSlots = async (dateValue: string) => {
     setManualDate(dateValue);
-    setSelectedManualSlot("");
+    setSelectedManualSlot('');
     setManualSlots([]);
-    setManualError("");
+    setManualError('');
 
     if (!dateValue || !bookingSettings.tenant_id) return;
 
     try {
       setLoadingManualSlots(true);
       const result = await apiFetch<CheckSlotsResponse>(
-        "/admin/booking/check-slots",
+        '/admin/booking/check-slots',
         {
-          method: "POST",
+          method: 'POST',
           auth: true,
           body: {
             tenant_id: bookingSettings.tenant_id,
@@ -853,16 +876,16 @@ function AvailabilityContent() {
       setManualSlots(slots);
 
       if (result.blocked) {
-        setManualError("This date is blocked in booking settings.");
+        setManualError('This date is blocked in booking settings.');
       } else if (!slots.length) {
-        setManualError("No available slots were found for this date.");
+        setManualError('No available slots were found for this date.');
       }
     } catch (error) {
       console.error(error);
       setManualError(
         error instanceof Error
           ? error.message
-          : "Unable to load available slots.",
+          : 'Unable to load available slots.',
       );
     } finally {
       setLoadingManualSlots(false);
@@ -870,25 +893,25 @@ function AvailabilityContent() {
   };
 
   const createManualBooking = async () => {
-    const name = (manualValues.name || "").trim();
+    const name = (manualValues.name || '').trim();
     const selectedSlot = manualSlots[Number(selectedManualSlot)];
 
     const nameConfig = customerFields.find(
-      (field) => field.field_key === "name",
+      (field) => field.field_key === 'name',
     );
 
     if (nameConfig?.required && !name) {
-      setManualError(`${nameConfig.label || "Customer name"} is required.`);
+      setManualError(`${nameConfig.label || 'Customer name'} is required.`);
       return;
     }
     if (!manualDate || !selectedSlot) {
-      setManualError("Choose a date and an available time slot.");
+      setManualError('Choose a date and an available time slot.');
       return;
     }
 
     for (const field of customerFields) {
-      if (field.field_key === "name") continue;
-      if (field.required && !(manualValues[field.field_key] || "").trim()) {
+      if (field.field_key === 'name') continue;
+      if (field.required && !(manualValues[field.field_key] || '').trim()) {
         setManualError(`${field.label} is required.`);
         return;
       }
@@ -896,7 +919,7 @@ function AvailabilityContent() {
 
     const customerDetails = customerFields.reduce<Record<string, string>>(
       (details, field) => {
-        const value = (manualValues[field.field_key] || "").trim();
+        const value = (manualValues[field.field_key] || '').trim();
         if (value) details[field.field_key] = value;
         return details;
       },
@@ -905,27 +928,27 @@ function AvailabilityContent() {
 
     const phoneField = customerFields.find(
       (field) =>
-        field.field_key.toLowerCase() === "phone" ||
-        field.label.toLowerCase().includes("phone"),
+        field.field_key.toLowerCase() === 'phone' ||
+        field.label.toLowerCase().includes('phone'),
     );
 
     try {
       setCreatingManualBooking(true);
-      setManualError("");
+      setManualError('');
 
-      await apiFetch("/admin/booking/create", {
-        method: "POST",
+      await apiFetch('/admin/booking/create', {
+        method: 'POST',
         auth: true,
         body: {
           tenant_id: bookingSettings.tenant_id,
           conversation_id: null,
           customer_name: name,
           customer_phone: phoneField
-            ? (manualValues[phoneField.field_key] || "").trim() || null
+            ? (manualValues[phoneField.field_key] || '').trim() || null
             : null,
           customer_details: customerDetails,
           customer_info_complete: true,
-          channel: "manual",
+          channel: 'manual',
           booking_date: selectedSlot.start_time,
           start_time: selectedSlot.start_time,
           end_time: selectedSlot.end_time,
@@ -940,7 +963,7 @@ function AvailabilityContent() {
       setManualError(
         error instanceof Error
           ? error.message
-          : "Failed to create appointment.",
+          : 'Failed to create appointment.',
       );
     } finally {
       setCreatingManualBooking(false);
@@ -948,45 +971,42 @@ function AvailabilityContent() {
   };
 
   const manualDayLabel = manualDate
-    ? new Date(`${manualDate}T00:00:00`).toLocaleDateString("en-IN", {
-        weekday: "long",
+    ? new Date(`${manualDate}T00:00:00`).toLocaleDateString('en-IN', {
+        weekday: 'long',
       })
-    : "";
+    : '';
 
-  const primaryFieldKeys = ["name", "phone", "email"];
+  const primaryFieldKeys = ['name', 'phone', 'email'];
 
   const primaryCustomerFields = primaryFieldKeys
     .map((key) =>
-      customerFields.find(
-        (field) => field.field_key.toLowerCase() === key,
-      ),
+      customerFields.find((field) => field.field_key.toLowerCase() === key),
     )
     .filter((field): field is CustomerField => Boolean(field));
 
   const customCustomerFields = customerFields.filter(
-    (field) =>
-      !primaryFieldKeys.includes(field.field_key.toLowerCase()),
+    (field) => !primaryFieldKeys.includes(field.field_key.toLowerCase()),
   );
 
   const formatTime = (value: string) => {
-    if (!value) return "";
+    if (!value) return '';
 
-    return new Date(value).toLocaleTimeString("en-IN", {
-      hour: "2-digit",
-      minute: "2-digit",
+    return new Date(value).toLocaleTimeString('en-IN', {
+      hour: '2-digit',
+      minute: '2-digit',
       hour12: true,
-      timeZone: "Asia/Kolkata",
+      timeZone: 'Asia/Kolkata',
     });
   };
 
   const formatDate = (value: string) => {
-    if (!value) return "";
+    if (!value) return '';
 
-    return new Date(value).toLocaleDateString("en-IN", {
-      weekday: "short",
-      day: "2-digit",
-      month: "short",
-      timeZone: "Asia/Kolkata",
+    return new Date(value).toLocaleDateString('en-IN', {
+      weekday: 'short',
+      day: '2-digit',
+      month: 'short',
+      timeZone: 'Asia/Kolkata',
     });
   };
 
@@ -997,27 +1017,25 @@ function AvailabilityContent() {
       null,
     displayName: booking.instagram_profile?.username
       ? `@${booking.instagram_profile.username}`
-      : booking.customer_name || "Customer",
+      : booking.customer_name || 'Customer',
   });
 
   const statusInfo = (status: string) =>
     STATUS_CONFIG[status] || {
       label: status,
-      color: "light" as StatusColor,
+      color: 'light' as StatusColor,
       icon: null,
     };
   const activeBookingTitle =
-    TABS.find((tab) => tab.key === activeTab)?.label || "All";
+    TABS.find((tab) => tab.key === activeTab)?.label || 'All';
   const activeBookingLabel = `${activeBookingTitle} bookings`;
-
-
 
   /* Loading */
   if (loading) {
     return (
-      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3 text-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-gray-200 border-t-brand-500 dark:border-gray-800 dark:border-t-brand-400" />
-        <span className="text-sm text-gray-400 dark:text-gray-500">
+      <div className='flex min-h-[60vh] flex-col items-center justify-center gap-3 text-center'>
+        <div className='h-8 w-8 animate-spin rounded-full border-[3px] border-gray-200 border-t-brand-500 dark:border-gray-800 dark:border-t-brand-400' />
+        <span className='text-sm text-gray-400 dark:text-gray-500'>
           Loading...
         </span>
       </div>
@@ -1027,16 +1045,16 @@ function AvailabilityContent() {
   /* Smart Booking disabled */
   if (!bookingSettings.booking_enabled) {
     return (
-      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3 text-center">
+      <div className='flex min-h-[60vh] flex-col items-center justify-center gap-3 text-center'>
         <CalendarDays
           size={40}
           strokeWidth={1.5}
-          className="text-warning-500/70"
+          className='text-warning-500/70'
         />
-        <h2 className="text-xl font-bold text-gray-800 dark:text-white/90">
+        <h2 className='text-xl font-bold text-gray-800 dark:text-white/90'>
           Enable Smart Booking first
         </h2>
-        <p className="max-w-sm text-sm leading-relaxed text-gray-500 dark:text-gray-400">
+        <p className='max-w-sm text-sm leading-relaxed text-gray-500 dark:text-gray-400'>
           Before setting weekly availability, enable Smart Booking from
           Settings.
         </p>
@@ -1180,9 +1198,8 @@ function AvailabilityContent() {
                   setActiveTab('all');
                   setBookingSearch('');
                   setCurrentPage(1);
-                  const today = getTodayLocalKey();
-                  setBookingDateRange({ from: today, to: today });
-                  setBookingDatePreset(0);
+                  setBookingDateRange(null);
+                  setBookingDatePreset(null);
                   setOpenBookingFilter(null);
                 }}
               >
@@ -1193,7 +1210,7 @@ function AvailabilityContent() {
 
           <div className='min-w-0 max-w-full overflow-hidden rounded-b-xl border border-gray-200 dark:border-white/[0.05]'>
             <div className='w-full overflow-x-auto'>
-              <table className='lashvae-column-dividers min-w-[1560px] table-fixed'>
+              <table className='lashvae-column-dividers min-h-65 min-w-[1560px] table-fixed'>
                 <colgroup>
                   <col className='w-[200px]' />
                   <col className='w-[155px]' />
