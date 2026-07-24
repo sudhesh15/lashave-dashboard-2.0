@@ -38,11 +38,14 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  Database,
   Download,
   Edit3,
   ExternalLink,
   FileSearch,
+  FileText,
   FlaskConical,
+  Globe,
   Globe2,
   LayoutList,
   Loader2,
@@ -58,9 +61,6 @@ import {
   XCircle,
   ZoomIn,
   ZoomOut,
-  Database,
-  FileText,
-  Globe,
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -5680,7 +5680,10 @@ function WebsiteImportLanding({
   isDark: boolean;
 }) {
   const hostGroups = (() => {
-   const map = new Map<string, { draft: number; approved: number; rejected: number; total: number }>();
+    const map = new Map<
+      string,
+      { draft: number; approved: number; rejected: number; total: number }
+    >();
     for (const entry of entries) {
       const raw = (entry.source_url || '').toLowerCase().trim();
       const host = raw
@@ -5725,11 +5728,19 @@ function WebsiteImportLanding({
           }}
         >
           <div>
-            <div style={{ color: th.text, fontSize: 16, fontWeight: 700, marginBottom: 4 }}>
+            <div
+              style={{
+                color: th.text,
+                fontSize: 16,
+                fontWeight: 700,
+                marginBottom: 4,
+              }}
+            >
               Past imports
             </div>
             <div style={{ color: th.textSub, fontSize: 12, lineHeight: 1.5 }}>
-              {activeSites} of {MAX_IMPORTED_SITES_PER_USER} slots used. Click to review, or delete to free the slot.
+              {activeSites} of {MAX_IMPORTED_SITES_PER_USER} slots used. Click
+              to review, or delete to free the slot.
             </div>
           </div>
 
@@ -5765,21 +5776,9 @@ function WebsiteImportLanding({
                   e.currentTarget.style.borderColor = th.cardBorder;
                 }}
               >
-                <div
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: 10,
-                    background: th.accentBg,
-                    border: `1px solid ${th.accentBorder}`,
-                    display: 'grid',
-                    placeItems: 'center',
-                    color: th.accent,
-                    flexShrink: 0,
-                  }}
-                >
-                  <Globe2 style={{ width: 18, height: 18 }} />
-                </div>
+                <Button size='icon'>
+                  <Globe2 size={14} />
+                </Button>
                 <div style={{ minWidth: 0, flex: 1 }}>
                   <div
                     style={{
@@ -5793,28 +5792,53 @@ function WebsiteImportLanding({
                   >
                     {host}
                   </div>
-                  <div style={{ display: 'flex', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      gap: 8,
+                      marginTop: 4,
+                      flexWrap: 'wrap',
+                    }}
+                  >
                     <span style={{ color: th.textSub, fontSize: 11 }}>
                       {total} {total === 1 ? 'entry' : 'entries'}
                     </span>
                     {draft > 0 && (
-                      <span style={{ color: '#d97706', fontSize: 11, fontWeight: 600 }}>
+                      <span
+                        style={{
+                          color: '#d97706',
+                          fontSize: 11,
+                          fontWeight: 600,
+                        }}
+                      >
                         · {draft} draft
                       </span>
                     )}
                     {approved > 0 && (
-                      <span style={{ color: '#059669', fontSize: 11, fontWeight: 600 }}>
+                      <span
+                        style={{
+                          color: '#059669',
+                          fontSize: 11,
+                          fontWeight: 600,
+                        }}
+                      >
                         · {approved} live
                       </span>
                     )}
                     {rejected > 0 && (
-                      <span style={{ color: '#991b1b', fontSize: 11, fontWeight: 600 }}>
+                      <span
+                        style={{
+                          color: '#991b1b',
+                          fontSize: 11,
+                          fontWeight: 600,
+                        }}
+                      >
                         · {rejected} rejected
                       </span>
                     )}
                   </div>
                 </div>
-                <button
+                <Button
                   onClick={(e) => {
                     e.stopPropagation();
                     onDeleteSite(host);
@@ -5827,52 +5851,48 @@ function WebsiteImportLanding({
                     display: 'grid',
                     placeItems: 'center',
                     borderRadius: 8,
-                    border: `1px solid ${isDark ? 'rgba(220,38,38,.3)' : 'rgba(220,38,38,.2)'}`,
-                    background: isDark ? 'rgba(220,38,38,.08)' : 'rgba(254,242,242,.9)',
-                    color: '#dc2626',
                     cursor: busyId === 'bulk' ? 'not-allowed' : 'pointer',
                     opacity: busyId === 'bulk' ? 0.5 : 1,
                     flexShrink: 0,
                   }}
                 >
                   <Trash2 style={{ width: 14, height: 14 }} />
-                </button>
+                </Button>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div
+        style={{
+          padding: 24,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 16,
+        }}
+      >
         <div>
-          <div style={{ color: th.text, fontSize: 16, fontWeight: 700, marginBottom: 4 }}>
+          <div
+            style={{
+              color: th.text,
+              fontSize: 16,
+              fontWeight: 700,
+              marginBottom: 4,
+            }}
+          >
             Import a new site
           </div>
           <div style={{ color: th.textSub, fontSize: 12, lineHeight: 1.5 }}>
-            Give us a URL — we&apos;ll turn its pages into draft Q&amp;A answers.
+            Give us a URL — we&apos;ll turn its pages into draft Q&amp;A
+            answers.
           </div>
         </div>
 
-        <button
-          onClick={onOpenImport}
-          style={{
-            padding: '14px 20px',
-            borderRadius: 10,
-            border: `1px solid ${th.accentBorder}`,
-            background: th.accent,
-            color: '#fff',
-            fontSize: 14,
-            fontWeight: 600,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 8,
-          }}
-        >
-          <Globe2 style={{ width: 16, height: 16 }} />
-          Start new import
-        </button>
+        <Button size='lg' onClick={onOpenImport}>
+          <Globe2 size={14} />
+          Import from site
+        </Button>
 
         <div
           style={{
@@ -5882,20 +5902,48 @@ function WebsiteImportLanding({
             border: `1px solid ${th.cardBorder}`,
           }}
         >
-          <div style={{ color: th.text, fontSize: 12, fontWeight: 700, marginBottom: 8 }}>
+          <div
+            style={{
+              color: th.text,
+              fontSize: 12,
+              fontWeight: 700,
+              marginBottom: 8,
+            }}
+          >
             How it works
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, color: th.textSub, fontSize: 12, lineHeight: 1.5 }}>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 8,
+              color: th.textSub,
+              fontSize: 12,
+              lineHeight: 1.5,
+            }}
+          >
             <div style={{ display: 'flex', gap: 8 }}>
-              <span style={{ color: th.accent, fontWeight: 800, flexShrink: 0 }}>1.</span>
+              <span
+                style={{ color: th.accent, fontWeight: 800, flexShrink: 0 }}
+              >
+                1.
+              </span>
               We read your site&apos;s public pages.
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
-              <span style={{ color: th.accent, fontWeight: 800, flexShrink: 0 }}>2.</span>
+              <span
+                style={{ color: th.accent, fontWeight: 800, flexShrink: 0 }}
+              >
+                2.
+              </span>
               We turn them into draft Q&amp;A answers.
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
-              <span style={{ color: th.accent, fontWeight: 800, flexShrink: 0 }}>3.</span>
+              <span
+                style={{ color: th.accent, fontWeight: 800, flexShrink: 0 }}
+              >
+                3.
+              </span>
               You review and approve what your bot uses.
             </div>
           </div>
@@ -6043,8 +6091,7 @@ function WebsiteReviewPane({
   // Counts respect the selected site (so tabs show counts for that site only)
   const scopedEntries = selectedSiteHost
     ? entries.filter(
-        (e) =>
-          normalizeHostForFilter(e.source_url || '') === selectedSiteHost,
+        (e) => normalizeHostForFilter(e.source_url || '') === selectedSiteHost,
       )
     : entries;
 
@@ -6703,297 +6750,283 @@ function WebsiteReviewPane({
         )}
       </div>
 
-    <aside
-  ref={detailPaneRef as React.RefObject<HTMLElement>}
-  style={{
-    padding: 16,
-    minWidth: 0,
-    background: isDark ? 'rgba(255,255,255,.015)' : '#fff',
-  }}
->
-  {onlyScraperStatus ? (
-    <div
-      style={{
-        color: th.textSub,
-        fontSize: 12,
-        lineHeight: 1.6,
-        padding: 4,
-      }}
-    >
-      <div
+      <aside
+        ref={detailPaneRef as React.RefObject<HTMLElement>}
         style={{
-          color: th.text,
-          fontSize: 14,
-          fontWeight: 600,
-          marginBottom: 6,
+          padding: 16,
+          minWidth: 0,
+          background: isDark ? 'rgba(255,255,255,.015)' : '#fff',
         }}
       >
-        Extraction preview
-      </div>
-
-      Useful pages will become short draft answers here once the scraper
-      finishes. You will be able to edit, reject, or approve them before they
-      are embedded.
-    </div>
-  ) : active ? (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 13,
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          gap: 10,
-        }}
-      >
-        <span
-          style={{
-            color: th.textSub,
-            fontSize: 11,
-            fontWeight: 500,
-            textTransform: 'uppercase',
-          }}
-        >
-          {active.status}
-        </span>
-
-        <span
-          style={{
-            color: th.textMuted,
-            fontSize: 11,
-          }}
-        >
-          {confidenceLabel(active.confidence)}
-        </span>
-      </div>
-
-      {editing ? (
-        <>
-          <input
-            value={question}
-            onChange={(event) => setQuestion(event.target.value)}
-            style={inspectorFieldStyle(th)}
-          />
-
-          <textarea
-            value={answer}
-            onChange={(event) => setAnswer(event.target.value)}
-            rows={7}
+        {onlyScraperStatus ? (
+          <div
             style={{
-              ...inspectorFieldStyle(th),
-              resize: 'vertical',
-              lineHeight: 1.5,
+              color: th.textSub,
+              fontSize: 12,
+              lineHeight: 1.6,
+              padding: 4,
             }}
-          />
-
-          <input
-            value={category}
-            onChange={(event) => setCategory(event.target.value)}
-            placeholder="Category"
-            style={inspectorFieldStyle(th)}
-          />
-
-          <input
-            value={tags}
-            onChange={(event) => setTags(event.target.value)}
-            placeholder="Tags"
-            style={inspectorFieldStyle(th)}
-          />
-        </>
-      ) : (
-        <>
-          <SourcePreviewFrame entry={active} th={th} isDark={isDark} />
-
+          >
+            <div
+              style={{
+                color: th.text,
+                fontSize: 14,
+                fontWeight: 600,
+                marginBottom: 6,
+              }}
+            >
+              Extraction preview
+            </div>
+            Useful pages will become short draft answers here once the scraper
+            finishes. You will be able to edit, reject, or approve them before
+            they are embedded.
+          </div>
+        ) : active ? (
           <div
             style={{
               display: 'flex',
-              flexWrap: 'wrap',
-              gap: 7,
+              flexDirection: 'column',
+              gap: 13,
             }}
           >
-            {(active.tags || []).slice(0, 8).map((tag) => (
-              <span
-                key={tag}
-                style={{
-                  borderRadius: 999,
-                  border: `1px solid ${th.cardBorder}`,
-                  padding: '5px 8px',
-                  color: th.textSub,
-                  fontSize: 11,
-                  fontWeight: 650,
-                }}
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-
-          {active.source_url && (
-            <a
-              href={active.source_url}
-              target="_blank"
-              rel="noopener noreferrer"
+            <div
               style={{
-                color: th.text,
-                textDecoration: 'none',
-                fontSize: 12,
-                fontWeight: 500,
-                display: 'inline-flex',
-                gap: 6,
-                alignItems: 'center',
-                width: 'fit-content',
+                display: 'flex',
+                justifyContent: 'space-between',
+                gap: 10,
               }}
             >
-              <ExternalLink style={{ width: 13, height: 13 }} />
+              <span
+                style={{
+                  color: th.textSub,
+                  fontSize: 11,
+                  fontWeight: 500,
+                  textTransform: 'uppercase',
+                }}
+              >
+                {active.status}
+              </span>
 
-              {sourceLabel(active.source_url, active.source_path)}
-            </a>
-          )}
+              <span
+                style={{
+                  color: th.textMuted,
+                  fontSize: 11,
+                }}
+              >
+                {confidenceLabel(active.confidence)}
+              </span>
+            </div>
 
+            {editing ? (
+              <>
+                <input
+                  value={question}
+                  onChange={(event) => setQuestion(event.target.value)}
+                  style={inspectorFieldStyle(th)}
+                />
+
+                <textarea
+                  value={answer}
+                  onChange={(event) => setAnswer(event.target.value)}
+                  rows={7}
+                  style={{
+                    ...inspectorFieldStyle(th),
+                    resize: 'vertical',
+                    lineHeight: 1.5,
+                  }}
+                />
+
+                <input
+                  value={category}
+                  onChange={(event) => setCategory(event.target.value)}
+                  placeholder='Category'
+                  style={inspectorFieldStyle(th)}
+                />
+
+                <input
+                  value={tags}
+                  onChange={(event) => setTags(event.target.value)}
+                  placeholder='Tags'
+                  style={inspectorFieldStyle(th)}
+                />
+              </>
+            ) : (
+              <>
+                <SourcePreviewFrame entry={active} th={th} isDark={isDark} />
+
+                <div
+                  style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: 7,
+                  }}
+                >
+                  {(active.tags || []).slice(0, 8).map((tag) => (
+                    <span
+                      key={tag}
+                      style={{
+                        borderRadius: 999,
+                        border: `1px solid ${th.cardBorder}`,
+                        padding: '5px 8px',
+                        color: th.textSub,
+                        fontSize: 11,
+                        fontWeight: 650,
+                      }}
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+
+                {active.source_url && (
+                  <a
+                    href={active.source_url}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    style={{
+                      color: th.text,
+                      textDecoration: 'none',
+                      fontSize: 12,
+                      fontWeight: 500,
+                      display: 'inline-flex',
+                      gap: 6,
+                      alignItems: 'center',
+                      width: 'fit-content',
+                    }}
+                  >
+                    <ExternalLink style={{ width: 13, height: 13 }} />
+
+                    {sourceLabel(active.source_url, active.source_path)}
+                  </a>
+                )}
+
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: 10,
+                    color: th.textSub,
+                    fontSize: 12,
+                  }}
+                >
+                  <MiniMetric
+                    label='Category'
+                    value={active.category || 'general'}
+                    color={th.text}
+                    th={th}
+                  />
+
+                  <MiniMetric
+                    label='Embedding'
+                    value={active.embed_status}
+                    color={th.textSub}
+                    th={th}
+                  />
+
+                  <MiniMetric
+                    label='Type'
+                    value={active.entry_type || 'answer'}
+                    color={th.text}
+                    th={th}
+                  />
+
+                  <MiniMetric
+                    label='Entry'
+                    value={`#${active.id}`}
+                    color={th.text}
+                    th={th}
+                  />
+                </div>
+              </>
+            )}
+
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: 8,
+                paddingTop: 8,
+                borderTop: `1px solid ${th.cardBorder}`,
+              }}
+            >
+              {editing ? (
+                <>
+                  <button
+                    onClick={() => setEditing(false)}
+                    style={{
+                      ...reviewButtonStyle(th, isDark),
+                      fontWeight: 500,
+                    }}
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    onClick={save}
+                    disabled={
+                      !question.trim() || !answer.trim() || busyId === active.id
+                    }
+                    style={{
+                      ...reviewButtonStyle(th, isDark),
+                      fontWeight: 500,
+                    }}
+                  >
+                    Save
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={beginEdit}
+                  style={{
+                    ...reviewButtonStyle(th, isDark),
+                    fontWeight: 500,
+                  }}
+                >
+                  <Edit3 style={{ width: 13, height: 13 }} />
+                  Edit
+                </button>
+              )}
+
+              <button
+                onClick={() => onReject(active.id)}
+                disabled={active.status === 'rejected' || busyId === active.id}
+                style={{
+                  ...reviewButtonStyle(th, isDark),
+                  fontWeight: 500,
+                }}
+              >
+                {active.status === 'approved' ? 'Move to rejected' : 'Reject'}
+              </button>
+
+              <button
+                onClick={() => onApprove(active.id)}
+                disabled={active.status === 'approved' || busyId === active.id}
+                style={{
+                  ...reviewButtonStyle(
+                    th,
+                    isDark,
+                    active.status === 'rejected' ? '#059669' : undefined,
+                  ),
+                  fontWeight: active.status === 'rejected' ? 700 : 500,
+                }}
+              >
+                {active.status === 'rejected' ? 'Bring back as FAQ' : 'Approve'}
+              </button>
+            </div>
+          </div>
+        ) : (
           <div
             style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: 10,
               color: th.textSub,
+              textAlign: 'center',
+              padding: 40,
               fontSize: 12,
             }}
           >
-            <MiniMetric
-              label="Category"
-              value={active.category || 'general'}
-              color={th.text}
-              th={th}
-            />
-
-            <MiniMetric
-              label="Embedding"
-              value={active.embed_status}
-              color={th.textSub}
-              th={th}
-            />
-
-            <MiniMetric
-              label="Type"
-              value={active.entry_type || 'answer'}
-              color={th.text}
-              th={th}
-            />
-
-            <MiniMetric
-              label="Entry"
-              value={`#${active.id}`}
-              color={th.text}
-              th={th}
-            />
+            Select a website entry to inspect it.
           </div>
-        </>
-      )}
-
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'flex-end',
-          gap: 8,
-          paddingTop: 8,
-          borderTop: `1px solid ${th.cardBorder}`,
-        }}
-      >
-        {editing ? (
-          <>
-            <button
-              onClick={() => setEditing(false)}
-              style={{
-                ...reviewButtonStyle(th, isDark),
-                fontWeight: 500,
-              }}
-            >
-              Cancel
-            </button>
-
-            <button
-              onClick={save}
-              disabled={
-                !question.trim() ||
-                !answer.trim() ||
-                busyId === active.id
-              }
-              style={{
-                ...reviewButtonStyle(th, isDark),
-                fontWeight: 500,
-              }}
-            >
-              Save
-            </button>
-          </>
-        ) : (
-          <button
-            onClick={beginEdit}
-            style={{
-              ...reviewButtonStyle(th, isDark),
-              fontWeight: 500,
-            }}
-          >
-            <Edit3 style={{ width: 13, height: 13 }} />
-            Edit
-          </button>
         )}
-
-        <button
-          onClick={() => onReject(active.id)}
-          disabled={
-            active.status === 'rejected' ||
-            busyId === active.id
-          }
-          style={{
-            ...reviewButtonStyle(th, isDark),
-            fontWeight: 500,
-          }}
-        >
-          {active.status === 'approved'
-            ? 'Move to rejected'
-            : 'Reject'}
-        </button>
-
-        <button
-          onClick={() => onApprove(active.id)}
-          disabled={
-            active.status === 'approved' ||
-            busyId === active.id
-          }
-          style={{
-            ...reviewButtonStyle(
-              th,
-              isDark,
-              active.status === 'rejected' ? '#059669' : undefined,
-            ),
-            fontWeight:
-              active.status === 'rejected' ? 700 : 500,
-          }}
-        >
-          {active.status === 'rejected'
-            ? 'Bring back as FAQ'
-            : 'Approve'}
-        </button>
-      </div>
-    </div>
-  ) : (
-    <div
-      style={{
-        color: th.textSub,
-        textAlign: 'center',
-        padding: 40,
-        fontSize: 12,
-      }}
-    >
-      Select a website entry to inspect it.
-    </div>
-  )}
-</aside>
+      </aside>
       {confirmDeleteHost && (
         <ConfirmModal
           title={`Delete all entries from ${confirmDeleteHost.host}?`}
@@ -7010,8 +7043,6 @@ function WebsiteReviewPane({
     </div>
   );
 }
-
-
 
 function SavedKnowledgeLedger({
   websiteEntries,
