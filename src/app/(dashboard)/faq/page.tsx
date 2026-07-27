@@ -4672,26 +4672,13 @@ function CatalogueWorkspace({
   }).length;
 
   return (
-    <div
-      className='catalogue-workspace'
-      style={{
-        display: 'grid',
-        gridTemplateColumns:
-          'minmax(300px, .9fr) minmax(420px, 1.1fr) minmax(360px, .95fr)',
-        minHeight: 560,
-        alignItems: 'start',
-      }}
-    >
-      <div style={{ borderRight: `1px solid ${th.cardBorder}`, minWidth: 0 }}>
-        <div
-          style={{
-            padding: 14,
-            display: 'flex',
-            justifyContent: 'space-between',
-            gap: 10,
-            alignItems: 'center',
-          }}
-        >
+    <div className='grid min-h-[560px] grid-cols-1 items-start lg:grid-cols-[minmax(300px,.9fr)_minmax(420px,1.1fr)_minmax(360px,.95fr)]'>
+      {/* Documents column */}
+      <div
+        className='min-w-0 border-t lg:border-t-0 lg:border-r first:border-t-0'
+        style={{ borderColor: th.cardBorder }}
+      >
+        <div className='flex flex-wrap items-center justify-between gap-2.5 p-3.5'>
           <div>
             <div style={{ color: th.text, fontSize: 14, fontWeight: 600 }}>
               Uploaded documents
@@ -4710,22 +4697,17 @@ function CatalogueWorkspace({
         </div>
 
         <div
-          style={{
-            maxHeight: 492,
-            overflowY: 'auto',
-            borderTop: `1px solid ${th.cardBorder}`,
-          }}
+          className='max-h-80 overflow-y-auto border-t lg:max-h-[492px]'
+          style={{ borderColor: th.cardBorder }}
         >
           {documents.map((doc) => {
             const active = selectedDoc?.document_id === doc.document_id;
             return (
               <div
                 key={doc.document_id}
+                className='relative grid grid-cols-[1fr_auto] border-b'
                 style={{
-                  position: 'relative',
-                  display: 'grid',
-                  gridTemplateColumns: '1fr auto',
-                  borderBottom: `1px solid ${th.cardBorder}`,
+                  borderColor: th.cardBorder,
                   background: active
                     ? isDark
                       ? 'rgba(255,255,255,.04)'
@@ -4735,53 +4717,26 @@ function CatalogueWorkspace({
               >
                 <button
                   onClick={() => onSelect(doc.document_id)}
-                  style={{
-                    border: 0,
-                    background: 'transparent',
-                    color: th.text,
-                    padding: '13px 14px',
-                    display: 'grid',
-                    gridTemplateColumns: '28px 1fr auto',
-                    gap: 10,
-                    alignItems: 'center',
-                    textAlign: 'left',
-                    cursor: 'pointer',
-                  }}
+                  className='grid min-w-0 cursor-pointer grid-cols-[28px_1fr_auto] items-center gap-2.5 border-0 bg-transparent px-3.5 py-3.5 text-left'
+                  style={{ color: th.text }}
                 >
                   <span
+                    className='grid h-[26px] w-[26px] place-items-center rounded-lg border'
                     style={{
-                      width: 26,
-                      height: 26,
-                      borderRadius: 8,
-                      display: 'grid',
-                      placeItems: 'center',
-                      border: `1px solid ${th.cardBorder}`,
+                      borderColor: th.cardBorder,
                       color: th.textMuted,
                       background: active ? th.cardBg : 'transparent',
                     }}
                   >
                     <FileText style={{ width: 14, height: 14 }} />
                   </span>
-                  <span style={{ minWidth: 0 }}>
-                    <span
-                      style={{
-                        display: 'block',
-                        fontSize: 13,
-                        fontWeight: 500,
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
+                  <span className='min-w-0'>
+                    <span className='block overflow-hidden text-ellipsis whitespace-nowrap text-[13px] font-medium'>
                       {doc.filename}
                     </span>
                     <span
-                      style={{
-                        display: 'block',
-                        color: th.textMuted,
-                        fontSize: 11,
-                        marginTop: 3,
-                      }}
+                      className='mt-[3px] block text-[11px]'
+                      style={{ color: th.textMuted }}
                     >
                       {documentClassLabel(doc)}
                       {doc.page_count ? ` - ${doc.page_count}p` : ''}
@@ -4791,14 +4746,10 @@ function CatalogueWorkspace({
                     </span>
                   </span>
                   <span
+                    className='whitespace-nowrap rounded-full px-2 py-[5px] text-[11px] font-medium'
                     style={{
                       color: th.textSub,
                       background: isDark ? 'rgba(255,255,255,.04)' : '#f8fafc',
-                      borderRadius: 999,
-                      padding: '5px 8px',
-                      fontSize: 11,
-                      fontWeight: 500,
-                      whiteSpace: 'nowrap',
                     }}
                   >
                     {doc.ingestion_status}
@@ -4810,16 +4761,8 @@ function CatalogueWorkspace({
                     onDeleteDocument(doc.document_id, doc.filename);
                   }}
                   title='Delete document'
-                  style={{
-                    border: 0,
-                    background: 'transparent',
-                    color: th.textMuted,
-                    cursor: 'pointer',
-                    padding: '0 12px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
+                  className='flex cursor-pointer items-center justify-center border-0 bg-transparent px-3'
+                  style={{ color: th.textMuted }}
                 >
                   <X style={{ width: 14, height: 14 }} />
                 </button>
@@ -4829,12 +4772,8 @@ function CatalogueWorkspace({
 
           {!documents.length && (
             <div
-              style={{
-                padding: 28,
-                color: th.textSub,
-                textAlign: 'center',
-                fontSize: 12,
-              }}
+              className='p-7 text-center text-xs'
+              style={{ color: th.textSub }}
             >
               {loading
                 ? 'Loading uploaded catalogues...'
@@ -4844,37 +4783,34 @@ function CatalogueWorkspace({
         </div>
       </div>
 
-      <DocumentPreviewPanel
-        doc={selectedDoc}
-        detail={detail}
-        loading={detailLoading}
-        th={th}
-        isDark={isDark}
-      />
+      {/* Preview column */}
+      <div
+        className='min-w-0 border-t lg:border-t-0'
+        style={{ borderColor: th.cardBorder }}
+      >
+        <DocumentPreviewPanel
+          doc={selectedDoc}
+          detail={detail}
+          loading={detailLoading}
+          th={th}
+          isDark={isDark}
+        />
+      </div>
 
-      <div style={{ borderLeft: `1px solid ${th.cardBorder}`, minWidth: 0 }}>
-        <div
-          style={{ padding: 16, borderBottom: `1px solid ${th.cardBorder}` }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              gap: 12,
-              alignItems: 'flex-start',
-            }}
-          >
-            <div style={{ minWidth: 0, flex: 1 }}>
+      {/* Review column */}
+      <div
+        className='min-w-0 border-t lg:border-t-0 lg:border-l'
+        style={{ borderColor: th.cardBorder }}
+      >
+        <div className='border-b p-4' style={{ borderColor: th.cardBorder }}>
+          <div className='flex flex-wrap items-start justify-between gap-3'>
+            <div className='min-w-0 flex-1'>
               <div style={{ color: th.text, fontSize: 15, fontWeight: 700 }}>
                 Review what we found
               </div>
               <div
-                style={{
-                  color: th.textSub,
-                  fontSize: 12,
-                  marginTop: 3,
-                  lineHeight: 1.5,
-                }}
+                className='mt-[3px] text-xs leading-relaxed'
+                style={{ color: th.textSub }}
               >
                 {detailLoading
                   ? 'Reading your document…'
@@ -4886,6 +4822,7 @@ function CatalogueWorkspace({
             <button
               onClick={onApproveThreshold}
               disabled={!pendingAbove || busyId === 'bulk'}
+              className='whitespace-nowrap font-bold'
               style={{
                 ...reviewButtonStyle(
                   th,
@@ -4893,8 +4830,6 @@ function CatalogueWorkspace({
                   pendingAbove ? '#059669' : undefined,
                 ),
                 opacity: pendingAbove ? 1 : 0.45,
-                fontWeight: 700,
-                whiteSpace: 'nowrap',
               }}
               title={
                 pendingAbove
@@ -4907,48 +4842,34 @@ function CatalogueWorkspace({
                 : 'No good matches yet'}
             </button>
           </div>
+
           <div
+            className='mt-4 rounded-xl border p-3'
             style={{
-              marginTop: 16,
-              padding: 12,
-              borderRadius: 12,
               background: isDark
                 ? 'rgba(255,255,255,.03)'
                 : 'rgba(248,250,252,.7)',
-              border: `1px solid ${th.cardBorder}`,
+              borderColor: th.cardBorder,
             }}
           >
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: 8,
-                gap: 12,
-              }}
-            >
+            <div className='mb-2 flex flex-wrap items-center justify-between gap-3'>
               <div>
                 <div style={{ color: th.text, fontSize: 12, fontWeight: 700 }}>
                   How picky should we be?
                 </div>
                 <div
-                  style={{ color: th.textMuted, fontSize: 11, marginTop: 2 }}
+                  className='mt-0.5 text-[11px]'
+                  style={{ color: th.textMuted }}
                 >
                   Only auto-approve items we&apos;re at least this sure about.
                 </div>
               </div>
               <span
+                className='min-w-[60px] rounded-lg border px-2.5 py-1 text-center text-[15px] font-extrabold tabular-nums'
                 style={{
                   color: th.text,
-                  fontWeight: 800,
-                  fontSize: 15,
-                  padding: '4px 10px',
-                  borderRadius: 8,
                   background: th.accentBg,
-                  border: `1px solid ${th.accentBorder}`,
-                  fontVariantNumeric: 'tabular-nums',
-                  minWidth: 60,
-                  textAlign: 'center',
+                  borderColor: th.accentBorder,
                 }}
               >
                 {threshold}%
@@ -4962,28 +4883,19 @@ function CatalogueWorkspace({
               value={threshold}
               onChange={(event) => onThreshold(Number(event.target.value))}
               aria-label='Confidence bar for auto-approval'
-              style={{ width: '100%', accentColor: th.accent, height: 24 }}
+              className='h-6 w-full'
+              style={{ accentColor: th.accent }}
             />
             <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                fontSize: 10,
-                color: th.textMuted,
-                fontWeight: 600,
-                marginTop: 2,
-              }}
+              className='mt-0.5 flex flex-wrap justify-between gap-1 text-[10px] font-semibold'
+              style={{ color: th.textMuted }}
             >
               <span>50% — more items, less careful</span>
               <span>100% — only the surest matches</span>
             </div>
             <div
-              style={{
-                color: th.textMuted,
-                fontSize: 11,
-                marginTop: 10,
-                lineHeight: 1.5,
-              }}
+              className='mt-2.5 text-[11px] leading-relaxed'
+              style={{ color: th.textMuted }}
             >
               Anything less confident stays as a draft below for you to check by
               hand.
