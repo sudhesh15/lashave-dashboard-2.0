@@ -199,15 +199,17 @@ function StatTile({
   tone?: keyof typeof STAT_TONE;
 }) {
   return (
-    <div className='flex items-center gap-3 rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900/60'>
-      <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${STAT_TONE[tone]}`}>
+    <div className='flex items-center gap-2 rounded-2xl border border-gray-200 bg-white p-3 sm:gap-3 sm:p-4 dark:border-gray-800 dark:bg-gray-900/60'>
+      <span
+        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:h-12 sm:w-12 ${STAT_TONE[tone]}`}
+      >
         {icon}
       </span>
       <div className='min-w-0'>
-        <div className='text-xl font-bold text-gray-800 dark:text-white/90'>
+        <div className='text-lg font-bold text-gray-800 sm:text-xl dark:text-white/90'>
           {formatCompact(value)}
         </div>
-        <div className='truncate text-theme-sm text-gray-500 dark:text-gray-400'>
+        <div className='truncate text-xs text-gray-500 sm:text-theme-sm dark:text-gray-400'>
           {label}
         </div>
       </div>
@@ -734,47 +736,47 @@ export default function ConversationsPage() {
             </div>
           </div>
 
-          <div className='mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-7'>
+          <div className='mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 xl:grid-cols-7'>
             <StatTile
               label='Complaint'
               value={categoryCounts.complaint || 0}
-              icon={<AlertTriangle className='h-6 w-6' />}
+              icon={<AlertTriangle className='h-5 w-5 sm:h-6 sm:w-6' />}
               tone='error'
             />
             <StatTile
               label='Feedback'
               value={categoryCounts.feedback || 0}
-              icon={<MessageCircle className='h-6 w-6' />}
+              icon={<MessageCircle className='h-5 w-5 sm:h-6 sm:w-6' />}
               tone='brand'
             />
             <StatTile
               label='Order'
               value={categoryCounts.order || 0}
-              icon={<Package className='h-6 w-6' />}
+              icon={<Package className='h-5 w-5 sm:h-6 sm:w-6' />}
               tone='warning'
             />
             <StatTile
               label='Enquiry'
               value={categoryCounts.enquiry || 0}
-              icon={<HelpCircle className='h-6 w-6' />}
+              icon={<HelpCircle className='h-5 w-5 sm:h-6 sm:w-6' />}
               tone='brand'
             />
             <StatTile
               label='Open'
               value={openCount}
-              icon={<CheckCircle2 className='h-6 w-6' />}
+              icon={<CheckCircle2 className='h-5 w-5 sm:h-6 sm:w-6' />}
               tone='success'
             />
             <StatTile
               label='Handoff'
               value={handoffCount}
-              icon={<ArrowRightLeft className='h-6 w-6' />}
+              icon={<ArrowRightLeft className='h-5 w-5 sm:h-6 sm:w-6' />}
               tone='warning'
             />
             <StatTile
               label='With lead'
               value={leadCount}
-              icon={<Target className='h-6 w-6' />}
+              icon={<Target className='h-5 w-5 sm:h-6 sm:w-6' />}
               tone='success'
             />
           </div>
