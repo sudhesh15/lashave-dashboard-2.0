@@ -199,7 +199,7 @@ function StatTile({
   tone?: keyof typeof STAT_TONE;
 }) {
   return (
-    <div className='flex items-center gap-2 rounded-2xl border border-gray-200 bg-white p-3 sm:gap-3 sm:p-4 dark:border-gray-800 dark:bg-gray-900/60'>
+    <div className='flex w-[176px] flex-none items-center gap-3 rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900/60 sm:w-[190px]'>
       <span
         className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:h-12 sm:w-12 ${STAT_TONE[tone]}`}
       >
@@ -209,7 +209,7 @@ function StatTile({
         <div className='text-lg font-bold text-gray-800 sm:text-xl dark:text-white/90'>
           {formatCompact(value)}
         </div>
-        <div className='truncate text-xs text-gray-500 sm:text-theme-sm dark:text-gray-400'>
+        <div className='text-xs leading-5 text-gray-500 sm:text-theme-sm dark:text-gray-400'>
           {label}
         </div>
       </div>
@@ -736,7 +736,7 @@ export default function ConversationsPage() {
             </div>
           </div>
 
-          <div className='mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 xl:grid-cols-7'>
+          <div className='mt-8 flex flex-wrap gap-3 sm:gap-4'>
             <StatTile
               label='Complaint'
               value={categoryCounts.complaint || 0}
