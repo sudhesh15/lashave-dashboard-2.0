@@ -675,7 +675,7 @@ export default function ConversationDetailPage() {
               </div>
 
               <div className='border-t border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03] sm:p-5'>
-                <div className='flex items-center gap-3'>
+                <div className='flex items-center gap-2 sm:gap-3'>
                   <input
                     type='text'
                     value={replyText}
@@ -688,51 +688,58 @@ export default function ConversationDetailPage() {
                         void sendReply();
                       }
                     }}
-                    placeholder='Message as agent… (Cmd/Ctrl + Enter to send)'
-                    className={`h-12 flex-1 rounded-full border border-gray-300 bg-transparent px-5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 ${channelTheme.ring}`}
+                    placeholder='Message as agent…'
+                    className={`h-11 min-w-0 flex-1 rounded-full border border-gray-300 bg-transparent px-4 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 sm:h-12 sm:px-5 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 ${channelTheme.ring}`}
                   />
                   <button
                     type='button'
                     onClick={() => void sendReply()}
                     disabled={!replyText.trim() || sending}
-                    className={`inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-full px-6 text-theme-sm font-medium text-white disabled:opacity-60 ${channelTheme.accent} ${channelTheme.accentHover}`}
+                    className={`inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-full px-4 text-theme-sm font-medium text-white disabled:opacity-60 sm:h-12 sm:px-6 ${channelTheme.accent} ${channelTheme.accentHover}`}
                   >
                     {sending ? (
                       <Loader2 className='h-4 w-4 animate-spin' />
                     ) : (
                       <Send className='h-4 w-4' />
                     )}
-                    Send
+                    <span className='hidden sm:inline'>Send</span>
                   </button>
                 </div>
+                <p className='mt-1.5 hidden text-xs text-gray-400 sm:block dark:text-gray-500'>
+                  Cmd/Ctrl + Enter to send
+                </p>
 
-                <div className='mt-3 grid grid-cols-2 gap-3'>
+                <div className='mt-3 grid grid-cols-2 gap-2 sm:gap-3'>
                   <button
                     type='button'
                     onClick={() => void act(isHandoff ? 'reopen' : 'handoff')}
                     disabled={Boolean(actionLoading)}
-                    className='inline-flex h-11 items-center justify-center gap-2 rounded-full border border-success-200 bg-success-50 text-theme-sm font-medium text-success-600 disabled:opacity-60 dark:border-success-500/20 dark:bg-success-500/10 dark:text-success-400'
+                    className='inline-flex h-11 items-center justify-center gap-2 rounded-full border border-success-200 bg-success-50 px-2 text-xs font-medium text-success-600 disabled:opacity-60 sm:text-theme-sm dark:border-success-500/20 dark:bg-success-500/10 dark:text-success-400'
                   >
                     {actionLoading === 'handoff' ||
                     actionLoading === 'reopen' ? (
-                      <Loader2 className='h-4 w-4 animate-spin' />
+                      <Loader2 className='h-4 w-4 shrink-0 animate-spin' />
                     ) : (
-                      <Users className='h-4 w-4' />
+                      <Users className='h-4 w-4 shrink-0' />
                     )}
-                    {isHandoff ? 'Back to AI' : 'Handoff'}
+                    <span className='truncate'>
+                      {isHandoff ? 'Back to AI' : 'Handoff'}
+                    </span>
                   </button>
                   <button
                     type='button'
                     onClick={() => void act(isClosed ? 'reopen' : 'close')}
                     disabled={Boolean(actionLoading)}
-                    className='inline-flex h-11 items-center justify-center gap-2 rounded-full border border-gray-200 bg-gray-50 text-theme-sm font-medium text-gray-700 disabled:opacity-60 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300'
+                    className='inline-flex h-11 items-center justify-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-2 text-xs font-medium text-gray-700 disabled:opacity-60 sm:text-theme-sm dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300'
                   >
                     {actionLoading === 'close' || actionLoading === 'reopen' ? (
-                      <Loader2 className='h-4 w-4 animate-spin' />
+                      <Loader2 className='h-4 w-4 shrink-0 animate-spin' />
                     ) : (
-                      <CheckCircle2 className='h-4 w-4' />
+                      <CheckCircle2 className='h-4 w-4 shrink-0' />
                     )}
-                    {isClosed ? 'Reopen' : 'Close'}
+                    <span className='truncate'>
+                      {isClosed ? 'Reopen' : 'Close'}
+                    </span>
                   </button>
                 </div>
               </div>
