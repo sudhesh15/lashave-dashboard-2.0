@@ -43,6 +43,7 @@ type FormFieldProps = {
   placeholder?: string;
   required?: boolean;
   error?: string;
+   disabled?: boolean; 
 };
 
 type MeResp = {
