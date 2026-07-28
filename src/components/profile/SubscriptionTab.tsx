@@ -732,56 +732,93 @@ function UsageBar({
   const barColor = isOver
     ? '#ef4444'
     : isNear
-      ? '#f59e0b'
-      : '#10b981';
+      ? '#10b981'
+      : '#38bdf8';
+
+  const size = 96;
+  const strokeWidth = 10;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const dashOffset = circumference - (percentage / 100) * circumference;
+
+  const trackColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
 
   return (
-    <div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'baseline',
-          marginBottom: 6,
-        }}
-      >
-        <span
-          style={{
-            fontSize: 12,
-            fontWeight: 600,
-            color: isDark ? 'rgba(248,250,252,0.72)' : 'rgba(15,23,42,0.72)',
-          }}
-        >
-          {label}
-        </span>
-        <span
-          style={{
-            fontSize: 12,
-            fontWeight: 700,
-            color: isOver ? '#ef4444' : isDark ? '#f8fafc' : '#0f172a',
-          }}
-        >
-          {used.toLocaleString()} / {limit >= 9999 ? '∞' : limit.toLocaleString()}
-        </span>
-      </div>
-      <div
-        style={{
-          height: 6,
-          borderRadius: 999,
-          background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
-          overflow: 'hidden',
-        }}
-      >
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 10,
+      }}
+    >
+      <div style={{ position: 'relative', width: size, height: size }}>
+        <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            fill="none"
+            stroke={trackColor}
+            strokeWidth={strokeWidth}
+          />
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            fill="none"
+            stroke={barColor}
+            strokeWidth={strokeWidth}
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={dashOffset}
+            style={{
+              transition: 'stroke-dashoffset 0.4s ease, stroke 0.2s',
+            }}
+          />
+        </svg>
         <div
           style={{
-            width: `${percentage}%`,
-            height: '100%',
-            borderRadius: 999,
-            background: barColor,
-            transition: 'width 0.4s ease, background 0.2s',
+            position: 'absolute',
+            inset: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
-        />
+        >
+          <span
+            style={{
+              fontSize: 16,
+              fontWeight: 700,
+              color: isOver ? '#ef4444' : isDark ? '#f8fafc' : '#0f172a',
+              lineHeight: 1,
+            }}
+          >
+            {percentage}%
+          </span>
+          <span
+            style={{
+              fontSize: 10,
+              fontWeight: 600,
+              marginTop: 2,
+              color: isDark ? 'rgba(248,250,252,0.6)' : 'rgba(15,23,42,0.6)',
+            }}
+          >
+            {used.toLocaleString()}/{limit >= 9999 ? '∞' : limit.toLocaleString()}
+          </span>
+        </div>
       </div>
+      <span
+        style={{
+          fontSize: 12,
+          fontWeight: 600,
+          color: isDark ? 'rgba(248,250,252,0.72)' : 'rgba(15,23,42,0.72)',
+          textAlign: 'center',
+        }}
+      >
+        {label}
+      </span>
     </div>
   );
 }

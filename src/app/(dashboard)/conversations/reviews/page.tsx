@@ -2,7 +2,10 @@
 
 import { RequireAuth } from '@/components/require-auth';
 import { Button } from '@/components/ui/button';
-import { getPageItems, TablePagination } from '@/components/ui/table-pagination';
+import {
+  getPageItems,
+  TablePagination,
+} from '@/components/ui/table-pagination';
 import { useOutsideClick } from '@/hooks/useOutsideClick';
 import { apiFetch } from '@/lib/api';
 import { useTheme } from '@/lib/theme-context';
@@ -22,7 +25,14 @@ import {
   Wand2,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 const ReactApexChart = dynamic(() => import('react-apexcharts'), {
   ssr: false,
@@ -146,7 +156,11 @@ const REVIEW_KEYWORDS = [
 
 type KeywordKey = (typeof REVIEW_KEYWORDS)[number]['key'];
 
-const REVIEW_STATUS_TABS: { key: FilterKey; label: string; icon: React.ReactNode }[] = [
+const REVIEW_STATUS_TABS: {
+  key: FilterKey;
+  label: string;
+  icon: React.ReactNode;
+}[] = [
   { key: 'needs_reply', label: 'Needs reply', icon: <Send size={13} /> },
   { key: 'replied', label: 'Replied', icon: <Check size={13} /> },
   { key: 'rating_only', label: 'Rating only', icon: <Star size={13} /> },
@@ -169,7 +183,8 @@ function formatDate(value?: string | null) {
   return new Intl.DateTimeFormat('en-IN', {
     day: 'numeric',
     month: 'short',
-    year: date.getFullYear() === new Date().getFullYear() ? undefined : 'numeric',
+    year:
+      date.getFullYear() === new Date().getFullYear() ? undefined : 'numeric',
   }).format(date);
 }
 
@@ -231,7 +246,9 @@ function MetricCard({
 
   return (
     <Card className='p-5 md:p-6'>
-      <span className={`inline-flex rounded-full px-2.5 py-1 text-theme-xs font-medium ${toneClass}`}>
+      <span
+        className={`inline-flex rounded-full px-2.5 py-1 text-theme-xs font-medium ${toneClass}`}
+      >
         {label}
       </span>
       <h3 className='mt-5 text-title-sm font-bold text-gray-800 dark:text-white/90'>
@@ -244,13 +261,7 @@ function MetricCard({
   );
 }
 
-function ChartHeader({
-  title,
-  subtitle,
-}: {
-  title: string;
-  subtitle: string;
-}) {
+function ChartHeader({ title, subtitle }: { title: string; subtitle: string }) {
   return (
     <div className='mb-6'>
       <h3 className='text-lg font-semibold text-gray-800 dark:text-white/90'>
@@ -269,7 +280,11 @@ function RatingStars({ rating }: { rating: number }) {
       {Array.from({ length: 5 }).map((_, index) => (
         <Star
           key={index}
-          className={index < rating ? 'text-brand-500' : 'text-gray-300 dark:text-gray-700'}
+          className={
+            index < rating
+              ? 'text-brand-500'
+              : 'text-gray-300 dark:text-gray-700'
+          }
           fill={index < rating ? '#465FFF' : 'transparent'}
           size={14}
         />
@@ -285,9 +300,23 @@ function RatingDistributionChart({
   distribution: Array<{ rating: number; count: number }>;
   isDark: boolean;
 }) {
-  const colors = ['#465FFF', '#5E76FF', '#7592FF', '#9CB9FF', '#C2D6FF'];
+  const RATING_COLORS: Record<number, string> = {
+    5: '#D1E0FF', // brand-100/200
+    4: '#B2CCFF', // brand-200
+    3: '#FEDF89', // warning-200
+    2: '#FDB022', // warning-400/orange
+    1: '#FDA29B', // error-300
+  };
+  const colors = distribution.map(
+    (item) => RATING_COLORS[item.rating] || '#465FFF',
+  );
+
   const options: ApexOptions = {
-    chart: { type: 'donut', toolbar: { show: false }, fontFamily: 'Outfit, sans-serif' },
+    chart: {
+      type: 'donut',
+      toolbar: { show: false },
+      fontFamily: 'Outfit, sans-serif',
+    },
     colors,
     labels: distribution.map((item) => `${item.rating} star`),
     legend: { show: false },
@@ -315,7 +344,10 @@ function RatingDistributionChart({
             <div key={item.rating}>
               <div className='mb-1 flex justify-between text-theme-sm'>
                 <span className='flex items-center gap-2 text-gray-700 dark:text-gray-300'>
-                  <span className='h-2 w-2 rounded-full' style={{ backgroundColor: colors[index] }} />
+                  <span
+                    className='h-2 w-2 rounded-full'
+                    style={{ backgroundColor: colors[index] }}
+                  />
                   {item.rating} star
                 </span>
                 <span className='font-medium text-gray-800 dark:text-white/90'>
@@ -338,7 +370,6 @@ function RatingDistributionChart({
     </Card>
   );
 }
-
 function KeywordSignalChart({
   keywordStats,
   isDark,
@@ -346,16 +377,35 @@ function KeywordSignalChart({
   keywordStats: Array<{ key: string; label: string; count: number }>;
   isDark: boolean;
 }) {
+  const KEYWORD_COLORS: Record<string, string> = {
+    refund: '#D1E0FF',
+    health: '#B2CCFF',
+    complaint: '#FEDF89',
+    delivery: '#FDB022',
+    quality: '#FDA29B',
+    service: '#A6F4C5',
+    price: '#D9D6FE',
+  };
+  const colors = keywordStats.map(
+    (item) => KEYWORD_COLORS[item.key] || '#B2CCFF',
+  );
+
   const options: ApexOptions = {
-    colors: ['#465FFF'],
+    colors,
     chart: {
       type: 'bar',
       toolbar: { show: false },
       fontFamily: 'Outfit, sans-serif',
     },
     plotOptions: {
-      bar: { borderRadius: 5, columnWidth: '42%', borderRadiusApplication: 'end' },
+      bar: {
+        borderRadius: 5,
+        columnWidth: '42%',
+        borderRadiusApplication: 'end',
+        distributed: true,
+      },
     },
+    legend: { show: false },
     dataLabels: { enabled: false },
     grid: {
       borderColor: isDark ? '#1D2939' : '#F2F4F7',
@@ -383,7 +433,9 @@ function KeywordSignalChart({
       {keywordStats.length > 0 ? (
         <ReactApexChart
           options={options}
-          series={[{ name: 'Mentions', data: keywordStats.map((item) => item.count) }]}
+          series={[
+            { name: 'Mentions', data: keywordStats.map((item) => item.count) },
+          ]}
           type='bar'
           height={260}
         />
@@ -395,7 +447,6 @@ function KeywordSignalChart({
     </Card>
   );
 }
-
 function ReviewRow({
   review,
   channelId,
@@ -449,7 +500,10 @@ function ReviewRow({
       setReply(suggestion);
       onMessage('AI suggestion generated.', 'success');
     } catch (error: unknown) {
-      onMessage(errorMessage(error, 'Failed to generate AI suggestion.'), 'error');
+      onMessage(
+        errorMessage(error, 'Failed to generate AI suggestion.'),
+        'error',
+      );
     } finally {
       setAiProcessing(false);
     }
@@ -481,7 +535,9 @@ function ReviewRow({
             </div>
             <div className='min-w-0'>
               <span className='group relative block max-w-full text-theme-sm font-medium text-gray-800 dark:text-white/90'>
-                <span className='block truncate'>{review.reviewer_name || 'Google reviewer'}</span>
+                <span className='block truncate'>
+                  {review.reviewer_name || 'Google reviewer'}
+                </span>
                 <span className='pointer-events-none absolute left-0 top-full z-50 mt-1 hidden max-w-[280px] group-hover:block'>
                   <span className='absolute -top-1 left-3 h-2 w-2 rotate-45 rounded-[2px] bg-gray-900' />
                   <span className='relative block rounded-md bg-gray-900 px-2.5 py-1.5 text-xs font-medium text-white shadow-lg'>
@@ -500,7 +556,8 @@ function ReviewRow({
         </td>
         <td className='max-w-[420px] px-5 py-4'>
           <p className='line-clamp-3 text-theme-sm text-gray-700 dark:text-gray-300'>
-            {review.comment || `Rated ${rating || 'unknown'} stars with no written review.`}
+            {review.comment ||
+              `Rated ${rating || 'unknown'} stars with no written review.`}
           </p>
           {review.critical_reasons && review.critical_reasons.length > 0 && (
             <p className='mt-2 text-theme-xs text-gray-500 dark:text-gray-400'>
@@ -518,7 +575,11 @@ function ReviewRow({
                   : 'bg-warning-50 text-warning-600 dark:bg-warning-500/15 dark:text-orange-400'
             }`}
           >
-            {replied ? 'Replied' : lowRating || review.is_critical ? 'Review needed' : 'Needs reply'}
+            {replied
+              ? 'Replied'
+              : lowRating || review.is_critical
+                ? 'Review needed'
+                : 'Needs reply'}
           </span>
         </td>
         <td className='px-5 py-4'>
@@ -543,8 +604,12 @@ function ReviewRow({
               </button>
               <button
                 type='button'
-                onClick={() => void (needsManual ? publishManualReply() : publishAiReply())}
-                disabled={publishing || aiProcessing || (needsManual && !reply.trim())}
+                onClick={() =>
+                  void (needsManual ? publishManualReply() : publishAiReply())
+                }
+                disabled={
+                  publishing || aiProcessing || (needsManual && !reply.trim())
+                }
                 className='inline-flex h-9 items-center gap-2 rounded-lg bg-brand-500 px-3 text-theme-sm font-medium text-white disabled:opacity-50'
               >
                 {publishing || (aiProcessing && !needsManual) ? (
@@ -560,7 +625,10 @@ function ReviewRow({
       </tr>
       {!replied && needsManual && (
         <tr>
-          <td colSpan={4} className='border-t border-gray-100 px-5 pb-5 dark:border-white/[0.05] sm:px-6'>
+          <td
+            colSpan={4}
+            className='border-t border-gray-100 px-5 pb-5 dark:border-white/[0.05] sm:px-6'
+          >
             <textarea
               value={reply}
               onChange={(event) => setReply(event.target.value)}
@@ -577,13 +645,23 @@ function ReviewRow({
 function ReviewsInner() {
   const { isDark } = useTheme();
   const [channels, setChannels] = useState<Channel[]>([]);
-  const [selectedChannelId, setSelectedChannelId] = useState<number | null>(null);
+  const [selectedChannelId, setSelectedChannelId] = useState<number | null>(
+    null,
+  );
   const [channelMenuOpen, setChannelMenuOpen] = useState(false);
   const [statusFilterOpen, setStatusFilterOpen] = useState(false);
   const channelMenuRef = useRef<HTMLDivElement>(null);
   const statusFilterRef = useRef<HTMLDivElement>(null);
-  useOutsideClick(channelMenuRef, () => setChannelMenuOpen(false), channelMenuOpen);
-  useOutsideClick(statusFilterRef, () => setStatusFilterOpen(false), statusFilterOpen);
+  useOutsideClick(
+    channelMenuRef,
+    () => setChannelMenuOpen(false),
+    channelMenuOpen,
+  );
+  useOutsideClick(
+    statusFilterRef,
+    () => setStatusFilterOpen(false),
+    statusFilterOpen,
+  );
   const [reviews, setReviews] = useState<GoogleReview[]>([]);
   const [criticalReviews, setCriticalReviews] = useState<GoogleReview[]>([]);
   const [loadingChannels, setLoadingChannels] = useState(true);
@@ -592,7 +670,9 @@ function ReviewsInner() {
   const [classifyingReviews, setClassifyingReviews] = useState(false);
   const [autoReplying, setAutoReplying] = useState(false);
   const [filter, setFilter] = useState<FilterKey>('needs_reply');
-  const [selectedKeyword, setSelectedKeyword] = useState<KeywordKey | 'all'>('all');
+  const [selectedKeyword, setSelectedKeyword] = useState<KeywordKey | 'all'>(
+    'all',
+  );
   const [reviewsPage, setReviewsPage] = useState(1);
   const [search, setSearch] = useState('');
   const [success, setSuccess] = useState('');
@@ -611,15 +691,18 @@ function ReviewsInner() {
     selectedChannel?.platform_account_id ||
     'Google Business Profile';
 
-  const showMessage = useCallback((message: string, kind: 'success' | 'error') => {
-    if (kind === 'success') {
-      setSuccess(message);
-      setError('');
-    } else {
-      setError(message);
-      setSuccess('');
-    }
-  }, []);
+  const showMessage = useCallback(
+    (message: string, kind: 'success' | 'error') => {
+      if (kind === 'success') {
+        setSuccess(message);
+        setError('');
+      } else {
+        setError(message);
+        setSuccess('');
+      }
+    },
+    [],
+  );
 
   const loadChannels = useCallback(async () => {
     setLoadingChannels(true);
@@ -628,7 +711,9 @@ function ReviewsInner() {
         auth: true,
       });
       const googleChannels = (result.items || []).filter(
-        (channel) => channel.platform?.toLowerCase().trim() === 'google' && channel.is_active,
+        (channel) =>
+          channel.platform?.toLowerCase().trim() === 'google' &&
+          channel.is_active,
       );
       setChannels(googleChannels);
       setSelectedChannelId((current) =>
@@ -666,10 +751,13 @@ function ReviewsInner() {
     if (!selectedChannelId) return;
     setLoadingReviews(true);
     try {
-      await apiFetch<unknown>(`/admin/channels/google/${selectedChannelId}/reviews`, {
-        method: 'POST',
-        auth: true,
-      });
+      await apiFetch<unknown>(
+        `/admin/channels/google/${selectedChannelId}/reviews`,
+        {
+          method: 'POST',
+          auth: true,
+        },
+      );
       await loadReviews();
       showMessage('Reviews synced.', 'success');
     } catch (err: unknown) {
@@ -720,7 +808,9 @@ function ReviewsInner() {
         needsReview += result.needs_review || 0;
         remaining = result.remaining || 0;
         if (result.processed === 0 && remaining > 0) {
-          throw new Error(`${remaining} reviews remain pending, but no reviews were processed.`);
+          throw new Error(
+            `${remaining} reviews remain pending, but no reviews were processed.`,
+          );
         }
       }
       await loadCriticalReviews();
@@ -731,7 +821,10 @@ function ReviewsInner() {
         failed > 0 ? 'error' : 'success',
       );
     } catch (err: unknown) {
-      showMessage(errorMessage(err, 'Failed to classify pending reviews.'), 'error');
+      showMessage(
+        errorMessage(err, 'Failed to classify pending reviews.'),
+        'error',
+      );
     } finally {
       setClassifyingReviews(false);
     }
@@ -783,21 +876,38 @@ function ReviewsInner() {
 
   const stats = useMemo(() => {
     const total = reviews.length;
-    const replied = reviews.filter((review) => review.status === 'replied').length;
+    const replied = reviews.filter(
+      (review) => review.status === 'replied',
+    ).length;
     const needsReply = total - replied;
-    const ratingOnly = reviews.filter((review) => !review.comment?.trim()).length;
+    const ratingOnly = reviews.filter(
+      (review) => !review.comment?.trim(),
+    ).length;
     const lowRating = reviews.filter((review) => {
       const rating = getRating(review);
       return rating === 1 || rating === 2;
     }).length;
-    const ratingTotal = reviews.reduce((sum, review) => sum + getRating(review), 0);
+    const ratingTotal = reviews.reduce(
+      (sum, review) => sum + getRating(review),
+      0,
+    );
     const average = total > 0 ? ratingTotal / total : 0;
     const replyRate = total > 0 ? Math.round((replied / total) * 100) : 0;
     const distribution = [5, 4, 3, 2, 1].map((rating) => ({
       rating,
-      count: reviews.filter((review) => review.rating === RATING_LABEL[rating]).length,
+      count: reviews.filter((review) => review.rating === RATING_LABEL[rating])
+        .length,
     }));
-    return { total, replied, needsReply, ratingOnly, lowRating, average, replyRate, distribution };
+    return {
+      total,
+      replied,
+      needsReply,
+      ratingOnly,
+      lowRating,
+      average,
+      replyRate,
+      distribution,
+    };
   }, [reviews]);
 
   const keywordStats = useMemo(
@@ -805,7 +915,8 @@ function ReviewsInner() {
       REVIEW_KEYWORDS.map((keyword) => ({
         key: keyword.key,
         label: keyword.label,
-        count: reviews.filter((review) => reviewMatchesKeyword(review, keyword)).length,
+        count: reviews.filter((review) => reviewMatchesKeyword(review, keyword))
+          .length,
       })).filter((keyword) => keyword.count > 0),
     [reviews],
   );
@@ -868,7 +979,8 @@ function ReviewsInner() {
   };
 
   const activeStatusTab =
-    REVIEW_STATUS_TABS.find((tab) => tab.key === filter) ?? REVIEW_STATUS_TABS[0];
+    REVIEW_STATUS_TABS.find((tab) => tab.key === filter) ??
+    REVIEW_STATUS_TABS[0];
 
   const handleSeeAllReviews = () => {
     setFilter('needs_reply');
@@ -888,7 +1000,8 @@ function ReviewsInner() {
             Review response workspace
           </h1>
           <p className='mt-2 max-w-2xl text-theme-sm text-gray-500 dark:text-gray-400'>
-            Track rating quality, urgent review signals, and reply coverage for connected Google profiles.
+            Track rating quality, urgent review signals, and reply coverage for
+            connected Google profiles.
           </p>
         </div>
 
@@ -900,8 +1013,16 @@ function ReviewsInner() {
               disabled={loadingChannels || channels.length === 0}
               className='inline-flex h-11 min-w-[240px] items-center justify-between rounded-lg border border-gray-200 bg-white px-4 text-left text-theme-sm font-medium text-gray-700 disabled:opacity-60 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300'
             >
-              <span className='truncate'>{loadingChannels ? 'Loading profile' : channels.length === 0 ? 'No Google profile' : channelName}</span>
-              {channels.length > 1 && <ChevronDown className='h-4 w-4 text-gray-400' />}
+              <span className='truncate'>
+                {loadingChannels
+                  ? 'Loading profile'
+                  : channels.length === 0
+                    ? 'No Google profile'
+                    : channelName}
+              </span>
+              {channels.length > 1 && (
+                <ChevronDown className='h-4 w-4 text-gray-400' />
+              )}
             </button>
             {channelMenuOpen && channels.length > 1 && (
               <div className='absolute right-0 top-[calc(100%+8px)] z-20 w-[300px] rounded-xl border border-gray-200 bg-white p-2 shadow-theme-lg dark:border-gray-800 dark:bg-gray-900'>
@@ -921,7 +1042,9 @@ function ReviewsInner() {
                           : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5'
                       }`}
                     >
-                      {channel.account_name || channel.display_name || channel.platform_account_id}
+                      {channel.account_name ||
+                        channel.display_name ||
+                        channel.platform_account_id}
                     </button>
                   );
                 })}
@@ -934,7 +1057,9 @@ function ReviewsInner() {
             disabled={!selectedChannelId || loadingReviews}
             className='inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 text-theme-sm font-medium text-gray-700 disabled:opacity-60 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300'
           >
-            <RefreshCw className={`h-4 w-4 ${loadingReviews ? 'animate-spin' : ''}`} />
+            <RefreshCw
+              className={`h-4 w-4 ${loadingReviews ? 'animate-spin' : ''}`}
+            />
             Sync
           </button>
         </div>
@@ -944,7 +1069,9 @@ function ReviewsInner() {
         <div className='mb-6 flex items-center gap-3 rounded-xl border border-success-200 bg-success-50 px-4 py-3 text-theme-sm font-medium text-success-700 dark:border-success-500/20 dark:bg-success-500/10 dark:text-success-500'>
           <Check className='h-4 w-4' />
           <span className='flex-1'>{success}</span>
-          <button type='button' onClick={() => setSuccess('')}>Close</button>
+          <button type='button' onClick={() => setSuccess('')}>
+            Close
+          </button>
         </div>
       )}
 
@@ -952,7 +1079,9 @@ function ReviewsInner() {
         <div className='mb-6 flex items-start gap-3 rounded-xl border border-error-200 bg-error-50 px-4 py-3 text-theme-sm font-medium text-error-700 dark:border-error-500/20 dark:bg-error-500/10 dark:text-error-500'>
           <AlertTriangle className='mt-0.5 h-4 w-4 shrink-0' />
           <span className='flex-1'>{error}</span>
-          <button type='button' onClick={() => setError('')}>Close</button>
+          <button type='button' onClick={() => setError('')}>
+            Close
+          </button>
         </div>
       )}
 
@@ -994,7 +1123,10 @@ function ReviewsInner() {
           </div>
 
           <div className='mt-6 grid grid-cols-1 gap-6 xl:grid-cols-2'>
-            <RatingDistributionChart distribution={stats.distribution} isDark={isDark} />
+            <RatingDistributionChart
+              distribution={stats.distribution}
+              isDark={isDark}
+            />
             <KeywordSignalChart keywordStats={keywordStats} isDark={isDark} />
           </div>
 
@@ -1083,7 +1215,9 @@ function ReviewsInner() {
                       key={keyword.key}
                       type='button'
                       onClick={() =>
-                        setSelectedKeyword(selectedKeyword === keyword.key ? 'all' : keyword.key)
+                        setSelectedKeyword(
+                          selectedKeyword === keyword.key ? 'all' : keyword.key,
+                        )
                       }
                       className={`h-10 shrink-0 rounded-lg px-4 text-theme-sm font-medium transition ${
                         selectedKeyword === keyword.key
@@ -1101,7 +1235,11 @@ function ReviewsInner() {
 
                   <Button
                     onClick={() => void autoReplyAll()}
-                    disabled={autoReplying || stats.needsReply === 0 || !selectedChannelId}
+                    disabled={
+                      autoReplying ||
+                      stats.needsReply === 0 ||
+                      !selectedChannelId
+                    }
                   >
                     {autoReplying ? (
                       <Loader2 className='h-4 w-4 animate-spin' />
@@ -1118,7 +1256,8 @@ function ReviewsInner() {
                   <div className='flex flex-col gap-3 rounded-xl border border-warning-200 bg-warning-50 p-4 dark:border-warning-500/20 dark:bg-warning-500/10 sm:flex-row sm:items-center sm:justify-between'>
                     <div>
                       <p className='text-theme-sm font-semibold text-gray-800 dark:text-white/90'>
-                        {pendingCriticalCount} reviews waiting for classification
+                        {pendingCriticalCount} reviews waiting for
+                        classification
                       </p>
                       <p className='mt-1 text-theme-xs text-gray-500 dark:text-gray-400'>
                         {needsHumanReviewCount} currently need human review.
@@ -1130,7 +1269,9 @@ function ReviewsInner() {
                       onClick={() => void classifyPendingCriticalReviews()}
                       className='inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-brand-500 px-4 text-theme-sm font-medium text-white disabled:opacity-60'
                     >
-                      {classifyingReviews && <Loader2 className='h-4 w-4 animate-spin' />}
+                      {classifyingReviews && (
+                        <Loader2 className='h-4 w-4 animate-spin' />
+                      )}
                       Classify pending
                     </button>
                   </div>
@@ -1148,26 +1289,34 @@ function ReviewsInner() {
                     </colgroup>
                     <thead className='border-b border-gray-100 dark:border-white/[0.05]'>
                       <tr>
-                        {['Reviewer', 'Review', 'Status', 'Action'].map((header) => (
-                          <th
-                            key={header}
-                            className='px-5 py-3 text-left text-base font-medium text-gray-500 dark:text-gray-400'
-                          >
-                            {header}
-                          </th>
-                        ))}
+                        {['Reviewer', 'Review', 'Status', 'Action'].map(
+                          (header) => (
+                            <th
+                              key={header}
+                              className='px-5 py-3 text-left text-base font-medium text-gray-500 dark:text-gray-400'
+                            >
+                              {header}
+                            </th>
+                          ),
+                        )}
                       </tr>
                     </thead>
                     <tbody className='divide-y divide-gray-100 dark:divide-white/[0.05]'>
                       {loadingReviews || loadingCriticalReviews ? (
                         <tr>
-                          <td colSpan={4} className='px-5 py-14 text-center text-theme-sm text-gray-500 dark:text-gray-400'>
+                          <td
+                            colSpan={4}
+                            className='px-5 py-14 text-center text-theme-sm text-gray-500 dark:text-gray-400'
+                          >
                             Loading reviews
                           </td>
                         </tr>
                       ) : filteredReviews.length === 0 ? (
                         <tr>
-                          <td colSpan={4} className='px-5 py-14 text-center text-theme-sm text-gray-500 dark:text-gray-400'>
+                          <td
+                            colSpan={4}
+                            className='px-5 py-14 text-center text-theme-sm text-gray-500 dark:text-gray-400'
+                          >
                             No reviews match this filter
                           </td>
                         </tr>
@@ -1186,7 +1335,11 @@ function ReviewsInner() {
                   </table>
                 </div>
               </div>
-              <TablePagination page={reviewsPage} totalItems={filteredReviews.length} onPageChange={setReviewsPage} />
+              <TablePagination
+                page={reviewsPage}
+                totalItems={filteredReviews.length}
+                onPageChange={setReviewsPage}
+              />
             </div>
           </div>
         </>

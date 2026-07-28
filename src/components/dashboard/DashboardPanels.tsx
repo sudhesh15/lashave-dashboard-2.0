@@ -8,6 +8,98 @@ import { useEffect, useRef, useState } from 'react';
 // Types
 // ─────────────────────────────────────────────────────────────────────────────
 
+export type AttentionCfg = {
+  dot: string;
+  badge: string;
+  label: string;
+};
+
+
+
+
+export const ATTENTION_CFG: Record<string, AttentionCfg> = {
+  handoff_needed: {
+    dot: 'bg-[#8B5CF6]',
+    badge:
+      'bg-[#8B5CF6]/10 text-[#7C3AED] dark:bg-[#8B5CF6]/20 dark:text-[#A78BFA]',
+    label: 'handoff',
+  },
+  angry_customer: {
+    dot: 'bg-error-500',
+    badge:
+      'bg-error-50 text-error-600 dark:bg-error-500/[0.12] dark:text-error-400',
+    label: 'angry',
+  },
+  hot_lead: {
+    dot: 'bg-[#F97316]',
+    badge:
+      'bg-[#F97316]/10 text-[#EA580C] dark:bg-[#F97316]/20 dark:text-[#FB923C]',
+    label: 'hot lead',
+  },
+  no_team_reply: {
+    dot: 'bg-warning-500',
+    badge:
+      'bg-warning-50 text-warning-600 dark:bg-warning-500/[0.12] dark:text-warning-400',
+    label: 'waiting',
+  },
+  faq_gap: {
+    dot: 'bg-[#06B6D4]',
+    badge:
+      'bg-[#06B6D4]/10 text-[#0891B2] dark:bg-[#06B6D4]/20 dark:text-[#22D3EE]',
+    label: 'FAQ gap',
+  },
+  error: {
+    dot: 'bg-error-600',
+    badge:
+      'bg-error-50 text-error-700 dark:bg-error-500/[0.15] dark:text-error-400',
+    label: 'error',
+  },
+  returning_lead: {
+    dot: 'bg-success-500',
+    badge:
+      'bg-success-50 text-success-600 dark:bg-success-500/[0.12] dark:text-success-400',
+    label: 'returning lead',
+  },
+  payment_issue: {
+    dot: 'bg-[#EC4899]',
+    badge:
+      'bg-[#EC4899]/10 text-[#DB2777] dark:bg-[#EC4899]/20 dark:text-[#F472B6]',
+    label: 'payment',
+  },
+  dropoff: {
+    dot: 'bg-error-500',
+    badge:
+      'bg-error-50 text-error-600 dark:bg-error-500/[0.12] dark:text-error-400',
+    label: 'drop-off',
+  },
+  returning: {
+    dot: 'bg-[#06B6D4]',
+    badge:
+      'bg-[#06B6D4]/10 text-[#0891B2] dark:bg-[#06B6D4]/20 dark:text-[#22D3EE]',
+    label: 'returning',
+  },
+  lead_won: {
+    dot: 'bg-success-500',
+    badge:
+      'bg-success-50 text-success-600 dark:bg-success-500/[0.12] dark:text-success-400',
+    label: 'won',
+  },
+  lead_qualified: {
+    dot: 'bg-[#A78BFA]',
+    badge:
+      'bg-[#A78BFA]/10 text-[#7C3AED] dark:bg-[#A78BFA]/20 dark:text-[#C4B5FD]',
+    label: 'qualified',
+  },
+  ai_disabled: {
+    dot: 'bg-warning-500',
+    badge:
+      'bg-warning-50 text-warning-600 dark:bg-warning-500/[0.12] dark:text-warning-400',
+    label: 'AI off',
+  },
+};
+
+
+
 export type AttentionType =
   | 'handoff_needed'
   | 'angry_customer'

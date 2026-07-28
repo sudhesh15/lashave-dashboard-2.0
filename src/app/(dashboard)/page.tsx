@@ -1,9 +1,12 @@
 'use client';
+import Link from 'next/link';
 
-import type {
-  AttentionItem,
-  FaqGap,
-  TopicItem,
+import {
+  ATTENTION_CFG,
+  AttentionCfg,
+  type AttentionItem,
+  type FaqGap,
+  type TopicItem,
 } from '@/components/dashboard/DashboardPanels';
 import { OnboardingCard } from '@/components/overview/onboarding/OnboardingCard';
 import { OnboardingDrawer } from '@/components/overview/onboarding/OnboardingDrawer';
@@ -612,6 +615,30 @@ function PipelineChart({
   );
 }
 
+// helper
+const TOPIC_COLOR_MAP: Record<string, string> = {
+  pricing: '#60A5FA',
+  booking: '#22D3EE',
+  appointment: '#2DD4BF',
+  support: '#FCA5A5',
+  product: '#C4B5FD',
+  availability: '#F0ABFC',
+  complaint: '#FB7185',
+  refund: '#FDBA74',
+  hours: '#FCD34D',
+  general_interest: '#CBD5E1',
+  integration: '#93C5FD',
+  demo: '#67E8F9',
+};
+
+function getTopicColor(topic: string): string {
+  const lower = topic.toLowerCase();
+  for (const [key, color] of Object.entries(TOPIC_COLOR_MAP)) {
+    if (lower.includes(key)) return color;
+  }
+  return '#94A3B8'; // fallback slate
+}
+
 function TopicsCard({
   topics,
   loading,
@@ -635,20 +662,24 @@ function TopicsCard({
         <div className='space-y-4'>
           {topics.slice(0, 8).map((topic) => {
             const pct = Math.round((topic.count / max) * 100);
+            const color = getTopicColor(topic.topic);
             return (
               <div key={topic.topic}>
                 <div className='mb-2 flex justify-between gap-3 text-theme-sm'>
                   <span className='font-medium capitalize text-gray-700 dark:text-gray-300'>
                     {topic.topic.replace(/_/g, ' ')}
                   </span>
-                  <span className='text-gray-500 dark:text-gray-400'>
+                  <span className='font-semibold' style={{ color }}>
                     {topic.count}
                   </span>
                 </div>
                 <div className='h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800'>
                   <div
-                    className='h-full rounded-full bg-brand-500'
-                    style={{ width: `${pct}%` }}
+                    className='h-full rounded-full transition-all'
+                    style={{
+                      width: `${pct}%`,
+                      background: `linear-gradient(90deg, ${color}, ${color}99)`,
+                    }}
                   />
                 </div>
               </div>
@@ -893,6 +924,16 @@ function timeAgo(iso: string | null) {
   return `${Math.floor(seconds / 86400)}d ago`;
 }
 
+const FALLBACK_CFG: AttentionCfg = {
+  dot: 'bg-gray-400',
+  badge: 'bg-gray-100 text-gray-600 dark:bg-gray-500/[0.12] dark:text-gray-300',
+  label: 'attention',
+};
+
+function getAttentionCfg(type: string): AttentionCfg {
+  return ATTENTION_CFG[type] ?? FALLBACK_CFG;
+}
+
 function attentionLabel(type: string) {
   return type.replace(/_/g, ' ');
 }
@@ -916,30 +957,43 @@ function AttentionCard({
         <EmptyBlock label='No attention items right now' />
       ) : (
         <div className='overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800'>
-          {items.slice(0, 8).map((item, index) => (
-            <div
-              key={`${item.type}-${item.created_at}-${index}`}
-              className='flex gap-3 border-b border-gray-200 px-4 py-3 last:border-b-0 dark:border-gray-800'
-            >
-              <span className='mt-2 h-2 w-2 shrink-0 rounded-full bg-brand-500' />
-              <div className='min-w-0 flex-1'>
-                <div className='flex items-center justify-between gap-3'>
-                  <p className='truncate text-theme-sm font-medium text-gray-800 dark:text-white/90'>
-                    {item.sender_name || 'Unknown customer'}
+          {items.slice(0, 8).map((item, index) => {
+            const cfg = getAttentionCfg(item.type);
+            const href = item.conversation_id
+              ? `/conversations/${item.conversation_id}`
+              : '/conversations';
+
+            return (
+              <Link
+                key={`${item.type}-${item.created_at}-${index}`}
+                href={href}
+                className='flex gap-3 border-b border-gray-200 px-4 py-3 last:border-b-0 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/[0.03]'
+              >
+                <span
+                  className={`mt-2 h-2 w-2 shrink-0 rounded-full ${cfg.dot}`}
+                />
+                <div className='min-w-0 flex-1'>
+                  <div className='flex items-center justify-between gap-3'>
+                    <p className='truncate text-theme-sm font-medium text-gray-800 dark:text-white/90'>
+                      {item.sender_name || 'Unknown customer'}
+                    </p>
+                    <span
+                      className={`shrink-0 rounded-full px-2.5 py-1 text-theme-xs font-medium capitalize ${cfg.badge}`}
+                    >
+                      {cfg.label}
+                    </span>
+                  </div>
+                  <p className='mt-1 line-clamp-2 text-theme-sm text-gray-500 dark:text-gray-400'>
+                    {item.message ||
+                      'Review this conversation for next action.'}
                   </p>
-                  <span className='shrink-0 rounded-full bg-brand-50 px-2.5 py-1 text-theme-xs font-medium capitalize text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400'>
-                    {attentionLabel(item.type)}
-                  </span>
+                  <p className='mt-2 text-theme-xs text-gray-400 dark:text-gray-500'>
+                    {timeAgo(item.created_at)} · {item.tenant_id || 'Tenant'}
+                  </p>
                 </div>
-                <p className='mt-1 line-clamp-2 text-theme-sm text-gray-500 dark:text-gray-400'>
-                  {item.message || 'Review this conversation for next action.'}
-                </p>
-                <p className='mt-2 text-theme-xs text-gray-400 dark:text-gray-500'>
-                  {timeAgo(item.created_at)} · {item.tenant_id || 'Tenant'}
-                </p>
-              </div>
-            </div>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       )}
     </Card>
@@ -1496,26 +1550,7 @@ ${about}`.trim();
           </div>
         </div>
 
-        <div className='mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3'>
-          <MetricCard
-            label='Returning Users'
-            value={returningTotal}
-            sub='repeat contacts'
-            icon={<RefreshCw className='h-6 w-6' />}
-          />
-          <MetricCard
-            label='AI Errors'
-            value={overview?.total_errors ?? 0}
-            sub='total'
-            icon={<Bot className='h-6 w-6' />}
-          />
-          <MetricCard
-            label='Complaints'
-            value={overview?.total_complaints ?? 0}
-            sub='total'
-            icon={<CircleHelp className='h-6 w-6' />}
-          />
-        </div>
+        
 
         <div className='mt-6 grid grid-cols-1 gap-6 xl:grid-cols-12'>
           <div className='xl:col-span-7'>

@@ -221,29 +221,46 @@ function MetricCard({
   value,
   detail,
   active,
+  tone = 'brand',
   onClick,
 }: {
   label: string;
   value: number;
   detail: string;
   active?: boolean;
+  tone?: 'brand' | 'success' | 'warning' | 'error' | 'gray';
   onClick?: () => void;
 }) {
+  const toneBg: Record<string, string> = {
+    brand: 'bg-brand-50/60 dark:bg-brand-500/[0.06]',
+    success: 'bg-success-50/60 dark:bg-success-500/[0.06]',
+    warning: 'bg-warning-50/60 dark:bg-warning-500/[0.06]',
+    error: 'bg-error-50/60 dark:bg-error-500/[0.06]',
+    gray: 'bg-gray-50 dark:bg-white/[0.02]',
+  };
+
   return (
     <button
-      type="button"
+      type='button'
       onClick={onClick}
       className={cn(
-        'rounded-2xl border bg-white p-5 text-left transition dark:bg-white/[0.03]',
+        'rounded-2xl border p-5 text-left transition',
+        toneBg[tone],
         active
           ? 'border-brand-300 shadow-theme-sm dark:border-brand-500/40'
           : 'border-gray-200 hover:border-gray-300 dark:border-gray-800 dark:hover:border-gray-700',
       )}
     >
-      <span className="text-theme-xs font-medium uppercase text-gray-500 dark:text-gray-400">{label}</span>
-      <div className="mt-3 flex items-end justify-between gap-3">
-        <span className="text-title-sm font-semibold text-gray-800 dark:text-white/90">{value}</span>
-        <span className="text-theme-xs text-gray-400 dark:text-gray-500">{detail}</span>
+      <span className='text-theme-xs font-medium uppercase text-gray-500 dark:text-gray-400'>
+        {label}
+      </span>
+      <div className='mt-3 flex items-end justify-between gap-3'>
+        <span className='text-title-sm font-semibold text-gray-800 dark:text-white/90'>
+          {value}
+        </span>
+        <span className='text-theme-xs text-gray-400 dark:text-gray-500'>
+          {detail}
+        </span>
       </div>
     </button>
   );
@@ -664,105 +681,135 @@ export default function LeadsPage() {
 
   return (
     <RequireAuth>
-      <div className="mx-auto max-w-360 px-4 py-8">
-        <PageBreadcrumb pageTitle="Leads" />
+      <div className='mx-auto max-w-360 px-4 py-8'>
+        <PageBreadcrumb pageTitle='Leads' />
 
-        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className='mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
           <div>
-            <h1 className="text-title-sm font-semibold text-gray-800 dark:text-white/90">Leads</h1>
-            <p className="mt-1 text-theme-sm text-gray-500 dark:text-gray-400">
-              Manage lead qualification, follow-ups, and pipeline movement from one focused workspace.
+            <h1 className='text-title-sm font-semibold text-gray-800 dark:text-white/90'>
+              Leads
+            </h1>
+            <p className='mt-1 text-theme-sm text-gray-500 dark:text-gray-400'>
+              Manage lead qualification, follow-ups, and pipeline movement from
+              one focused workspace.
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => load()} disabled={loading}>
+          <div className='flex items-center gap-2'>
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={() => load()}
+              disabled={loading}
+            >
               <RefreshCw className={cn('size-4', loading && 'animate-spin')} />
               Refresh
             </Button>
           </div>
         </div>
 
-        <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className='mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4'>
           <MetricCard
-            label="Total leads"
+            label='Total leads'
             value={total}
             detail={debouncedQ ? 'Filtered result' : 'Current view'}
             active={filterStatus === 'all'}
+            tone='warning'
             onClick={() => setFilterStatus('all')}
           />
           <MetricCard
-            label="New"
+            label='New'
             value={counts.new || 0}
-            detail={pipelineTotal ? `${Math.round(((counts.new || 0) / pipelineTotal) * 100)}% pipeline` : 'No data'}
+            detail={
+              pipelineTotal
+                ? `${Math.round(((counts.new || 0) / pipelineTotal) * 100)}% pipeline`
+                : 'No data'
+            }
             active={filterStatus === 'new'}
-            onClick={() => setFilterStatus(filterStatus === 'new' ? 'all' : 'new')}
+            tone='brand'
+            onClick={() =>
+              setFilterStatus(filterStatus === 'new' ? 'all' : 'new')
+            }
           />
           <MetricCard
-            label="Qualified"
+            label='Qualified'
             value={qualifiedTotal}
-            detail="Qualified and won"
+            detail='Qualified and won'
             active={filterStatus === 'qualified'}
-            onClick={() => setFilterStatus(filterStatus === 'qualified' ? 'all' : 'qualified')}
+            tone='success'
+            onClick={() =>
+              setFilterStatus(
+                filterStatus === 'qualified' ? 'all' : 'qualified',
+              )
+            }
           />
           <MetricCard
-            label="Follow-ups"
+            label='Follow-ups'
             value={voiceFollowUps.length}
-            detail="Growth queue"
+            detail='Growth queue'
+            tone='error'
           />
         </div>
 
-        <div className="flex flex-col gap-6">
-          <div className="flex flex-col gap-6">
-            <div className="min-w-0 max-w-full overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-              <div className="flex flex-col gap-2 border-b border-gray-100 px-5 py-5 dark:border-white/[0.05] sm:flex-row sm:items-center sm:justify-between sm:px-6">
-                <h3 className="text-base font-semibold text-gray-800 dark:text-white/90">Lead pipeline</h3>
-                <div className="text-theme-sm font-medium text-gray-500 dark:text-gray-400">{total} leads</div>
+        <div className='flex flex-col gap-6'>
+          <div className='flex flex-col gap-6'>
+            <div className='min-w-0 max-w-full overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]'>
+              <div className='flex flex-col gap-2 border-b border-gray-100 px-5 py-5 dark:border-white/[0.05] sm:flex-row sm:items-center sm:justify-between sm:px-6'>
+                <h3 className='text-base font-semibold text-gray-800 dark:text-white/90'>
+                  Lead pipeline
+                </h3>
+                <div className='text-theme-sm font-medium text-gray-500 dark:text-gray-400'>
+                  {total} leads
+                </div>
               </div>
 
-              <div className="min-w-0 px-5 py-5 sm:px-6">
-                <div className="flex flex-col gap-4 rounded-t-xl border border-b-0 border-gray-200 bg-white px-5 py-4 dark:border-white/[0.05] dark:bg-white/[0.01] lg:flex-row lg:items-center lg:justify-between">
-                  <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90">
+              <div className='min-w-0 px-5 py-5 sm:px-6'>
+                <div className='flex flex-col gap-4 rounded-t-xl border border-b-0 border-gray-200 bg-white px-5 py-4 dark:border-white/[0.05] dark:bg-white/[0.01] lg:flex-row lg:items-center lg:justify-between'>
+                  <h4 className='text-lg font-semibold text-gray-800 dark:text-white/90'>
                     {activeStageTab.label} leads
                   </h4>
-                  <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
-                    <div className="relative w-full sm:w-[240px]">
-                      <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400" />
+                  <div className='flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end'>
+                    <div className='relative w-full sm:w-[240px]'>
+                      <Search className='pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400' />
                       <input
-                        type="search"
+                        type='search'
                         value={searchQ}
                         onChange={(event) => {
                           setSearchQ(event.target.value);
                           setSearching(!!event.target.value);
                         }}
-                        placeholder="Search name, intent, service, or message"
-                        className="h-11 w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-11 pr-9 text-theme-sm text-gray-800 shadow-theme-xs outline-none placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-gray-500"
+                        placeholder='Search name, intent, service, or message'
+                        className='h-11 w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-11 pr-9 text-theme-sm text-gray-800 shadow-theme-xs outline-none placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-gray-500'
                       />
                       {searchQ && !searching && (
                         <button
-                          type="button"
+                          type='button'
                           onClick={() => setSearchQ('')}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 transition hover:text-gray-600 dark:hover:text-gray-300"
-                          aria-label="Clear search"
+                          className='absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 transition hover:text-gray-600 dark:hover:text-gray-300'
+                          aria-label='Clear search'
                         >
-                          <X className="size-4" />
+                          <X className='size-4' />
                         </button>
                       )}
                       {searching && (
-                        <Loader2 className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 animate-spin text-gray-400" />
+                        <Loader2 className='pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 animate-spin text-gray-400' />
                       )}
                     </div>
 
-                    <div ref={channelFilterRef} className="relative">
+                    <div ref={channelFilterRef} className='relative'>
                       <Button
-                        variant="outline"
-                        onClick={() => setOpenFilter(openFilter === 'channel' ? null : 'channel')}
+                        variant='outline'
+                        onClick={() =>
+                          setOpenFilter(
+                            openFilter === 'channel' ? null : 'channel',
+                          )
+                        }
                       >
                         <Radio size={14} />
                         Channel
                       </Button>
                       {openFilter === 'channel' && (
-                        <div className="absolute right-0 z-20 mt-2 w-64 overflow-hidden rounded-xl border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-800 dark:bg-gray-900">
+                        <div className='absolute right-0 z-20 mt-2 w-64 overflow-hidden rounded-xl border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-800 dark:bg-gray-900'>
                           <ChannelFilter
                             value={channelFilter}
                             onChange={(value) => {
@@ -776,23 +823,25 @@ export default function LeadsPage() {
                       )}
                     </div>
 
-                    <div ref={stageFilterRef} className="relative">
+                    <div ref={stageFilterRef} className='relative'>
                       <Button
-                        variant="outline"
-                        onClick={() => setOpenFilter(openFilter === 'stage' ? null : 'stage')}
+                        variant='outline'
+                        onClick={() =>
+                          setOpenFilter(openFilter === 'stage' ? null : 'stage')
+                        }
                       >
                         <SlidersHorizontal size={14} />
                         Stage
                       </Button>
                       {openFilter === 'stage' && (
-                        <div className="absolute right-0 z-20 mt-2 w-56 overflow-hidden rounded-xl border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-800 dark:bg-gray-900">
+                        <div className='absolute right-0 z-20 mt-2 w-56 overflow-hidden rounded-xl border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-800 dark:bg-gray-900'>
                           {STAGE_TABS.map((tab) => {
                             const isActive = filterStatus === tab.key;
                             const count = stageCounts[tab.key] || 0;
                             return (
                               <button
                                 key={tab.key}
-                                type="button"
+                                type='button'
                                 onClick={() => {
                                   setFilterStatus(tab.key);
                                   setOpenFilter(null);
@@ -804,11 +853,13 @@ export default function LeadsPage() {
                                     : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/[0.04]',
                                 )}
                               >
-                                <span className="inline-flex items-center gap-2">
+                                <span className='inline-flex items-center gap-2'>
                                   {tab.icon}
                                   {tab.label}
                                 </span>
-                                <span className="text-xs text-gray-400 dark:text-gray-500">{count}</span>
+                                <span className='text-xs text-gray-400 dark:text-gray-500'>
+                                  {count}
+                                </span>
                               </button>
                             );
                           })}
@@ -816,33 +867,37 @@ export default function LeadsPage() {
                       )}
                     </div>
 
-                    <div ref={dateFilterRef} className="relative">
+                    <div ref={dateFilterRef} className='relative'>
                       <DateFilter
                         dateRange={dateRange}
                         activePreset={activePreset}
                         setDateRange={setDateRange}
                         setActivePreset={setActivePreset}
                         open={openFilter === 'date'}
-                        onToggle={() => setOpenFilter(openFilter === 'date' ? null : 'date')}
+                        onToggle={() =>
+                          setOpenFilter(openFilter === 'date' ? null : 'date')
+                        }
                         onClose={() => setOpenFilter(null)}
                       />
                     </div>
 
-                    <Button variant="outline" onClick={handleSeeAllLeads}>
+                    <Button variant='outline' onClick={handleSeeAllLeads}>
                       See all
                     </Button>
                   </div>
                 </div>
 
                 {debouncedQ && !loading && (
-                  <div className="border-x border-gray-200 bg-white px-5 py-3 text-theme-sm text-brand-500 dark:border-white/[0.05] dark:bg-white/[0.01] dark:text-brand-400">
-                    {total > 0 ? `${total} leads match "${debouncedQ}"` : `No leads match "${debouncedQ}"`}
+                  <div className='border-x border-gray-200 bg-white px-5 py-3 text-theme-sm text-brand-500 dark:border-white/[0.05] dark:bg-white/[0.01] dark:text-brand-400'>
+                    {total > 0
+                      ? `${total} leads match "${debouncedQ}"`
+                      : `No leads match "${debouncedQ}"`}
                   </div>
                 )}
 
                 {err && (
-                  <div className="mt-3 flex items-center gap-2 rounded-lg border border-error-200 bg-error-50 px-4 py-3 text-theme-sm text-error-600 dark:border-error-500/30 dark:bg-error-500/15 dark:text-error-500">
-                    <AlertTriangle className="size-4 shrink-0" />
+                  <div className='mt-3 flex items-center gap-2 rounded-lg border border-error-200 bg-error-50 px-4 py-3 text-theme-sm text-error-600 dark:border-error-500/30 dark:bg-error-500/15 dark:text-error-500'>
+                    <AlertTriangle className='size-4 shrink-0' />
                     {err}
                   </div>
                 )}
@@ -854,48 +909,59 @@ export default function LeadsPage() {
                   updatingId={updatingId}
                   onStatusChange={updateStatus}
                 />
-                <TablePagination page={page} totalItems={visibleItems.length} onPageChange={setPage} pageSize={PAGE_SIZE} />
+                <TablePagination
+                  page={page}
+                  totalItems={visibleItems.length}
+                  onPageChange={setPage}
+                  pageSize={PAGE_SIZE}
+                />
               </div>
             </div>
           </div>
 
-          <div className="flex flex-col gap-6">
-            <div className="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
-              <div className="border-b border-gray-100 px-6 py-5 dark:border-gray-800">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className='flex flex-col gap-6'>
+            <div className='rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]'>
+              <div className='border-b border-gray-100 px-6 py-5 dark:border-gray-800'>
+                <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
                   <div>
-                    <h3 className="text-base font-semibold text-gray-800 dark:text-white/90">Lead keywords</h3>
-                    <p className="mt-1 text-theme-sm text-gray-500 dark:text-gray-400">
-                      Terms that boost a conversation&apos;s lead score automatically.
+                    <h3 className='text-base font-semibold text-gray-800 dark:text-white/90'>
+                      Lead keywords
+                    </h3>
+                    <p className='mt-1 text-theme-sm text-gray-500 dark:text-gray-400'>
+                      Terms that boost a conversation&apos;s lead score
+                      automatically.
                     </p>
                   </div>
-                  <Badge color="light">{keywords.length} active</Badge>
+                  <Badge color='light'>{keywords.length} active</Badge>
                 </div>
               </div>
 
-              <div className="grid gap-4 p-4 sm:p-6 lg:grid-cols-2">
-                <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-white/[0.02]">
-                  <div className="flex items-center gap-2 text-theme-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                    <Tag className="size-3.5" />
+              <div className='grid gap-4 p-4 sm:p-6 lg:grid-cols-2'>
+                <div className='flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-white/[0.02]'>
+                  <div className='flex items-center gap-2 text-theme-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400'>
+                    <Tag className='size-3.5' />
                     Active keywords
                   </div>
-                  <p className="text-theme-xs text-gray-500 dark:text-gray-400">
-                    Each keyword adds 2 points. Strong intent terms can qualify a conversation automatically.
+                  <p className='text-theme-xs text-gray-500 dark:text-gray-400'>
+                    Each keyword adds 2 points. Strong intent terms can qualify
+                    a conversation automatically.
                   </p>
-                  <div className="flex min-h-24 flex-1 flex-wrap content-start gap-2 rounded-lg border border-gray-200 bg-white p-3 dark:border-gray-800 dark:bg-gray-900">
+                  <div className='flex min-h-24 flex-1 flex-wrap content-start gap-2 rounded-lg border border-gray-200 bg-white p-3 dark:border-gray-800 dark:bg-gray-900'>
                     {keywords.length === 0 ? (
-                      <span className="self-center text-theme-sm text-gray-400 dark:text-gray-500">No keywords added yet</span>
+                      <span className='self-center text-theme-sm text-gray-400 dark:text-gray-500'>
+                        No keywords added yet
+                      </span>
                     ) : (
                       keywords.map((kw) => (
-                        <Badge key={kw} color="primary">
+                        <Badge key={kw} color='primary'>
                           {kw}
                           <button
-                            type="button"
+                            type='button'
                             onClick={() => removeKw(kw)}
-                            className="text-brand-500/70 transition hover:text-brand-500 dark:text-brand-400/70 dark:hover:text-brand-400"
+                            className='text-brand-500/70 transition hover:text-brand-500 dark:text-brand-400/70 dark:hover:text-brand-400'
                             aria-label={`Remove ${kw}`}
                           >
-                            <X className="size-3" />
+                            <X className='size-3' />
                           </button>
                         </Badge>
                       ))
@@ -903,39 +969,49 @@ export default function LeadsPage() {
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-white/[0.02]">
-                  <div className="flex items-center gap-2 text-theme-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                    <Plus className="size-3.5" />
+                <div className='flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-white/[0.02]'>
+                  <div className='flex items-center gap-2 text-theme-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400'>
+                    <Plus className='size-3.5' />
                     Add a keyword
                   </div>
-                  <div className="flex gap-2">
+                  <div className='flex gap-2'>
                     <Input
                       value={kwInput}
                       onChange={(event) => setKwInput(event.target.value)}
                       onKeyDown={(event) => event.key === 'Enter' && addKw()}
-                      placeholder="e.g. pricing, urgent"
-                      className="h-10 rounded-lg bg-white dark:bg-gray-900"
+                      placeholder='e.g. pricing, urgent'
+                      className='h-10 rounded-lg bg-white dark:bg-gray-900'
                     />
-                    <Button className="h-10 shrink-0 rounded-lg px-5" onClick={addKw} disabled={!kwInput.trim()}>
-                      <Plus className="size-4" />
+                    <Button
+                      className='h-10 shrink-0 rounded-lg px-5'
+                      onClick={addKw}
+                      disabled={!kwInput.trim()}
+                    >
+                      <Plus className='size-4' />
                       Add
                     </Button>
                   </div>
 
-                  <div className="flex flex-1 flex-col gap-3">
-                    <p className="text-theme-xs font-medium text-gray-500 dark:text-gray-400">Suggested</p>
+                  <div className='flex flex-1 flex-col gap-3'>
+                    <p className='text-theme-xs font-medium text-gray-500 dark:text-gray-400'>
+                      Suggested
+                    </p>
                     {QUICK_KW.map((group) => (
-                      <div key={group.label} className="flex flex-col gap-1.5">
-                        <span className="text-theme-xs text-gray-400 dark:text-gray-500">{group.label}</span>
-                        <div className="flex flex-wrap gap-2">
+                      <div key={group.label} className='flex flex-col gap-1.5'>
+                        <span className='text-theme-xs text-gray-400 dark:text-gray-500'>
+                          {group.label}
+                        </span>
+                        <div className='flex flex-wrap gap-2'>
                           {group.kws.map((kw) => {
                             const already = keywords.includes(kw);
                             return (
                               <button
                                 key={kw}
-                                type="button"
+                                type='button'
                                 disabled={already}
-                                onClick={() => setKeywords((prev) => [...prev, kw])}
+                                onClick={() =>
+                                  setKeywords((prev) => [...prev, kw])
+                                }
                                 className={cn(
                                   'inline-flex items-center rounded-lg border px-2.5 py-1.5 text-theme-xs font-medium transition',
                                   already
@@ -954,13 +1030,13 @@ export default function LeadsPage() {
                 </div>
               </div>
 
-              <div className="flex justify-end border-t border-gray-100 px-4 py-4 dark:border-gray-800 sm:px-6">
+              <div className='flex justify-end border-t border-gray-100 px-4 py-4 dark:border-gray-800 sm:px-6'>
                 <Button onClick={saveKeywords} disabled={savingKW}>
                   {savingKW ? (
                     'Saving'
                   ) : savedKW ? (
                     <>
-                      <Check className="size-4" />
+                      <Check className='size-4' />
                       Saved
                     </>
                   ) : (
@@ -970,22 +1046,28 @@ export default function LeadsPage() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
-              <div className="border-b border-gray-100 px-6 py-5 dark:border-gray-800">
-                <div className="flex items-center justify-between gap-3">
+            <div className='rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]'>
+              <div className='border-b border-gray-100 px-6 py-5 dark:border-gray-800'>
+                <div className='flex items-center justify-between gap-3'>
                   <div>
-                    <h3 className="text-base font-medium text-gray-800 dark:text-white/90">Follow-ups</h3>
-                    <p className="mt-1 text-theme-sm text-gray-500 dark:text-gray-400">Recommended conversations to revisit.</p>
+                    <h3 className='text-base font-medium text-gray-800 dark:text-white/90'>
+                      Follow-ups
+                    </h3>
+                    <p className='mt-1 text-theme-sm text-gray-500 dark:text-gray-400'>
+                      Recommended conversations to revisit.
+                    </p>
                   </div>
-                  <Badge color="light">{voiceFollowUps.length}</Badge>
+                  <Badge color='light'>{voiceFollowUps.length}</Badge>
                 </div>
               </div>
 
-              <div className="space-y-3 p-4 sm:p-6">
+              <div className='space-y-3 p-4 sm:p-6'>
                 {voiceFollowUps.length === 0 ? (
-                  <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-8 text-center dark:border-gray-800 dark:bg-white/[0.02]">
-                    <p className="text-theme-sm font-medium text-gray-700 dark:text-gray-300">No follow-ups waiting</p>
-                    <p className="mt-1 text-theme-xs text-gray-500 dark:text-gray-400">
+                  <div className='rounded-xl border border-gray-200 bg-gray-50 px-4 py-8 text-center dark:border-gray-800 dark:bg-white/[0.02]'>
+                    <p className='text-theme-sm font-medium text-gray-700 dark:text-gray-300'>
+                      No follow-ups waiting
+                    </p>
+                    <p className='mt-1 text-theme-xs text-gray-500 dark:text-gray-400'>
                       Growth recommendations will appear here.
                     </p>
                   </div>
@@ -994,19 +1076,28 @@ export default function LeadsPage() {
                     <Link
                       key={followUp.conversation_id}
                       href={`/conversations/${followUp.conversation_id}`}
-                      className="block rounded-xl border border-gray-200 bg-white p-4 transition hover:border-gray-300 hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-900 dark:hover:bg-white/[0.03]"
+                      className='block rounded-xl border border-gray-200 bg-white p-4 transition hover:border-gray-300 hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-900 dark:hover:bg-white/[0.03]'
                     >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <p className="truncate text-theme-sm font-medium text-gray-800 dark:text-white/90">
-                            {followUp.name || followUp.lead_or_customer || followUp.title || `Follow-up ${index + 1}`}
+                      <div className='flex items-start justify-between gap-3'>
+                        <div className='min-w-0'>
+                          <p className='truncate text-theme-sm font-medium text-gray-800 dark:text-white/90'>
+                            {followUp.name ||
+                              followUp.lead_or_customer ||
+                              followUp.title ||
+                              `Follow-up ${index + 1}`}
                           </p>
-                          <p className="mt-1 line-clamp-2 text-theme-xs text-gray-500 dark:text-gray-400">
-                            {followUp.reason || followUp.insight || 'No reason provided'}
+                          <p className='mt-1 line-clamp-2 text-theme-xs text-gray-500 dark:text-gray-400'>
+                            {followUp.reason ||
+                              followUp.insight ||
+                              'No reason provided'}
                           </p>
                         </div>
                         {followUp.priority && (
-                          <Badge color={followUp.priority === 'HIGH' ? 'error' : 'warning'}>
+                          <Badge
+                            color={
+                              followUp.priority === 'HIGH' ? 'error' : 'warning'
+                            }
+                          >
                             {titleCase(String(followUp.priority))}
                           </Badge>
                         )}

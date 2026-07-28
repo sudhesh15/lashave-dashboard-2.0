@@ -10,7 +10,6 @@ import {
   AlertTriangle,
   ArrowLeft,
   CheckCircle2,
-  Clock3,
   Loader2,
   MessageCircle,
   RefreshCw,
@@ -78,6 +77,71 @@ const BRAND = '#465FFF';
 
 function errorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
+}
+
+type ChannelTheme = {
+  logo: string;
+  accent: string; // send button + active accents
+  accentHover: string;
+  bubble: string; // assistant/agent bubble bg
+  bubbleText: string;
+  ring: string; // input focus ring
+};
+
+const CHANNEL_THEME: Record<string, ChannelTheme> = {
+  whatsapp: {
+    logo: '/brand-logo/whatsapp.png',
+    accent: 'bg-[#25D366]',
+    accentHover: 'hover:bg-[#1DA851]',
+    bubble: 'bg-[#25D366]',
+    bubbleText: 'text-white',
+    ring: 'focus:border-[#25D366] focus:ring-[#25D366]/10',
+  },
+  instagram: {
+    logo: '/brand-logo/instagram.png',
+    accent: 'bg-gradient-to-r from-[#833AB4] via-[#E1306C] to-[#F77737]',
+    accentHover: 'hover:opacity-90',
+    bubble: 'bg-gradient-to-r from-[#833AB4] via-[#E1306C] to-[#F77737]',
+    bubbleText: 'text-white',
+    ring: 'focus:border-[#E1306C] focus:ring-[#E1306C]/10',
+  },
+  facebook: {
+    logo: '/brand-logo/facebook.png',
+    accent: 'bg-[#1877F2]',
+    accentHover: 'hover:bg-[#1461C7]',
+    bubble: 'bg-[#1877F2]',
+    bubbleText: 'text-white',
+    ring: 'focus:border-[#1877F2] focus:ring-[#1877F2]/10',
+  },
+  telegram: {
+    logo: '/brand-logo/telegram.png',
+    accent: 'bg-[#26A5E4]',
+    accentHover: 'hover:bg-[#1E8AC0]',
+    bubble: 'bg-[#26A5E4]',
+    bubbleText: 'text-white',
+    ring: 'focus:border-[#26A5E4] focus:ring-[#26A5E4]/10',
+  },
+  youtube: {
+    logo: '/brand-logo/youtube.png',
+    accent: 'bg-[#FF0000]',
+    accentHover: 'hover:bg-[#CC0000]',
+    bubble: 'bg-[#FF0000]',
+    bubbleText: 'text-white',
+    ring: 'focus:border-[#FF0000] focus:ring-[#FF0000]/10',
+  },
+  website: {
+    logo: '/brand-logo/website.png',
+    accent: 'bg-brand-500',
+    accentHover: 'hover:bg-brand-600',
+    bubble: 'bg-brand-500',
+    bubbleText: 'text-white',
+    ring: 'focus:border-brand-300 focus:ring-brand-500/10',
+  },
+};
+
+function getChannelTheme(channel?: string | null): ChannelTheme {
+  const key = (channel || '').toLowerCase();
+  return CHANNEL_THEME[key] || CHANNEL_THEME.website;
 }
 
 function platformLabel(value?: string | null) {
@@ -154,7 +218,9 @@ function Card({
   className?: string;
 }) {
   return (
-    <div className={`rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] ${className}`}>
+    <div
+      className={`rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] ${className}`}
+    >
       {children}
     </div>
   );
@@ -176,20 +242,35 @@ function MetricCard({
           {icon}
         </div>
         <div>
-          <p className='text-theme-xs text-gray-500 dark:text-gray-400'>{label}</p>
-          <p className='mt-1 text-theme-sm font-semibold text-gray-800 dark:text-white/90'>{value}</p>
+          <p className='text-theme-xs text-gray-500 dark:text-gray-400'>
+            {label}
+          </p>
+          <p className='mt-1 text-theme-sm font-semibold text-gray-800 dark:text-white/90'>
+            {value}
+          </p>
         </div>
       </div>
     </Card>
   );
 }
 
-function MessageMixChart({ data, isDark }: { data: ConvoResp | null; isDark: boolean }) {
-  const user = data?.messages.filter((message) => message.role === 'user').length ?? 0;
+function MessageMixChart({
+  data,
+  isDark,
+}: {
+  data: ConvoResp | null;
+  isDark: boolean;
+}) {
+  const user =
+    data?.messages.filter((message) => message.role === 'user').length ?? 0;
   const assistant =
-    data?.messages.filter((message) => message.role === 'assistant' && message.provider !== 'human').length ?? 0;
+    data?.messages.filter(
+      (message) => message.role === 'assistant' && message.provider !== 'human',
+    ).length ?? 0;
   const human =
-    data?.messages.filter((message) => message.role === 'assistant' && message.provider === 'human').length ?? 0;
+    data?.messages.filter(
+      (message) => message.role === 'assistant' && message.provider === 'human',
+    ).length ?? 0;
 
   const options: ApexOptions = {
     chart: { type: 'donut', fontFamily: 'Outfit, sans-serif' },
@@ -206,24 +287,43 @@ function MessageMixChart({ data, isDark }: { data: ConvoResp | null; isDark: boo
 
   return (
     <Card className='p-5'>
-      <h3 className='text-lg font-semibold text-gray-800 dark:text-white/90'>Message Mix</h3>
-      <p className='mt-1 text-theme-sm text-gray-500 dark:text-gray-400'>Customer, AI, and agent messages</p>
-      <ReactApexChart options={options} series={[user, assistant, human]} type='donut' height={250} />
+      <h3 className='text-lg font-semibold text-gray-800 dark:text-white/90'>
+        Message Mix
+      </h3>
+      <p className='mt-1 text-theme-sm text-gray-500 dark:text-gray-400'>
+        Customer, AI, and agent messages
+      </p>
+      <ReactApexChart
+        options={options}
+        series={[user, assistant, human]}
+        type='donut'
+        height={250}
+      />
     </Card>
   );
 }
 
-function LatencyChart({ data, isDark }: { data: ConvoResp | null; isDark: boolean }) {
+function LatencyChart({
+  data,
+  isDark,
+}: {
+  data: ConvoResp | null;
+  isDark: boolean;
+}) {
   const rows = (data?.messages || [])
     .filter((message) => message.latency_ms != null)
     .slice(-8)
     .map((message, index) => ({
       label: `#${index + 1}`,
-      value: Math.round((message.latency_ms || 0) / 1000 * 100) / 100,
+      value: Math.round(((message.latency_ms || 0) / 1000) * 100) / 100,
     }));
 
   const options: ApexOptions = {
-    chart: { type: 'bar', toolbar: { show: false }, fontFamily: 'Outfit, sans-serif' },
+    chart: {
+      type: 'bar',
+      toolbar: { show: false },
+      fontFamily: 'Outfit, sans-serif',
+    },
     colors: [BRAND],
     grid: { borderColor: isDark ? '#1F2937' : '#E5E7EB' },
     plotOptions: { bar: { borderRadius: 4, columnWidth: '44%' } },
@@ -235,17 +335,29 @@ function LatencyChart({ data, isDark }: { data: ConvoResp | null; isDark: boolea
       axisTicks: { show: false },
     },
     yaxis: {
-      labels: { style: { colors: isDark ? '#98A2B3' : '#667085' }, formatter: (value) => `${value}s` },
+      labels: {
+        style: { colors: isDark ? '#98A2B3' : '#667085' },
+        formatter: (value) => `${value}s`,
+      },
     },
     tooltip: { y: { formatter: (value) => `${value}s` } },
   };
 
   return (
     <Card className='p-5'>
-      <h3 className='text-lg font-semibold text-gray-800 dark:text-white/90'>Response Latency</h3>
-      <p className='mt-1 text-theme-sm text-gray-500 dark:text-gray-400'>Recent AI response times</p>
+      <h3 className='text-lg font-semibold text-gray-800 dark:text-white/90'>
+        Response Latency
+      </h3>
+      <p className='mt-1 text-theme-sm text-gray-500 dark:text-gray-400'>
+        Recent AI response times
+      </p>
       {rows.length > 0 ? (
-        <ReactApexChart options={options} series={[{ name: 'Latency', data: rows.map((row) => row.value) }]} type='bar' height={240} />
+        <ReactApexChart
+          options={options}
+          series={[{ name: 'Latency', data: rows.map((row) => row.value) }]}
+          type='bar'
+          height={240}
+        />
       ) : (
         <div className='flex h-[240px] items-center justify-center text-theme-sm text-gray-500 dark:text-gray-400'>
           No latency data available
@@ -255,7 +367,13 @@ function LatencyChart({ data, isDark }: { data: ConvoResp | null; isDark: boolea
   );
 }
 
-function MessageBubble({ message }: { message: ConvoResp['messages'][number] }) {
+function MessageBubble({
+  message,
+  theme,
+}: {
+  message: ConvoResp['messages'][number];
+  theme: ChannelTheme;
+}) {
   const fromCustomer = message.role === 'user';
   const fromHuman = message.provider === 'human';
 
@@ -267,13 +385,19 @@ function MessageBubble({ message }: { message: ConvoResp['messages'][number] }) 
             ? 'rounded-tl-md border border-gray-200 bg-white text-gray-700 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300'
             : fromHuman
               ? 'rounded-tr-md bg-gray-800 text-white dark:bg-white/10'
-              : 'rounded-tr-md bg-brand-500 text-white'
+              : `rounded-tr-md ${theme.bubble} ${theme.bubbleText}`
         }`}
       >
-        <p className='whitespace-pre-wrap text-theme-sm leading-6'>{message.content}</p>
-        <div className={`mt-2 flex items-center gap-2 text-theme-xs ${fromCustomer ? 'text-gray-400' : 'text-white/70'}`}>
+        <p className='whitespace-pre-wrap text-theme-sm leading-6'>
+          {message.content}
+        </p>
+        <div
+          className={`mt-2 flex items-center gap-2 text-theme-xs ${fromCustomer ? 'text-gray-400' : 'text-white/70'}`}
+        >
           <span>{formatDate(message.created_at)}</span>
-          {message.latency_ms != null && <span>{formatLatency(message.latency_ms)}</span>}
+          {message.latency_ms != null && (
+            <span>{formatLatency(message.latency_ms)}</span>
+          )}
         </div>
       </div>
     </div>
@@ -283,8 +407,12 @@ function MessageBubble({ message }: { message: ConvoResp['messages'][number] }) 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <div className='flex items-start justify-between gap-4 border-b border-gray-100 py-3 last:border-b-0 dark:border-gray-800'>
-      <span className='text-theme-sm text-gray-500 dark:text-gray-400'>{label}</span>
-      <span className='max-w-[55%] break-words text-right text-theme-sm font-medium text-gray-800 dark:text-white/90'>{value}</span>
+      <span className='text-theme-sm text-gray-500 dark:text-gray-400'>
+        {label}
+      </span>
+      <span className='max-w-[55%] break-words text-right text-theme-sm font-medium text-gray-800 dark:text-white/90'>
+        {value}
+      </span>
     </div>
   );
 }
@@ -327,7 +455,10 @@ export default function ConversationDetailPage() {
         method: 'POST',
         auth: true,
       }).catch(() => {});
-      window.setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+      window.setTimeout(
+        () => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }),
+        50,
+      );
     } catch (error) {
       setErr(errorMessage(error, 'Failed to load conversation'));
     } finally {
@@ -399,13 +530,23 @@ export default function ConversationDetailPage() {
   const convo = data?.conversation;
   const lead = data?.lead;
   const messages = useMemo(() => data?.messages || [], [data?.messages]);
+  const channelTheme = useMemo(
+    () => getChannelTheme(convo?.channel),
+    [convo?.channel],
+  );
+
   const customerName = displayName(data);
   const profilePic = lead?.meta?.instagram_profile?.profile_pic_url;
+  const isClosed = convo?.status === 'closed';
   const isHandoff = convo?.status === 'handoff';
   const avgLatency = useMemo(() => {
-    const values = messages.map((message) => message.latency_ms).filter((value): value is number => value != null);
+    const values = messages
+      .map((message) => message.latency_ms)
+      .filter((value): value is number => value != null);
     if (!values.length) return null;
-    return Math.round(values.reduce((sum, value) => sum + value, 0) / values.length);
+    return Math.round(
+      values.reduce((sum, value) => sum + value, 0) / values.length,
+    );
   }, [messages]);
   const mood = useMemo(
     () =>
@@ -441,8 +582,12 @@ export default function ConversationDetailPage() {
               <ArrowLeft className='h-5 w-5' />
             </button>
             <div>
-              <h1 className='text-2xl font-semibold text-gray-800 dark:text-white/90'>Conversation Detail</h1>
-              <p className='mt-1 text-theme-sm text-gray-500 dark:text-gray-400'>Review messages, customer context, and lead stage.</p>
+              <h1 className='text-2xl font-semibold text-gray-800 dark:text-white/90'>
+                Conversation Detail
+              </h1>
+              <p className='mt-1 text-theme-sm text-gray-500 dark:text-gray-400'>
+                Review messages, customer context, and lead stage.
+              </p>
             </div>
           </div>
           <div className='flex flex-wrap gap-2'>
@@ -453,24 +598,6 @@ export default function ConversationDetailPage() {
             >
               <RefreshCw className='h-4 w-4' />
               Refresh
-            </button>
-            <button
-              type='button'
-              onClick={() => void act(isHandoff ? 'reopen' : 'handoff')}
-              disabled={Boolean(actionLoading)}
-              className='inline-flex h-11 items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 text-theme-sm font-medium text-gray-700 disabled:opacity-60 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300'
-            >
-              {actionLoading === 'handoff' || actionLoading === 'reopen' ? <Loader2 className='h-4 w-4 animate-spin' /> : <Users className='h-4 w-4' />}
-              {isHandoff ? 'Reopen' : 'Handoff'}
-            </button>
-            <button
-              type='button'
-              onClick={() => void act('close')}
-              disabled={Boolean(actionLoading)}
-              className='inline-flex h-11 items-center gap-2 rounded-lg bg-brand-500 px-4 text-theme-sm font-medium text-white disabled:opacity-60'
-            >
-              {actionLoading === 'close' ? <Loader2 className='h-4 w-4 animate-spin' /> : <CheckCircle2 className='h-4 w-4' />}
-              Close
             </button>
           </div>
         </div>
@@ -487,21 +614,39 @@ export default function ConversationDetailPage() {
             <Card className='overflow-hidden'>
               <div className='flex items-center justify-between border-b border-gray-200 px-5 py-4 dark:border-gray-800 sm:px-6'>
                 <div className='flex min-w-0 items-center gap-3'>
-                  <div className='h-11 w-11 overflow-hidden rounded-full border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-gray-800'>
-                    {profilePic ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={profilePic} alt={customerName} className='h-full w-full object-cover' />
-                    ) : (
-                      <div className='flex h-full w-full items-center justify-center text-theme-sm font-semibold text-gray-700 dark:text-gray-300'>
-                        {initials(customerName)}
-                      </div>
-                    )}
+                  <div className='relative h-11 w-11 shrink-0'>
+                    <div className='h-11 w-11 overflow-hidden rounded-full border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-gray-800'>
+                      {profilePic ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={profilePic}
+                          alt={customerName}
+                          className='h-full w-full object-cover'
+                        />
+                      ) : (
+                        <div className='flex h-full w-full items-center justify-center text-theme-sm font-semibold text-gray-700 dark:text-gray-300'>
+                          {initials(customerName)}
+                        </div>
+                      )}
+                    </div>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={channelTheme.logo}
+                      alt={platformLabel(convo?.channel)}
+                      className='absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full border border-white bg-white object-contain dark:border-gray-900'
+                    />
                   </div>
                   <div className='min-w-0'>
-                    <h2 className='truncate text-lg font-semibold text-gray-800 dark:text-white/90'>{customerName}</h2>
+                    <h2 className='truncate text-lg font-semibold text-gray-800 dark:text-white/90'>
+                      {customerName}
+                    </h2>
                     <div className='mt-1 flex flex-wrap items-center gap-2'>
-                      <span className='text-theme-sm text-gray-500 dark:text-gray-400'>{platformLabel(convo?.channel)}</span>
-                      <span className={`rounded-full px-2.5 py-1 text-theme-xs font-medium capitalize ${statusClass(convo?.status)}`}>
+                      <span className='text-theme-sm text-gray-500 dark:text-gray-400'>
+                        {platformLabel(convo?.channel)}
+                      </span>
+                      <span
+                        className={`rounded-full px-2.5 py-1 text-theme-xs font-medium capitalize ${statusClass(convo?.status)}`}
+                      >
                         {convo?.status || 'unknown'}
                       </span>
                     </div>
@@ -518,28 +663,83 @@ export default function ConversationDetailPage() {
                     No messages found
                   </div>
                 ) : (
-                  messages.map((message) => <MessageBubble key={message.id} message={message} />)
+                  messages.map((message) => (
+                    <MessageBubble
+                      key={message.id}
+                      message={message}
+                      theme={channelTheme}
+                    />
+                  ))
                 )}
                 <div ref={bottomRef} />
               </div>
 
               <div className='border-t border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03] sm:p-5'>
-                <div className='flex flex-col gap-3 sm:flex-row sm:items-end'>
-                  <textarea
+                <div className='flex items-center gap-2 sm:gap-3'>
+                  <input
+                    type='text'
                     value={replyText}
                     onChange={(event) => setReplyText(event.target.value)}
-                    placeholder='Type your reply'
-                    rows={3}
-                    className='min-h-[96px] flex-1 resize-none rounded-lg border border-gray-300 bg-transparent px-4 py-3 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30'
+                    onKeyDown={(event) => {
+                      if (
+                        (event.metaKey || event.ctrlKey) &&
+                        event.key === 'Enter'
+                      ) {
+                        void sendReply();
+                      }
+                    }}
+                    placeholder='Message as agent…'
+                    className={`h-11 min-w-0 flex-1 rounded-full border border-gray-300 bg-transparent px-4 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 sm:h-12 sm:px-5 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 ${channelTheme.ring}`}
                   />
                   <button
                     type='button'
                     onClick={() => void sendReply()}
                     disabled={!replyText.trim() || sending}
-                    className='inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-brand-500 px-5 text-theme-sm font-medium text-white disabled:opacity-60'
+                    className={`inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-full px-4 text-theme-sm font-medium text-white disabled:opacity-60 sm:h-12 sm:px-6 ${channelTheme.accent} ${channelTheme.accentHover}`}
                   >
-                    {sending ? <Loader2 className='h-4 w-4 animate-spin' /> : <Send className='h-4 w-4' />}
-                    Send
+                    {sending ? (
+                      <Loader2 className='h-4 w-4 animate-spin' />
+                    ) : (
+                      <Send className='h-4 w-4' />
+                    )}
+                    <span className='hidden sm:inline'>Send</span>
+                  </button>
+                </div>
+                <p className='mt-1.5 hidden text-xs text-gray-400 sm:block dark:text-gray-500'>
+                  Cmd/Ctrl + Enter to send
+                </p>
+
+                <div className='mt-3 grid grid-cols-2 gap-2 sm:gap-3'>
+                  <button
+                    type='button'
+                    onClick={() => void act(isHandoff ? 'reopen' : 'handoff')}
+                    disabled={Boolean(actionLoading)}
+                    className='inline-flex h-11 items-center justify-center gap-2 rounded-full border border-success-200 bg-success-50 px-2 text-xs font-medium text-success-600 disabled:opacity-60 sm:text-theme-sm dark:border-success-500/20 dark:bg-success-500/10 dark:text-success-400'
+                  >
+                    {actionLoading === 'handoff' ||
+                    actionLoading === 'reopen' ? (
+                      <Loader2 className='h-4 w-4 shrink-0 animate-spin' />
+                    ) : (
+                      <Users className='h-4 w-4 shrink-0' />
+                    )}
+                    <span className='truncate'>
+                      {isHandoff ? 'Back to AI' : 'Handoff'}
+                    </span>
+                  </button>
+                  <button
+                    type='button'
+                    onClick={() => void act(isClosed ? 'reopen' : 'close')}
+                    disabled={Boolean(actionLoading)}
+                    className='inline-flex h-11 items-center justify-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-2 text-xs font-medium text-gray-700 disabled:opacity-60 sm:text-theme-sm dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300'
+                  >
+                    {actionLoading === 'close' || actionLoading === 'reopen' ? (
+                      <Loader2 className='h-4 w-4 shrink-0 animate-spin' />
+                    ) : (
+                      <CheckCircle2 className='h-4 w-4 shrink-0' />
+                    )}
+                    <span className='truncate'>
+                      {isClosed ? 'Reopen' : 'Close'}
+                    </span>
                   </button>
                 </div>
               </div>
@@ -548,45 +748,89 @@ export default function ConversationDetailPage() {
 
           <div className='space-y-6 xl:col-span-4'>
             <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-1'>
-              <MetricCard label='Messages' value={messages.length} icon={<MessageCircle className='h-5 w-5' />} />
-              <MetricCard label='Avg response' value={formatLatency(avgLatency)} icon={<Clock3 className='h-5 w-5' />} />
+              <MetricCard
+                label='Messages'
+                value={messages.length}
+                icon={<MessageCircle className='h-5 w-5' />}
+              />
+              <MetricCard
+                label='Mood'
+                value={mood?.label || 'Neutral'}
+                icon={
+                  <span className='text-lg leading-none'>
+                    {mood?.emoji || '🙂'}
+                  </span>
+                }
+              />
             </div>
 
             <Card className='p-5'>
-              <h3 className='text-lg font-semibold text-gray-800 dark:text-white/90'>Customer Context</h3>
+              <h3 className='text-lg font-semibold text-gray-800 dark:text-white/90'>
+                Customer Context
+              </h3>
               <div className='mt-4'>
-                <InfoRow label='Channel' value={platformLabel(convo?.channel)} />
-                <InfoRow label='External ID' value={convo?.external_user_id || 'Not available'} />
-                <InfoRow label='Created' value={formatDate(convo?.created_at)} />
-                <InfoRow label='Mood' value={mood?.label || 'Neutral'} />
+                <InfoRow
+                  label='Channel'
+                  value={platformLabel(convo?.channel)}
+                />
+                <InfoRow
+                  label='External ID'
+                  value={convo?.external_user_id || 'Not available'}
+                />
+                <InfoRow
+                  label='Created'
+                  value={formatDate(convo?.created_at)}
+                />
               </div>
               {convo?.summary && (
                 <div className='mt-4 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-900'>
-                  <p className='text-theme-sm font-medium text-gray-800 dark:text-white/90'>Summary</p>
-                  <p className='mt-2 text-theme-sm leading-6 text-gray-500 dark:text-gray-400'>{convo.summary}</p>
+                  <p className='text-theme-sm font-medium text-gray-800 dark:text-white/90'>
+                    Summary
+                  </p>
+                  <p className='mt-2 text-theme-sm leading-6 text-gray-500 dark:text-gray-400'>
+                    {convo.summary}
+                  </p>
                 </div>
               )}
             </Card>
 
             <Card className='p-5'>
-              <h3 className='text-lg font-semibold text-gray-800 dark:text-white/90'>Lead Details</h3>
+              <h3 className='text-lg font-semibold text-gray-800 dark:text-white/90'>
+                Lead Details
+              </h3>
               {lead ? (
                 <>
                   <div className='mt-4'>
-                    <InfoRow label='Intent' value={lead.intent || 'Not available'} />
-                    <InfoRow label='Service' value={lead.service || 'Not available'} />
-                    <InfoRow label='Source' value={lead.source || 'Not available'} />
-                    <InfoRow label='Score' value={String(lead.meta?.score ?? 0)} />
+                    <InfoRow
+                      label='Intent'
+                      value={lead.intent || 'Not available'}
+                    />
+                    <InfoRow
+                      label='Service'
+                      value={lead.service || 'Not available'}
+                    />
+                    <InfoRow
+                      label='Source'
+                      value={lead.source || 'Not available'}
+                    />
+                    <InfoRow
+                      label='Score'
+                      value={String(lead.meta?.score ?? 0)}
+                    />
                   </div>
                   <div className='mt-4'>
-                    <label className='mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400'>Pipeline stage</label>
+                    <label className='mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400'>
+                      Pipeline stage
+                    </label>
                     <select
                       value={leadStatus}
                       onChange={(event) => setLeadStatus(event.target.value)}
                       className='h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90'
                     >
                       {PIPELINE.map((stage) => (
-                        <option key={stage} value={stage}>{stage}</option>
+                        <option key={stage} value={stage}>
+                          {stage}
+                        </option>
                       ))}
                     </select>
                     <button
@@ -595,16 +839,25 @@ export default function ConversationDetailPage() {
                       disabled={savingStage || leadStatus === lead.status}
                       className='mt-3 inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-brand-500 px-4 text-theme-sm font-medium text-white disabled:opacity-60'
                     >
-                      {savingStage && <Loader2 className='h-4 w-4 animate-spin' />}
+                      {savingStage && (
+                        <Loader2 className='h-4 w-4 animate-spin' />
+                      )}
                       Save Stage
                     </button>
                   </div>
-                  {(lead.contacts.emails?.length || lead.contacts.phones?.length) ? (
+                  {lead.contacts.emails?.length ||
+                  lead.contacts.phones?.length ? (
                     <div className='mt-4 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-900'>
-                      <p className='text-theme-sm font-medium text-gray-800 dark:text-white/90'>Contacts</p>
+                      <p className='text-theme-sm font-medium text-gray-800 dark:text-white/90'>
+                        Contacts
+                      </p>
                       <div className='mt-2 space-y-1 text-theme-sm text-gray-500 dark:text-gray-400'>
-                        {(lead.contacts.emails || []).map((email) => <p key={email}>{email}</p>)}
-                        {(lead.contacts.phones || []).map((phone) => <p key={phone}>{phone}</p>)}
+                        {(lead.contacts.emails || []).map((email) => (
+                          <p key={email}>{email}</p>
+                        ))}
+                        {(lead.contacts.phones || []).map((phone) => (
+                          <p key={phone}>{phone}</p>
+                        ))}
                       </div>
                     </div>
                   ) : null}
@@ -612,30 +865,34 @@ export default function ConversationDetailPage() {
               ) : (
                 <div className='mt-4 flex items-start gap-3 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-900'>
                   <ShieldAlert className='mt-0.5 h-4 w-4 text-gray-500 dark:text-gray-400' />
-                  <p className='text-theme-sm text-gray-500 dark:text-gray-400'>No lead has been created for this conversation yet.</p>
+                  <p className='text-theme-sm text-gray-500 dark:text-gray-400'>
+                    No lead has been created for this conversation yet.
+                  </p>
                 </div>
               )}
             </Card>
-
-            <MessageMixChart data={data} isDark={isDark} />
-            <LatencyChart data={data} isDark={isDark} />
-
-            {convo?.channel === 'website' && (
-              <WebsiteActivityPanel
-                conversationId={id}
-                theme={{
-                  text: isDark ? '#F9FAFB' : '#101828',
-                  textSub: isDark ? '#D0D5DD' : '#344054',
-                  textMuted: isDark ? '#98A2B3' : '#667085',
-                  cardBg: isDark ? 'rgba(255,255,255,0.03)' : '#FFFFFF',
-                  cardBorder: isDark ? '#1F2937' : '#E5E7EB',
-                  divider: isDark ? '#1F2937' : '#E5E7EB',
-                }}
-                isDark={isDark}
-              />
-            )}
           </div>
         </div>
+
+        <div className='mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2'>
+          <MessageMixChart data={data} isDark={isDark} />
+          <LatencyChart data={data} isDark={isDark} />
+        </div>
+
+        {convo?.channel === 'website' && (
+          <WebsiteActivityPanel
+            conversationId={id}
+            theme={{
+              text: isDark ? '#F9FAFB' : '#101828',
+              textSub: isDark ? '#D0D5DD' : '#344054',
+              textMuted: isDark ? '#98A2B3' : '#667085',
+              cardBg: isDark ? 'rgba(255,255,255,0.03)' : '#FFFFFF',
+              cardBorder: isDark ? '#1F2937' : '#E5E7EB',
+              divider: isDark ? '#1F2937' : '#E5E7EB',
+            }}
+            isDark={isDark}
+          />
+        )}
       </div>
     </RequireAuth>
   );

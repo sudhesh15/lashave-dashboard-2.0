@@ -2,6 +2,25 @@
 
 import * as React from 'react';
 import { useEffect, useMemo, useState } from 'react';
+import {
+  AlertTriangle,
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle2,
+  FileText,
+  Globe,
+  Loader2,
+  PencilLine,
+  Sparkles,
+  Upload,
+  X,
+} from 'lucide-react';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/lib/utils';
 import type { Theme } from '@/lib/theme';
 import type { BizType } from '../types';
 import { BIZ_OPTIONS, BizIcon, BIZ_QUESTIONS } from './data';
@@ -54,13 +73,7 @@ export function OnboardingDrawer({
   t: Theme;
   isDark: boolean;
 }) {
-  const accent = isDark ? '#8da6ff' : '#2563EB';
-  const accentGradient = isDark
-    ? 'linear-gradient(135deg, #8da6ff, #a8bfff)'
-    : 'linear-gradient(135deg, #2563EB, #06B6D4)';
-  const modalBg = isDark ? 'rgba(9,13,31,0.97)' : '#ffffff';
-  const modalBorder = isDark ? 'rgba(141,166,255,0.18)' : 'rgba(15,23,42,0.08)';
-  const modalShadow = isDark ? '0 40px 80px rgba(0,0,0,.6)' : t.cardShadow;
+  const accent = isDark ? '#9CB9FF' : '#4249C6';
 
   type Phase = 'routes' | 'inputs' | 'running' | 'summary';
   const [phase, setPhase] = useState<Phase>('routes');
@@ -187,7 +200,7 @@ export function OnboardingDrawer({
         if (r === 'scrape') {
           const res = await onRunScrape(scrapeUrl.trim());
           setPendingScrape(res);
-          // Draft count is unknown at kickoff — reported on FAQ page instead.
+          // Draft count is unknown at kickoff - reported on FAQ page instead.
           count = 0;
         } else if (r === 'upload') {
           if (!uploadFile) throw new Error('No file selected');
@@ -204,10 +217,11 @@ export function OnboardingDrawer({
           count = res.addedCount;
         }
         setResults((prev) => [...prev, { route: r, status: 'done', count }]);
-      } catch (e: any) {
+      } catch (e: unknown) {
+        const message = e instanceof Error ? e.message : 'Failed';
         setResults((prev) => [
           ...prev,
-          { route: r, status: 'failed', message: e?.message || 'Failed' },
+          { route: r, status: 'failed', message },
         ]);
       }
     }
@@ -276,36 +290,14 @@ export function OnboardingDrawer({
       onClick={(e) => {
         if (e.target === e.currentTarget && phase !== 'running') onClose();
       }}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 50,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 16,
-        backdropFilter: 'blur(10px)',
-        WebkitBackdropFilter: 'blur(10px)',
-        background: isDark ? 'rgba(0,0,0,.65)' : 'rgba(15,23,42,.35)',
-      }}
+      className='fixed inset-0 z-99999 flex items-center justify-center overflow-y-auto bg-gray-400/50 p-4 backdrop-blur-[32px]'
     >
       <style>{`
-        @keyframes od-slide-up { from { opacity: 0; transform: translateY(12px) scale(.98); } to { opacity: 1; transform: none; } }
         @keyframes od-spin { to { transform: rotate(360deg); } }
       `}</style>
       <div
-        style={{
-          maxWidth,
-          width: '100%',
-          maxHeight: '90vh',
-          overflowY: 'auto',
-          background: modalBg,
-          border: `1px solid ${modalBorder}`,
-          borderRadius: 20,
-          padding: 26,
-          boxShadow: modalShadow,
-          animation: 'od-slide-up .35s cubic-bezier(.34,1.2,.64,1) both',
-        }}
+        className='w-full max-h-[90vh] overflow-y-auto rounded-2xl border border-gray-200 bg-white shadow-theme-xl dark:border-gray-800 dark:bg-gray-900'
+        style={{ maxWidth }}
       >
         {children}
       </div>
@@ -316,7 +308,7 @@ export function OnboardingDrawer({
   if (phase === 'routes') {
     const routeDefs: {
       id: OnboardingRoute;
-      icon: string;
+      icon: React.ComponentType<{ className?: string }>;
       title: string;
       detail: string;
       duration: string;
@@ -324,7 +316,7 @@ export function OnboardingDrawer({
     }[] = [
       {
         id: 'scrape',
-        icon: '🌐',
+        icon: Globe,
         title: 'Scrape my website',
         detail:
           'We visit your site, read the pages, and turn them into draft Q&As.',
@@ -333,14 +325,14 @@ export function OnboardingDrawer({
       },
       {
         id: 'upload',
-        icon: '📄',
+        icon: FileText,
         title: 'Upload a document',
-        detail: 'Menu, price list, brochure — we extract the entries for you.',
+        detail: 'Menu, price list, brochure - we extract the entries for you.',
         duration: '~1 min',
       },
       {
         id: 'questions',
-        icon: '✍️',
+        icon: PencilLine,
         title: 'Answer a few questions',
         detail:
           'We ask 8 quick questions about your business. No website needed.',
@@ -348,201 +340,77 @@ export function OnboardingDrawer({
       },
     ];
     return shell(
-      <>
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'flex-start',
-            marginBottom: 22,
-            gap: 12,
-          }}
-        >
-          <div style={{ minWidth: 0, flex: 1 }}>
-            <div
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 6,
-                background: isDark
-                  ? 'rgba(141,166,255,0.12)'
-                  : 'rgba(37,99,235,0.08)',
-                border: `1px solid ${isDark ? 'rgba(141,166,255,0.25)' : 'rgba(37,99,235,0.2)'}`,
-                borderRadius: 999,
-                padding: '4px 12px',
-                marginBottom: 12,
-              }}
-            >
-              <span
-                style={{
-                  fontSize: 10,
-                  fontWeight: 700,
-                  letterSpacing: '.1em',
-                  textTransform: 'uppercase',
-                  color: accent,
-                }}
-              >
+      <div className='p-5 sm:p-6'>
+        <div className='mb-6 flex items-start justify-between gap-4'>
+          <div className='min-w-0'>
+            <div className='mb-3 flex flex-wrap items-center gap-2'>
+              <Badge color='primary' startIcon={<Sparkles className='h-3 w-3' />}>
                 Train your AI
-              </span>
+              </Badge>
             </div>
-            <h2
-              style={{
-                fontSize: 22,
-                fontWeight: 800,
-                color: t.text,
-                letterSpacing: '-.5px',
-                margin: 0,
-                lineHeight: 1.2,
-              }}
-            >
+            <h2 className='text-xl font-semibold text-gray-800 dark:text-white/90'>
               How would you like to train your AI?
             </h2>
-            <p
-              style={{
-                fontSize: 13,
-                color: t.textSub,
-                margin: '6px 0 0',
-                lineHeight: 1.55,
-              }}
-            >
+            <p className='mt-1 text-theme-sm leading-6 text-gray-500 dark:text-gray-400'>
               Pick one or more. We&apos;ll run them in the order you picked.
             </p>
           </div>
           <button
+            type='button'
             onClick={onClose}
-            style={{
-              background: 'none',
-              border: 'none',
-              fontSize: 20,
-              color: t.textMuted,
-              cursor: 'pointer',
-              padding: 4,
-              lineHeight: 1,
-              flexShrink: 0,
-            }}
+            aria-label='Close train AI modal'
+            className='inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 dark:text-gray-500 dark:hover:bg-white/[0.05] dark:hover:text-gray-300'
           >
-            ✕
+            <X className='h-4 w-4' />
           </button>
         </div>
 
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-            gap: 10,
-          }}
-        >
+        <div className='grid gap-3 md:grid-cols-3'>
           {routeDefs.map((r) => {
             const selected = routes.includes(r.id);
             const order = selected ? routes.indexOf(r.id) + 1 : null;
+            const Icon = r.icon;
             return (
               <button
                 key={r.id}
+                type='button'
                 onClick={() => toggleRoute(r.id)}
-                style={{
-                  position: 'relative',
-                  textAlign: 'left',
-                  borderRadius: 14,
-                  padding: 18,
-                  cursor: 'pointer',
-                  border: `1.5px solid ${selected ? accent : isDark ? 'rgba(120,130,180,0.18)' : 'rgba(15,23,42,0.08)'}`,
-                  background: selected
-                    ? isDark
-                      ? 'rgba(141,166,255,0.10)'
-                      : 'rgba(59,130,246,0.06)'
-                    : isDark
-                      ? 'rgba(18,22,44,0.7)'
-                      : '#ffffff',
-                  transition:
-                    'border-color .18s, background .18s, transform .18s',
-                  transform: selected ? 'translateY(-1px)' : 'none',
-                }}
+                className={cn(
+                  'relative rounded-xl border p-4 text-left transition',
+                  selected
+                    ? 'border-brand-300 bg-brand-50 shadow-theme-xs dark:border-brand-500/30 dark:bg-brand-500/10'
+                    : 'border-gray-200 bg-white hover:border-brand-200 hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:hover:border-brand-500/20 dark:hover:bg-white/[0.05]',
+                )}
               >
                 {order !== null && (
-                  <span
-                    style={{
-                      position: 'absolute',
-                      top: 12,
-                      right: 12,
-                      minWidth: 22,
-                      height: 22,
-                      borderRadius: 999,
-                      padding: '0 8px',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      background: accent,
-                      color: '#fff',
-                      fontSize: 11,
-                      fontWeight: 800,
-                      fontVariantNumeric: 'tabular-nums',
-                    }}
-                  >
+                  <span className='absolute right-3 top-3 inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-brand-500 px-2 text-theme-xs font-semibold text-white'>
                     {order}
                   </span>
                 )}
-                <div style={{ fontSize: 24, marginBottom: 8 }}>{r.icon}</div>
                 <div
-                  style={{
-                    fontSize: 14,
-                    fontWeight: 700,
-                    color: t.text,
-                    marginBottom: 4,
-                  }}
+                  className={cn(
+                    'mb-4 flex h-10 w-10 items-center justify-center rounded-lg',
+                    selected
+                      ? 'bg-white text-brand-500 dark:bg-white/[0.06] dark:text-brand-400'
+                      : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+                  )}
                 >
+                  <Icon className='h-5 w-5' />
+                </div>
+                <div className='pr-7 text-theme-sm font-semibold text-gray-800 dark:text-white/90'>
                   {r.title}
                 </div>
-                <div
-                  style={{
-                    fontSize: 12,
-                    color: t.textSub,
-                    lineHeight: 1.5,
-                    marginBottom: 10,
-                  }}
-                >
+                <div className='mt-1 text-theme-xs leading-5 text-gray-500 dark:text-gray-400'>
                   {r.detail}
                 </div>
-                <div
-                  style={{
-                    display: 'flex',
-                    gap: 6,
-                    alignItems: 'center',
-                    flexWrap: 'wrap',
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: 10,
-                      fontWeight: 700,
-                      letterSpacing: '.05em',
-                      textTransform: 'uppercase',
-                      color: t.textMuted,
-                      padding: '3px 8px',
-                      borderRadius: 999,
-                      background: isDark
-                        ? 'rgba(255,255,255,0.04)'
-                        : 'rgba(15,23,42,0.04)',
-                    }}
-                  >
+                <div className='mt-3 flex flex-wrap items-center gap-2'>
+                  <Badge color='light'>
                     {r.duration}
-                  </span>
+                  </Badge>
                   {r.tag && (
-                    <span
-                      style={{
-                        fontSize: 10,
-                        fontWeight: 700,
-                        letterSpacing: '.05em',
-                        textTransform: 'uppercase',
-                        color: accent,
-                        padding: '3px 8px',
-                        borderRadius: 999,
-                        background: isDark
-                          ? 'rgba(141,166,255,0.14)'
-                          : 'rgba(59,130,246,0.08)',
-                      }}
-                    >
+                    <Badge color='primary'>
                       {r.tag}
-                    </span>
+                    </Badge>
                   )}
                 </div>
               </button>
@@ -550,57 +418,30 @@ export function OnboardingDrawer({
           })}
         </div>
 
-        <div style={{ display: 'flex', gap: 10, marginTop: 22 }}>
-          <button
+        <div className='mt-6 flex flex-col-reverse gap-3 sm:flex-row'>
+          <Button
+            type='button'
             onClick={onClose}
-            style={{
-              padding: '11px 16px',
-              borderRadius: 10,
-              background: 'transparent',
-              border: `1px solid ${isDark ? 'rgba(141,166,255,0.16)' : 'rgba(15,23,42,0.08)'}`,
-              color: t.textSub,
-              fontSize: 13,
-              fontWeight: 600,
-              cursor: 'pointer',
-            }}
+            variant='outline'
+            className='sm:w-auto'
           >
             Skip for now
-          </button>
-          <button
+          </Button>
+          <Button
+            type='button'
             disabled={routes.length === 0}
             onClick={() => setPhase('inputs')}
-            style={{
-              flex: 1,
-              padding: '12px 0',
-              borderRadius: 10,
-              background:
-                routes.length > 0
-                  ? accentGradient
-                  : isDark
-                    ? 'rgba(255,255,255,.05)'
-                    : 'rgba(15,23,42,.05)',
-              border:
-                routes.length > 0
-                  ? `1px solid ${isDark ? 'rgba(141,166,255,0.4)' : 'rgba(37,99,235,0.35)'}`
-                  : `1px solid ${isDark ? 'rgba(255,255,255,.08)' : 'rgba(15,23,42,0.08)'}`,
-              color: routes.length > 0 ? '#fff' : t.textMuted,
-              fontSize: 14,
-              fontWeight: 700,
-              cursor: routes.length > 0 ? 'pointer' : 'not-allowed',
-              boxShadow:
-                routes.length > 0 && !isDark
-                  ? '0 14px 30px rgba(37,99,235,0.22)'
-                  : 'none',
-            }}
+            className='flex-1'
           >
             {routes.length === 0
               ? 'Select at least one to continue'
               : routes.length === 1
-                ? 'Continue →'
-                : `Continue with ${routes.length} tasks →`}
-          </button>
+                ? 'Continue'
+                : `Continue with ${routes.length} tasks`}
+            <ArrowRight className='h-4 w-4' />
+          </Button>
         </div>
-      </>,
+      </div>,
     );
   }
 
@@ -642,124 +483,56 @@ export function OnboardingDrawer({
     }
 
     return shell(
-      <>
-        <div style={{ marginBottom: 18 }}>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: 10,
-            }}
-          >
-            <div
-              style={{
-                fontSize: 11,
-                fontWeight: 700,
-                color: t.textMuted,
-                letterSpacing: '.06em',
-                textTransform: 'uppercase',
-              }}
-            >
+      <div className='p-5 sm:p-6'>
+        <div className='mb-5'>
+          <div className='mb-3 flex items-center justify-between gap-4'>
+            <Badge color='light'>
               Step {inputIndex + 1} of {inputSteps.length}
-            </div>
+            </Badge>
             <button
+              type='button'
               onClick={onClose}
-              style={{
-                background: 'none',
-                border: 'none',
-                fontSize: 18,
-                color: t.textMuted,
-                cursor: 'pointer',
-                padding: 4,
-                lineHeight: 1,
-              }}
+              aria-label='Close train AI modal'
+              className='inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 dark:text-gray-500 dark:hover:bg-white/[0.05] dark:hover:text-gray-300'
             >
-              ✕
+              <X className='h-4 w-4' />
             </button>
           </div>
-          <div
-            style={{
-              height: 3,
-              background: isDark
-                ? 'rgba(141,166,255,0.08)'
-                : 'rgba(37,99,235,0.08)',
-              borderRadius: 999,
-              overflow: 'hidden',
-              marginBottom: 16,
-            }}
-          >
+          <div className='mb-4 h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800'>
             <div
-              style={{
-                height: '100%',
-                width: `${progressPct}%`,
-                background: accentGradient,
-                transition: 'width .4s cubic-bezier(.34,1.2,.64,1)',
-              }}
+              className='h-full rounded-full bg-brand-500 transition-all duration-500'
+              style={{ width: `${progressPct}%` }}
             />
           </div>
-          <h2
-            style={{
-              fontSize: 20,
-              fontWeight: 800,
-              color: t.text,
-              margin: 0,
-              letterSpacing: '-.3px',
-            }}
-          >
+          <h2 className='text-xl font-semibold text-gray-800 dark:text-white/90'>
             {stepTitleMap[currentInputStep]}
           </h2>
         </div>
 
         {currentInputStep === 'scrape' && (
           <div>
-            <p
-              style={{
-                fontSize: 13,
-                color: t.textSub,
-                margin: '0 0 12px',
-                lineHeight: 1.5,
-              }}
-            >
+            <p className='mb-3 text-theme-sm leading-6 text-gray-500 dark:text-gray-400'>
               We&apos;ll visit the pages, read the useful content, and turn it
               into draft Q&amp;As you can review.
             </p>
-            <input
+            <Input
               autoFocus
               type='url'
               value={scrapeUrl}
               onChange={(e) => setScrapeUrl(e.target.value)}
               placeholder='https://your-site.com'
-              style={{
-                width: '100%',
-                borderRadius: 10,
-                border: `1px solid ${dupUrlWarn ? '#d97706' : isDark ? 'rgba(141,166,255,0.18)' : 'rgba(37,99,235,0.15)'}`,
-                background: isDark ? 'rgba(30,36,66,0.7)' : '#fff',
-                padding: '12px 14px',
-                fontSize: 14,
-                color: t.text,
-                outline: 'none',
-                boxSizing: 'border-box',
-              }}
+              aria-invalid={dupUrlWarn}
+              className='h-11 rounded-lg bg-white dark:bg-white/[0.03]'
             />
             {dupUrlChecking && (
-              <div style={{ fontSize: 11, color: t.textMuted, marginTop: 6 }}>
-                Checking…
+              <div className='mt-2 flex items-center gap-2 text-theme-xs text-gray-500 dark:text-gray-400'>
+                <Loader2 className='h-3.5 w-3.5 animate-spin' />
+                Checking
               </div>
             )}
             {dupUrlWarn && !dupUrlChecking && (
-              <div
-                style={{
-                  marginTop: 8,
-                  padding: '8px 10px',
-                  borderRadius: 8,
-                  fontSize: 12,
-                  color: '#b45309',
-                  background: isDark ? 'rgba(217,119,6,0.10)' : '#fef3c7',
-                  border: '1px solid rgba(217,119,6,0.25)',
-                  lineHeight: 1.5,
-                }}
-              >
+              <div className='mt-3 flex gap-2 rounded-lg border border-warning-200 bg-warning-50 p-3 text-theme-xs leading-5 text-warning-700 dark:border-warning-500/20 dark:bg-warning-500/10 dark:text-orange-400'>
+                <AlertTriangle className='mt-0.5 h-4 w-4 shrink-0' />
                 It looks like this site has already been scraped. Running it
                 again will create duplicate drafts.
               </div>
@@ -769,38 +542,25 @@ export function OnboardingDrawer({
 
         {currentInputStep === 'upload' && (
           <div>
-            <p
-              style={{
-                fontSize: 13,
-                color: t.textSub,
-                margin: '0 0 12px',
-                lineHeight: 1.5,
-              }}
-            >
+            <p className='mb-3 text-theme-sm leading-6 text-gray-500 dark:text-gray-400'>
               PDFs, price lists, menus, brochures. We&apos;ll extract the
               entries and let you review before they go live.
             </p>
             <label
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: 32,
-                borderRadius: 12,
-                border: `2px dashed ${dupFileWarn ? '#d97706' : isDark ? 'rgba(141,166,255,0.25)' : 'rgba(37,99,235,0.2)'}`,
-                background: isDark
-                  ? 'rgba(141,166,255,0.04)'
-                  : 'rgba(59,130,246,0.03)',
-                cursor: 'pointer',
-                textAlign: 'center',
-              }}
+              className={cn(
+                'flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 text-center transition',
+                dupFileWarn
+                  ? 'border-warning-300 bg-warning-50 dark:border-warning-500/30 dark:bg-warning-500/10'
+                  : 'border-gray-300 bg-gray-50 hover:border-brand-300 hover:bg-brand-50 dark:border-gray-700 dark:bg-white/[0.03] dark:hover:border-brand-500/30 dark:hover:bg-brand-500/10',
+              )}
             >
-              <div style={{ fontSize: 32, marginBottom: 8 }}>📄</div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: t.text }}>
+              <div className='mb-3 flex h-11 w-11 items-center justify-center rounded-lg bg-white text-brand-500 shadow-theme-xs dark:bg-white/[0.06] dark:text-brand-400'>
+                <Upload className='h-5 w-5' />
+              </div>
+              <div className='text-theme-sm font-semibold text-gray-800 dark:text-white/90'>
                 {uploadFile ? uploadFile.name : 'Click to choose a file'}
               </div>
-              <div style={{ fontSize: 11, color: t.textMuted, marginTop: 4 }}>
+              <div className='mt-1 text-theme-xs text-gray-500 dark:text-gray-400'>
                 {uploadFile
                   ? `${Math.round(uploadFile.size / 1024)} KB`
                   : 'PDF, DOCX, TXT accepted'}
@@ -817,23 +577,14 @@ export function OnboardingDrawer({
             </label>
 
             {dupFileChecking && (
-              <div style={{ fontSize: 11, color: t.textMuted, marginTop: 6 }}>
-                Checking…
+              <div className='mt-2 flex items-center gap-2 text-theme-xs text-gray-500 dark:text-gray-400'>
+                <Loader2 className='h-3.5 w-3.5 animate-spin' />
+                Checking
               </div>
             )}
             {dupFileWarn && !dupFileChecking && (
-              <div
-                style={{
-                  marginTop: 8,
-                  padding: '8px 10px',
-                  borderRadius: 8,
-                  fontSize: 12,
-                  color: '#b45309',
-                  background: isDark ? 'rgba(217,119,6,0.10)' : '#fef3c7',
-                  border: '1px solid rgba(217,119,6,0.25)',
-                  lineHeight: 1.5,
-                }}
-              >
+              <div className='mt-3 flex gap-2 rounded-lg border border-warning-200 bg-warning-50 p-3 text-theme-xs leading-5 text-warning-700 dark:border-warning-500/20 dark:bg-warning-500/10 dark:text-orange-400'>
+                <AlertTriangle className='mt-0.5 h-4 w-4 shrink-0' />
                 A file with this name has already been uploaded. Continuing will
                 create a duplicate document.
               </div>
@@ -841,30 +592,13 @@ export function OnboardingDrawer({
 
             {uploadFile && (
               <label
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 6,
-                  marginTop: 14,
-                  fontSize: 12,
-                  color: t.textSub,
-                }}
+                className='mt-4 flex flex-col gap-2 text-theme-xs font-medium text-gray-700 dark:text-gray-300'
               >
                 What kind of document is this?
                 <select
                   value={docCategory}
                   onChange={(e) => setDocCategory(e.target.value)}
-                  style={{
-                    width: '100%',
-                    borderRadius: 10,
-                    border: `1px solid ${isDark ? 'rgba(141,166,255,0.18)' : 'rgba(37,99,235,0.15)'}`,
-                    background: isDark ? 'rgba(30,36,66,0.7)' : '#fff',
-                    padding: '10px 12px',
-                    fontSize: 13,
-                    color: docCategory ? t.text : t.textMuted,
-                    outline: 'none',
-                    boxSizing: 'border-box',
-                  }}
+                  className='h-10 rounded-lg border border-gray-200 bg-white px-3 text-theme-sm text-gray-700 outline-none transition focus:border-brand-300 focus:ring-3 focus:ring-brand-300/20 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-300'
                 >
                   <option value=''>Auto-detect</option>
                   <option value='menu'>Menu</option>
@@ -881,23 +615,10 @@ export function OnboardingDrawer({
 
         {currentInputStep === 'biz-type' && (
           <div>
-            <p
-              style={{
-                fontSize: 13,
-                color: t.textSub,
-                margin: '0 0 14px',
-                lineHeight: 1.5,
-              }}
-            >
+            <p className='mb-4 text-theme-sm leading-6 text-gray-500 dark:text-gray-400'>
               We&apos;ll use this to pick the right questions.
             </p>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-                gap: 8,
-              }}
-            >
+            <div className='grid gap-3 sm:grid-cols-2'>
               {BIZ_OPTIONS.map((biz) => {
                 const active = bizType === biz.id;
                 const iconColor = active
@@ -908,44 +629,29 @@ export function OnboardingDrawer({
                 return (
                   <button
                     key={biz.id}
+                    type='button'
                     onClick={() => setBizType(biz.id)}
-                    style={{
-                      borderRadius: 12,
-                      padding: '14px 8px',
-                      textAlign: 'center',
-                      cursor: 'pointer',
-                      border: `2px solid ${active ? accent : isDark ? 'rgba(120,130,180,0.2)' : 'rgba(15,23,42,0.08)'}`,
-                      background: active
-                        ? isDark
-                          ? 'rgba(141,166,255,0.15)'
-                          : 'rgba(37,99,235,0.08)'
-                        : isDark
-                          ? 'rgba(18,22,44,0.9)'
-                          : '#fff',
-                      transition: 'all .18s',
-                    }}
+                    className={cn(
+                      'rounded-xl border p-4 text-left transition',
+                      active
+                        ? 'border-brand-300 bg-brand-50 shadow-theme-xs dark:border-brand-500/30 dark:bg-brand-500/10'
+                        : 'border-gray-200 bg-white hover:border-brand-200 hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:hover:border-brand-500/20 dark:hover:bg-white/[0.05]',
+                    )}
                   >
                     <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        marginBottom: 8,
-                      }}
+                      className='mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800'
                     >
                       {BizIcon[biz.id](iconColor)}
                     </div>
-                    <div
-                      style={{
-                        fontSize: 12,
-                        fontWeight: 700,
-                        color: active ? accent : t.text,
-                      }}
-                    >
+                    <div className={cn(
+                      'text-theme-sm font-semibold',
+                      active
+                        ? 'text-brand-500 dark:text-brand-400'
+                        : 'text-gray-800 dark:text-white/90',
+                    )}>
                       {biz.label}
                     </div>
-                    <div
-                      style={{ fontSize: 10, color: t.textMuted, marginTop: 2 }}
-                    >
+                    <div className='mt-1 text-theme-xs text-gray-500 dark:text-gray-400'>
                       {biz.desc}
                     </div>
                   </button>
@@ -957,18 +663,10 @@ export function OnboardingDrawer({
 
         {currentInputStep === 'questions' && currentQ && (
           <div>
-            <p
-              style={{
-                fontSize: 15,
-                fontWeight: 700,
-                color: t.text,
-                margin: '0 0 10px',
-                lineHeight: 1.4,
-              }}
-            >
+            <p className='mb-3 text-theme-sm font-semibold leading-6 text-gray-800 dark:text-white/90'>
               {currentQ.q}
             </p>
-            <textarea
+            <Textarea
               autoFocus
               value={currentAnswer}
               onChange={(e) => setCurrentAnswer(e.target.value)}
@@ -977,157 +675,87 @@ export function OnboardingDrawer({
               }}
               placeholder={currentQ.placeholder}
               rows={3}
-              style={{
-                width: '100%',
-                borderRadius: 10,
-                border: `1px solid ${isDark ? 'rgba(141,166,255,0.18)' : 'rgba(37,99,235,0.15)'}`,
-                background: isDark ? 'rgba(30,36,66,0.7)' : '#fff',
-                padding: '11px 13px',
-                fontSize: 13,
-                color: t.text,
-                outline: 'none',
-                resize: 'none',
-                lineHeight: 1.6,
-                fontFamily: 'inherit',
-                boxSizing: 'border-box',
-              }}
+              className='min-h-28 resize-none rounded-lg bg-white leading-6 dark:bg-white/[0.03]'
             />
-            <div style={{ fontSize: 11, color: t.textMuted, marginTop: 6 }}>
-              Optional · Cmd/Ctrl+Enter to continue
+            <div className='mt-2 text-theme-xs text-gray-500 dark:text-gray-400'>
+              Optional. Cmd/Ctrl+Enter to continue
             </div>
           </div>
         )}
 
         {currentInputStep === 'about' && (
           <div>
-            <p
-              style={{
-                fontSize: 13,
-                color: t.textSub,
-                margin: '0 0 12px',
-                lineHeight: 1.5,
-              }}
-            >
+            <p className='mb-3 text-theme-sm leading-6 text-gray-500 dark:text-gray-400'>
               Anything important your AI should know. Also saved to your
               Settings.
             </p>
-            <textarea
+            <Textarea
               autoFocus
               value={aboutBusiness}
               onChange={(e) => setAboutBusiness(e.target.value)}
               rows={6}
               placeholder="Example: We're a premium sofa brand. Customers usually ask about pricing, delivery, fabric options and warranty."
-              style={{
-                width: '100%',
-                borderRadius: 12,
-                border: `1px solid ${isDark ? 'rgba(141,166,255,0.18)' : 'rgba(37,99,235,0.15)'}`,
-                background: isDark ? 'rgba(30,36,66,0.7)' : '#fff',
-                padding: '13px 14px',
-                fontSize: 13,
-                color: t.text,
-                outline: 'none',
-                resize: 'vertical',
-                lineHeight: 1.6,
-                fontFamily: 'inherit',
-                boxSizing: 'border-box',
-              }}
+              className='min-h-40 rounded-lg bg-white leading-6 dark:bg-white/[0.03]'
             />
           </div>
         )}
 
-        <div style={{ display: 'flex', gap: 8, marginTop: 20 }}>
-          <button
+        <div className='mt-6 flex flex-col-reverse gap-3 sm:flex-row'>
+          <Button
+            type='button'
             onClick={goBack}
-            style={{
-              padding: '11px 16px',
-              borderRadius: 10,
-              background: 'transparent',
-              border: `1px solid ${isDark ? 'rgba(141,166,255,0.16)' : 'rgba(15,23,42,0.08)'}`,
-              color: t.textSub,
-              fontSize: 13,
-              fontWeight: 600,
-              cursor: 'pointer',
-            }}
+            variant='outline'
           >
-            ← Back
-          </button>
-          <button
+            <ArrowLeft className='h-4 w-4' />
+            Back
+          </Button>
+          <Button
+            type='button'
             disabled={!canAdvance}
             onClick={goNext}
-            style={{
-              flex: 1,
-              padding: '12px 0',
-              borderRadius: 10,
-              background: canAdvance
-                ? accentGradient
-                : isDark
-                  ? 'rgba(255,255,255,.05)'
-                  : 'rgba(15,23,42,.05)',
-              border: canAdvance
-                ? `1px solid ${isDark ? 'rgba(141,166,255,0.4)' : 'rgba(37,99,235,0.35)'}`
-                : `1px solid ${isDark ? 'rgba(255,255,255,.08)' : 'rgba(15,23,42,0.08)'}`,
-              color: canAdvance ? '#fff' : t.textMuted,
-              fontSize: 14,
-              fontWeight: 700,
-              cursor: canAdvance ? 'pointer' : 'not-allowed',
-            }}
+            className='flex-1'
           >
             {inputIndex === inputSteps.length - 1 &&
             currentInputStep !== 'questions'
-              ? 'Start training →'
+              ? 'Start training'
               : currentInputStep === 'questions' &&
                   qIndex === bizQuestions.length - 1
-                ? 'Continue →'
-                : 'Next →'}
-          </button>
+                ? 'Continue'
+                : 'Next'}
+            <ArrowRight className='h-4 w-4' />
+          </Button>
           {currentInputStep === 'questions' && (
-            <button
+            <Button
+              type='button'
               onClick={goNext}
-              style={{
-                padding: '11px 16px',
-                borderRadius: 10,
-                background: 'transparent',
-                border: `1px solid ${isDark ? 'rgba(141,166,255,0.16)' : 'rgba(37,99,235,0.15)'}`,
-                color: t.textSub,
-                fontSize: 13,
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
+              variant='outline'
             >
               Skip
-            </button>
+            </Button>
           )}
         </div>
-      </>,
+      </div>,
     );
   }
 
   /* ============ PHASE 3: running ============ */
   if (phase === 'running') {
     return shell(
-      <>
-        <h2
-          style={{
-            fontSize: 20,
-            fontWeight: 800,
-            color: t.text,
-            margin: 0,
-            letterSpacing: '-.3px',
-          }}
-        >
-          Starting your training
-        </h2>
-        <p
-          style={{
-            fontSize: 13,
-            color: t.textSub,
-            margin: '6px 0 20px',
-            lineHeight: 1.5,
-          }}
-        >
-          Kicking off each task — the scrape and upload will keep running on the
-          FAQ page where you can watch them progress.
-        </p>
+      <div className='p-5 sm:p-6'>
+        <div className='mb-5 flex items-start gap-3'>
+          <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'>
+            <Loader2 className='h-5 w-5 animate-spin' />
+          </div>
+          <div>
+            <h2 className='text-xl font-semibold text-gray-800 dark:text-white/90'>
+              Starting your training
+            </h2>
+            <p className='mt-1 text-theme-sm leading-6 text-gray-500 dark:text-gray-400'>
+              Kicking off each task. The scrape and upload will keep running on
+              the FAQ page where you can watch them progress.
+            </p>
+          </div>
+        </div>
         <OnboardingSequentialStepper
           routes={routes}
           results={results}
@@ -1136,7 +764,7 @@ export function OnboardingDrawer({
           isDark={isDark}
           accent={accent}
         />
-      </>,
+      </div>,
       560,
     );
   }
@@ -1147,41 +775,33 @@ export function OnboardingDrawer({
   const anyFailed = results.some((r) => r.status === 'failed');
 
   return shell(
-    <>
-      <div style={{ textAlign: 'center', marginBottom: 18 }}>
+    <div className='p-5 sm:p-6'>
+      <div className='mb-5 text-center'>
         <div
-          style={{
-            width: 52,
-            height: 52,
-            borderRadius: '50%',
-            background: anyFailed && !anyDone ? '#dc262614' : '#05966914',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 26,
-            marginBottom: 10,
-          }}
+          className={cn(
+            'mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full',
+            anyFailed && !anyDone
+              ? 'bg-error-50 text-error-600 dark:bg-error-500/15 dark:text-error-500'
+              : 'bg-success-50 text-success-600 dark:bg-success-500/15 dark:text-success-500',
+          )}
         >
-          {anyFailed && !anyDone ? '!' : '✓'}
+          {anyFailed && !anyDone ? (
+            <AlertTriangle className='h-6 w-6' />
+          ) : (
+            <CheckCircle2 className='h-6 w-6' />
+          )}
         </div>
-        <h2 style={{ fontSize: 22, fontWeight: 800, color: t.text, margin: 0 }}>
+        <h2 className='text-xl font-semibold text-gray-800 dark:text-white/90'>
           {anyDone ? 'Your AI is trained' : 'Nothing was added'}
         </h2>
-        <p
-          style={{
-            fontSize: 13,
-            color: t.textSub,
-            margin: '8px 0 0',
-            lineHeight: 1.5,
-          }}
-        >
+        <p className='mt-2 text-theme-sm leading-6 text-gray-500 dark:text-gray-400'>
           {anyDone && totalDrafts > 0
             ? `${totalDrafts} ${totalDrafts === 1 ? 'draft is' : 'drafts are'} ready for you to review.`
             : 'You can try again from the FAQ page.'}
         </p>
       </div>
 
-      <div style={{ marginBottom: 16 }}>
+      <div className='mb-4'>
         <OnboardingSequentialStepper
           routes={routes}
           results={results}
@@ -1193,35 +813,11 @@ export function OnboardingDrawer({
       </div>
 
       {!bizAlreadyAsked && anyDone && (
-        <div
-          style={{
-            borderRadius: 12,
-            border: `1px solid ${isDark ? 'rgba(141,166,255,0.15)' : 'rgba(15,23,42,0.06)'}`,
-            padding: 12,
-            marginBottom: 16,
-            background: isDark
-              ? 'rgba(141,166,255,0.04)'
-              : 'rgba(59,130,246,0.03)',
-          }}
-        >
-          <div
-            style={{
-              fontSize: 12,
-              fontWeight: 700,
-              color: t.text,
-              marginBottom: 8,
-            }}
-          >
-            Quick one — what kind of business is this?
+        <div className='mb-4 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-white/[0.03]'>
+          <div className='mb-2 text-theme-sm font-semibold text-gray-800 dark:text-white/90'>
+            Quick one - what kind of business is this?
             {guessedBiz && (
-              <span
-                style={{
-                  marginLeft: 6,
-                  fontSize: 11,
-                  color: t.textMuted,
-                  fontWeight: 500,
-                }}
-              >
+              <span className='ml-1 text-theme-xs font-normal text-gray-500 dark:text-gray-400'>
                 (we guessed{' '}
                 {BIZ_OPTIONS.find((b) => b.id === guessedBiz)?.label})
               </span>
@@ -1232,18 +828,9 @@ export function OnboardingDrawer({
             onChange={(e) =>
               setFinalBiz((e.target.value || null) as BizType | null)
             }
-            style={{
-              width: '100%',
-              padding: '10px 12px',
-              borderRadius: 8,
-              border: `1px solid ${isDark ? 'rgba(141,166,255,0.18)' : 'rgba(37,99,235,0.15)'}`,
-              background: isDark ? 'rgba(30,36,66,0.7)' : '#fff',
-              color: t.text,
-              fontSize: 13,
-              outline: 'none',
-            }}
+            className='h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-theme-sm text-gray-700 outline-none transition focus:border-brand-300 focus:ring-3 focus:ring-brand-300/20 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-300'
           >
-            <option value=''>— Skip this —</option>
+            <option value=''>Skip this</option>
             {BIZ_OPTIONS.map((biz) => (
               <option key={biz.id} value={biz.id}>
                 {biz.label}
@@ -1253,25 +840,25 @@ export function OnboardingDrawer({
         </div>
       )}
 
-      <button
+      <Button
+        type='button'
         onClick={commitBizAndFinish}
         disabled={savingBiz}
-        style={{
-          width: '100%',
-          padding: '13px 0',
-          borderRadius: 10,
-          background: accentGradient,
-          border: `1px solid ${isDark ? 'rgba(141,166,255,0.4)' : 'rgba(37,99,235,0.35)'}`,
-          color: '#fff',
-          fontSize: 14,
-          fontWeight: 700,
-          cursor: savingBiz ? 'default' : 'pointer',
-          opacity: savingBiz ? 0.6 : 1,
-        }}
+        className='w-full'
       >
-        {savingBiz ? 'Saving…' : anyDone ? 'Review drafts →' : 'Go to FAQ →'}
-      </button>
-    </>,
+        {savingBiz ? (
+          <>
+            <Loader2 className='h-4 w-4 animate-spin' />
+            Saving
+          </>
+        ) : (
+          <>
+            {anyDone ? 'Review drafts' : 'Go to FAQ'}
+            <ArrowRight className='h-4 w-4' />
+          </>
+        )}
+      </Button>
+    </div>,
     520,
   );
 }

@@ -178,26 +178,38 @@ function leadBadgeClass(status: string) {
       return 'bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400';
   }
 }
-
+const STAT_TONE: Record<string, string> = {
+  brand: 'bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400',
+  error: 'bg-error-50 text-error-600 dark:bg-error-500/15 dark:text-error-500',
+  warning:
+    'bg-warning-50 text-warning-600 dark:bg-warning-500/15 dark:text-orange-400',
+  success:
+    'bg-success-50 text-success-600 dark:bg-success-500/15 dark:text-success-500',
+  gray: 'bg-gray-100 text-gray-700 dark:bg-white/[0.06] dark:text-gray-300',
+};
 function StatTile({
   label,
   value,
   icon,
+  tone = 'gray',
 }: {
   label: string;
   value: number;
   icon: React.ReactNode;
+  tone?: keyof typeof STAT_TONE;
 }) {
   return (
-    <div className='flex items-center gap-3 rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900/60'>
-      <span className='flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gray-100 text-gray-700 dark:bg-white/[0.06] dark:text-gray-300'>
+    <div className='flex w-[176px] flex-none items-center gap-3 rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900/60 sm:w-[190px]'>
+      <span
+        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:h-12 sm:w-12 ${STAT_TONE[tone]}`}
+      >
         {icon}
       </span>
       <div className='min-w-0'>
-        <div className='text-xl font-bold text-gray-800 dark:text-white/90'>
+        <div className='text-lg font-bold text-gray-800 sm:text-xl dark:text-white/90'>
           {formatCompact(value)}
         </div>
-        <div className='truncate text-theme-sm text-gray-500 dark:text-gray-400'>
+        <div className='text-xs leading-5 text-gray-500 sm:text-theme-sm dark:text-gray-400'>
           {label}
         </div>
       </div>
@@ -704,7 +716,8 @@ export default function ConversationsPage() {
                 Inbox management
               </h1>
               <p className='mt-2 max-w-2xl text-theme-sm text-gray-500 dark:text-gray-400'>
-                Review customer conversations, lead quality, channel source, and intent signals from a single workspace.
+                Review customer conversations, lead quality, channel source, and
+                intent signals from a single workspace.
               </p>
             </div>
 
@@ -723,41 +736,48 @@ export default function ConversationsPage() {
             </div>
           </div>
 
-          <div className='mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-7'>
+          <div className='mt-8 flex flex-wrap gap-3 sm:gap-4'>
             <StatTile
               label='Complaint'
               value={categoryCounts.complaint || 0}
-              icon={<AlertTriangle className='h-6 w-6' />}
+              icon={<AlertTriangle className='h-5 w-5 sm:h-6 sm:w-6' />}
+              tone='error'
             />
             <StatTile
               label='Feedback'
               value={categoryCounts.feedback || 0}
-              icon={<MessageCircle className='h-6 w-6' />}
+              icon={<MessageCircle className='h-5 w-5 sm:h-6 sm:w-6' />}
+              tone='brand'
             />
             <StatTile
               label='Order'
               value={categoryCounts.order || 0}
-              icon={<Package className='h-6 w-6' />}
+              icon={<Package className='h-5 w-5 sm:h-6 sm:w-6' />}
+              tone='warning'
             />
             <StatTile
               label='Enquiry'
               value={categoryCounts.enquiry || 0}
-              icon={<HelpCircle className='h-6 w-6' />}
+              icon={<HelpCircle className='h-5 w-5 sm:h-6 sm:w-6' />}
+              tone='brand'
             />
             <StatTile
               label='Open'
               value={openCount}
-              icon={<CheckCircle2 className='h-6 w-6' />}
+              icon={<CheckCircle2 className='h-5 w-5 sm:h-6 sm:w-6' />}
+              tone='success'
             />
             <StatTile
               label='Handoff'
               value={handoffCount}
-              icon={<ArrowRightLeft className='h-6 w-6' />}
+              icon={<ArrowRightLeft className='h-5 w-5 sm:h-6 sm:w-6' />}
+              tone='warning'
             />
             <StatTile
               label='With lead'
               value={leadCount}
-              icon={<Target className='h-6 w-6' />}
+              icon={<Target className='h-5 w-5 sm:h-6 sm:w-6' />}
+              tone='success'
             />
           </div>
         </div>
@@ -793,7 +813,8 @@ export default function ConversationsPage() {
 
           {dateRange && (
             <p className='mt-3 text-theme-xs text-gray-500 dark:text-gray-400'>
-              Filtered from {formatDate(dateRange.from)} to {formatDate(dateRange.to)}
+              Filtered from {formatDate(dateRange.from)} to{' '}
+              {formatDate(dateRange.to)}
             </p>
           )}
         </div>
