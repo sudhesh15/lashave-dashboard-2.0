@@ -142,13 +142,13 @@ function Section({
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
+    <section className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
       <div className="mb-4">
-        <h3 className="text-theme-sm font-semibold text-gray-800 dark:text-white/90">
+        <h3 className="type-small font-semibold text-gray-800 dark:text-white/90">
           {title}
         </h3>
         {description && (
-          <p className="mt-1 text-theme-sm text-gray-500 dark:text-gray-400">
+          <p className="mt-1 type-small text-gray-500 dark:text-gray-400">
             {description}
           </p>
         )}
@@ -185,11 +185,11 @@ function OptionGrid<T extends string>({
                 : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/[0.05]"
             }`}
           >
-            <span className="block text-theme-sm font-semibold">
+            <span className="block type-small font-semibold">
               {option.label}
             </span>
             <span
-              className={`mt-1 block text-theme-xs leading-5 ${
+              className={`mt-1 block type-caption leading-5 ${
                 active
                   ? "text-brand-500/80 dark:text-brand-400/80"
                   : "text-gray-500 dark:text-gray-400"
@@ -218,10 +218,10 @@ function ToggleRow({
   return (
     <div className="flex items-center justify-between gap-4 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
       <div>
-        <p className="text-theme-sm font-medium text-gray-800 dark:text-white/90">
+        <p className="type-small font-medium text-gray-800 dark:text-white/90">
           {label}
         </p>
-        <p className="mt-1 text-theme-xs leading-5 text-gray-500 dark:text-gray-400">
+        <p className="mt-1 type-caption leading-5 text-gray-500 dark:text-gray-400">
           {description}
         </p>
       </div>
@@ -230,7 +230,7 @@ function ToggleRow({
         role="switch"
         aria-checked={checked}
         onClick={() => onChange(!checked)}
-        className={`relative h-6 w-11 shrink-0 rounded-full transition ${
+        className={`relative h-6 w-10 shrink-0 rounded-full transition ${
           checked ? "bg-brand-500" : "bg-gray-200 dark:bg-gray-700"
         }`}
       >
@@ -284,22 +284,22 @@ function PreviewCard({ settings }: { settings: LLMSettings }) {
   }, [settings]);
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-gray-50 p-5 dark:border-gray-800 dark:bg-gray-900">
+    <div className="rounded-2xl border border-gray-200 bg-gray-50 p-6 dark:border-gray-800 dark:bg-gray-900">
       <div className="mb-4 flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-gray-700 dark:bg-white/[0.05] dark:text-gray-300">
           <Bot className="h-5 w-5" />
         </div>
         <div>
-          <p className="text-theme-sm font-semibold text-gray-800 dark:text-white/90">
+          <p className="type-small font-semibold text-gray-800 dark:text-white/90">
             Response Preview
           </p>
-          <p className="text-theme-xs text-gray-500 dark:text-gray-400">
+          <p className="type-caption text-gray-500 dark:text-gray-400">
             Sample output based on current settings
           </p>
         </div>
       </div>
       <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
-        <p className="text-theme-sm leading-6 text-gray-600 dark:text-gray-300">
+        <p className="type-small leading-6 text-gray-600 dark:text-gray-300">
           {sample}
         </p>
       </div>
@@ -307,7 +307,7 @@ function PreviewCard({ settings }: { settings: LLMSettings }) {
         {[settings.mode, settings.tone, settings.response_length].map((tag) => (
           <span
             key={tag}
-            className="rounded-full bg-gray-100 px-2.5 py-1 text-theme-xs font-medium capitalize text-gray-700 dark:bg-white/[0.05] dark:text-gray-300"
+            className="rounded-full bg-gray-100 px-3 py-1 type-caption font-medium capitalize text-gray-700 dark:bg-white/[0.05] dark:text-gray-300"
           >
             {tag}
           </span>
@@ -432,14 +432,14 @@ export function ChannelSettingsDrawer({
       >
         <div className="flex items-start justify-between gap-4 border-b border-gray-200 px-5 py-5 dark:border-gray-800 sm:px-6">
           <div className="flex items-start gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400">
               <Settings2 className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-gray-800 dark:text-white/90">
+              <h2 className="type-card-title font-semibold text-gray-800 dark:text-white/90">
                 Channel Settings
               </h2>
-              <p className="mt-1 text-theme-sm text-gray-500 dark:text-gray-400">
+              <p className="mt-1 type-small text-gray-500 dark:text-gray-400">
                 {channelName} per-channel AI behaviour
               </p>
             </div>
@@ -447,7 +447,7 @@ export function ChannelSettingsDrawer({
           <button
             type="button"
             onClick={onClose}
-            className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 transition hover:bg-gray-50 hover:text-gray-700 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400 dark:hover:bg-white/[0.05] dark:hover:text-white/90"
+            className="flex h-10 w-10 items-center justify-center rounded-[10px] border border-gray-200 bg-white text-gray-500 transition hover:bg-gray-50 hover:text-gray-700 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400 dark:hover:bg-white/[0.05] dark:hover:text-white/90"
             aria-label="Close settings"
           >
             <X className="h-5 w-5" />
@@ -537,15 +537,15 @@ export function ChannelSettingsDrawer({
                   }
                   placeholder="Example: This channel is for existing customers. Prioritize order support and keep replies concise."
                   rows={5}
-                  className="h-auto w-full resize-y rounded-lg border border-gray-300 bg-transparent px-4 py-3 text-sm leading-6 text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                  className="h-auto w-full resize-y rounded-[10px] border border-gray-300 bg-transparent px-4 py-3 type-small leading-6 text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                 />
-                <p className="mt-2 text-theme-xs text-gray-500 dark:text-gray-400">
+                <p className="mt-2 type-caption text-gray-500 dark:text-gray-400">
                   This context is sent with the prompt for this channel only.
                 </p>
               </Section>
 
               {err && (
-                <div className="rounded-xl border border-error-500/20 bg-error-50 px-4 py-3 text-theme-sm text-error-600 dark:bg-error-500/10 dark:text-error-500">
+                <div className="rounded-xl border border-error-500/20 bg-error-50 px-4 py-3 type-small text-error-600 dark:bg-error-500/10 dark:text-error-500">
                   {err}
                 </div>
               )}
@@ -558,7 +558,7 @@ export function ChannelSettingsDrawer({
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex h-11 items-center justify-center rounded-lg border border-gray-200 bg-white px-5 text-theme-sm font-medium text-gray-700 shadow-theme-xs transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-white/[0.03]"
+              className="inline-flex h-10 items-center justify-center rounded-[10px] border border-gray-200 bg-white px-5 type-small font-medium text-gray-700 shadow-theme-xs transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-white/[0.03]"
             >
               Cancel
             </button>
@@ -566,7 +566,7 @@ export function ChannelSettingsDrawer({
               type="button"
               onClick={() => void save()}
               disabled={saving || loading}
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-brand-500 px-5 text-theme-sm font-medium text-white shadow-theme-xs transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-[10px] bg-brand-500 px-5 type-small font-medium text-white shadow-theme-xs transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {saving ? (
                 <>

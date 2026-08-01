@@ -9,7 +9,8 @@
    ───────────────────────────────────────────────────────────────────────── */
 @theme {
   --font-*: initial;
-  --font-outfit: Outfit, sans-serif;
+  --font-inter: Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-outfit: var(--font-inter);
 
   --breakpoint-*: initial;
   --breakpoint-2xsm: 375px;
@@ -21,16 +22,22 @@
   --breakpoint-xl: 1280px;
   --breakpoint-2xl: 1536px;
 
-  --text-title-2xl: 72px;
-  --text-title-2xl--line-height: 90px;
-  --text-title-xl: 60px;
-  --text-title-xl--line-height: 72px;
-  --text-title-lg: 48px;
-  --text-title-lg--line-height: 60px;
-  --text-title-md: 36px;
-  --text-title-md--line-height: 44px;
-  --text-title-sm: 30px;
-  --text-title-sm--line-height: 38px;
+  --text-hero-title: 36px;
+  --text-hero-title--line-height: 1.1;
+  --text-title-2xl: 48px;
+  --text-title-2xl--line-height: 1.2;
+  --text-title-xl: 36px;
+  --text-title-xl--line-height: 1.2;
+  --text-title-lg: 28px;
+  --text-title-lg--line-height: 1.25;
+  --text-title-md: 24px;
+  --text-title-md--line-height: 1.3;
+  --text-title-sm: 20px;
+  --text-title-sm--line-height: 1.35;
+  --text-body-lg: 18px;
+  --text-body-lg--line-height: 1.6;
+  --text-body: 16px;
+  --text-body--line-height: 1.6;
   --text-theme-xl: 20px;
   --text-theme-xl--line-height: 30px;
   --text-theme-sm: 14px;
@@ -170,7 +177,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-outfit);
+  --font-sans: var(--font-inter);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
@@ -258,13 +265,122 @@
     cursor: pointer;
   }
   body {
-    @apply relative font-normal font-outfit bg-background text-foreground;
+    @apply relative bg-background font-sans text-body font-normal leading-[1.6] text-foreground antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    letter-spacing: 0;
   }
 }
 
-/* Sidebar nav item utilities, ported from TailAdmin */
+@utility type-hero-title {
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.1;
+  @media (min-width: 768px) { font-size: 48px; }
+  @media (min-width: 1024px) { font-size: 56px; }
+}
+
+@utility type-h1 {
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.2;
+  @media (min-width: 768px) { font-size: 40px; }
+  @media (min-width: 1024px) { font-size: 48px; }
+}
+
+@utility type-h2 {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
+  @media (min-width: 768px) { font-size: 32px; }
+  @media (min-width: 1024px) { font-size: 36px; }
+}
+
+@utility type-h3 {
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.25;
+  @media (min-width: 768px) { font-size: 24px; }
+  @media (min-width: 1024px) { font-size: 28px; }
+}
+
+@utility type-h4 {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.3;
+  @media (min-width: 768px) { font-size: 20px; }
+  @media (min-width: 1024px) { font-size: 24px; }
+}
+
+@utility type-card-title {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.35;
+  @media (min-width: 1024px) { font-size: 20px; }
+}
+
+@utility type-body-large {
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+@utility type-body {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+@utility type-small {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+@utility type-caption {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+@utility type-label {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+@utility container-text {
+  max-width: 700px;
+  width: 100%;
+  margin-inline: auto;
+}
+
+@utility container-content {
+  max-width: 1200px;
+  width: 100%;
+  margin-inline: auto;
+}
+
+@utility container-dashboard {
+  max-width: 1400px;
+  width: 100%;
+  margin-inline: auto;
+}
+
+@utility icon-tiny { width: 14px; height: 14px; }
+@utility icon-small { width: 16px; height: 16px; }
+@utility icon-default { width: 20px; height: 20px; }
+@utility icon-nav { width: 24px; height: 24px; }
+@utility icon-feature { width: 32px; height: 32px; }
+@utility icon-hero { width: 40px; height: 40px; }
+@utility icon-illustration { width: 48px; height: 48px; }
+@utility icon-empty { width: 64px; height: 64px; }
 @utility menu-item {
-  @apply relative flex items-center w-full gap-3 px-3 py-2 font-medium rounded-lg text-theme-sm;
+  @apply relative flex items-center w-full gap-3 rounded-[10px] px-3 py-2 font-medium text-theme-sm;
 }
 
 @utility menu-item-active {
@@ -315,7 +431,7 @@
 }
 
 @utility menu-dropdown-item {
-  @apply relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-theme-sm font-medium;
+  @apply relative flex items-center gap-3 rounded-[10px] px-3 py-2 text-theme-sm font-medium;
 }
 
 @utility menu-dropdown-item-active {
@@ -387,7 +503,7 @@
 }
 
 .apexcharts-tooltip.apexcharts-theme-light {
-  @apply gap-1 !rounded-lg !border-gray-200 p-3 !shadow-theme-sm dark:!border-gray-800 dark:!bg-gray-900;
+  @apply gap-1 !rounded-[10px] !border-gray-200 p-3 !shadow-theme-sm dark:!border-gray-800 dark:!bg-gray-900;
 }
 
 .apexcharts-tooltip-series-group {
@@ -397,7 +513,7 @@
   @apply !p-0;
 }
 .apexcharts-tooltip-title {
-  @apply !mb-0 !border-b-0 !bg-transparent !p-0 !text-[10px] !leading-4 !text-gray-800 dark:!text-white/90;
+  @apply !mb-0 !border-b-0 !bg-transparent !p-0 !type-caption !leading-4 !text-gray-800 dark:!text-white/90;
 }
 .apexcharts-tooltip-text {
   @apply !text-theme-xs !text-gray-700 dark:!text-white/90;

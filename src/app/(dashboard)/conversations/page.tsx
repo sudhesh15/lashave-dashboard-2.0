@@ -98,6 +98,17 @@ function timeAgo(iso: string | null) {
   return `${Math.floor(diff / 86400)}d ago`;
 }
 
+const CHANNEL_LOGOS: Record<string, string> = {
+  facebook: '/brand-logo/facebook.png',
+  google: '/brand-logo/google-map.png',
+  instagram: '/brand-logo/instagram.png',
+  meta: '/brand-logo/meta.png',
+  telegram: '/brand-logo/telegram.png',
+  website: '/brand-logo/website.png',
+  whatsapp: '/brand-logo/whatsapp.png',
+  youtube: '/brand-logo/youtube.png',
+};
+
 function platformLabel(channel?: string) {
   if (!channel) return 'Unknown';
   const map: Record<string, string> = {
@@ -199,17 +210,17 @@ function StatTile({
   tone?: keyof typeof STAT_TONE;
 }) {
   return (
-    <div className='flex w-[176px] flex-none items-center gap-3 rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900/60 sm:w-[190px]'>
+    <div className='flex min-w-0 items-center gap-2 rounded-2xl border border-gray-200 bg-white p-3 dark:border-gray-800 dark:bg-gray-900/60 sm:gap-3 xl:p-3'>
       <span
-        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:h-12 sm:w-12 ${STAT_TONE[tone]}`}
+        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${STAT_TONE[tone]}`}
       >
         {icon}
       </span>
       <div className='min-w-0'>
-        <div className='text-lg font-bold text-gray-800 sm:text-xl dark:text-white/90'>
+        <div className='type-card-title font-bold text-gray-800 dark:text-white/90'>
           {formatCompact(value)}
         </div>
-        <div className='text-xs leading-5 text-gray-500 sm:text-theme-sm dark:text-gray-400'>
+        <div className='truncate type-caption leading-5 text-gray-500 dark:text-gray-400'>
           {label}
         </div>
       </div>
@@ -247,7 +258,7 @@ function ConversationAvatar({
   return (
     <div
       style={{ height: size, width: size }}
-      className='flex items-center justify-center rounded-full bg-gray-100 text-theme-sm font-semibold text-gray-700 dark:bg-gray-800 dark:text-gray-300'
+      className='flex items-center justify-center rounded-full bg-gray-100 type-small font-semibold text-gray-700 dark:bg-gray-800 dark:text-gray-300'
     >
       {initials || 'U'}
     </div>
@@ -334,17 +345,17 @@ function ConversationTable({
   return (
     <div className='min-w-0 max-w-full overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]'>
       <div className='flex flex-col gap-2 border-b border-gray-100 px-5 py-5 dark:border-white/[0.05] sm:flex-row sm:items-center sm:justify-between sm:px-6'>
-        <h3 className='text-base font-semibold text-gray-800 dark:text-white/90'>
+        <h3 className='type-body font-semibold text-gray-800 dark:text-white/90'>
           Inbox
         </h3>
-        <div className='text-theme-sm font-medium text-gray-500 dark:text-gray-400'>
+        <div className='type-small font-medium text-gray-500 dark:text-gray-400'>
           {items.length} conversations
         </div>
       </div>
 
       <div className='min-w-0 px-5 py-5 sm:px-6'>
         <div className='flex flex-col gap-4 rounded-t-xl border border-b-0 border-gray-200 bg-white px-5 py-4 dark:border-white/[0.05] dark:bg-white/[0.01] lg:flex-row lg:items-center lg:justify-between'>
-          <h4 className='text-lg font-semibold text-gray-800 dark:text-white/90'>
+          <h4 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
             {activeTab.label} conversations
           </h4>
           <div className='flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end'>
@@ -356,7 +367,7 @@ function ConversationTable({
                 onChange={(e) => setQ(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && onSearchSubmit()}
                 placeholder='Search by username or ID'
-                className='h-11 w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-11 pr-4 text-theme-sm text-gray-800 shadow-theme-xs outline-none placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-gray-500'
+                className='h-10 w-full rounded-[10px] border border-gray-300 bg-white py-2 pl-11 pr-4 type-small text-gray-800 shadow-theme-xs outline-none placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-gray-500'
               />
             </div>
 
@@ -407,7 +418,7 @@ function ConversationTable({
                           setOpenFilter(null);
                         }}
                         className={cn(
-                          'flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm font-medium transition',
+                          'flex w-full items-center justify-between rounded-[10px] px-3 py-2 text-left type-small font-medium transition',
                           isActive
                             ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'
                             : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/[0.04]',
@@ -417,7 +428,7 @@ function ConversationTable({
                           {tab.icon}
                           {tab.label} conversations
                         </span>
-                        <span className='text-xs text-gray-400 dark:text-gray-500'>
+                        <span className='type-caption text-gray-400 dark:text-gray-500'>
                           {count}
                         </span>
                       </button>
@@ -444,7 +455,7 @@ function ConversationTable({
               type='button'
               onClick={() => setFilterLead((value) => !value)}
               className={cn(
-                'inline-flex h-10 shrink-0 items-center gap-2 rounded-lg px-4 text-theme-sm font-medium transition',
+                'inline-flex h-10 shrink-0 items-center gap-2 rounded-[10px] px-4 type-small font-medium transition',
                 filterLead
                   ? 'bg-brand-500 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-white/5',
@@ -477,7 +488,7 @@ function ConversationTable({
                   {['Customer', 'Channel', 'Intent', 'Status', 'Lead', 'Last active', 'Actions'].map((header) => (
                     <th
                       key={header}
-                      className='px-5 py-3 text-left text-base font-medium text-gray-500 dark:text-gray-400'
+                      className='px-5 py-3 text-left type-body font-medium text-gray-500 dark:text-gray-400'
                     >
                       {header}
                     </th>
@@ -487,7 +498,7 @@ function ConversationTable({
               <tbody className='divide-y divide-gray-100 dark:divide-white/[0.05]'>
                 {loading && (
                   <tr>
-                    <td colSpan={7} className='px-5 py-14 text-center text-theme-sm text-gray-500 dark:text-gray-400'>
+                    <td colSpan={7} className='px-5 py-14 text-center type-small text-gray-500 dark:text-gray-400'>
                       Loading conversations
                     </td>
                   </tr>
@@ -495,7 +506,7 @@ function ConversationTable({
 
                 {!loading && items.length === 0 && (
                   <tr>
-                    <td colSpan={7} className='px-5 py-14 text-center text-theme-sm text-gray-500 dark:text-gray-400'>
+                    <td colSpan={7} className='px-5 py-14 text-center type-small text-gray-500 dark:text-gray-400'>
                       {q.trim() ? 'No conversations match this search' : 'No conversations found'}
                     </td>
                   </tr>
@@ -515,58 +526,67 @@ function ConversationTable({
                             </div>
                             <div className='min-w-0'>
                               <div className='flex items-center gap-2'>
-                                <span className='group relative block max-w-[220px] text-theme-sm font-medium text-gray-800 dark:text-white/90'>
+                                <span className='group relative block max-w-[220px] type-small font-medium text-gray-800 dark:text-white/90'>
                                   <span className='block truncate'>{name}</span>
                                   <span className='pointer-events-none absolute left-0 top-full z-50 mt-1 hidden max-w-[280px] group-hover:block'>
                                     <span className='absolute -top-1 left-3 h-2 w-2 rotate-45 rounded-[2px] bg-gray-900' />
-                                    <span className='relative block rounded-md bg-gray-900 px-2.5 py-1.5 text-xs font-medium text-white shadow-lg'>
+                                    <span className='relative block rounded-[10px] bg-gray-900 px-3 py-1.5 type-caption font-medium text-white shadow-lg'>
                                       {name}
                                     </span>
                                   </span>
                                 </span>
                                 {item.unread_count != null && item.unread_count > 0 && (
-                                  <span className='shrink-0 rounded-full bg-brand-50 px-2 py-0.5 text-theme-xs font-medium text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'>
+                                  <span className='shrink-0 rounded-full bg-brand-50 px-2 py-0.5 type-caption font-medium text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'>
                                     {item.unread_count}
                                   </span>
                                 )}
                               </div>
-                              <span className='mt-1 block max-w-[260px] truncate text-theme-xs text-gray-500 dark:text-gray-400'>
+                              <span className='mt-1 block max-w-[260px] truncate type-caption text-gray-500 dark:text-gray-400'>
                                 {preview}
                               </span>
                             </div>
                           </Link>
                         </td>
-                        <td className='px-6 py-3 text-theme-sm text-gray-500 dark:text-gray-400'>
-                          {platformLabel(item.channel)}
+                        <td className='px-6 py-3 type-small text-gray-500 dark:text-gray-400'>
+                          <span className='inline-flex items-center gap-2'>
+                            <Image
+                              src={CHANNEL_LOGOS[(item.channel || '').toLowerCase()] || '/brand-logo/website.png'}
+                              alt={platformLabel(item.channel)}
+                              width={18}
+                              height={18}
+                              className='h-[18px] w-[18px] shrink-0 object-contain'
+                            />
+                            <span className='truncate'>{platformLabel(item.channel)}</span>
+                          </span>
                         </td>
                         <td className='px-6 py-3'>
-                          <span className='inline-flex items-center rounded-full bg-brand-50 px-2.5 py-1 text-theme-xs font-medium capitalize text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'>
+                          <span className='inline-flex items-center rounded-full bg-brand-50 px-3 py-1 type-caption font-medium capitalize text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'>
                             {category || 'Unclassified'}
                           </span>
                         </td>
                         <td className='px-6 py-3'>
-                          <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-theme-xs font-medium capitalize ${badgeClass(item.status)}`}>
+                          <span className={`inline-flex items-center rounded-full px-3 py-1 type-caption font-medium capitalize ${badgeClass(item.status)}`}>
                             {item.status || 'unknown'}
                           </span>
                         </td>
                         <td className='px-6 py-3'>
                           {item.lead ? (
-                            <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-theme-xs font-medium capitalize ${leadBadgeClass(item.lead.status)}`}>
+                            <span className={`inline-flex items-center rounded-full px-3 py-1 type-caption font-medium capitalize ${leadBadgeClass(item.lead.status)}`}>
                               {item.lead.status || 'new'}
                             </span>
                           ) : (
-                            <span className='text-theme-sm text-gray-400 dark:text-gray-500'>
+                            <span className='type-small text-gray-400 dark:text-gray-500'>
                               None
                             </span>
                           )}
                         </td>
-                        <td className='px-6 py-3 text-theme-sm text-gray-500 dark:text-gray-400'>
+                        <td className='px-6 py-3 type-small text-gray-500 dark:text-gray-400'>
                           {timeAgo(item.last_message_at)}
                         </td>
                         <td className='px-6 py-3'>
                           <Link
                             href={`/conversations/${item.id}`}
-                            className='inline-flex h-8 items-center gap-2 whitespace-nowrap rounded-lg bg-brand-500 px-3 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-brand-600'
+                            className='inline-flex h-8 items-center gap-2 whitespace-nowrap rounded-[10px] bg-brand-500 px-3 type-small font-medium text-white shadow-theme-xs hover:bg-brand-600'
                           >
                             <Eye size={14} />
                             View conversation
@@ -706,16 +726,16 @@ export default function ConversationsPage() {
   return (
     <RequireAuth>
       <div className='mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 lg:px-8'>
-        <div className='rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.04)] dark:border-slate-800 dark:bg-slate-900/80 sm:p-8'>
+        <div className='rounded-[28px] border border-gray-200 bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.04)] dark:border-gray-800 dark:bg-white/[0.03] sm:p-8'>
           <div className='flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between'>
             <div>
-              <p className='text-theme-sm font-semibold uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400'>
+              <p className='type-small font-semibold uppercase tracking-[0.24em] text-gray-500 dark:text-gray-400'>
                 Conversations
               </p>
               <h1 className='mt-2 text-title-sm font-semibold text-gray-800 dark:text-white/90'>
                 Inbox management
               </h1>
-              <p className='mt-2 max-w-2xl text-theme-sm text-gray-500 dark:text-gray-400'>
+              <p className='mt-2 max-w-2xl type-small text-gray-500 dark:text-gray-400'>
                 Review customer conversations, lead quality, channel source, and
                 intent signals from a single workspace.
               </p>
@@ -723,67 +743,73 @@ export default function ConversationsPage() {
 
             <div className='flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-3'>
               <button
-                className='inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 text-theme-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/[0.05]'
+                className='inline-flex h-10 items-center justify-center gap-2 rounded-[10px] border border-gray-200 bg-white px-4 type-small font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/[0.05]'
                 onClick={() => load()}
               >
                 <RefreshCw className='h-4 w-4' />
                 Refresh
               </button>
-              <div className='flex items-center gap-2 text-theme-xs text-gray-500 dark:text-gray-400'>
+              <div className='flex items-center gap-2 type-caption text-gray-500 dark:text-gray-400'>
                 <Clock3 className='h-3.5 w-3.5' />
                 Last refreshed {lastRefresh.toLocaleTimeString()}
               </div>
             </div>
           </div>
 
-          <div className='mt-8 flex flex-wrap gap-3 sm:gap-4'>
+          <div className='mt-8 grid grid-cols-2 gap-3 lg:grid-cols-4 3xl:grid-cols-8'>
+            <StatTile
+              label='Total'
+              value={items.length}
+              icon={<List className='h-5 w-5' />}
+              tone='gray'
+            />
             <StatTile
               label='Complaint'
               value={categoryCounts.complaint || 0}
-              icon={<AlertTriangle className='h-5 w-5 sm:h-6 sm:w-6' />}
+              icon={<AlertTriangle className='h-5 w-5' />}
               tone='error'
             />
             <StatTile
               label='Feedback'
               value={categoryCounts.feedback || 0}
-              icon={<MessageCircle className='h-5 w-5 sm:h-6 sm:w-6' />}
+              icon={<MessageCircle className='h-5 w-5' />}
               tone='brand'
             />
             <StatTile
               label='Order'
               value={categoryCounts.order || 0}
-              icon={<Package className='h-5 w-5 sm:h-6 sm:w-6' />}
+              icon={<Package className='h-5 w-5' />}
               tone='warning'
             />
             <StatTile
               label='Enquiry'
               value={categoryCounts.enquiry || 0}
-              icon={<HelpCircle className='h-5 w-5 sm:h-6 sm:w-6' />}
+              icon={<HelpCircle className='h-5 w-5' />}
               tone='brand'
             />
             <StatTile
               label='Open'
               value={openCount}
-              icon={<CheckCircle2 className='h-5 w-5 sm:h-6 sm:w-6' />}
+              icon={<CheckCircle2 className='h-5 w-5' />}
               tone='success'
             />
             <StatTile
               label='Handoff'
               value={handoffCount}
-              icon={<ArrowRightLeft className='h-5 w-5 sm:h-6 sm:w-6' />}
+              icon={<ArrowRightLeft className='h-5 w-5' />}
               tone='warning'
             />
             <StatTile
               label='With lead'
               value={leadCount}
-              icon={<Target className='h-5 w-5 sm:h-6 sm:w-6' />}
+              icon={<Target className='h-5 w-5' />}
               tone='success'
             />
           </div>
         </div>
 
         {err && (
-          <div className='mt-6 rounded-xl border border-error-200 bg-error-50 px-4 py-3 text-theme-sm text-error-700 dark:border-error-500/20 dark:bg-error-500/10 dark:text-error-400'>
+          <div className='mt-6 rounded-xl border border-error-200 bg-error-50 px-4 py-3 type-small text-error-700 dark:border-error-500/20 dark:bg-error-500/10 dark:text-error-400'>
             {err}
           </div>
         )}
@@ -812,7 +838,7 @@ export default function ConversationsPage() {
           />
 
           {dateRange && (
-            <p className='mt-3 text-theme-xs text-gray-500 dark:text-gray-400'>
+            <p className='mt-3 type-caption text-gray-500 dark:text-gray-400'>
               Filtered from {formatDate(dateRange.from)} to{' '}
               {formatDate(dateRange.to)}
             </p>

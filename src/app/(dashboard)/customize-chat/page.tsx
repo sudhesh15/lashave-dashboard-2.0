@@ -21,7 +21,7 @@ import { apiFetch } from '@/lib/api';
 import { useTheme } from '@/lib/theme-context';
 import { cn } from '@/lib/utils';
 import {
-  AlertTriangle, ArrowLeft, Blocks, BookOpen, Copy, Check, CheckCircle2, Code2, DollarSign,
+  AlertTriangle, ArrowLeft, Blocks, BookOpen, ChevronRight, Copy, Check, CheckCircle2, Code2, DollarSign,
   Handshake, HelpCircle, Info, Send, Upload, RotateCcw,
   LogOut, Monitor, Smartphone, Sparkles, Save, Eye, Wrench, Palette, MessageCircle,
   Plus, ShoppingBag, Trash2, User, Layout, Users, X,
@@ -485,30 +485,55 @@ function ColorInput({
   onChange: (v: string) => void;
 }) {
   const colorRef = useRef<HTMLInputElement>(null);
+  const [draft, setDraft] = useState(value.toUpperCase());
+
+  useEffect(() => {
+    setDraft(value.toUpperCase());
+  }, [value]);
+
+  function handleTextChange(raw: string) {
+    const next = raw.startsWith('#') ? raw : `#${raw}`;
+    const normalized = `#${next.replace('#', '').slice(0, 6)}`.toUpperCase();
+
+    if (!/^#[0-9A-F]{0,6}$/.test(normalized)) return;
+
+    setDraft(normalized);
+    if (/^#[0-9A-F]{6}$/.test(normalized)) {
+      onChange(normalized);
+    }
+  }
 
   return (
     <div className="flex-1">
-      <div className="mb-2 text-sm font-medium text-gray-500 dark:text-gray-400">{label}</div>
+      <div className="mb-2 type-small font-medium text-gray-500 dark:text-gray-400">{label}</div>
       <div
-        className="flex min-h-11 cursor-pointer items-center gap-2.5 rounded-lg border border-gray-300 bg-white px-3 py-2 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900"
+        className="flex min-h-10 cursor-pointer items-center gap-3 rounded-[10px] border border-gray-300 bg-white px-3 py-2 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900"
         onClick={() => colorRef.current?.click()}
       >
         <div
-          className="h-7 w-7 shrink-0 rounded-md border border-gray-300 dark:border-gray-700"
+          className="h-7 w-7 shrink-0 rounded-[10px] border border-gray-300 dark:border-gray-700"
           style={{ background: value }}
         />
         <input
           ref={colorRef} type="color" value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => {
+            const next = e.target.value.toUpperCase();
+            setDraft(next);
+            onChange(next);
+          }}
           className="absolute h-0 w-0 border-none p-0 opacity-0"
         />
         <input
-          type="text" value={value.toUpperCase()}
-          onChange={(e) => {
-            const v = e.target.value;
-            if (/^#[0-9a-fA-F]{0,6}$/.test(v)) onChange(v);
+          type="text"
+          value={draft}
+          onClick={(e) => e.stopPropagation()}
+          onChange={(e) => handleTextChange(e.target.value)}
+          onBlur={() => {
+            if (!/^#[0-9A-F]{6}$/.test(draft)) {
+              setDraft(value.toUpperCase());
+            }
           }}
-          className="w-full bg-transparent font-mono text-sm font-medium text-gray-800 outline-none dark:text-white/90"
+          className="w-full bg-transparent font-mono type-small font-medium text-gray-800 outline-none dark:text-white/90"
         />
       </div>
     </div>
@@ -542,12 +567,12 @@ function ToggleRow({
 }) {
   return (
     <div
-      className="flex min-h-11 items-center justify-between gap-4"
+      className="flex min-h-10 items-center justify-between gap-4"
       style={{ marginBottom: mb }}
     >
       <div>
-        <div className={cn('mb-0.5 font-semibold text-gray-800 dark:text-white/90', large ? 'text-base' : 'text-sm')}>{title}</div>
-        {desc && <div className={cn(large ? 'text-[15px]' : 'text-sm', 'text-gray-400 dark:text-gray-500')}>{desc}</div>}
+        <div className={cn('mb-0.5 font-semibold text-gray-800 dark:text-white/90', large ? 'type-body' : 'type-small')}>{title}</div>
+        {desc && <div className={cn(large ? 'type-body' : 'type-small', 'text-gray-400 dark:text-gray-500')}>{desc}</div>}
       </div>
       <Toggle checked={checked} onChange={onChange} />
     </div>
@@ -565,7 +590,7 @@ function Segmented({
   accent: string;
 }) {
   return (
-    <div className="inline-flex flex-wrap gap-0.5 rounded-lg border border-gray-200 bg-gray-50 p-0.5 dark:border-gray-800 dark:bg-white/[0.03]">
+    <div className="inline-flex flex-wrap gap-0.5 rounded-[10px] border border-gray-200 bg-gray-50 p-0.5 dark:border-gray-800 dark:bg-white/[0.03]">
       {options.map((o) => {
         const sel = o.id === value;
         return (
@@ -573,7 +598,7 @@ function Segmented({
             key={o.id}
             onClick={() => onChange(o.id)}
             className={cn(
-              'min-h-[34px] rounded-md px-3.5 py-1.5 text-sm font-medium transition',
+              'min-h-[34px] rounded-[10px] px-3.5 py-1.5 type-small font-medium transition',
               sel
                 ? 'text-white shadow-theme-xs'
                 : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200',
@@ -602,12 +627,12 @@ function TextField({
 }) {
   return (
     <div style={{ marginBottom: mb }}>
-      <div className="mb-2 text-sm font-medium text-gray-500 dark:text-gray-400">{label}</div>
+      <div className="mb-2 type-small font-medium text-gray-500 dark:text-gray-400">{label}</div>
       <Input
         type={type} value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="h-11 rounded-lg border-gray-300 px-4 py-2.5 text-theme-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus-visible:border-brand-300 focus-visible:ring-3 focus-visible:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus-visible:border-brand-800"
+        className="h-10 rounded-[10px] border-gray-300 px-4 py-2 type-small text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus-visible:border-brand-300 focus-visible:ring-3 focus-visible:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus-visible:border-brand-800"
       />
     </div>
   );
@@ -617,8 +642,8 @@ function TextField({
 
 function SectionHeader({ title, badge }: { title: string; badge?: string }) {
   return (
-    <div className="mb-4.5 flex items-center gap-2.5">
-      <h2 className="text-base font-semibold text-gray-800 dark:text-white/90">{title}</h2>
+    <div className="mb-4.5 flex items-center gap-3">
+      <h2 className="type-body font-semibold text-gray-800 dark:text-white/90">{title}</h2>
       {badge && <Badge color="primary">{badge}</Badge>}
     </div>
   );
@@ -638,22 +663,22 @@ function CustomFieldEditor({
 }) {
   return (
     <div className="rounded-2xl border border-gray-200 bg-white p-3.5 dark:border-gray-700 dark:bg-gray-900">
-      <div className="mb-2.5 grid grid-cols-[1fr_120px] gap-2.5">
+      <div className="mb-2.5 grid grid-cols-[1fr_120px] gap-3">
         <div>
-          <div className="mb-1.5 text-xs font-semibold text-gray-400 dark:text-gray-500">Question</div>
+          <div className="mb-1.5 type-caption font-semibold text-gray-400 dark:text-gray-500">Question</div>
           <Input
             value={field.label}
             onChange={(e) => onUpdate(index, { label: e.target.value })}
             placeholder="What service are you looking for?"
-            className="h-auto py-2.5 text-sm"
+            className="h-auto py-2 type-small"
           />
         </div>
         <div>
-          <div className="mb-1.5 text-xs font-semibold text-gray-400 dark:text-gray-500">Type</div>
+          <div className="mb-1.5 type-caption font-semibold text-gray-400 dark:text-gray-500">Type</div>
           <select
             value={field.type}
             onChange={(e) => onUpdate(index, { type: e.target.value as CustomDetailField['type'] })}
-            className="h-9 w-full rounded-lg border border-gray-300 bg-transparent px-2.5 text-sm text-gray-800 outline-none focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+            className="h-9 w-full rounded-[10px] border border-gray-300 bg-transparent px-3 type-small text-gray-800 outline-none focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
           >
             <option value="text">Text</option>
             <option value="number">Number</option>
@@ -661,12 +686,12 @@ function CustomFieldEditor({
         </div>
       </div>
       <div className="mb-2.5">
-        <div className="mb-1.5 text-xs font-semibold text-gray-400 dark:text-gray-500">Placeholder</div>
+        <div className="mb-1.5 type-caption font-semibold text-gray-400 dark:text-gray-500">Placeholder</div>
         <Input
           value={field.placeholder || ''}
           onChange={(e) => onUpdate(index, { placeholder: e.target.value })}
           placeholder="Enter answer..."
-          className="h-auto py-2.5 text-sm"
+          className="h-auto py-2 type-small"
         />
       </div>
       <div className="flex items-center justify-between gap-3">
@@ -698,7 +723,7 @@ function TopicEditor({
             value={t.label}
             onChange={(e) => onChange(topics.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))}
             placeholder="Topic label (e.g. Billing question)"
-            className="h-auto flex-1 py-2.5 text-base"
+            className="h-auto flex-1 py-2 type-body"
           />
           <Button
             type="button"
@@ -730,27 +755,27 @@ function FaqEditor({
   onChange: (f: FaqItem[]) => void;
 }) {
   return (
-    <div className="flex flex-col gap-2.5">
+    <div className="flex flex-col gap-3">
       {items.map((f, i) => (
         <div key={i} className="rounded-2xl border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-900">
           <Input
             value={f.q}
             onChange={(e) => onChange(items.map((x, j) => (j === i ? { ...x, q: e.target.value } : x)))}
             placeholder="Question — e.g. What are your opening hours?"
-            className="mb-2 h-auto py-2 text-base font-semibold"
+            className="mb-2 h-auto py-2 type-body font-semibold"
           />
           <textarea
             value={f.a}
             onChange={(e) => onChange(items.map((x, j) => (j === i ? { ...x, a: e.target.value } : x)))}
             placeholder="Answer shown to visitors…"
             rows={2}
-            className="mb-2 w-full resize-y rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-base text-gray-800 outline-none focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+            className="mb-2 w-full resize-y rounded-[10px] border border-gray-300 bg-transparent px-3 py-2 type-body text-gray-800 outline-none focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
           />
           <Button
             type="button"
             variant="outline"
             size="sm"
-            className="border-error-200 text-sm text-error-600 hover:bg-error-50 dark:border-error-500/30 dark:text-error-400 dark:hover:bg-error-500/10"
+            className="border-error-200 type-small text-error-600 hover:bg-error-50 dark:border-error-500/30 dark:text-error-400 dark:hover:bg-error-500/10"
             onClick={() => onChange(items.filter((_, j) => j !== i))}
           >
             <Trash2 size={16} /> Remove
@@ -880,13 +905,13 @@ function ProactiveRuleCard({
         !rule.enabled && 'opacity-55',
       )}
     >
-      <div className={cn('flex items-center gap-2.5', expanded && 'mb-3.5')}>
+      <div className={cn('flex items-center gap-3', expanded && 'mb-3.5')}>
         <Toggle checked={rule.enabled} onChange={(v) => onUpdate({ ...rule, enabled: v })} />
         <div className="min-w-0 flex-1">
-          <div className="truncate text-sm font-semibold text-gray-800 dark:text-white/90">
+          <div className="truncate type-small font-semibold text-gray-800 dark:text-white/90">
             {rule.name || 'Untitled rule'}
           </div>
-          <div className="mt-0.5 text-xs text-gray-400 dark:text-gray-500">
+          <div className="mt-0.5 type-caption text-gray-400 dark:text-gray-500">
             {summarizeConditions(cond)}
           </div>
         </div>
@@ -898,29 +923,29 @@ function ProactiveRuleCard({
       {expanded && (
         <div className="flex flex-col gap-3">
           <div>
-            <div className="mb-1.5 text-xs font-semibold text-gray-400 dark:text-gray-500">Rule name (internal)</div>
+            <div className="mb-1.5 type-caption font-semibold text-gray-400 dark:text-gray-500">Rule name (internal)</div>
             <Input
               value={rule.name}
               onChange={(e) => onUpdate({ ...rule, name: e.target.value })}
               placeholder="e.g. Pricing hesitation"
-              className="h-auto py-2.5 text-sm"
+              className="h-auto py-2 type-small"
             />
           </div>
 
           <div>
-            <div className="mb-1.5 text-xs font-semibold text-gray-400 dark:text-gray-500">Message shown to visitor</div>
+            <div className="mb-1.5 type-caption font-semibold text-gray-400 dark:text-gray-500">Message shown to visitor</div>
             <textarea
               value={rule.message}
               onChange={(e) => onUpdate({ ...rule, message: e.target.value })}
               placeholder="Any questions about pricing? I can help."
               rows={2}
-              className="w-full resize-y rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 outline-none focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+              className="w-full resize-y rounded-[10px] border border-gray-300 bg-transparent px-3 py-2 type-small text-gray-800 outline-none focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-2 gap-3">
             <div>
-              <div className="mb-1.5 text-xs font-semibold text-gray-400 dark:text-gray-500">
+              <div className="mb-1.5 type-caption font-semibold text-gray-400 dark:text-gray-500">
                 Page URL
                 <span className="ml-1.5 font-normal opacity-70">· leave blank to match every page</span>
               </div>
@@ -932,7 +957,7 @@ function ProactiveRuleCard({
                   if (normalized !== cond.path_match) patchCond({ path_match: normalized });
                 }}
                 placeholder="e.g. /careers or /products/* or paste a URL"
-                className="h-auto py-2.5 font-mono text-sm"
+                className="h-auto py-2 font-mono type-small"
               />
               {cond.path_match && (
                 <div className="mt-1.5 text-[10.5px] leading-relaxed text-gray-400 dark:text-gray-500">
@@ -945,7 +970,7 @@ function ProactiveRuleCard({
               )}
             </div>
             <div>
-              <div className="mb-1.5 text-xs font-semibold text-gray-400 dark:text-gray-500">
+              <div className="mb-1.5 type-caption font-semibold text-gray-400 dark:text-gray-500">
                 Priority
                 <span className="ml-1.5 font-normal opacity-70">· higher wins if multiple match</span>
               </div>
@@ -953,13 +978,13 @@ function ProactiveRuleCard({
                 type="number" value={rule.priority}
                 onChange={(e) => onUpdate({ ...rule, priority: Number(e.target.value) || 0 })}
                 min={0} max={100}
-                className="h-auto py-2.5 text-sm"
+                className="h-auto py-2 type-small"
               />
             </div>
           </div>
 
           <div>
-            <div className="mb-1.5 text-xs font-semibold text-gray-400 dark:text-gray-500">
+            <div className="mb-1.5 type-caption font-semibold text-gray-400 dark:text-gray-500">
               Time on page — {(cond.time_on_page_ms || 0) / 1000}s
             </div>
             <input
@@ -971,7 +996,7 @@ function ProactiveRuleCard({
           </div>
 
           <div>
-            <div className="mb-1.5 text-xs font-semibold text-gray-400 dark:text-gray-500">
+            <div className="mb-1.5 type-caption font-semibold text-gray-400 dark:text-gray-500">
               Min scroll depth — {cond.min_scroll_pct ?? 0}%
             </div>
             <input
@@ -999,7 +1024,7 @@ function ProactiveRuleCard({
           />
 
           <div>
-            <div className="mb-1.5 text-xs font-semibold text-gray-400 dark:text-gray-500">Show for</div>
+            <div className="mb-1.5 type-caption font-semibold text-gray-400 dark:text-gray-500">Show for</div>
             <Segmented
               options={[
                 { id: 'any', label: 'All visitors' },
@@ -1059,7 +1084,7 @@ function ProactiveRulesSection({
   return (
     <div className="flex flex-col gap-3">
       {rules.length === 0 && (
-        <div className="rounded-2xl border border-dashed border-gray-300 px-4 py-4.5 text-center text-xs font-medium leading-relaxed text-gray-400 dark:border-gray-700 dark:text-gray-500">
+        <div className="rounded-2xl border border-dashed border-gray-300 px-4 py-4.5 text-center type-caption font-medium leading-relaxed text-gray-400 dark:border-gray-700 dark:text-gray-500">
           No proactive rules yet.<br />
           Add one below to nudge visitors when they hesitate, exit, or scroll deep.
         </div>
@@ -1074,7 +1099,7 @@ function ProactiveRulesSection({
 
       {showTemplates ? (
         <div className="rounded-2xl border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-white/[0.02]">
-          <div className="mb-2.5 text-xs font-semibold text-gray-800 dark:text-white/90">
+          <div className="mb-2.5 type-caption font-semibold text-gray-800 dark:text-white/90">
             Start from a template
           </div>
           <div className="grid grid-cols-2 gap-2">
@@ -1083,11 +1108,11 @@ function ProactiveRulesSection({
               return (
                 <button
                   key={t.name} onClick={() => addFromTemplate(t)}
-                  className="flex items-start gap-2 rounded-lg border border-gray-200 bg-white p-2.5 text-left dark:border-gray-700 dark:bg-gray-900"
+                  className="flex items-start gap-2 rounded-[10px] border border-gray-200 bg-white p-2.5 text-left dark:border-gray-700 dark:bg-gray-900"
                 >
                   <Icon size={16} className="mt-0.5 shrink-0 text-gray-400 dark:text-gray-500" />
                   <div className="min-w-0">
-                    <div className="text-xs font-semibold text-gray-800 dark:text-white/90">{t.name}</div>
+                    <div className="type-caption font-semibold text-gray-800 dark:text-white/90">{t.name}</div>
                     <div className="mt-0.5 text-[10.5px] leading-relaxed text-gray-400 dark:text-gray-500">{t.desc}</div>
                   </div>
                 </button>
@@ -1132,7 +1157,7 @@ function CopyButton({
         border: '1px solid rgba(70,95,255,0.32)',
         background: 'rgba(70,95,255,0.12)',
         color: isDark ? '#9CB9FF' : '#465FFF',
-        cursor: 'pointer', fontSize: 12, fontWeight: 800, flex: '0 0 auto',
+        cursor: 'pointer', fontSize: 12, fontWeight: 600, flex: '0 0 auto',
       }}
     >
       {label}
@@ -1481,7 +1506,7 @@ function WebsiteBuilderGuide({
     <>
       <div style={{ marginBottom: 16 }}>
         <div style={{
-          fontSize: 11, fontWeight: 800, letterSpacing: '.1em',
+          fontSize: 11, fontWeight: 600, letterSpacing: '.1em',
           textTransform: 'uppercase', color: textMuted, marginBottom: 10,
         }}>
           Choose your platform
@@ -1501,7 +1526,7 @@ function WebsiteBuilderGuide({
                   color: active
                     ? (isDark ? '#9CB9FF' : '#465FFF')
                     : (isDark ? 'rgba(226,232,240,0.6)' : '#64748B'),
-                  cursor: 'pointer', fontWeight: 800, fontSize: 14,
+                  cursor: 'pointer', fontWeight: 600, fontSize: 14,
                   display: 'flex', alignItems: 'center', gap: 8,
                   transition: 'all .15s ease',
                 }}
@@ -1542,7 +1567,7 @@ function WebsiteBuilderGuide({
                     flex: '0 0 auto', width: 24, height: 24, borderRadius: 7,
                     background: isDark ? 'rgba(70,95,255,0.15)' : 'rgba(70,95,255,0.08)',
                     color: isDark ? '#A5B4FC' : '#465FFF',
-                    fontSize: 12, fontWeight: 900,
+                    fontSize: 12, fontWeight: 700,
                     display: 'grid', placeItems: 'center',
                   }}>
                     {i + 1}
@@ -1600,7 +1625,7 @@ function CustomCodeGuide({
     <>
       <div style={{ marginBottom: 16 }}>
         <div style={{
-          fontSize: 11, fontWeight: 800, letterSpacing: '.1em',
+          fontSize: 11, fontWeight: 600, letterSpacing: '.1em',
           textTransform: 'uppercase', color: textMuted, marginBottom: 10,
         }}>
           Install on
@@ -1620,7 +1645,7 @@ function CustomCodeGuide({
                   color: active
                     ? (isDark ? '#9CB9FF' : '#465FFF')
                     : (isDark ? 'rgba(226,232,240,0.6)' : '#64748B'),
-                  cursor: 'pointer', fontWeight: 800, fontSize: 14,
+                  cursor: 'pointer', fontWeight: 600, fontSize: 14,
                   display: 'flex', alignItems: 'center', gap: 6,
                   transition: 'all .15s ease',
                 }}
@@ -1721,7 +1746,7 @@ Let me know once it's live. Thanks!`;
             <Send size={18} />
           </span>
           <div>
-            <div style={{ fontSize: 15, fontWeight: 800, color: textPrimary }}>
+            <div style={{ fontSize: 15, fontWeight: 600, color: textPrimary }}>
               Send this to your developer
             </div>
             <div style={{ fontSize: 12, color: textSecondary, marginTop: 2 }}>
@@ -1752,7 +1777,7 @@ Let me know once it's live. Thanks!`;
             border: '1px solid rgba(70,95,255,0.35)',
             background: 'rgba(70,95,255,0.12)',
             color: isDark ? '#9CB9FF' : '#465FFF',
-            cursor: 'pointer', fontWeight: 900, fontSize: 15,
+            cursor: 'pointer', fontWeight: 700, fontSize: 15,
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
           }}
         >
@@ -1786,7 +1811,7 @@ function QuickTestingPanel({
         >
           <div>
             <div style={{
-              fontSize: 14, fontWeight: 900, letterSpacing: '.02em',
+              fontSize: 14, fontWeight: 700, letterSpacing: '.02em',
               color: isDark ? '#94A3B8' : '#64748B',
             }}>
               Temporary Console Preview
@@ -1840,20 +1865,20 @@ function DisconnectConfirmModal({
       className="fixed inset-0 z-[100] flex items-center justify-center bg-gray-400/50 p-4 backdrop-blur-[10px] dark:bg-black/70"
     >
       <div className="w-full max-w-[420px] rounded-2xl border border-error-200 bg-white p-6 shadow-theme-xl dark:border-error-500/30 dark:bg-gray-900">
-        <div className="mb-3.5 flex h-11 w-11 items-center justify-center rounded-xl bg-error-50 text-error-500 dark:bg-error-500/15 dark:text-error-400">
+        <div className="mb-3.5 flex h-10 w-10 items-center justify-center rounded-xl bg-error-50 text-error-500 dark:bg-error-500/15 dark:text-error-400">
           <AlertTriangle size={22} />
         </div>
 
-        <div className="mb-2 text-lg font-semibold text-gray-800 dark:text-white/90">
+        <div className="mb-2 type-card-title font-semibold text-gray-800 dark:text-white/90">
           Disconnect website chatbot?
         </div>
 
-        <div className="text-sm leading-relaxed text-gray-500 dark:text-gray-400">
+        <div className="type-small leading-relaxed text-gray-500 dark:text-gray-400">
           The installed widget will stop working on your website. Visitors will not be able
           to chat until you enable it again.
         </div>
 
-        <div className="mt-5.5 flex justify-end gap-2.5">
+        <div className="mt-5.5 flex justify-end gap-3">
           <Button type="button" variant="outline" onClick={onCancel} disabled={saving}>
             Cancel
           </Button>
@@ -2021,7 +2046,7 @@ function LivePreview({
           )}
           <div style={{ minWidth: 0 }}>
             <div style={{
-              fontWeight: 800, fontSize: 15.5, letterSpacing: 0, lineHeight: 1.15,
+              fontWeight: 600, fontSize: 15.5, letterSpacing: 0, lineHeight: 1.15,
               whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
               maxWidth: 170,
             }}>
@@ -2122,7 +2147,7 @@ function LivePreview({
 
       {adv.enable_faq && adv.faq_items.length > 0 && (
         <div style={floatCard({ padding: '15px 16px', marginTop: 12, background: topicCardBg })}>
-          <div style={{ fontSize: 13.5, fontWeight: 800, color: textMain, marginBottom: 8 }}>
+          <div style={{ fontSize: 13.5, fontWeight: 600, color: textMain, marginBottom: 8 }}>
             Popular articles
           </div>
           {adv.faq_items.slice(0, 2).map((f, i) => (
@@ -2195,7 +2220,7 @@ function LivePreview({
             <button style={{
               width: '100%', padding: '12px 0', borderRadius: Math.max(R.input, 12), border: 'none',
               background: brandColor,
-              color: '#fff', fontWeight: 800, fontSize: 14, cursor: 'default',
+              color: '#fff', fontWeight: 600, fontSize: 14, cursor: 'default',
               boxShadow: `0 8px 18px ${rgba(brandColor, 0.24)}`, fontFamily: 'inherit',
             }}>
               Start Chat
@@ -2330,7 +2355,7 @@ function LivePreview({
   const surveyBody = (
     <div style={{ padding: '22px 16px 14px' }}>
       <div style={floatCard({ padding: 20, textAlign: 'center' })}>
-        <div style={{ fontSize: 16, fontWeight: 800, color: textMain, marginBottom: 5 }}>
+        <div style={{ fontSize: 16, fontWeight: 600, color: textMain, marginBottom: 5 }}>
           How was your experience?
         </div>
         <div style={{ fontSize: 13, color: textSub, marginBottom: 16 }}>
@@ -2361,7 +2386,7 @@ function LivePreview({
         <button style={{
           width: '100%', padding: '12px 0', borderRadius: Math.max(R.input, 12), border: 'none',
           background: brandColor,
-          color: '#fff', fontWeight: 800, fontSize: 14, cursor: 'default',
+          color: '#fff', fontWeight: 600, fontSize: 14, cursor: 'default',
           boxShadow: `0 8px 18px ${rgba(brandColor, 0.24)}`, fontFamily: 'inherit',
         }}>
           Send Feedback
@@ -2394,7 +2419,7 @@ function LivePreview({
             textAlign: 'center', padding: '10px 0 12px',
             fontSize: 12, color: textSub, fontWeight: 500, letterSpacing: 0,
           }}>
-            Powered by <span style={{ fontWeight: 900, color: textMain }}>Lashvae</span>
+            Powered by <span style={{ fontWeight: 700, color: textMain }}>Lashvae</span>
           </div>
         )}
       </div>
@@ -2571,7 +2596,7 @@ function BubblePreview({
               position: 'absolute', top: -3, right: -3,
               minWidth: 18, height: 18, borderRadius: 999,
               background: '#ef4444', color: '#fff',
-              fontSize: 10, fontWeight: 900,
+              fontSize: 10, fontWeight: 700,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               border: '2px solid #fff', padding: '0 3px',
               zIndex: 2,
@@ -2596,19 +2621,20 @@ type SectionId =
 type SidebarItem = {
   id: SectionId;
   label: string;
+  subtitle: string;
   icon: React.ReactNode;
 };
 
 const SIDEBAR_ITEMS: SidebarItem[] = [
-  { id: 'install',     label: 'Install',      icon: <Wrench size={16} /> },
-  { id: 'testing',     label: 'Testing',      icon: <TestTube size={16} /> },
-  { id: 'appearance',  label: 'Appearance',   icon: <Palette size={16} /> },
-  { id: 'launcher',    label: 'Launcher',     icon: <MessageCircle size={16} /> },
-  { id: 'branding',    label: 'Branding',     icon: <User size={16} /> },
-  { id: 'content',     label: 'Content',      icon: <Layout size={16} /> },
-  { id: 'leadcapture', label: 'Lead Capture', icon: <Users size={16} /> },
-  { id: 'proactive',   label: 'Proactive',    icon: <Zap size={16} /> },
-  { id: 'advanced',    label: 'Advanced',     icon: <Settings size={16} /> },
+  { id: 'install',     label: 'Install',      subtitle: 'Add the widget to your site',    icon: <Wrench size={20} /> },
+  { id: 'testing',     label: 'Testing',      subtitle: 'Preview and test the widget',    icon: <TestTube size={20} /> },
+  { id: 'appearance',  label: 'Appearance',   subtitle: 'Colors, radius and font',        icon: <Palette size={20} /> },
+  { id: 'launcher',    label: 'Launcher',     subtitle: 'Bubble shape and icon',          icon: <MessageCircle size={20} /> },
+  { id: 'branding',    label: 'Branding',     subtitle: 'Name, avatar and greeting',      icon: <User size={20} /> },
+  { id: 'content',     label: 'Content',      subtitle: 'Topics and quick replies',       icon: <Layout size={20} /> },
+  { id: 'leadcapture', label: 'Lead Capture', subtitle: 'Name, email and custom fields',  icon: <Users size={20} /> },
+  { id: 'proactive',   label: 'Proactive',    subtitle: 'Auto-open and offline message',  icon: <Zap size={20} /> },
+  { id: 'advanced',    label: 'Advanced',     subtitle: 'Fine-tune widget behavior',      icon: <Settings size={20} /> },
 ];
 
 /* sections that should hide the right rail (per user requirement) */
@@ -2622,42 +2648,82 @@ function Sidebar({
   router: ReturnType<typeof useRouter>;
 }) {
   return (
-    <div className="sticky top-6 flex flex-col gap-1 rounded-2xl border border-gray-200 bg-white p-2.5 dark:border-gray-800 dark:bg-white/[0.03]">
-      {SIDEBAR_ITEMS.map((item) => {
-        const active = activeSection === item.id;
-        return (
-          <button
-            key={item.id}
-            onClick={() => onSelect(item.id)}
-            className={cn(
-              'group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm font-semibold transition',
-              active
-                ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'
-                : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/[0.05] dark:hover:text-white',
-            )}
-          >
-            <span
-              className={cn(
-                'shrink-0 transition',
-                active
-                  ? 'text-brand-500 dark:text-brand-400'
-                  : 'text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-white',
-              )}
-            >
-              {item.icon}
-            </span>
-            {item.label}
-          </button>
-        );
-      })}
+    <div className="sticky top-6 flex flex-col gap-4">
+      <div className="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+        <div className="border-b border-gray-100 px-5 py-4 dark:border-gray-800">
+          <h3 className="type-card-title font-semibold text-gray-800 dark:text-white/90">
+            Website Widget
+          </h3>
+          <p className="mt-1 type-small text-gray-500 dark:text-gray-400">
+            Configure your chat widget
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-1 p-3">
+          {SIDEBAR_ITEMS.map((item) => {
+            const active = activeSection === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => onSelect(item.id)}
+                className={cn(
+                  'flex w-full items-center justify-between gap-3 rounded-[10px] px-3 py-3 text-left transition',
+                  active
+                    ? 'bg-brand-50 dark:bg-brand-500/[0.12]'
+                    : 'hover:bg-gray-50 dark:hover:bg-white/[0.03]',
+                )}
+              >
+                <span className="flex items-center gap-3">
+                  <span
+                    className={cn(
+                      'flex h-9 w-9 items-center justify-center rounded-[10px]',
+                      active
+                        ? 'bg-white text-brand-500 shadow-theme-xs dark:bg-white/10 dark:text-brand-400'
+                        : 'text-gray-500 dark:text-gray-400',
+                    )}
+                  >
+                    {item.icon}
+                  </span>
+
+                  <span>
+                    <span
+                      className={cn(
+                        'block type-small font-semibold',
+                        active
+                          ? 'text-brand-500 dark:text-brand-400'
+                          : 'text-gray-700 dark:text-gray-300',
+                      )}
+                    >
+                      {item.label}
+                    </span>
+                    <span className="mt-0.5 block type-caption font-normal text-gray-400 dark:text-gray-500">
+                      {item.subtitle}
+                    </span>
+                  </span>
+                </span>
+
+                <ChevronRight
+                  size={16}
+                  className={cn(
+                    'shrink-0',
+                    active
+                      ? 'text-brand-400'
+                      : 'text-gray-300 dark:text-gray-600',
+                  )}
+                />
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
       {/* Need help card */}
-      <div className="mt-3 rounded-lg border border-gray-100 bg-gray-50 p-3.5 dark:border-gray-800 dark:bg-white/[0.02]">
+      <div className="rounded-2xl border border-gray-200 bg-white p-3.5 dark:border-gray-800 dark:bg-white/[0.03]">
         <div className="mb-1.5 flex items-center gap-2">
           <LifeBuoy size={15} className="text-gray-500 dark:text-gray-400" />
-          <span className="text-sm font-semibold text-gray-800 dark:text-white/90">Need help?</span>
+          <span className="type-small font-semibold text-gray-800 dark:text-white/90">Need help?</span>
         </div>
-        <div className="mb-3 text-sm text-gray-400 dark:text-gray-500">
+        <div className="mb-3 type-small text-gray-400 dark:text-gray-500">
           We&apos;re here to help you set up your chatbot.
         </div>
         <Button variant="outline" size="sm" className="w-full" onClick={() => router.push('/profile?support=True')}>
@@ -3364,21 +3430,21 @@ function CustomizeChatInner() {
             {/* Quick themes */}
             <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
               <SectionHeader title="Quick Themes" badge="New" />
-              <p className="-mt-2 mb-4.5 text-sm text-gray-500 dark:text-gray-400">
+              <p className="-mt-2 mb-4.5 type-small text-gray-500 dark:text-gray-400">
                 One click applies a coordinated look — colors, radius, font.
               </p>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              <div className="grid grid-cols-2 gap-3">
                 {PRESET_THEMES.map((p) => (
                   <button
                     key={p.name}
                     onClick={() => applyPreset(p)}
-                    className="flex min-h-12 items-center gap-2.5 rounded-lg border border-gray-300 bg-white px-3.5 py-3 text-left shadow-theme-xs dark:border-gray-700 dark:bg-gray-900"
+                    className="flex min-h-12 min-w-0 items-center gap-3 rounded-[10px] border border-gray-300 bg-white px-3.5 py-3 text-left shadow-theme-xs dark:border-gray-700 dark:bg-gray-900"
                   >
                     <span
-                      className="h-6 w-6 shrink-0 rounded-md border border-gray-300 dark:border-gray-700"
+                      className="h-6 w-6 shrink-0 rounded-[10px] border border-gray-300 dark:border-gray-700"
                       style={{ background: p.brand }}
                     />
-                    <span className="text-sm font-semibold text-gray-800 dark:text-white/90">{p.name}</span>
+                    <span className="truncate type-small font-semibold text-gray-800 dark:text-white/90">{p.name}</span>
                   </button>
                 ))}
               </div>
@@ -3392,7 +3458,7 @@ function CustomizeChatInner() {
 
               <div className="mb-4.5 grid grid-cols-2 gap-5">
                 <div>
-                  <div className="mb-2 text-sm font-medium text-gray-500 dark:text-gray-400">Widget Theme</div>
+                  <div className="mb-2 type-small font-medium text-gray-500 dark:text-gray-400">Widget Theme</div>
                   <Segmented
                     options={[{ id: 'light', label: 'Light' }, { id: 'dark', label: 'Dark' }, { id: 'auto', label: 'Auto' }]}
                     value={adv.widget_theme} onChange={(v) => patchAdv({ widget_theme: v as any })}
@@ -3400,7 +3466,7 @@ function CustomizeChatInner() {
                   />
                 </div>
                 <div>
-                  <div className="mb-2 text-sm font-medium text-gray-500 dark:text-gray-400">Corner Radius</div>
+                  <div className="mb-2 type-small font-medium text-gray-500 dark:text-gray-400">Corner Radius</div>
                   <Segmented
                     options={[{ id: 'sharp', label: 'Sharp' }, { id: 'soft', label: 'Soft' }, { id: 'round', label: 'Round' }]}
                     value={adv.corner_radius} onChange={(v) => patchAdv({ corner_radius: v as any })}
@@ -3409,7 +3475,7 @@ function CustomizeChatInner() {
                 </div>
               </div>
 
-              <div className="mb-2 text-sm font-medium text-gray-500 dark:text-gray-400">Font</div>
+              <div className="mb-2 type-small font-medium text-gray-500 dark:text-gray-400">Font</div>
               <Segmented
                 options={WIDGET_FONTS.map((f) => ({ id: f.id, label: f.label }))}
                 value={adv.font_family} onChange={(v) => patchAdv({ font_family: v })}
@@ -3426,14 +3492,14 @@ function CustomizeChatInner() {
             {/* Position */}
             <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
               <SectionHeader title="Widget Position" />
-              <div className="grid grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-2 gap-3">
                 {[{ id: 'bottom-right', label: 'Bottom Right' }, { id: 'bottom-left', label: 'Bottom Left' }].map((p) => {
                   const active = position === p.id;
                   return (
                     <button
                       key={p.id} onClick={() => setPosition(p.id)}
                       className={cn(
-                        'min-h-11 rounded-lg px-3.5 py-2.5 text-sm font-semibold transition',
+                        'min-h-10 rounded-[10px] px-3.5 py-2 type-small font-semibold transition',
                         active
                           ? ''
                           : 'border border-gray-300 bg-white text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90',
@@ -3450,7 +3516,7 @@ function CustomizeChatInner() {
             {/* Bubble color + Style presets */}
             <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
               <SectionHeader title="Bubble Style" badge="Premium" />
-              <p className="-mt-2 mb-4.5 text-sm text-gray-500 dark:text-gray-400">
+              <p className="-mt-2 mb-4.5 type-small text-gray-500 dark:text-gray-400">
                 Pick a visual style — color, gradient, glow and depth are baked in.
               </p>
 
@@ -3467,7 +3533,7 @@ function CustomizeChatInner() {
                       key={s.id}
                       onClick={() => patchAdv({ launcher_style: s.id })}
                       className={cn(
-                        'flex min-h-[72px] items-center gap-3 rounded-lg p-3.5 text-left shadow-theme-xs transition',
+                        'flex min-h-[72px] items-center gap-3 rounded-[10px] p-3.5 text-left shadow-theme-xs transition',
                         active
                           ? ''
                           : 'border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-900',
@@ -3483,10 +3549,10 @@ function CustomizeChatInner() {
                         </svg>
                       </div>
                       <div className="min-w-0">
-                        <div className="text-sm font-semibold" style={{ color: active ? brandColor : undefined }}>
+                        <div className="type-small font-semibold" style={{ color: active ? brandColor : undefined }}>
                           <span className={!active ? 'text-gray-800 dark:text-white/90' : ''}>{s.label}</span>
                         </div>
-                        <div className="mt-0.5 text-sm text-gray-400 dark:text-gray-500">
+                        <div className="mt-0.5 type-small text-gray-400 dark:text-gray-500">
                           {s.desc}
                         </div>
                       </div>
@@ -3499,7 +3565,7 @@ function CustomizeChatInner() {
             {/* Animation */}
             <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
               <SectionHeader title="Animation" badge="New" />
-              <p className="-mt-2 mb-4.5 text-sm text-gray-500 dark:text-gray-400">
+              <p className="-mt-2 mb-4.5 type-small text-gray-500 dark:text-gray-400">
                 Motion draws attention — pick the one that fits your brand energy.
               </p>
 
@@ -3520,7 +3586,7 @@ function CustomizeChatInner() {
                       key={a.id}
                       onClick={() => patchAdv({ launcher_animation: a.id })}
                       className={cn(
-                        'flex min-h-[72px] items-center gap-3 rounded-lg p-3.5 text-left shadow-theme-xs transition',
+                        'flex min-h-[72px] items-center gap-3 rounded-[10px] p-3.5 text-left shadow-theme-xs transition',
                         active
                           ? ''
                           : 'border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-900',
@@ -3550,10 +3616,10 @@ function CustomizeChatInner() {
                         </div>
                       </div>
                       <div className="min-w-0">
-                        <div className="text-sm font-semibold" style={{ color: active ? brandColor : undefined }}>
+                        <div className="type-small font-semibold" style={{ color: active ? brandColor : undefined }}>
                           <span className={!active ? 'text-gray-800 dark:text-white/90' : ''}>{a.label}</span>
                         </div>
-                        <div className="mt-0.5 text-sm text-gray-400 dark:text-gray-500">
+                        <div className="mt-0.5 type-small text-gray-400 dark:text-gray-500">
                           {a.desc}
                         </div>
                       </div>
@@ -3567,7 +3633,7 @@ function CustomizeChatInner() {
             <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
               <SectionHeader title="Shape & Icon" />
 
-              <div className="mb-2 text-sm font-medium text-gray-500 dark:text-gray-400">Shape</div>
+              <div className="mb-2 type-small font-medium text-gray-500 dark:text-gray-400">Shape</div>
               <div className="mb-5.5 grid grid-cols-4 gap-2 sm:grid-cols-5">
                 {BUBBLE_SHAPES.map((s) => {
                   const active = bubbleShape === s.id;
@@ -3587,7 +3653,7 @@ function CustomizeChatInner() {
                         background: `linear-gradient(135deg, ${bubbleColor}, ${lighten(bubbleColor, 0.2)})`,
                         ...getBubbleShapeStyle(s.id),
                       }} />
-                      <span className="text-[10px] font-semibold" style={{ color: active ? brandColor : undefined }}>
+                      <span className="type-caption font-semibold" style={{ color: active ? brandColor : undefined }}>
                         <span className={!active ? 'text-gray-400 dark:text-gray-500' : ''}>{s.label}</span>
                       </span>
                     </button>
@@ -3595,7 +3661,7 @@ function CustomizeChatInner() {
                 })}
               </div>
 
-              <div className="mb-2 text-sm font-medium text-gray-500 dark:text-gray-400">Icon</div>
+              <div className="mb-2 type-small font-medium text-gray-500 dark:text-gray-400">Icon</div>
               <div
                 className="mb-5.5 grid grid-cols-4 gap-2 transition-opacity sm:grid-cols-6"
                 style={{
@@ -3619,7 +3685,7 @@ function CustomizeChatInner() {
                       <svg viewBox="0 0 24 24" width="20" height="20" fill={active ? brandColor : undefined} className={!active ? 'fill-gray-500 dark:fill-gray-400' : ''}>
                         <path d={ic.path} />
                       </svg>
-                      <span className="text-[10px] font-semibold" style={{ color: active ? brandColor : undefined }}>
+                      <span className="type-caption font-semibold" style={{ color: active ? brandColor : undefined }}>
                         <span className={!active ? 'text-gray-400 dark:text-gray-500' : ''}>{ic.label}</span>
                       </span>
                     </button>
@@ -3627,13 +3693,13 @@ function CustomizeChatInner() {
                 })}
               </div>
               {adv.launcher_custom_icon_url && (
-                <div className="-mt-3.5 mb-5.5 rounded-lg border border-dashed border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-400 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-500">
+                <div className="-mt-3.5 mb-5.5 rounded-[10px] border border-dashed border-gray-200 bg-gray-50 px-3 py-2 type-small text-gray-400 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-500">
                   Icon set disabled — you have a custom icon uploaded below. Remove it to switch back.
                 </div>
               )}
 
               {/* Icon size */}
-              <div className="mb-2 text-sm font-medium text-gray-500 dark:text-gray-400">Icon Size</div>
+              <div className="mb-2 type-small font-medium text-gray-500 dark:text-gray-400">Icon Size</div>
               <div className="mb-5.5">
                 <Segmented
                   options={LAUNCHER_ICON_SIZES.map((s) => ({ id: s.id, label: s.label }))}
@@ -3644,7 +3710,7 @@ function CustomizeChatInner() {
               </div>
 
               {/* Custom icon upload */}
-              <div className="mb-2 text-sm font-medium text-gray-500 dark:text-gray-400">
+              <div className="mb-2 type-small font-medium text-gray-500 dark:text-gray-400">
                 Custom Icon
                 <span className="ml-1.5 font-medium opacity-70">
                   · SVG or PNG, overrides the icon set above
@@ -3696,11 +3762,11 @@ function CustomizeChatInner() {
                       </Button>
                     )}
                   </div>
-                  <div className="mt-1.5 text-sm text-gray-400 dark:text-gray-500">
+                  <div className="mt-1.5 type-small text-gray-400 dark:text-gray-500">
                     Best results with a transparent-background SVG or PNG · max 1 MB.
                     Colored icons keep their colors; monochrome white SVGs work with any bubble style.
                   </div>
-                  <label className="mt-2 inline-flex cursor-pointer items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                  <label className="mt-2 inline-flex cursor-pointer items-center gap-2 type-small text-gray-500 dark:text-gray-400">
                     <input
                       type="checkbox"
                       checked={iconRemoveBg}
@@ -3722,8 +3788,8 @@ function CustomizeChatInner() {
 
               <div className="mb-4.5">
                 <div className="mb-1.5 flex justify-between">
-                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Launcher size</span>
-                  <span className="text-sm font-semibold text-gray-800 dark:text-white/90">{adv.launcher_size}px</span>
+                  <span className="type-small font-medium text-gray-500 dark:text-gray-400">Launcher size</span>
+                  <span className="type-small font-semibold text-gray-800 dark:text-white/90">{adv.launcher_size}px</span>
                 </div>
                 <input
                   type="range" min={44} max={80} step={2}
@@ -3750,8 +3816,8 @@ function CustomizeChatInner() {
               />
               <div>
                 <div className="mb-1.5 flex justify-between">
-                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Teaser delay</span>
-                  <span className="text-sm font-semibold text-gray-800 dark:text-white/90">
+                  <span className="type-small font-medium text-gray-500 dark:text-gray-400">Teaser delay</span>
+                  <span className="type-small font-semibold text-gray-800 dark:text-white/90">
                     {adv.teaser_delay_ms === 0 ? 'immediately' : `${adv.teaser_delay_ms / 1000}s`}
                   </span>
                 </div>
@@ -3773,7 +3839,7 @@ function CustomizeChatInner() {
             <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
               <SectionHeader title="Branding" />
 
-              <div className="mb-2 text-sm font-medium text-gray-500 dark:text-gray-400">Logo (optional)</div>
+              <div className="mb-2 type-small font-medium text-gray-500 dark:text-gray-400">Logo (optional)</div>
               <div className="mb-5 flex items-center gap-3">
                 <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-900">
                   {avatarUrl ? (
@@ -3799,10 +3865,10 @@ function CustomizeChatInner() {
                       Remove
                     </Button>
                   )}
-                  <div className="mt-1.5 text-xs text-gray-400 dark:text-gray-500">
+                  <div className="mt-1.5 type-caption text-gray-400 dark:text-gray-500">
                     PNG or JPG · max 2MB. Recommended: transparent PNG on light and dark backgrounds.
                   </div>
-                  <label className="mt-2 inline-flex cursor-pointer items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                  <label className="mt-2 inline-flex cursor-pointer items-center gap-2 type-caption text-gray-500 dark:text-gray-400">
                     <input
                       type="checkbox"
                       checked={logoRemoveBg}
@@ -3861,7 +3927,7 @@ function CustomizeChatInner() {
               />
               {adv.enable_home && (
                 <>
-                  <div className="mb-2 text-sm font-semibold text-gray-500 dark:text-gray-400">
+                  <div className="mb-2 type-small font-semibold text-gray-500 dark:text-gray-400">
                     Contact topics
                   </div>
                   <TopicEditor
@@ -3883,7 +3949,7 @@ function CustomizeChatInner() {
               />
               {adv.enable_faq && (
                 <>
-                  <div className="mb-2 text-sm font-semibold text-gray-500 dark:text-gray-400">
+                  <div className="mb-2 type-small font-semibold text-gray-500 dark:text-gray-400">
                     FAQ articles
                   </div>
                   <FaqEditor
@@ -3914,7 +3980,7 @@ function CustomizeChatInner() {
           <div className="flex flex-col gap-5">
             <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
               <SectionHeader title="Lead Capture" />
-              <p className="-mt-2 mb-4.5 text-sm text-gray-500 dark:text-gray-400">
+              <p className="-mt-2 mb-4.5 type-small text-gray-500 dark:text-gray-400">
                 Ask visitors for a few details before they start chatting.
               </p>
               <ToggleRow title="Ask for name" checked={collectName} onChange={setCollectName} />
@@ -3947,7 +4013,7 @@ function CustomizeChatInner() {
               />
               {customDetails && (
                 <>
-                  <div className="mb-3 flex flex-col gap-2.5">
+                  <div className="mb-3 flex flex-col gap-3">
                     {customDetailsFields.map((field, i) => (
                       <CustomFieldEditor
                         key={i} field={field} index={i}
@@ -3974,7 +4040,7 @@ function CustomizeChatInner() {
         return (
           <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
             <SectionHeader title="Proactive Messages" badge="NEW" />
-            <p className="-mt-2 mb-4.5 text-sm text-gray-500 dark:text-gray-400">
+            <p className="-mt-2 mb-4.5 type-small text-gray-500 dark:text-gray-400">
               Nudge visitors when they hesitate, exit, or scroll deep — with smart, targeted messages that
               open the chat automatically.
             </p>
@@ -4007,8 +4073,8 @@ function CustomizeChatInner() {
 
               <div className="mb-4.5">
                 <div className="mb-1.5 flex justify-between">
-                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Auto-open delay</span>
-                  <span className="text-sm font-semibold text-gray-800 dark:text-white/90">
+                  <span className="type-small font-medium text-gray-500 dark:text-gray-400">Auto-open delay</span>
+                  <span className="type-small font-semibold text-gray-800 dark:text-white/90">
                     {autoOpenDelayMs === 0 ? 'never' : `${autoOpenDelayMs / 1000}s`}
                   </span>
                 </div>
@@ -4018,17 +4084,17 @@ function CustomizeChatInner() {
                   onChange={(e) => setAutoOpenDelayMs(Number(e.target.value))}
                   className="w-full accent-brand-500"
                 />
-                <div className="mt-1 text-sm text-gray-400 dark:text-gray-500">
+                <div className="mt-1 type-small text-gray-400 dark:text-gray-500">
                   Automatically open the chat after this many seconds. Set to 0 to disable.
                 </div>
               </div>
 
               <div className="mb-1">
-                <div className="mb-2 text-sm font-medium text-gray-500 dark:text-gray-400">Widget Language</div>
+                <div className="mb-2 type-small font-medium text-gray-500 dark:text-gray-400">Widget Language</div>
                 <select
                   value={adv.widget_language}
                   onChange={(e) => patchAdv({ widget_language: e.target.value })}
-                  className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 outline-none focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                  className="h-10 w-full rounded-[10px] border border-gray-300 bg-transparent px-3 type-small text-gray-800 outline-none focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
                 >
                   {WIDGET_LANGUAGES.map((l) => (
                     <option key={l.id} value={l.id}>{l.label}</option>
@@ -4060,7 +4126,7 @@ function CustomizeChatInner() {
             {isActive && (
               <div className="rounded-2xl border border-error-200 bg-white p-6 dark:border-error-500/30 dark:bg-white/[0.03]">
                 <SectionHeader title="Disconnect Widget" />
-                <p className="-mt-2 mb-4 text-sm text-gray-500 dark:text-gray-400">
+                <p className="-mt-2 mb-4 type-small text-gray-500 dark:text-gray-400">
                   Stop the widget from loading on your website. You can reconnect any time.
                 </p>
                 <Button
@@ -4176,9 +4242,9 @@ function CustomizeChatInner() {
         }
         .pw-topic:hover { background: rgba(15,23,42,.04) !important; }
         .pw-topic:hover .pw-chev { transform: translateX(3px); transition: transform .18s; }
-        @media (max-width: 1180px) {
-          .cw-grid { grid-template-columns: 220px 1fr !important; }
-          .cw-rail { display: none !important; }
+        @media (max-width: 1536px) {
+          .cw-grid { grid-template-columns: 290px 1fr !important; }
+          .cw-rail { grid-column: 1 / -1 !important; position: static !important; top: auto !important; }
         }
         @media (max-width: 820px) {
           .cw-grid { grid-template-columns: 1fr !important; }
@@ -4195,13 +4261,13 @@ function CustomizeChatInner() {
               Back
             </Button>
             <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2.5">
+              <div className="flex flex-wrap items-center gap-3">
                 <h1 className="text-title-sm font-bold text-gray-800 dark:text-white/90">
                   Website Chatbot
                 </h1>
                 <span
                   className={cn(
-                    'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium uppercase',
+                    'inline-flex items-center gap-1.5 rounded-full border px-3 py-1 type-caption font-medium uppercase',
                     isActive
                       ? 'border-success-200 bg-success-50 text-success-600 dark:border-success-500/30 dark:bg-success-500/10 dark:text-success-500'
                       : 'border-gray-200 bg-gray-100 text-gray-400 dark:border-gray-800 dark:bg-white/5 dark:text-gray-500',
@@ -4211,7 +4277,7 @@ function CustomizeChatInner() {
                   {isActive ? 'Live' : 'Offline'}
                 </span>
               </div>
-              <div className="mt-1 truncate text-sm text-gray-500 dark:text-gray-400">
+              <div className="mt-1 truncate type-small text-gray-500 dark:text-gray-400">
                 Install, customize, and manage your website chat widget.
               </div>
             </div>
@@ -4233,8 +4299,8 @@ function CustomizeChatInner() {
           className="cw-grid mx-auto grid max-w-[1400px] items-start gap-6"
           style={{
             gridTemplateColumns: hideRightRail
-              ? '220px 1fr'
-              : '220px minmax(0, 1fr) 380px',
+              ? '290px 1fr'
+              : '290px minmax(0, 1fr) 380px',
           }}
         >
           {/* Sidebar column */}
@@ -4258,7 +4324,7 @@ function CustomizeChatInner() {
                 <div className="mb-3.5 flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <Eye size={15} className="text-gray-500 dark:text-gray-400" />
-                    <span className="text-base font-semibold text-gray-800 dark:text-white/90">
+                    <span className="type-body font-semibold text-gray-800 dark:text-white/90">
                       Live Preview
                     </span>
                   </div>
@@ -4279,7 +4345,7 @@ function CustomizeChatInner() {
                       <div className="inline-flex gap-0.5 rounded-[10px] bg-gray-100 p-0.5 dark:bg-white/5">
                         <button
                           onClick={() => setDevice('desktop')}
-                          className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium"
+                          className="inline-flex items-center gap-1.5 rounded-[10px] px-3 py-1.5 type-caption font-medium"
                           style={{
                             background: device === 'desktop' ? brandColor : 'transparent',
                             color: device === 'desktop' ? '#fff' : undefined,
@@ -4290,7 +4356,7 @@ function CustomizeChatInner() {
                         </button>
                         <button
                           onClick={() => setDevice('mobile')}
-                          className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium"
+                          className="inline-flex items-center gap-1.5 rounded-[10px] px-3 py-1.5 type-caption font-medium"
                           style={{
                             background: device === 'mobile' ? brandColor : 'transparent',
                             color: device === 'mobile' ? '#fff' : undefined,
@@ -4336,17 +4402,17 @@ function CustomizeChatInner() {
               <div className="rounded-2xl border border-gray-200 bg-white p-4.5 dark:border-gray-800 dark:bg-white/[0.03]">
                 <div className="mb-3 flex items-center gap-2">
                   <Sparkles size={15} className="text-gray-500 dark:text-gray-400" />
-                  <span className="text-base font-semibold text-gray-800 dark:text-white/90">
+                  <span className="type-body font-semibold text-gray-800 dark:text-white/90">
                     Widget Status
                   </span>
                 </div>
-                <div className="mb-3 flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 px-3 py-2.5 dark:border-gray-800 dark:bg-white/[0.02]">
-                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                <div className="mb-3 flex items-center justify-between rounded-[10px] border border-gray-100 bg-gray-50 px-3 py-2 dark:border-gray-800 dark:bg-white/[0.02]">
+                  <span className="type-small font-medium text-gray-500 dark:text-gray-400">
                     Connection
                   </span>
                   <span
                     className={cn(
-                      'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium uppercase',
+                      'inline-flex items-center gap-1.5 rounded-full px-3 py-1 type-caption font-medium uppercase',
                       isActive
                         ? 'bg-success-50 text-success-600 dark:bg-success-500/15 dark:text-success-500'
                         : 'bg-gray-100 text-gray-400 dark:bg-white/5 dark:text-gray-500',

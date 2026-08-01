@@ -26,7 +26,7 @@ export function ChartCard({
 
   return (
     <div
-      className={`rounded-2xl p-5 transition-all duration-300 ${className}`}
+      className={`rounded-2xl p-6 transition-all duration-300 ${className}`}
       style={{
         border: `1px solid ${isDark ? (hov ? t.cardBorderHov : t.cardBorder) : 'rgba(15,23,42,0.08)'}`,
         background: hov ? t.cardHovBg : t.cardBg,

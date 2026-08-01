@@ -83,7 +83,7 @@ export function ChannelFilter({
 
   const rowClass = (active: boolean) =>
     cn(
-      "flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm font-medium transition",
+      "flex w-full items-center justify-between rounded-[10px] px-3 py-2 text-left type-small font-medium transition",
       active
         ? "bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400"
         : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/[0.04]",
@@ -97,7 +97,7 @@ export function ChannelFilter({
           All channels
         </span>
         {totalCount != null && (
-          <span className="text-xs text-gray-400 dark:text-gray-500">{totalCount}</span>
+          <span className="type-caption text-gray-400 dark:text-gray-500">{totalCount}</span>
         )}
       </button>
 
@@ -136,7 +136,7 @@ export function ChannelFilter({
                   )}
                   {label}
                 </span>
-                <span className="text-xs text-gray-400 dark:text-gray-500">{count}</span>
+                <span className="type-caption text-gray-400 dark:text-gray-500">{count}</span>
               </button>
             );
           })}

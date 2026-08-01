@@ -94,10 +94,10 @@ const FIELD_TYPE_OPTIONS: { value: FieldType; label: string; help: string }[] = 
 ];
 
 const INPUT_CLASS =
-  'h-11 rounded-lg border-gray-300 px-4 py-2.5 text-theme-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus-visible:border-brand-300 focus-visible:ring-3 focus-visible:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus-visible:border-brand-800';
+  'h-10 rounded-[10px] border-gray-300 px-4 py-2 type-small text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus-visible:border-brand-300 focus-visible:ring-3 focus-visible:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus-visible:border-brand-800';
 
 const SELECT_CLASS =
-  'h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-10 text-theme-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800';
+  'h-10 w-full appearance-none rounded-[10px] border border-gray-300 bg-transparent px-4 py-2 pr-10 type-small text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800';
 
 function slugifyKey(value: string) {
   return value
@@ -130,10 +130,10 @@ function SectionHeader({
 }) {
   return (
     <div>
-      <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
+      <h3 className="type-card-title font-semibold text-gray-800 dark:text-white/90">
         {title}
       </h3>
-      <p className="mt-1 text-theme-sm leading-6 text-gray-500 dark:text-gray-400">
+      <p className="mt-1 type-small leading-6 text-gray-500 dark:text-gray-400">
         {description}
       </p>
     </div>
@@ -152,8 +152,8 @@ function ToggleRow({
   onChange: (checked: boolean) => void;
 }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 dark:border-gray-800 dark:bg-white/[0.02]">
-      <span className="text-theme-sm font-medium text-gray-700 dark:text-gray-300">
+    <div className="flex items-center justify-between gap-3 rounded-[10px] border border-gray-200 bg-gray-50 px-3 py-2 dark:border-gray-800 dark:bg-white/[0.02]">
+      <span className="type-small font-medium text-gray-700 dark:text-gray-300">
         {label}
       </span>
       <Switch checked={checked} disabled={disabled} onChange={onChange} />
@@ -344,16 +344,16 @@ export default function CustomerInfoModal({
       className="m-4 max-w-[860px]"
       showCloseButton={false}
     >
-      <div className="flex max-h-[85vh] w-full flex-col overflow-hidden rounded-3xl bg-white dark:bg-gray-900">
+      <div className="flex max-h-[85vh] w-full flex-col overflow-hidden rounded-[20px] bg-white dark:bg-gray-900">
         <div className="flex items-start justify-between gap-5 border-b border-gray-100 px-6 py-5 pr-5 dark:border-gray-800">
           <div className="min-w-0">
             <Badge color="primary" startIcon={<UserCheck size={13} />}>
               Customer Info
             </Badge>
-            <h2 className="mt-3 text-xl font-bold text-gray-800 dark:text-white/90">
+            <h2 className="mt-3 type-h4 font-bold text-gray-800 dark:text-white/90">
               Booking form fields
             </h2>
-            <p className="mt-1.5 max-w-2xl text-theme-sm leading-6 text-gray-500 dark:text-gray-400">
+            <p className="mt-1.5 max-w-2xl type-small leading-6 text-gray-500 dark:text-gray-400">
               These questions are collected after a booking is confirmed. Name
               and phone are always required.
             </p>
@@ -371,7 +371,7 @@ export default function CustomerInfoModal({
 
         <div className="custom-scrollbar flex-1 overflow-y-auto px-6 py-5">
           {loading ? (
-            <div className="flex min-h-56 items-center justify-center text-theme-sm text-gray-500 dark:text-gray-400">
+            <div className="flex min-h-56 items-center justify-center type-small text-gray-500 dark:text-gray-400">
               Loading fields...
             </div>
           ) : (
@@ -389,19 +389,19 @@ export default function CustomerInfoModal({
                       className="grid grid-cols-1 items-center gap-4 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-white/[0.02] md:grid-cols-[1fr_1fr_auto]"
                     >
                       <div>
-                        <p className="text-theme-xs font-medium text-gray-500 dark:text-gray-400">
+                        <p className="type-caption font-medium text-gray-500 dark:text-gray-400">
                           Field
                         </p>
-                        <p className="mt-1 text-theme-sm font-semibold text-gray-800 dark:text-white/90">
+                        <p className="mt-1 type-small font-semibold text-gray-800 dark:text-white/90">
                           {field.label}
                         </p>
                       </div>
 
                       <div>
-                        <p className="text-theme-xs font-medium text-gray-500 dark:text-gray-400">
+                        <p className="type-caption font-medium text-gray-500 dark:text-gray-400">
                           Answer type
                         </p>
-                        <p className="mt-1 text-theme-sm font-semibold text-gray-800 dark:text-white/90">
+                        <p className="mt-1 type-small font-semibold text-gray-800 dark:text-white/90">
                           {getTypeLabel(field.field_type)}
                         </p>
                       </div>
@@ -433,10 +433,10 @@ export default function CustomerInfoModal({
 
                 {customFields.length === 0 ? (
                   <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 px-5 py-10 text-center dark:border-gray-800 dark:bg-white/[0.02]">
-                    <h4 className="text-theme-sm font-semibold text-gray-800 dark:text-white/90">
+                    <h4 className="type-small font-semibold text-gray-800 dark:text-white/90">
                       No additional questions yet
                     </h4>
-                    <p className="mx-auto mt-1 max-w-md text-theme-sm leading-6 text-gray-500 dark:text-gray-400">
+                    <p className="mx-auto mt-1 max-w-md type-small leading-6 text-gray-500 dark:text-gray-400">
                       Add fields only when your booking flow needs more customer
                       context.
                     </p>
@@ -470,16 +470,16 @@ export default function CustomerInfoModal({
                             <div className="flex min-w-0 items-center gap-3">
                               <button
                                 type="button"
-                                className="flex h-9 w-9 cursor-grab items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-400 dark:border-gray-800 dark:bg-gray-900"
+                                className="flex h-9 w-9 cursor-grab items-center justify-center rounded-[10px] border border-gray-200 bg-white text-gray-400 dark:border-gray-800 dark:bg-gray-900"
                                 aria-label="Drag field"
                               >
                                 <GripVertical size={16} />
                               </button>
                               <div className="min-w-0">
-                                <p className="truncate text-theme-sm font-semibold text-gray-800 dark:text-white/90">
+                                <p className="truncate type-small font-semibold text-gray-800 dark:text-white/90">
                                   {field.label || 'Untitled question'}
                                 </p>
-                                <p className="mt-0.5 text-theme-xs text-gray-500 dark:text-gray-400">
+                                <p className="mt-0.5 type-caption text-gray-500 dark:text-gray-400">
                                   {getTypeLabel(field.field_type)}
                                 </p>
                               </div>
@@ -488,14 +488,14 @@ export default function CustomerInfoModal({
                             <button
                               type="button"
                               onClick={() => removeField(field.id)}
-                              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 transition hover:bg-gray-50 hover:text-error-500 dark:border-gray-800 dark:bg-gray-900 dark:hover:bg-white/[0.03] dark:hover:text-error-400"
+                              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-gray-200 bg-white text-gray-500 transition hover:bg-gray-50 hover:text-error-500 dark:border-gray-800 dark:bg-gray-900 dark:hover:bg-white/[0.03] dark:hover:text-error-400"
                               aria-label="Remove field"
                             >
                               <Trash2 size={16} />
                             </button>
                           </div>
 
-                          <div className="space-y-5 p-4 sm:p-5">
+                          <div className="space-y-5 p-4 sm:p-6">
                             <div>
                               <Label>Question shown to customer</Label>
                               <Input
@@ -547,7 +547,7 @@ export default function CustomerInfoModal({
                                     className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
                                   />
                                 </div>
-                                <p className="mt-1.5 text-theme-sm text-gray-500 dark:text-gray-400">
+                                <p className="mt-1.5 type-small text-gray-500 dark:text-gray-400">
                                   {getTypeHelp(field.field_type)}
                                 </p>
                               </div>
@@ -578,10 +578,10 @@ export default function CustomerInfoModal({
                               <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-white/[0.02]">
                                 <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                                   <div>
-                                    <h4 className="text-theme-sm font-semibold text-gray-800 dark:text-white/90">
+                                    <h4 className="type-small font-semibold text-gray-800 dark:text-white/90">
                                       Dropdown choices
                                     </h4>
-                                    <p className="mt-1 text-theme-sm text-gray-500 dark:text-gray-400">
+                                    <p className="mt-1 type-small text-gray-500 dark:text-gray-400">
                                       Add the options customers can select.
                                     </p>
                                   </div>
@@ -601,7 +601,7 @@ export default function CustomerInfoModal({
                                       key={`${field.id}-${optionIndex}`}
                                       className="grid grid-cols-[32px_1fr_40px] items-center gap-2"
                                     >
-                                      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-theme-xs font-medium text-gray-500 ring-1 ring-gray-200 dark:bg-gray-900 dark:text-gray-400 dark:ring-gray-800">
+                                      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white type-caption font-medium text-gray-500 ring-1 ring-gray-200 dark:bg-gray-900 dark:text-gray-400 dark:ring-gray-800">
                                         {optionIndex + 1}
                                       </span>
                                       <Input
@@ -621,7 +621,7 @@ export default function CustomerInfoModal({
                                         onClick={() =>
                                           removeOption(field.id, optionIndex)
                                         }
-                                        className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 transition hover:bg-gray-50 hover:text-error-500 dark:border-gray-800 dark:bg-gray-900 dark:hover:bg-white/[0.03]"
+                                        className="flex h-10 w-10 items-center justify-center rounded-[10px] border border-gray-200 bg-white text-gray-500 transition hover:bg-gray-50 hover:text-error-500 dark:border-gray-800 dark:bg-gray-900 dark:hover:bg-white/[0.03]"
                                         aria-label="Remove choice"
                                       >
                                         <X size={15} />
@@ -633,10 +633,10 @@ export default function CustomerInfoModal({
                             )}
 
                             <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-white/[0.02]">
-                              <p className="text-theme-xs font-medium text-gray-500 dark:text-gray-400">
+                              <p className="type-caption font-medium text-gray-500 dark:text-gray-400">
                                 Customer preview
                               </p>
-                              <p className="mt-2 text-theme-sm font-semibold text-gray-800 dark:text-white/90">
+                              <p className="mt-2 type-small font-semibold text-gray-800 dark:text-white/90">
                                 {field.label || 'Your question will appear here'}
                               </p>
 
@@ -646,19 +646,19 @@ export default function CustomerInfoModal({
                                     {cleanOptions.map((option, optionIndex) => (
                                       <div
                                         key={`${option}-${optionIndex}`}
-                                        className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-theme-sm text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300"
+                                        className="rounded-[10px] border border-gray-200 bg-white px-3 py-2 type-small text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300"
                                       >
                                         {optionIndex + 1}. {option}
                                       </div>
                                     ))}
                                   </div>
                                 ) : (
-                                  <p className="mt-2 text-theme-sm text-gray-500 dark:text-gray-400">
+                                  <p className="mt-2 type-small text-gray-500 dark:text-gray-400">
                                     Dropdown choices will appear here.
                                   </p>
                                 )
                               ) : (
-                                <div className="mt-3 rounded-lg border border-dashed border-gray-300 bg-white px-3 py-2 text-theme-sm text-gray-500 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400">
+                                <div className="mt-3 rounded-[10px] border border-dashed border-gray-300 bg-white px-3 py-2 type-small text-gray-500 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400">
                                   {field.field_type === 'number'
                                     ? 'Customer will enter a number.'
                                     : 'Customer will type an answer.'}
@@ -674,7 +674,7 @@ export default function CustomerInfoModal({
               </section>
 
               {error && (
-                <div className="rounded-xl border border-error-200 bg-error-50 px-4 py-3 text-theme-sm font-medium text-error-700 dark:border-error-500/20 dark:bg-error-500/10 dark:text-error-500">
+                <div className="rounded-xl border border-error-200 bg-error-50 px-4 py-3 type-small font-medium text-error-700 dark:border-error-500/20 dark:bg-error-500/10 dark:text-error-500">
                   {error}
                 </div>
               )}

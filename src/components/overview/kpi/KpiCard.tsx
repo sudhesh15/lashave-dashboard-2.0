@@ -80,7 +80,7 @@ export function KpiCard({
   return (
     <div
       ref={ref}
-      className='relative overflow-hidden rounded-2xl p-5 cursor-pointer select-none'
+      className='relative overflow-hidden rounded-2xl p-6 cursor-pointer select-none'
       style={{
         background: cardBg,
         border: `1px solid ${borderColor}`,
@@ -140,9 +140,9 @@ export function KpiCard({
       <div className='relative flex items-start justify-between mb-3 gap-2'>
         <p
           style={{
-            fontSize: 10,
-            fontWeight: 700,
-            letterSpacing: '.12em',
+            fontSize: 12,
+            fontWeight: 600,
+            letterSpacing: 0,
             textTransform: 'uppercase',
             color: t.labelColor,
             minWidth: 0,
@@ -154,7 +154,7 @@ export function KpiCard({
         </p>
         <span
           style={{
-            fontSize: 18,
+            fontSize: 20,
             transition: 'all .3s',
             transform: hov ? 'scale(1.35) rotate(-10deg)' : 'scale(1)',
             opacity: hov ? 1 : 0.6,
@@ -166,12 +166,12 @@ export function KpiCard({
       </div>
       <p
         className='relative tabular-nums leading-none kpi-value'
-        style={{ fontWeight: 900, color: t.text }}
+        style={{ fontWeight: 600, color: t.text }}
       >
         {val.toLocaleString()}
       </p>
       {sub && (
-        <p className='relative mt-2' style={{ fontSize: 12, color: t.textSub }}>
+        <p className='relative mt-2 type-caption' style={{ color: t.textSub }}>
           {sub}
         </p>
       )}

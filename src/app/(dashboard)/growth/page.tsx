@@ -24,6 +24,7 @@ import {
   Lightbulb,
   Loader2,
   MapPin,
+  Menu,
   Megaphone,
   MessageCircle,
   Play,
@@ -44,6 +45,11 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Modal } from '@/components/ui/modal';
+import {
+  getPageItems,
+  getTotalPages,
+  TablePagination,
+} from '@/components/ui/table-pagination';
 
 const ReactApexChart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
@@ -266,6 +272,17 @@ const URGENCY_BADGE: Record<NonNullable<RadarTrend['urgency']>, { color: BadgeCo
 const CARD =
   'rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]';
 
+type GrowthSectionKey =
+  | 'report-history'
+  | 'growth-consultant'
+  | 'content-ideas'
+  | 'campaigns'
+  | 'weekly-action-plan'
+  | 'custom-reel-script'
+  | 'trending'
+  | 'industry'
+  | 'competitor';
+
 /* ─────────────────────── helpers ─────────────────────── */
 function fmtDate(d?: string) {
   if (!d) return '—';
@@ -327,20 +344,20 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <div className={cn(CARD, 'p-5 sm:p-6')}>
+    <div className={cn(CARD, 'p-6 sm:p-6')}>
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400">
             {icon}
           </div>
           <div>
-            <h2 className="text-base font-semibold text-gray-800 dark:text-white/90">{title}</h2>
-            {sub && <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">{sub}</p>}
+            <h2 className="type-body font-semibold text-gray-800 dark:text-white/90">{title}</h2>
+            {sub && <p className="mt-0.5 type-small text-gray-500 dark:text-gray-400">{sub}</p>}
           </div>
         </div>
         <div className="flex items-center gap-2">
           {typeof count === 'number' && (
-            <span className="flex h-7 min-w-7 items-center justify-center rounded-full bg-gray-100 px-2 text-xs font-semibold text-gray-600 dark:bg-white/[0.06] dark:text-gray-300">
+            <span className="flex h-7 min-w-7 items-center justify-center rounded-full bg-gray-100 px-2 type-caption font-semibold text-gray-600 dark:bg-white/[0.06] dark:text-gray-300">
               {count}
             </span>
           )}
@@ -356,7 +373,7 @@ function Empty({ text }: { text: string }) {
   return (
     <div className="flex min-h-[110px] flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-gray-300 px-5 py-8 text-center dark:border-gray-700">
       <Sparkles size={20} className="text-gray-300 dark:text-gray-700" />
-      <p className="text-sm text-gray-400 dark:text-gray-500">{text}</p>
+      <p className="type-small text-gray-400 dark:text-gray-500">{text}</p>
     </div>
   );
 }
@@ -403,17 +420,17 @@ function ActionGrid({ items, empty }: { items?: GrowthItem[]; empty: string }) {
           className="flex flex-col rounded-xl border border-gray-200 p-4 dark:border-gray-800"
         >
           <div className="mb-2.5 flex items-center justify-between gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-50 text-xs font-semibold text-brand-500 dark:bg-brand-500/15 dark:text-brand-400">
+            <span className="flex h-7 w-7 items-center justify-center rounded-[10px] bg-brand-50 type-caption font-semibold text-brand-500 dark:bg-brand-500/15 dark:text-brand-400">
               {idx + 1}
             </span>
             {item.priority && <Badge color={priorityBadgeColor(item.priority)}>{item.priority}</Badge>}
           </div>
-          <h3 className="text-sm font-semibold text-gray-800 dark:text-white/90">{itemTitle(item)}</h3>
-          <p className="mt-1.5 flex-1 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+          <h3 className="type-small font-semibold text-gray-800 dark:text-white/90">{itemTitle(item)}</h3>
+          <p className="mt-1.5 flex-1 type-caption leading-relaxed text-gray-500 dark:text-gray-400">
             {compactText(itemDescription(item))}
           </p>
           {item.cta && (
-            <div className="mt-3 text-xs font-semibold text-brand-500 dark:text-brand-400">{item.cta}</div>
+            <div className="mt-3 type-caption font-semibold text-brand-500 dark:text-brand-400">{item.cta}</div>
           )}
         </div>
       ))}
@@ -452,17 +469,17 @@ function MagazineGrid({
             className="flex flex-col rounded-xl border border-gray-200 p-4 dark:border-gray-800"
           >
             <div className="mb-2.5 flex items-center justify-between gap-2">
-              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-50 text-xs font-semibold text-brand-500 dark:bg-brand-500/15 dark:text-brand-400">
+              <span className="flex h-7 w-7 items-center justify-center rounded-[10px] bg-brand-50 type-caption font-semibold text-brand-500 dark:bg-brand-500/15 dark:text-brand-400">
                 {String(idx + 1).padStart(2, '0')}
               </span>
               {item.priority && <Badge color={priorityBadgeColor(item.priority)}>{item.priority}</Badge>}
             </div>
-            <h3 className="text-sm font-semibold text-gray-800 dark:text-white/90">{title}</h3>
-            <p className="mt-1.5 flex-1 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+            <h3 className="type-small font-semibold text-gray-800 dark:text-white/90">{title}</h3>
+            <p className="mt-1.5 flex-1 type-caption leading-relaxed text-gray-500 dark:text-gray-400">
               {compactText(itemDescription(item))}
             </p>
             {item.cta && (
-              <div className="mt-3 inline-block w-fit rounded-md bg-gray-100 px-2 py-1 text-xs text-gray-600 dark:bg-white/[0.06] dark:text-gray-300">
+              <div className="mt-3 inline-block w-fit rounded-[10px] bg-gray-100 px-2 py-1 type-caption text-gray-600 dark:bg-white/[0.06] dark:text-gray-300">
                 {item.cta}
               </div>
             )}
@@ -567,11 +584,11 @@ function CampaignTimeline({
             className='rounded-xl border border-gray-200 p-4 dark:border-gray-800'
           >
             <div className='mb-2 flex flex-wrap items-center gap-2'>
-              <span className='flex h-7 w-7 items-center justify-center rounded-lg bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'>
+              <span className='flex h-7 w-7 items-center justify-center rounded-[10px] bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'>
                 {idx === 0 ? (
                   <Trophy size={13} />
                 ) : (
-                  <span className='text-xs font-semibold'>{idx + 1}</span>
+                  <span className='type-caption font-semibold'>{idx + 1}</span>
                 )}
               </span>
               {item.priority && (
@@ -580,15 +597,15 @@ function CampaignTimeline({
                 </Badge>
               )}
               {item.day && (
-                <span className='ml-auto flex items-center gap-1 text-xs text-gray-400 dark:text-gray-500'>
+                <span className='ml-auto flex items-center gap-1 type-caption text-gray-400 dark:text-gray-500'>
                   <CalendarDays size={11} /> {item.day}
                 </span>
               )}
             </div>
-            <h3 className='text-sm font-semibold text-gray-800 dark:text-white/90'>
+            <h3 className='type-small font-semibold text-gray-800 dark:text-white/90'>
               {title}
             </h3>
-            <p className='mt-1.5 text-xs leading-relaxed text-gray-500 dark:text-gray-400'>
+            <p className='mt-1.5 type-caption leading-relaxed text-gray-500 dark:text-gray-400'>
               {compactText(itemDescription(item))}
             </p>
             <div className='mt-3 flex items-center justify-between gap-2'>
@@ -597,7 +614,7 @@ function CampaignTimeline({
                   {item.channels.map((ch) => (
                     <span
                       key={ch}
-                      className='inline-flex items-center gap-1 rounded-md bg-gray-100 px-2 py-0.5 text-[11px] text-gray-500 dark:bg-white/[0.06] dark:text-gray-400'
+                      className='inline-flex items-center gap-1 rounded-[10px] bg-gray-100 px-2 py-0.5 type-caption text-gray-500 dark:bg-white/[0.06] dark:text-gray-400'
                     >
                       {CHANNEL_CFG[ch.toLowerCase()]?.logo || (
                         <GlobeIcon
@@ -669,7 +686,7 @@ function ModalSection({
   return (
     <div>
       <div
-        className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide"
+        className="mb-2 flex items-center gap-1.5 type-caption font-semibold uppercase tracking-wide"
         style={{ color: color || undefined }}
       >
         {icon} {label}
@@ -680,7 +697,7 @@ function ModalSection({
 }
 
 const TEXT_BLOCK =
-  'rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm leading-relaxed text-gray-700 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300';
+  'rounded-xl border border-gray-200 bg-gray-50 p-4 type-small leading-relaxed text-gray-700 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300';
 
 /* ─────────────────────── Main Page ─────────────────────── */
 export default function GrowthPage() {
@@ -691,6 +708,9 @@ export default function GrowthPage() {
   const [err, setErr] = useState<string | null>(null);
   const [latest, setLatest] = useState<LatestGrowthResponse | null>(null);
   const [overview, setOverview] = useState<GrowthOverviewResponse | null>(null);
+  const [activeSection, setActiveSection] = useState<GrowthSectionKey>('report-history');
+  const [isMobile, setIsMobile] = useState(false);
+  const [growthMenuOpen, setGrowthMenuOpen] = useState(false);
 
   const [history, setHistory] = useState<GrowthHistoryItem[]>([]);
   const [selectedHistory, setSelectedHistory] = useState<GrowthHistoryItem | null>(null);
@@ -699,7 +719,7 @@ export default function GrowthPage() {
   const [scriptTopic, setScriptTopic] = useState('');
   const [script, setScript] = useState<ScriptResponse['script'] | null>(null);
 
-  const [showAllHistory, setShowAllHistory] = useState(false);
+  const [historyPage, setHistoryPage] = useState(1);
 
   const [scriptCache, setScriptCache] = useState<Record<string, ScriptResponse['script']>>({});
 
@@ -952,14 +972,97 @@ export default function GrowthPage() {
     [radarTrends, radarTab],
   );
 
+  const historyTotalPages = getTotalPages(history.length, 8);
+  const currentHistoryPage = Math.min(historyPage, historyTotalPages);
+  const paginatedHistory = getPageItems(history, currentHistoryPage, 8);
+
   useEffect(() => {
     loadLatest();
   }, []);
 
-  const RADAR_TABS: { key: 'trending' | 'industry' | 'competitor'; label: string }[] = [
-    { key: 'trending', label: 'Trending now' },
-    { key: 'industry', label: 'Industry shifts' },
-    { key: 'competitor', label: 'Competitor moves' },
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 900);
+
+    check();
+    window.addEventListener('resize', check);
+
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
+  useEffect(() => {
+    if (historyPage <= historyTotalPages) return;
+    setHistoryPage(historyTotalPages);
+  }, [historyPage, historyTotalPages]);
+
+  const GROWTH_NAV: {
+    key: GrowthSectionKey;
+    title: string;
+    subtitle: string;
+    icon: React.ReactNode;
+    count?: number;
+  }[] = [
+    {
+      key: 'report-history',
+      title: 'Report History',
+      subtitle: 'Previous weekly reports',
+      icon: <CalendarDays size={20} />,
+      count: history.length,
+    },
+    {
+      key: 'growth-consultant',
+      title: 'Growth Consultant',
+      subtitle: 'Strategic growth ideas',
+      icon: <Brain size={20} />,
+      count: consultantIdeas.length,
+    },
+    {
+      key: 'content-ideas',
+      title: 'Content Ideas',
+      subtitle: 'Social post angles',
+      icon: <Lightbulb size={20} />,
+      count: counts.contentIdeas,
+    },
+    {
+      key: 'campaigns',
+      title: 'Campaigns',
+      subtitle: 'Weekly campaign angles',
+      icon: <Megaphone size={20} />,
+      count: counts.campaigns,
+    },
+    {
+      key: 'weekly-action-plan',
+      title: 'Weekly Action Plan',
+      subtitle: 'Execution checklist',
+      icon: <CheckCircle2 size={20} />,
+      count: counts.weeklyActions,
+    },
+    {
+      key: 'custom-reel-script',
+      title: 'Generate a Custom Reel Script',
+      subtitle: 'Create reel scripts',
+      icon: <Wand2 size={20} />,
+    },
+    {
+      key: 'trending',
+      title: 'Trending now',
+      subtitle: 'Live market trends',
+      icon: <Flame size={20} />,
+      count: radarTrends.filter((tr) => tr.category === 'trending').length,
+    },
+    {
+      key: 'industry',
+      title: 'Industry shifts',
+      subtitle: 'Category changes',
+      icon: <MapPin size={20} />,
+      count: radarTrends.filter((tr) => tr.category === 'industry').length,
+    },
+    {
+      key: 'competitor',
+      title: 'Competitor moves',
+      subtitle: 'Competitive activity',
+      icon: <Target size={20} />,
+      count: radarTrends.filter((tr) => tr.category === 'competitor').length,
+    },
   ];
 
   return (
@@ -971,13 +1074,13 @@ export default function GrowthPage() {
           <Badge color="primary" startIcon={<Sparkles size={13} />}>
             AI Growth Studio
           </Badge>
-          <p className="mt-2 max-w-xl text-sm text-gray-500 dark:text-gray-400">
+          <p className="mt-2 max-w-xl type-small text-gray-500 dark:text-gray-400">
             Turn customer conversations into weekly actions, content ideas and follow-ups.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400">
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1.5 type-caption font-medium text-gray-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400">
             <Clock size={13} /> Updated {fmtDate(latest?.created_at)}
           </span>
 
@@ -987,7 +1090,7 @@ export default function GrowthPage() {
           </Button>
 
           {hasGenerated && !canRegenerate ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1.5 type-caption font-medium text-gray-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400">
               <CalendarDays size={13} />
               Regenerate on{' '}
               {nextRegenDate?.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
@@ -1002,7 +1105,7 @@ export default function GrowthPage() {
       </div>
 
       {err && (
-        <div className="mb-6 flex items-center gap-2.5 rounded-lg border border-error-200 bg-error-50 px-4 py-3 text-sm text-error-600 dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-400">
+        <div className="mb-6 flex items-center gap-3 rounded-[10px] border border-error-200 bg-error-50 px-4 py-3 type-small text-error-600 dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-400">
           <AlertTriangle size={16} className="shrink-0" />
           {err}
         </div>
@@ -1011,15 +1114,15 @@ export default function GrowthPage() {
       {loading ? (
         <div className="flex min-h-[260px] flex-col items-center justify-center gap-3 text-center">
           <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-gray-200 border-t-brand-500 dark:border-gray-800 dark:border-t-brand-400" />
-          <span className="text-sm text-gray-400 dark:text-gray-500">Loading Growth report...</span>
+          <span className="type-small text-gray-400 dark:text-gray-500">Loading Growth report...</span>
         </div>
       ) : !latest?.exists ? (
         <div className={cn(CARD, 'flex flex-col items-center px-6 py-16 text-center')}>
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400">
             <Sparkles size={30} />
           </div>
-          <h2 className="text-xl font-semibold text-gray-800 dark:text-white/90">No Growth plan yet</h2>
-          <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-gray-500 dark:text-gray-400">
+          <h2 className="type-h4 font-semibold text-gray-800 dark:text-white/90">No Growth plan yet</h2>
+          <p className="mx-auto mt-2 max-w-md type-small leading-relaxed text-gray-500 dark:text-gray-400">
             Generate your first weekly growth plan from conversations, leads, complaints and FAQs.
           </p>
           <Button className="mt-6" onClick={generateReport} disabled={generating || (hasGenerated && !canRegenerate)}>
@@ -1030,19 +1133,19 @@ export default function GrowthPage() {
       ) : (
         <div className="flex flex-col gap-6">
           {/* Hero */}
-          <div className={cn(CARD, 'p-5 sm:p-6')}>
+          <div className={cn(CARD, 'p-6 sm:p-6')}>
             <div className="grid grid-cols-1 gap-6 md:grid-cols-[190px_1fr] md:items-center">
               <div className="mx-auto w-full max-w-[190px]">
                 <GrowthGauge score={report?.growth_score || 0} isDark={isDark} />
               </div>
               <div>
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-white/90">This Week&apos;s Growth Plan</h2>
-                <p className="mt-1.5 text-sm leading-relaxed text-gray-500 dark:text-gray-400">
+                <h2 className="type-h4 font-semibold text-gray-800 dark:text-white/90">This Week&apos;s Growth Plan</h2>
+                <p className="mt-1.5 type-small leading-relaxed text-gray-500 dark:text-gray-400">
                   A simple weekly view of what customers are saying, what needs fixing and where growth can come
                   from.
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-medium text-gray-500 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 px-3 py-1 type-caption font-medium text-gray-500 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400">
                     <CalendarDays size={13} />
                     Generated {fmtDate(weeklyGeneratedAt ?? undefined)} · Next on{' '}
                     {fmtDate(overview?.next_regeneration_at ?? undefined)}
@@ -1056,15 +1159,115 @@ export default function GrowthPage() {
 
             {focusLine && (
               <div className="mt-5 rounded-xl border border-brand-200 bg-brand-50 p-4 dark:border-brand-500/25 dark:bg-brand-500/10">
-                <div className="mb-1 flex items-center gap-1.5 text-xs font-semibold text-brand-600 dark:text-brand-400">
+                <div className="mb-1 flex items-center gap-1.5 type-caption font-semibold text-brand-600 dark:text-brand-400">
                   <Sparkles size={13} /> This week&apos;s focus
                 </div>
-                <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-200">{focusLine}</p>
+                <p className="type-small leading-relaxed text-gray-700 dark:text-gray-200">{focusLine}</p>
               </div>
             )}
           </div>
 
-          {/* Report History */}
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[290px_1fr] lg:items-start">
+            <div>
+              {isMobile && (
+                <button
+                  type="button"
+                  onClick={() => setGrowthMenuOpen((p) => !p)}
+                  className="mb-3 flex h-10 w-full items-center justify-between rounded-[10px] border border-gray-200 bg-white px-4 type-small font-medium text-gray-700 shadow-theme-xs transition hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400 dark:hover:bg-white/[0.03]"
+                >
+                  <span>Growth Menu</span>
+                  <Menu size={18} />
+                </button>
+              )}
+
+              {(!isMobile || growthMenuOpen) && (
+                <div className="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+                  <div className="border-b border-gray-100 px-5 py-4 dark:border-gray-800">
+                    <h3 className="type-card-title font-semibold text-gray-800 dark:text-white/90">
+                      Growth
+                    </h3>
+                    <p className="mt-1 type-small text-gray-500 dark:text-gray-400">
+                      Plan, content, and market signals
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-1 p-3">
+                    {GROWTH_NAV.map((item) => {
+                      const active = activeSection === item.key;
+
+                      return (
+                        <button
+                          key={item.key}
+                          type="button"
+                          onClick={() => {
+                            setActiveSection(item.key);
+                            if (item.key === 'trending' || item.key === 'industry' || item.key === 'competitor') {
+                              setRadarTab(item.key);
+                              setExpandedRadarIdx(null);
+                            }
+                            setGrowthMenuOpen(false);
+                          }}
+                          className={cn(
+                            'flex w-full items-center justify-between gap-3 rounded-[10px] px-3 py-3 text-left transition',
+                            active
+                              ? 'bg-brand-50 dark:bg-brand-500/[0.12]'
+                              : 'hover:bg-gray-50 dark:hover:bg-white/[0.03]',
+                          )}
+                        >
+                          <span className="flex min-w-0 items-center gap-3">
+                            <span
+                              className={cn(
+                                'flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px]',
+                                active
+                                  ? 'bg-white text-brand-500 shadow-theme-xs dark:bg-white/10 dark:text-brand-400'
+                                  : 'text-gray-500 dark:text-gray-400',
+                              )}
+                            >
+                              {item.icon}
+                            </span>
+
+                            <span className="min-w-0">
+                              <span
+                                className={cn(
+                                  'block truncate type-small font-semibold',
+                                  active
+                                    ? 'text-brand-500 dark:text-brand-400'
+                                    : 'text-gray-700 dark:text-gray-300',
+                                )}
+                              >
+                                {item.title}
+                              </span>
+                              <span className="mt-0.5 block truncate type-caption font-normal text-gray-400 dark:text-gray-500">
+                                {item.subtitle}
+                              </span>
+                            </span>
+                          </span>
+
+                          <span className="flex shrink-0 items-center gap-2">
+                            {typeof item.count === 'number' && (
+                              <span className="rounded-full bg-gray-100 px-1.5 py-0.5 type-caption font-semibold text-gray-500 dark:bg-white/[0.06] dark:text-gray-400">
+                                {item.count}
+                              </span>
+                            )}
+                            <ChevronRight
+                              size={16}
+                              className={cn(
+                                active
+                                  ? 'text-brand-400'
+                                  : 'text-gray-300 dark:text-gray-600',
+                              )}
+                            />
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="min-w-0 space-y-6">
+              {activeSection === 'report-history' && (
           <Section
             icon={<CalendarDays size={20} />}
             title="Report History"
@@ -1075,9 +1278,9 @@ export default function GrowthPage() {
               <Empty text="No previous weekly reports yet." />
             ) : (
               <>
-                <div className="flex flex-col gap-2.5">
-                  {history.slice(0, showAllHistory ? history.length : 1).map((h, idx) => {
-                    const isCurrent = idx === 0;
+                <div className="flex flex-col gap-3">
+                  {paginatedHistory.map((h) => {
+                    const isCurrent = h.id === history[0]?.id;
                     const scoreColor =
                       typeof h.growth_score === 'number'
                         ? h.growth_score >= 70
@@ -1093,24 +1296,24 @@ export default function GrowthPage() {
                         onClick={() => setSelectedHistory(h)}
                         className="flex cursor-pointer items-center gap-3 rounded-xl border border-gray-200 p-3.5 transition hover:border-gray-300 dark:border-gray-800 dark:hover:border-gray-700"
                       >
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400">
                           <CalendarDays size={15} />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-gray-800 dark:text-white/90">
+                          <div className="flex flex-wrap items-center gap-2 type-small font-semibold text-gray-800 dark:text-white/90">
                             {fmtDate(h.week_start)} – {fmtDate(h.week_end)}
                             {isCurrent && <Badge color="success">Current</Badge>}
                           </div>
-                          <p className="mt-0.5 truncate text-xs text-gray-500 dark:text-gray-400">
+                          <p className="mt-0.5 truncate type-caption text-gray-500 dark:text-gray-400">
                             {compactText(h.biggest_opportunity, 'No summary available.')}
                           </p>
                         </div>
                         {typeof h.growth_score === 'number' && (
                           <div className="text-right">
-                            <div className="text-lg font-bold" style={{ color: scoreColor }}>
+                            <div className="type-card-title font-bold" style={{ color: scoreColor }}>
                               {h.growth_score}
                             </div>
-                            <div className="text-[10px] text-gray-400 dark:text-gray-500">score</div>
+                            <div className="type-caption text-gray-400 dark:text-gray-500">score</div>
                           </div>
                         )}
                         <ChevronRight size={16} className="shrink-0 text-gray-300 dark:text-gray-600" />
@@ -1119,20 +1322,19 @@ export default function GrowthPage() {
                   })}
                 </div>
 
-                {history.length > 1 && (
-                  <button
-                    onClick={() => setShowAllHistory((prev) => !prev)}
-                    className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-gray-50 py-2.5 text-xs font-semibold text-gray-600 hover:bg-gray-100 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/[0.06]"
-                  >
-                    {showAllHistory ? 'Show less' : `View ${history.length - 1} more reports`}
-                    <ChevronDown size={14} className={cn('transition-transform', showAllHistory && 'rotate-180')} />
-                  </button>
-                )}
+                <TablePagination
+                  page={currentHistoryPage}
+                  totalItems={history.length}
+                  onPageChange={setHistoryPage}
+                  pageSize={8}
+                />
               </>
             )}
           </Section>
+              )}
 
           {/* AI Growth Consultant */}
+              {activeSection === 'growth-consultant' && (
           <Section
             icon={<Brain size={20} />}
             title="Growth Consultant"
@@ -1141,10 +1343,10 @@ export default function GrowthPage() {
           >
             {consultantNote && (
               <div className="mb-4 rounded-xl border border-brand-200 bg-brand-50 p-4 dark:border-brand-500/25 dark:bg-brand-500/10">
-                <div className="mb-1 flex items-center gap-1.5 text-xs font-semibold text-brand-600 dark:text-brand-400">
+                <div className="mb-1 flex items-center gap-1.5 type-caption font-semibold text-brand-600 dark:text-brand-400">
                   <Brain size={13} /> Consultant note
                 </div>
-                <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-200">{consultantNote}</p>
+                <p className="type-small leading-relaxed text-gray-700 dark:text-gray-200">{consultantNote}</p>
               </div>
             )}
 
@@ -1157,7 +1359,7 @@ export default function GrowthPage() {
                 }
               />
             ) : (
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {consultantIdeas.map((idea, idx) => (
                   <div
                     key={`${idea.title}-${idx}`}
@@ -1165,7 +1367,7 @@ export default function GrowthPage() {
                     className="cursor-pointer overflow-hidden rounded-xl border border-gray-200 transition hover:-translate-y-0.5 hover:border-gray-300 dark:border-gray-800 dark:hover:border-gray-700"
                   >
                     <div
-                      className="flex h-24 items-center justify-center bg-gray-50 bg-cover bg-center dark:bg-white/[0.03]"
+                      className="flex aspect-[16/9] min-h-[160px] items-center justify-center bg-gray-50 bg-cover bg-center dark:bg-white/[0.03]"
                       style={idea.thumbnail ? { backgroundImage: `url(${idea.thumbnail})` } : undefined}
                     >
                       {!idea.thumbnail && <Sparkles size={26} className="text-gray-300 dark:text-gray-700" />}
@@ -1174,13 +1376,13 @@ export default function GrowthPage() {
                       <Badge color={CATEGORY_BADGE[idea.category] || 'primary'} className="capitalize">
                         {idea.category}
                       </Badge>
-                      <h3 className="mt-2 text-sm font-semibold text-gray-800 dark:text-white/90">{idea.title}</h3>
-                      <p className="mt-1.5 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+                      <h3 className="mt-2 type-small font-semibold text-gray-800 dark:text-white/90">{idea.title}</h3>
+                      <p className="mt-1.5 type-caption leading-relaxed text-gray-500 dark:text-gray-400">
                         {compactText(idea.description, 'No description')}
                       </p>
                       <div className="mt-2.5 flex flex-wrap gap-1.5">
                         {idea.estimated_cost && (
-                          <span className="rounded-md bg-gray-100 px-2 py-0.5 text-[11px] text-gray-500 dark:bg-white/[0.06] dark:text-gray-400">
+                          <span className="rounded-[10px] bg-gray-100 px-2 py-0.5 type-caption text-gray-500 dark:bg-white/[0.06] dark:text-gray-400">
                             {idea.estimated_cost === 'free' ? 'Free' : `${idea.estimated_cost} cost`}
                           </span>
                         )}
@@ -1196,50 +1398,29 @@ export default function GrowthPage() {
               </div>
             )}
           </Section>
+              )}
 
-          {/* Growth Radar */}
+              {(activeSection === 'trending' || activeSection === 'industry' || activeSection === 'competitor') && (
           <Section
-            icon={<Radar size={20} />}
-            title="Growth Radar"
+            icon={
+              activeSection === 'trending' ? (
+                <Flame size={20} />
+              ) : activeSection === 'industry' ? (
+                <MapPin size={20} />
+              ) : (
+                <Target size={20} />
+              )
+            }
+            title={GROWTH_NAV.find((item) => item.key === activeSection)?.title || 'Market Signals'}
             sub={radarScannedAt ? `Scanned ${fmtDate(radarScannedAt)}` : "What's trending now and how you can use it"}
-            count={radarTrends.length}
+            count={filteredRadarTrends.length}
           >
-            <div className="mb-4 flex gap-1 border-b border-gray-100 dark:border-gray-800">
-              {RADAR_TABS.map((tab) => {
-                const tabCount = radarTrends.filter((tr) => tr.category === tab.key).length;
-                const active = radarTab === tab.key;
-                return (
-                  <button
-                    key={tab.key}
-                    type="button"
-                    onClick={() => {
-                      setRadarTab(tab.key);
-                      setExpandedRadarIdx(null);
-                    }}
-                    className={cn(
-                      'flex items-center gap-1.5 border-b-2 px-3 py-2 text-sm font-medium transition',
-                      active
-                        ? 'border-brand-500 text-brand-500 dark:text-brand-400'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300',
-                    )}
-                  >
-                    {tab.label}
-                    {tabCount > 0 && (
-                      <span className="rounded-full bg-brand-50 px-1.5 py-0.5 text-[10px] font-semibold text-brand-500 dark:bg-brand-500/15 dark:text-brand-400">
-                        {tabCount}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-
             {radarSummary && (
               <div className="mb-4 rounded-xl border border-warning-200 bg-warning-50 p-4 dark:border-warning-500/25 dark:bg-warning-500/10">
-                <div className="mb-1 flex items-center gap-1.5 text-xs font-semibold text-warning-700 dark:text-orange-300">
+                <div className="mb-1 flex items-center gap-1.5 type-caption font-semibold text-warning-700 dark:text-orange-300">
                   <Radar size={13} /> Market overview
                 </div>
-                <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-200">{radarSummary}</p>
+                <p className="type-small leading-relaxed text-gray-700 dark:text-gray-200">{radarSummary}</p>
               </div>
             )}
 
@@ -1265,7 +1446,7 @@ export default function GrowthPage() {
                                 href={trend.source_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-xs text-gray-400 no-underline hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+                                className="type-caption text-gray-400 no-underline hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
                               >
                                 {(() => {
                                   try {
@@ -1277,8 +1458,8 @@ export default function GrowthPage() {
                               </a>
                             )}
                           </div>
-                          <div className="mb-1.5 text-sm font-semibold text-gray-800 dark:text-white/90">{trend.title}</div>
-                          <p className="mb-2.5 text-xs leading-relaxed text-gray-500 dark:text-gray-400">{trend.description}</p>
+                          <div className="mb-1.5 type-small font-semibold text-gray-800 dark:text-white/90">{trend.title}</div>
+                          <p className="mb-2.5 type-caption leading-relaxed text-gray-500 dark:text-gray-400">{trend.description}</p>
 
                           <div className="mb-2.5 flex items-center gap-2">
                             <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-100 dark:bg-white/[0.06]">
@@ -1287,7 +1468,7 @@ export default function GrowthPage() {
                                 style={{ width: `${trend.match_score}%`, background: scoreColor }}
                               />
                             </div>
-                            <span className="text-xs font-semibold" style={{ color: scoreColor }}>
+                            <span className="type-caption font-semibold" style={{ color: scoreColor }}>
                               {trend.match_score}%
                             </span>
                           </div>
@@ -1295,7 +1476,7 @@ export default function GrowthPage() {
                           <button
                             type="button"
                             onClick={() => setExpandedRadarIdx(isExpanded ? null : idx)}
-                            className="flex items-center gap-1.5 text-xs font-semibold text-brand-500 dark:text-brand-400"
+                            className="flex items-center gap-1.5 type-caption font-semibold text-brand-500 dark:text-brand-400"
                           >
                             <ChevronDown size={13} className={cn('transition-transform', isExpanded && 'rotate-180')} />
                             How you can use this
@@ -1303,7 +1484,7 @@ export default function GrowthPage() {
 
                           {isExpanded && trend.implementation && (
                             <>
-                              <div className="mt-2.5 rounded-lg bg-gray-50 p-3 text-xs leading-relaxed text-gray-600 dark:bg-white/[0.03] dark:text-gray-300">
+                              <div className="mt-2.5 rounded-[10px] bg-gray-50 p-3 type-caption leading-relaxed text-gray-600 dark:bg-white/[0.03] dark:text-gray-300">
                                 {trend.implementation}
                               </div>
                               <Button
@@ -1340,12 +1521,13 @@ export default function GrowthPage() {
               />
             )}
           </Section>
+              )}
 
           {/* Cooldown / status pill */}
           {hasGenerated && (
             <div
               className={cn(
-                'flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium',
+                'flex items-center justify-center gap-2 rounded-xl px-4 py-2 type-small font-medium',
                 canRegenerate
                   ? 'bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-400'
                   : 'bg-success-50 text-success-700 dark:bg-success-500/10 dark:text-success-400',
@@ -1358,8 +1540,7 @@ export default function GrowthPage() {
             </div>
           )}
 
-          {/* Content Ideas + Campaigns */}
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              {activeSection === 'content-ideas' && (
             <Section
               icon={<Lightbulb size={20} />}
               title="Content Ideas"
@@ -1376,7 +1557,9 @@ export default function GrowthPage() {
                 scriptCache={scriptCache}
               />
             </Section>
+              )}
 
+              {activeSection === 'campaigns' && (
             <Section
               icon={<Megaphone size={20} />}
               title="Campaigns"
@@ -1393,9 +1576,10 @@ export default function GrowthPage() {
                 scriptCache={scriptCache}
               />
             </Section>
-          </div>
+              )}
 
           {/* Weekly Action Plan */}
+              {activeSection === 'weekly-action-plan' && (
           <Section
             icon={<CheckCircle2 size={20} />}
             title="Weekly Action Plan"
@@ -1404,10 +1588,12 @@ export default function GrowthPage() {
           >
             <ActionGrid items={report?.weekly_action_plan} empty="No weekly action plan yet." />
           </Section>
+              )}
 
           {/* Custom script generator */}
+              {activeSection === 'custom-reel-script' && (
           <Section icon={<Wand2 size={20} />} title="Generate a Custom Reel Script" sub="Enter any growth topic and create a script immediately">
-            <div className="flex flex-wrap gap-2.5">
+            <div className="flex flex-wrap gap-3">
               <Input
                 value={scriptTopic}
                 onChange={(e) => setScriptTopic(e.target.value)}
@@ -1420,20 +1606,23 @@ export default function GrowthPage() {
               </Button>
             </div>
           </Section>
+              )}
+            </div>
+          </div>
         </div>
       )}
 
       {/* ══════ Script Modal ══════ */}
       <Modal isOpen={scriptLoading || !!script} onClose={() => !scriptLoading && setScript(null)} className="m-4 max-w-[820px]">
-        <div className="flex max-h-[85vh] w-full flex-col overflow-hidden rounded-3xl bg-white dark:bg-gray-900">
+        <div className="flex max-h-[85vh] w-full flex-col overflow-hidden rounded-[20px] bg-white dark:bg-gray-900">
           <div className="flex items-start justify-between gap-4 border-b border-gray-100 px-6 py-5 pr-14 dark:border-gray-800">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400">
                 <Film size={18} />
               </div>
               <div>
-                <h2 className="text-base font-semibold text-gray-800 dark:text-white/90">{script?.title || 'Reel Script'}</h2>
-                <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                <h2 className="type-body font-semibold text-gray-800 dark:text-white/90">{script?.title || 'Reel Script'}</h2>
+                <p className="mt-0.5 type-caption text-gray-500 dark:text-gray-400">
                   {scriptTopic || 'Generated content idea'}
                   {script?.scenes?.length ? ` · ${script.scenes.length} scenes` : ''}
                 </p>
@@ -1445,7 +1634,7 @@ export default function GrowthPage() {
             {scriptLoading ? (
               <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 text-gray-500 dark:text-gray-400">
                 <Loader2 size={26} className="animate-spin" />
-                <span className="text-sm font-medium">Generating script...</span>
+                <span className="type-small font-medium">Generating script...</span>
               </div>
             ) : script ? (
               <div className="flex flex-col gap-5">
@@ -1460,21 +1649,21 @@ export default function GrowthPage() {
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       {script.scenes.map((scene) => (
                         <div key={scene.scene} className="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800">
-                          <div className="bg-brand-50 px-3.5 py-2.5 text-xs font-semibold uppercase tracking-wide text-brand-600 dark:bg-brand-500/15 dark:text-brand-400">
+                          <div className="bg-brand-50 px-3.5 py-2 type-caption font-semibold uppercase tracking-wide text-brand-600 dark:bg-brand-500/15 dark:text-brand-400">
                             Scene {scene.scene}
                           </div>
                           <div className="flex flex-col gap-2 p-3.5">
                             <div>
-                              <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Visual</span>
-                              <p className="text-xs leading-relaxed text-gray-700 dark:text-gray-300">{scene.visual}</p>
+                              <span className="type-caption font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Visual</span>
+                              <p className="type-caption leading-relaxed text-gray-700 dark:text-gray-300">{scene.visual}</p>
                             </div>
                             <div>
-                              <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Voiceover</span>
-                              <p className="text-xs leading-relaxed text-gray-700 dark:text-gray-300">{scene.voiceover}</p>
+                              <span className="type-caption font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Voiceover</span>
+                              <p className="type-caption leading-relaxed text-gray-700 dark:text-gray-300">{scene.voiceover}</p>
                             </div>
                             <div>
-                              <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">On-screen</span>
-                              <p className="text-xs leading-relaxed text-gray-700 dark:text-gray-300">{scene.onscreen_text}</p>
+                              <span className="type-caption font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">On-screen</span>
+                              <p className="type-caption leading-relaxed text-gray-700 dark:text-gray-300">{scene.onscreen_text}</p>
                             </div>
                           </div>
                         </div>
@@ -1552,9 +1741,9 @@ export default function GrowthPage() {
       {/* ══════ Consultant Idea Detail Modal ══════ */}
       {selectedIdea && (
         <Modal isOpen onClose={() => setSelectedIdea(null)} className="m-4 max-w-[640px]">
-          <div className="max-h-[85vh] w-full overflow-y-auto rounded-3xl bg-white dark:bg-gray-900">
+          <div className="max-h-[85vh] w-full overflow-y-auto rounded-[20px] bg-white dark:bg-gray-900">
             {selectedIdea.thumbnail && (
-              <div className="h-40 bg-cover bg-center" style={{ backgroundImage: `url(${selectedIdea.thumbnail})` }} />
+              <div className="aspect-[16/9] min-h-[220px] bg-cover bg-center" style={{ backgroundImage: `url(${selectedIdea.thumbnail})` }} />
             )}
             <div className="p-6 pr-14">
               <div className="mb-3 flex flex-wrap items-center gap-2">
@@ -1572,18 +1761,18 @@ export default function GrowthPage() {
                   </Badge>
                 )}
               </div>
-              <h2 className="mb-2.5 text-lg font-semibold text-gray-800 dark:text-white/90">{selectedIdea.title}</h2>
-              <p className="mb-4 text-sm leading-relaxed text-gray-600 dark:text-gray-300">{selectedIdea.description}</p>
+              <h2 className="mb-2.5 type-card-title font-semibold text-gray-800 dark:text-white/90">{selectedIdea.title}</h2>
+              <p className="mb-4 type-small leading-relaxed text-gray-600 dark:text-gray-300">{selectedIdea.description}</p>
 
               {selectedIdea.data_evidence && (
-                <div className="mb-3.5 rounded-lg bg-brand-50 p-3.5 text-xs leading-relaxed text-gray-600 dark:bg-brand-500/10 dark:text-gray-300">
+                <div className="mb-3.5 rounded-[10px] bg-brand-50 p-3.5 type-caption leading-relaxed text-gray-600 dark:bg-brand-500/10 dark:text-gray-300">
                   <span className="font-semibold text-brand-600 dark:text-brand-400">Data evidence: </span>
                   {selectedIdea.data_evidence}
                 </div>
               )}
 
               {selectedIdea.expected_outcome && (
-                <div className="mb-3.5 rounded-lg bg-success-50 p-3.5 text-xs leading-relaxed text-gray-600 dark:bg-success-500/10 dark:text-gray-300">
+                <div className="mb-3.5 rounded-[10px] bg-success-50 p-3.5 type-caption leading-relaxed text-gray-600 dark:bg-success-500/10 dark:text-gray-300">
                   <span className="font-semibold text-success-700 dark:text-success-400">Expected outcome: </span>
                   {selectedIdea.expected_outcome}
                 </div>
@@ -1592,7 +1781,7 @@ export default function GrowthPage() {
               {selectedIdea.tags?.length > 0 && (
                 <div className="mb-5 flex flex-wrap gap-1.5">
                   {selectedIdea.tags.map((tag) => (
-                    <span key={tag} className="rounded-md bg-gray-100 px-2 py-0.5 text-[11px] text-gray-500 dark:bg-white/[0.06] dark:text-gray-400">
+                    <span key={tag} className="rounded-[10px] bg-gray-100 px-2 py-0.5 type-caption text-gray-500 dark:bg-white/[0.06] dark:text-gray-400">
                       {tag.replace(/_/g, ' ')}
                     </span>
                   ))}
@@ -1627,16 +1816,16 @@ export default function GrowthPage() {
 
       {/* ══════ Action Plan Modal ══════ */}
       <Modal isOpen={actionPlanLoading || !!actionPlan} onClose={() => !actionPlanLoading && setActionPlan(null)} className="m-4 max-w-[720px]">
-        <div className="flex max-h-[85vh] w-full flex-col overflow-hidden rounded-3xl bg-white dark:bg-gray-900">
+        <div className="flex max-h-[85vh] w-full flex-col overflow-hidden rounded-[20px] bg-white dark:bg-gray-900">
           <div className="flex items-center gap-3 border-b border-gray-100 px-6 py-5 pr-14 dark:border-gray-800">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-success-50 text-success-600 dark:bg-success-500/15 dark:text-success-400">
               <Rocket size={18} />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-gray-800 dark:text-white/90">
+              <h2 className="type-body font-semibold text-gray-800 dark:text-white/90">
                 {actionPlan?.idea_title || actionPlanIdea || 'Action Plan'}
               </h2>
-              <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+              <p className="mt-0.5 type-caption text-gray-500 dark:text-gray-400">
                 {actionPlan?.timeline ? `Timeline: ${actionPlan.timeline}` : 'Step-by-step execution plan'}
               </p>
             </div>
@@ -1646,13 +1835,13 @@ export default function GrowthPage() {
             {actionPlanLoading ? (
               <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 text-gray-500 dark:text-gray-400">
                 <Loader2 size={26} className="animate-spin" />
-                <span className="text-sm font-medium">Building your action plan...</span>
+                <span className="type-small font-medium">Building your action plan...</span>
               </div>
             ) : actionPlan ? (
               <div className="flex flex-col gap-5">
                 {actionPlan.quick_start && (
                   <ModalSection icon={<Zap size={13} />} label="Quick start (do this in 30 min)" color={PALETTE.success}>
-                    <div className="rounded-xl border-l-[3px] border-success-500 bg-success-50 p-4 text-sm leading-relaxed text-gray-700 dark:bg-success-500/10 dark:text-gray-200">
+                    <div className="rounded-xl border-l-[3px] border-success-500 bg-success-50 p-4 type-small leading-relaxed text-gray-700 dark:bg-success-500/10 dark:text-gray-200">
                       {actionPlan.quick_start}
                     </div>
                   </ModalSection>
@@ -1660,21 +1849,21 @@ export default function GrowthPage() {
 
                 {actionPlan.steps?.length ? (
                   <ModalSection icon={<CheckCircle2 size={13} />} label="Steps" color={PALETTE.brand}>
-                    <div className="flex flex-col gap-2.5">
+                    <div className="flex flex-col gap-3">
                       {actionPlan.steps.map((step) => (
                         <div key={step.step} className="rounded-xl border border-gray-200 p-4 dark:border-gray-800">
                           <div className="mb-1.5 flex items-center gap-2">
-                            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-success-50 text-xs font-semibold text-success-600 dark:bg-success-500/15 dark:text-success-400">
+                            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-[10px] bg-success-50 type-caption font-semibold text-success-600 dark:bg-success-500/15 dark:text-success-400">
                               {step.step}
                             </span>
-                            <span className="text-sm font-semibold text-gray-800 dark:text-white/90">{step.title}</span>
+                            <span className="type-small font-semibold text-gray-800 dark:text-white/90">{step.title}</span>
                             {step.timeline && (
-                              <span className="ml-auto flex items-center gap-1 text-[11px] text-gray-400 dark:text-gray-500">
+                              <span className="ml-auto flex items-center gap-1 type-caption text-gray-400 dark:text-gray-500">
                                 <Clock size={10} /> {step.timeline}
                               </span>
                             )}
                           </div>
-                          <p className="text-xs leading-relaxed text-gray-500 dark:text-gray-400">{step.description}</p>
+                          <p className="type-caption leading-relaxed text-gray-500 dark:text-gray-400">{step.description}</p>
                           {step.cost && step.cost !== 'free' && (
                             <Badge color="warning" className="mt-1.5">
                               Cost: {step.cost}
@@ -1690,7 +1879,7 @@ export default function GrowthPage() {
                   <ModalSection icon={<Target size={13} />} label="Success metrics" color={PALETTE.success}>
                     <div className="flex flex-col gap-1.5">
                       {actionPlan.success_metrics.map((m, i) => (
-                        <div key={i} className="flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-700 dark:bg-white/[0.03] dark:text-gray-300">
+                        <div key={i} className="flex items-center gap-2 rounded-[10px] bg-gray-50 px-3 py-2 type-caption text-gray-700 dark:bg-white/[0.03] dark:text-gray-300">
                           <CheckCircle2 size={12} className="shrink-0 text-success-500" /> {m}
                         </div>
                       ))}
@@ -1702,7 +1891,7 @@ export default function GrowthPage() {
                   <ModalSection icon={<AlertTriangle size={13} />} label="Risks to watch" color={PALETTE.error}>
                     <div className="flex flex-col gap-1.5">
                       {actionPlan.risks.map((r, i) => (
-                        <div key={i} className="flex items-center gap-2 rounded-lg bg-error-50 px-3 py-2 text-xs text-gray-700 dark:bg-error-500/10 dark:text-gray-300">
+                        <div key={i} className="flex items-center gap-2 rounded-[10px] bg-error-50 px-3 py-2 type-caption text-gray-700 dark:bg-error-500/10 dark:text-gray-300">
                           <AlertTriangle size={12} className="shrink-0 text-error-500" /> {r}
                         </div>
                       ))}
@@ -1740,16 +1929,16 @@ export default function GrowthPage() {
       {/* ══════ History Detail Modal ══════ */}
       {selectedHistory && (
         <Modal isOpen onClose={() => setSelectedHistory(null)} className="m-4 max-w-[560px]">
-          <div className="max-h-[85vh] w-full overflow-y-auto rounded-3xl bg-white dark:bg-gray-900">
+          <div className="max-h-[85vh] w-full overflow-y-auto rounded-[20px] bg-white dark:bg-gray-900">
             <div className="flex items-center gap-3 border-b border-gray-100 px-6 py-5 pr-14 dark:border-gray-800">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400">
                 <CalendarDays size={18} />
               </div>
               <div>
-                <h2 className="text-base font-semibold text-gray-800 dark:text-white/90">
+                <h2 className="type-body font-semibold text-gray-800 dark:text-white/90">
                   {fmtDate(selectedHistory.week_start)} – {fmtDate(selectedHistory.week_end)}
                 </h2>
-                <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Generated {fmtDate(selectedHistory.created_at)}</p>
+                <p className="mt-0.5 type-caption text-gray-500 dark:text-gray-400">Generated {fmtDate(selectedHistory.created_at)}</p>
               </div>
             </div>
 
@@ -1762,7 +1951,7 @@ export default function GrowthPage() {
 
               {selectedHistory.biggest_opportunity && (
                 <ModalSection icon={<Rocket size={13} />} label="Biggest opportunity" color={PALETTE.success}>
-                  <div className="rounded-xl bg-success-50 p-4 text-sm leading-relaxed text-gray-700 dark:bg-success-500/10 dark:text-gray-200">
+                  <div className="rounded-xl bg-success-50 p-4 type-small leading-relaxed text-gray-700 dark:bg-success-500/10 dark:text-gray-200">
                     {selectedHistory.biggest_opportunity}
                   </div>
                 </ModalSection>
@@ -1770,7 +1959,7 @@ export default function GrowthPage() {
 
               {selectedHistory.biggest_risk && (
                 <ModalSection icon={<AlertTriangle size={13} />} label="Biggest risk" color={PALETTE.error}>
-                  <div className="rounded-xl bg-error-50 p-4 text-sm leading-relaxed text-gray-700 dark:bg-error-500/10 dark:text-gray-200">
+                  <div className="rounded-xl bg-error-50 p-4 type-small leading-relaxed text-gray-700 dark:bg-error-500/10 dark:text-gray-200">
                     {selectedHistory.biggest_risk}
                   </div>
                 </ModalSection>

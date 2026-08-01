@@ -340,7 +340,7 @@ export function OnboardingDrawer({
       },
     ];
     return shell(
-      <div className='p-5 sm:p-6'>
+      <div className='p-6 sm:p-6'>
         <div className='mb-6 flex items-start justify-between gap-4'>
           <div className='min-w-0'>
             <div className='mb-3 flex flex-wrap items-center gap-2'>
@@ -348,10 +348,10 @@ export function OnboardingDrawer({
                 Train your AI
               </Badge>
             </div>
-            <h2 className='text-xl font-semibold text-gray-800 dark:text-white/90'>
+            <h2 className='type-h4 font-semibold text-gray-800 dark:text-white/90'>
               How would you like to train your AI?
             </h2>
-            <p className='mt-1 text-theme-sm leading-6 text-gray-500 dark:text-gray-400'>
+            <p className='mt-1 type-small leading-6 text-gray-500 dark:text-gray-400'>
               Pick one or more. We&apos;ll run them in the order you picked.
             </p>
           </div>
@@ -359,7 +359,7 @@ export function OnboardingDrawer({
             type='button'
             onClick={onClose}
             aria-label='Close train AI modal'
-            className='inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 dark:text-gray-500 dark:hover:bg-white/[0.05] dark:hover:text-gray-300'
+            className='inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 dark:text-gray-500 dark:hover:bg-white/[0.05] dark:hover:text-gray-300'
           >
             <X className='h-4 w-4' />
           </button>
@@ -383,13 +383,13 @@ export function OnboardingDrawer({
                 )}
               >
                 {order !== null && (
-                  <span className='absolute right-3 top-3 inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-brand-500 px-2 text-theme-xs font-semibold text-white'>
+                  <span className='absolute right-3 top-3 inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-brand-500 px-2 type-caption font-semibold text-white'>
                     {order}
                   </span>
                 )}
                 <div
                   className={cn(
-                    'mb-4 flex h-10 w-10 items-center justify-center rounded-lg',
+                    'mb-4 flex h-10 w-10 items-center justify-center rounded-[10px]',
                     selected
                       ? 'bg-white text-brand-500 dark:bg-white/[0.06] dark:text-brand-400'
                       : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
@@ -397,10 +397,10 @@ export function OnboardingDrawer({
                 >
                   <Icon className='h-5 w-5' />
                 </div>
-                <div className='pr-7 text-theme-sm font-semibold text-gray-800 dark:text-white/90'>
+                <div className='pr-7 type-small font-semibold text-gray-800 dark:text-white/90'>
                   {r.title}
                 </div>
-                <div className='mt-1 text-theme-xs leading-5 text-gray-500 dark:text-gray-400'>
+                <div className='mt-1 type-caption leading-5 text-gray-500 dark:text-gray-400'>
                   {r.detail}
                 </div>
                 <div className='mt-3 flex flex-wrap items-center gap-2'>
@@ -483,7 +483,7 @@ export function OnboardingDrawer({
     }
 
     return shell(
-      <div className='p-5 sm:p-6'>
+      <div className='p-6 sm:p-6'>
         <div className='mb-5'>
           <div className='mb-3 flex items-center justify-between gap-4'>
             <Badge color='light'>
@@ -493,7 +493,7 @@ export function OnboardingDrawer({
               type='button'
               onClick={onClose}
               aria-label='Close train AI modal'
-              className='inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 dark:text-gray-500 dark:hover:bg-white/[0.05] dark:hover:text-gray-300'
+              className='inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 dark:text-gray-500 dark:hover:bg-white/[0.05] dark:hover:text-gray-300'
             >
               <X className='h-4 w-4' />
             </button>
@@ -504,14 +504,14 @@ export function OnboardingDrawer({
               style={{ width: `${progressPct}%` }}
             />
           </div>
-          <h2 className='text-xl font-semibold text-gray-800 dark:text-white/90'>
+          <h2 className='type-h4 font-semibold text-gray-800 dark:text-white/90'>
             {stepTitleMap[currentInputStep]}
           </h2>
         </div>
 
         {currentInputStep === 'scrape' && (
           <div>
-            <p className='mb-3 text-theme-sm leading-6 text-gray-500 dark:text-gray-400'>
+            <p className='mb-3 type-small leading-6 text-gray-500 dark:text-gray-400'>
               We&apos;ll visit the pages, read the useful content, and turn it
               into draft Q&amp;As you can review.
             </p>
@@ -522,16 +522,16 @@ export function OnboardingDrawer({
               onChange={(e) => setScrapeUrl(e.target.value)}
               placeholder='https://your-site.com'
               aria-invalid={dupUrlWarn}
-              className='h-11 rounded-lg bg-white dark:bg-white/[0.03]'
+              className='h-10 rounded-[10px] bg-white dark:bg-white/[0.03]'
             />
             {dupUrlChecking && (
-              <div className='mt-2 flex items-center gap-2 text-theme-xs text-gray-500 dark:text-gray-400'>
+              <div className='mt-2 flex items-center gap-2 type-caption text-gray-500 dark:text-gray-400'>
                 <Loader2 className='h-3.5 w-3.5 animate-spin' />
                 Checking
               </div>
             )}
             {dupUrlWarn && !dupUrlChecking && (
-              <div className='mt-3 flex gap-2 rounded-lg border border-warning-200 bg-warning-50 p-3 text-theme-xs leading-5 text-warning-700 dark:border-warning-500/20 dark:bg-warning-500/10 dark:text-orange-400'>
+              <div className='mt-3 flex gap-2 rounded-[10px] border border-warning-200 bg-warning-50 p-3 type-caption leading-5 text-warning-700 dark:border-warning-500/20 dark:bg-warning-500/10 dark:text-orange-400'>
                 <AlertTriangle className='mt-0.5 h-4 w-4 shrink-0' />
                 It looks like this site has already been scraped. Running it
                 again will create duplicate drafts.
@@ -542,7 +542,7 @@ export function OnboardingDrawer({
 
         {currentInputStep === 'upload' && (
           <div>
-            <p className='mb-3 text-theme-sm leading-6 text-gray-500 dark:text-gray-400'>
+            <p className='mb-3 type-small leading-6 text-gray-500 dark:text-gray-400'>
               PDFs, price lists, menus, brochures. We&apos;ll extract the
               entries and let you review before they go live.
             </p>
@@ -554,13 +554,13 @@ export function OnboardingDrawer({
                   : 'border-gray-300 bg-gray-50 hover:border-brand-300 hover:bg-brand-50 dark:border-gray-700 dark:bg-white/[0.03] dark:hover:border-brand-500/30 dark:hover:bg-brand-500/10',
               )}
             >
-              <div className='mb-3 flex h-11 w-11 items-center justify-center rounded-lg bg-white text-brand-500 shadow-theme-xs dark:bg-white/[0.06] dark:text-brand-400'>
+              <div className='mb-3 flex h-10 w-10 items-center justify-center rounded-[10px] bg-white text-brand-500 shadow-theme-xs dark:bg-white/[0.06] dark:text-brand-400'>
                 <Upload className='h-5 w-5' />
               </div>
-              <div className='text-theme-sm font-semibold text-gray-800 dark:text-white/90'>
+              <div className='type-small font-semibold text-gray-800 dark:text-white/90'>
                 {uploadFile ? uploadFile.name : 'Click to choose a file'}
               </div>
-              <div className='mt-1 text-theme-xs text-gray-500 dark:text-gray-400'>
+              <div className='mt-1 type-caption text-gray-500 dark:text-gray-400'>
                 {uploadFile
                   ? `${Math.round(uploadFile.size / 1024)} KB`
                   : 'PDF, DOCX, TXT accepted'}
@@ -577,13 +577,13 @@ export function OnboardingDrawer({
             </label>
 
             {dupFileChecking && (
-              <div className='mt-2 flex items-center gap-2 text-theme-xs text-gray-500 dark:text-gray-400'>
+              <div className='mt-2 flex items-center gap-2 type-caption text-gray-500 dark:text-gray-400'>
                 <Loader2 className='h-3.5 w-3.5 animate-spin' />
                 Checking
               </div>
             )}
             {dupFileWarn && !dupFileChecking && (
-              <div className='mt-3 flex gap-2 rounded-lg border border-warning-200 bg-warning-50 p-3 text-theme-xs leading-5 text-warning-700 dark:border-warning-500/20 dark:bg-warning-500/10 dark:text-orange-400'>
+              <div className='mt-3 flex gap-2 rounded-[10px] border border-warning-200 bg-warning-50 p-3 type-caption leading-5 text-warning-700 dark:border-warning-500/20 dark:bg-warning-500/10 dark:text-orange-400'>
                 <AlertTriangle className='mt-0.5 h-4 w-4 shrink-0' />
                 A file with this name has already been uploaded. Continuing will
                 create a duplicate document.
@@ -592,13 +592,13 @@ export function OnboardingDrawer({
 
             {uploadFile && (
               <label
-                className='mt-4 flex flex-col gap-2 text-theme-xs font-medium text-gray-700 dark:text-gray-300'
+                className='mt-4 flex flex-col gap-2 type-caption font-medium text-gray-700 dark:text-gray-300'
               >
                 What kind of document is this?
                 <select
                   value={docCategory}
                   onChange={(e) => setDocCategory(e.target.value)}
-                  className='h-10 rounded-lg border border-gray-200 bg-white px-3 text-theme-sm text-gray-700 outline-none transition focus:border-brand-300 focus:ring-3 focus:ring-brand-300/20 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-300'
+                  className='h-10 rounded-[10px] border border-gray-200 bg-white px-3 type-small text-gray-700 outline-none transition focus:border-brand-300 focus:ring-3 focus:ring-brand-300/20 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-300'
                 >
                   <option value=''>Auto-detect</option>
                   <option value='menu'>Menu</option>
@@ -615,7 +615,7 @@ export function OnboardingDrawer({
 
         {currentInputStep === 'biz-type' && (
           <div>
-            <p className='mb-4 text-theme-sm leading-6 text-gray-500 dark:text-gray-400'>
+            <p className='mb-4 type-small leading-6 text-gray-500 dark:text-gray-400'>
               We&apos;ll use this to pick the right questions.
             </p>
             <div className='grid gap-3 sm:grid-cols-2'>
@@ -639,19 +639,19 @@ export function OnboardingDrawer({
                     )}
                   >
                     <div
-                      className='mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800'
+                      className='mb-3 flex h-10 w-10 items-center justify-center rounded-[10px] bg-gray-100 dark:bg-gray-800'
                     >
                       {BizIcon[biz.id](iconColor)}
                     </div>
                     <div className={cn(
-                      'text-theme-sm font-semibold',
+                      'type-small font-semibold',
                       active
                         ? 'text-brand-500 dark:text-brand-400'
                         : 'text-gray-800 dark:text-white/90',
                     )}>
                       {biz.label}
                     </div>
-                    <div className='mt-1 text-theme-xs text-gray-500 dark:text-gray-400'>
+                    <div className='mt-1 type-caption text-gray-500 dark:text-gray-400'>
                       {biz.desc}
                     </div>
                   </button>
@@ -663,7 +663,7 @@ export function OnboardingDrawer({
 
         {currentInputStep === 'questions' && currentQ && (
           <div>
-            <p className='mb-3 text-theme-sm font-semibold leading-6 text-gray-800 dark:text-white/90'>
+            <p className='mb-3 type-small font-semibold leading-6 text-gray-800 dark:text-white/90'>
               {currentQ.q}
             </p>
             <Textarea
@@ -675,9 +675,9 @@ export function OnboardingDrawer({
               }}
               placeholder={currentQ.placeholder}
               rows={3}
-              className='min-h-28 resize-none rounded-lg bg-white leading-6 dark:bg-white/[0.03]'
+              className='min-h-28 resize-none rounded-[10px] bg-white leading-6 dark:bg-white/[0.03]'
             />
-            <div className='mt-2 text-theme-xs text-gray-500 dark:text-gray-400'>
+            <div className='mt-2 type-caption text-gray-500 dark:text-gray-400'>
               Optional. Cmd/Ctrl+Enter to continue
             </div>
           </div>
@@ -685,7 +685,7 @@ export function OnboardingDrawer({
 
         {currentInputStep === 'about' && (
           <div>
-            <p className='mb-3 text-theme-sm leading-6 text-gray-500 dark:text-gray-400'>
+            <p className='mb-3 type-small leading-6 text-gray-500 dark:text-gray-400'>
               Anything important your AI should know. Also saved to your
               Settings.
             </p>
@@ -695,7 +695,7 @@ export function OnboardingDrawer({
               onChange={(e) => setAboutBusiness(e.target.value)}
               rows={6}
               placeholder="Example: We're a premium sofa brand. Customers usually ask about pricing, delivery, fabric options and warranty."
-              className='min-h-40 rounded-lg bg-white leading-6 dark:bg-white/[0.03]'
+              className='min-h-40 rounded-[10px] bg-white leading-6 dark:bg-white/[0.03]'
             />
           </div>
         )}
@@ -741,16 +741,16 @@ export function OnboardingDrawer({
   /* ============ PHASE 3: running ============ */
   if (phase === 'running') {
     return shell(
-      <div className='p-5 sm:p-6'>
+      <div className='p-6 sm:p-6'>
         <div className='mb-5 flex items-start gap-3'>
-          <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'>
+          <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'>
             <Loader2 className='h-5 w-5 animate-spin' />
           </div>
           <div>
-            <h2 className='text-xl font-semibold text-gray-800 dark:text-white/90'>
+            <h2 className='type-h4 font-semibold text-gray-800 dark:text-white/90'>
               Starting your training
             </h2>
-            <p className='mt-1 text-theme-sm leading-6 text-gray-500 dark:text-gray-400'>
+            <p className='mt-1 type-small leading-6 text-gray-500 dark:text-gray-400'>
               Kicking off each task. The scrape and upload will keep running on
               the FAQ page where you can watch them progress.
             </p>
@@ -775,7 +775,7 @@ export function OnboardingDrawer({
   const anyFailed = results.some((r) => r.status === 'failed');
 
   return shell(
-    <div className='p-5 sm:p-6'>
+    <div className='p-6 sm:p-6'>
       <div className='mb-5 text-center'>
         <div
           className={cn(
@@ -791,10 +791,10 @@ export function OnboardingDrawer({
             <CheckCircle2 className='h-6 w-6' />
           )}
         </div>
-        <h2 className='text-xl font-semibold text-gray-800 dark:text-white/90'>
+        <h2 className='type-h4 font-semibold text-gray-800 dark:text-white/90'>
           {anyDone ? 'Your AI is trained' : 'Nothing was added'}
         </h2>
-        <p className='mt-2 text-theme-sm leading-6 text-gray-500 dark:text-gray-400'>
+        <p className='mt-2 type-small leading-6 text-gray-500 dark:text-gray-400'>
           {anyDone && totalDrafts > 0
             ? `${totalDrafts} ${totalDrafts === 1 ? 'draft is' : 'drafts are'} ready for you to review.`
             : 'You can try again from the FAQ page.'}
@@ -814,10 +814,10 @@ export function OnboardingDrawer({
 
       {!bizAlreadyAsked && anyDone && (
         <div className='mb-4 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-white/[0.03]'>
-          <div className='mb-2 text-theme-sm font-semibold text-gray-800 dark:text-white/90'>
+          <div className='mb-2 type-small font-semibold text-gray-800 dark:text-white/90'>
             Quick one - what kind of business is this?
             {guessedBiz && (
-              <span className='ml-1 text-theme-xs font-normal text-gray-500 dark:text-gray-400'>
+              <span className='ml-1 type-caption font-normal text-gray-500 dark:text-gray-400'>
                 (we guessed{' '}
                 {BIZ_OPTIONS.find((b) => b.id === guessedBiz)?.label})
               </span>
@@ -828,7 +828,7 @@ export function OnboardingDrawer({
             onChange={(e) =>
               setFinalBiz((e.target.value || null) as BizType | null)
             }
-            className='h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-theme-sm text-gray-700 outline-none transition focus:border-brand-300 focus:ring-3 focus:ring-brand-300/20 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-300'
+            className='h-10 w-full rounded-[10px] border border-gray-200 bg-white px-3 type-small text-gray-700 outline-none transition focus:border-brand-300 focus:ring-3 focus:ring-brand-300/20 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-300'
           >
             <option value=''>Skip this</option>
             {BIZ_OPTIONS.map((biz) => (

@@ -118,7 +118,7 @@ function Field({
 
   return (
     <div>
-      <label className='mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400'>
+      <label className='mb-1.5 block type-small font-medium text-gray-700 dark:text-gray-400'>
         {label} <span className='text-error-500'>*</span>
       </label>
       <div className='relative'>
@@ -128,7 +128,7 @@ function Field({
           type={isPassword && visible ? 'text' : type}
           placeholder={placeholder}
           autoComplete={autoComplete}
-          className='h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-theme-sm text-gray-800 shadow-theme-xs outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-3 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-blue-400'
+          className='h-10 w-full rounded-[10px] border border-gray-300 bg-transparent px-4 py-2 type-small text-gray-800 shadow-theme-xs outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-3 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-blue-400'
         />
         {isPassword && (
           <button
@@ -156,7 +156,7 @@ function Alert({
 
   return (
     <div
-      className={`rounded-lg border px-4 py-3 text-theme-sm ${
+      className={`rounded-[10px] border px-4 py-3 type-small ${
         type === 'success'
           ? 'border-success-200 bg-success-50 text-success-700 dark:border-success-500/25 dark:bg-success-500/10 dark:text-success-400'
           : 'border-error-200 bg-error-50 text-error-600 dark:border-error-500/25 dark:bg-error-500/10 dark:text-error-400'
@@ -180,7 +180,7 @@ function SubmitButton({
     <button
       type='submit'
       disabled={loading || disabled}
-      className='flex w-full items-center justify-center rounded-lg bg-blue-600 px-4 py-3 text-theme-sm font-medium text-white shadow-theme-xs transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:focus:ring-offset-gray-900'
+      className='flex w-full items-center justify-center rounded-[10px] bg-blue-600 px-4 py-3 type-small font-medium text-white shadow-theme-xs transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:focus:ring-offset-gray-900'
     >
       {loading ? 'Please wait...' : children}
     </button>
@@ -203,7 +203,7 @@ function OtpInput({
       inputMode='numeric'
       autoComplete='one-time-code'
       placeholder='000000'
-      className='h-12 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-center text-theme-lg font-semibold tracking-[0.35em] text-gray-800 shadow-theme-xs outline-none placeholder:text-gray-300 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800'
+      className='h-12 w-full rounded-[10px] border border-gray-300 bg-transparent px-4 text-center type-card-title font-semibold tracking-[0.35em] text-gray-800 shadow-theme-xs outline-none placeholder:text-gray-300 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800'
     />
   );
 }
@@ -491,13 +491,13 @@ function AuthPageInner() {
               <h1 className='mb-2 text-title-sm font-semibold text-gray-800 dark:text-white/90 sm:text-title-md'>
                 {title}
               </h1>
-              <p className='text-theme-sm text-gray-500 dark:text-gray-400'>
+              <p className='type-small text-gray-500 dark:text-gray-400'>
                 {subtitle}
               </p>
             </div>
 
             {showTabs && (
-              <div className='mb-6 grid grid-cols-2 gap-2 rounded-lg bg-gray-100 p-1 dark:bg-white/[0.05]'>
+              <div className='mb-6 grid grid-cols-2 gap-2 rounded-[10px] bg-gray-100 p-1 dark:bg-white/[0.05]'>
                 {(['login', 'signup'] as const).map((item) => (
                   <button
                     key={item}
@@ -506,7 +506,7 @@ function AuthPageInner() {
                       setTab(item);
                       go(item);
                     }}
-                    className={`rounded-md px-3 py-2.5 text-theme-sm font-medium transition ${
+                    className={`rounded-[10px] px-3 py-2 type-small font-medium transition ${
                       tab === item
                         ? 'bg-white text-blue-600 shadow-theme-xs dark:bg-gray-900 dark:text-blue-400'
                         : 'text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400'
@@ -544,7 +544,7 @@ function AuthPageInner() {
                     <button
                       type='button'
                       onClick={() => go('forgot')}
-                      className='text-theme-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300'
+                      className='type-small font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300'
                     >
                       Forgot password?
                     </button>
@@ -593,7 +593,7 @@ function AuthPageInner() {
                     placeholder='Confirm your password'
                     autoComplete='new-password'
                   />
-                  <label className='flex items-start gap-3 text-theme-sm text-gray-500 dark:text-gray-400'>
+                  <label className='flex items-start gap-3 type-small text-gray-500 dark:text-gray-400'>
                     <input
                       type='checkbox'
                       checked={agreeTerms}
@@ -634,7 +634,7 @@ function AuthPageInner() {
                   onSubmit={submit(doVerifySignupOTP)}
                 >
                   <OtpInput value={signupOTP} onChange={setSignupOTP} />
-                  <div className='text-center text-theme-sm text-gray-500 dark:text-gray-400'>
+                  <div className='text-center type-small text-gray-500 dark:text-gray-400'>
                     {signupTimer.done ? (
                       <button
                         type='button'
@@ -673,7 +673,7 @@ function AuthPageInner() {
                   onSubmit={submit(doVerifyForgotOTP)}
                 >
                   <OtpInput value={forgotOTP} onChange={setForgotOTP} />
-                  <div className='text-center text-theme-sm text-gray-500 dark:text-gray-400'>
+                  <div className='text-center type-small text-gray-500 dark:text-gray-400'>
                     {forgotTimer.done ? (
                       <button
                         type='button'
@@ -721,7 +721,7 @@ function AuthPageInner() {
                     setTab('login');
                     go('login');
                   }}
-                  className='flex w-full items-center justify-center rounded-lg bg-brand-500 px-4 py-3 text-theme-sm font-medium text-white shadow-theme-xs transition hover:bg-brand-600'
+                  className='flex w-full items-center justify-center rounded-[10px] bg-brand-500 px-4 py-3 type-small font-medium text-white shadow-theme-xs transition hover:bg-brand-600'
                 >
                   Back to Sign In
                 </button>
@@ -735,7 +735,7 @@ function AuthPageInner() {
                   setTab('login');
                   go('login');
                 }}
-                className='mt-6 text-center text-theme-sm font-medium text-gray-500 transition hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                className='mt-6 text-center type-small font-medium text-gray-500 transition hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
               >
                 Back to Sign In
               </button>
@@ -760,7 +760,7 @@ function AuthPageInner() {
               <h2 className='text-title-md font-semibold text-white sm:text-title-lg'>
                 Lashvae
               </h2>
-              <p className='mt-4 max-w-sm text-base leading-7 text-gray-300'>
+              <p className='mt-4 max-w-sm type-body leading-7 text-gray-300'>
                 AI-powered messaging dashboard for your business.
               </p>
             </div>

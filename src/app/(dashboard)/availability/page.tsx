@@ -50,6 +50,17 @@ import { TablePagination } from '@/components/ui/table-pagination';
 import { Textarea } from '@/components/ui/textarea';
 import { useOutsideClick } from '@/hooks/useOutsideClick';
 
+const CHANNEL_LOGOS: Record<string, string> = {
+  facebook: '/brand-logo/facebook.png',
+  google: '/brand-logo/google-map.png',
+  instagram: '/brand-logo/instagram.png',
+  meta: '/brand-logo/meta.png',
+  telegram: '/brand-logo/telegram.png',
+  website: '/brand-logo/website.png',
+  whatsapp: '/brand-logo/whatsapp.png',
+  youtube: '/brand-logo/youtube.png',
+};
+
 /* Types */
 type AvailabilityItem = {
   id?: number;
@@ -276,10 +287,10 @@ const applyCompletedOverrides = (items: Booking[]) => {
 };
 
 const SELECT_CLASS =
-  'h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-3.5 py-2.5 pr-8 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800';
+  'h-10 w-full appearance-none rounded-[10px] border border-gray-300 bg-transparent px-3.5 py-2 pr-8 type-small text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800';
 
 const TIME_INPUT_CLASS =
-  'h-10 w-full rounded-lg border border-gray-300 bg-white px-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 disabled:opacity-40 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90';
+  'h-10 w-full rounded-[10px] border border-gray-300 bg-white px-3 type-small text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 disabled:opacity-40 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90';
 
 /* Avatar */
 function Avatar({
@@ -325,7 +336,7 @@ function Avatar({
         alignItems: 'center',
         justifyContent: 'center',
         fontSize: size * 0.31,
-        fontWeight: 800,
+        fontWeight: 600,
         color: '#344054',
         flexShrink: 0,
         background: '#F2F4F7',
@@ -348,14 +359,14 @@ function DetailRow({
 }) {
   return (
     <div className='flex items-center gap-3'>
-      <div className='flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-400 dark:bg-white/[0.06] dark:text-gray-500'>
+      <div className='flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-gray-100 text-gray-400 dark:bg-white/[0.06] dark:text-gray-500'>
         {icon}
       </div>
       <div className='min-w-0'>
-        <span className='block text-[11px] font-semibold text-gray-400 dark:text-gray-500'>
+        <span className='block type-caption font-semibold text-gray-400 dark:text-gray-500'>
           {label}
         </span>
-        <span className='block truncate text-sm font-bold text-gray-800 dark:text-white/90'>
+        <span className='block truncate type-small font-bold text-gray-800 dark:text-white/90'>
           {value}
         </span>
       </div>
@@ -1035,7 +1046,7 @@ function AvailabilityContent() {
     return (
       <div className='flex min-h-[60vh] flex-col items-center justify-center gap-3 text-center'>
         <div className='h-8 w-8 animate-spin rounded-full border-[3px] border-gray-200 border-t-brand-500 dark:border-gray-800 dark:border-t-brand-400' />
-        <span className='text-sm text-gray-400 dark:text-gray-500'>
+        <span className='type-small text-gray-400 dark:text-gray-500'>
           Loading...
         </span>
       </div>
@@ -1051,10 +1062,10 @@ function AvailabilityContent() {
           strokeWidth={1.5}
           className='text-warning-500/70'
         />
-        <h2 className='text-xl font-bold text-gray-800 dark:text-white/90'>
+        <h2 className='type-h4 font-bold text-gray-800 dark:text-white/90'>
           Enable Smart Booking first
         </h2>
-        <p className='max-w-sm text-sm leading-relaxed text-gray-500 dark:text-gray-400'>
+        <p className='max-w-sm type-small leading-relaxed text-gray-500 dark:text-gray-400'>
           Before setting weekly availability, enable Smart Booking from
           Settings.
         </p>
@@ -1067,7 +1078,7 @@ function AvailabilityContent() {
     <div className='min-w-0 max-w-full overflow-x-hidden'>
       {/* No availability warning */}
       {!hasAvailability && (
-        <div className='mb-6 flex items-center gap-2.5 rounded-xl border border-warning-200 bg-warning-50 px-4 py-3 text-sm font-medium text-warning-700 dark:border-warning-500/25 dark:bg-warning-500/10 dark:text-orange-300'>
+        <div className='mb-6 flex items-center gap-3 rounded-xl border border-warning-200 bg-warning-50 px-4 py-3 type-small font-medium text-warning-700 dark:border-warning-500/25 dark:bg-warning-500/10 dark:text-orange-300'>
           <AlertCircle size={16} className='shrink-0' />
           <span>
             No working hours set - customers can&apos;t book yet.{' '}
@@ -1084,10 +1095,10 @@ function AvailabilityContent() {
       {/* Bookings list */}
       <div className='min-w-0 max-w-full overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]'>
         <div className='flex flex-col gap-4 border-b border-gray-100 px-5 py-5 dark:border-white/[0.05] sm:px-6 lg:flex-row lg:items-center lg:justify-between'>
-          <h3 className='text-base font-semibold text-gray-800 dark:text-white/90'>
+          <h3 className='type-body font-semibold text-gray-800 dark:text-white/90'>
             Bookings
           </h3>
-          <div className='flex flex-wrap items-center gap-2.5'>
+          <div className='flex flex-wrap items-center gap-3'>
             <Button onClick={() => setShowManualBooking(true)}>
               <Plus size={15} />
               Add appointment
@@ -1112,11 +1123,11 @@ function AvailabilityContent() {
 
         <div className='min-w-0 px-5 py-5 sm:px-6'>
           <div className='flex flex-col gap-4 rounded-t-xl border border-b-0 border-gray-200 bg-white px-5 py-4 dark:border-white/[0.05] dark:bg-white/[0.01] lg:flex-row lg:items-center lg:justify-between'>
-            <div className='flex items-center gap-2.5'>
-              <h4 className='text-lg font-semibold text-gray-800 dark:text-white/90'>
+            <div className='flex items-center gap-3'>
+              <h4 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
                 {activeBookingLabel}
               </h4>
-              <span className='rounded-full bg-brand-50 px-2.5 py-0.5 text-theme-xs font-semibold text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'>
+              <span className='rounded-full bg-brand-50 px-3 py-0.5 type-caption font-semibold text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'>
                 {sortedBookings.length}
               </span>
             </div>
@@ -1128,7 +1139,7 @@ function AvailabilityContent() {
                   value={bookingSearch}
                   onChange={(event) => setBookingSearch(event.target.value)}
                   placeholder='Search...'
-                  className='h-11 w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-11 pr-4 text-theme-sm text-gray-800 shadow-theme-xs outline-none placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-gray-500'
+                  className='h-10 w-full rounded-[10px] border border-gray-300 bg-white py-2 pl-11 pr-4 type-small text-gray-800 shadow-theme-xs outline-none placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-gray-500'
                 />
               </div>
               <div ref={bookingFilterRef} className='relative'>
@@ -1158,7 +1169,7 @@ function AvailabilityContent() {
                             setOpenBookingFilter(null);
                           }}
                           className={cn(
-                            'flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm font-medium transition',
+                            'flex w-full items-center justify-between rounded-[10px] px-3 py-2 text-left type-small font-medium transition',
                             isActive
                               ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'
                               : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/[0.04]',
@@ -1168,7 +1179,7 @@ function AvailabilityContent() {
                             {tab.icon}
                             {tab.label} bookings
                           </span>
-                          <span className='text-xs text-gray-400 dark:text-gray-500'>
+                          <span className='type-caption text-gray-400 dark:text-gray-500'>
                             {count}
                           </span>
                         </button>
@@ -1235,7 +1246,7 @@ function AvailabilityContent() {
                       <th
                         key={column.key}
                         className={cn(
-                          'px-5 py-3 text-base font-medium text-gray-500 dark:text-gray-400',
+                          'px-5 py-3 type-body font-medium text-gray-500 dark:text-gray-400',
                           [
                             'phone',
                             'email',
@@ -1252,7 +1263,7 @@ function AvailabilityContent() {
                             toggleBookingSort(column.key as BookingSortKey)
                           }
                           className={cn(
-                            'flex w-full items-center gap-3 text-base font-medium',
+                            'flex w-full items-center gap-3 type-body font-medium',
                             column.key === 'status'
                               ? 'justify-center text-center'
                               : 'justify-between text-left',
@@ -1270,8 +1281,8 @@ function AvailabilityContent() {
                         </button>
                       </th>
                     ))}
-                    <th className='px-6 py-3 text-left text-base font-medium text-gray-500 dark:text-gray-400'>
-                      <span className='flex w-full items-center justify-between gap-3 text-left text-base font-medium'>
+                    <th className='px-6 py-3 text-left type-body font-medium text-gray-500 dark:text-gray-400'>
+                      <span className='flex w-full items-center justify-between gap-3 text-left type-body font-medium'>
                         Actions
                       </span>
                     </th>
@@ -1282,7 +1293,7 @@ function AvailabilityContent() {
                     <tr>
                       <td
                         colSpan={8}
-                        className='px-5 py-14 text-center text-theme-sm text-gray-500 dark:text-gray-400'
+                        className='px-5 py-14 text-center type-small text-gray-500 dark:text-gray-400'
                       >
                         {bookingSearch.trim()
                           ? 'No bookings match this search'
@@ -1326,13 +1337,13 @@ function AvailabilityContent() {
                                 />
                               </div>
                               <div className='min-w-0'>
-                                <span className='group relative block max-w-full text-theme-sm font-medium text-gray-800 dark:text-white/90'>
+                                <span className='group relative block max-w-full type-small font-medium text-gray-800 dark:text-white/90'>
                                   <span className='block truncate'>
                                     {displayName}
                                   </span>
                                   <span className='pointer-events-none absolute left-0 top-full z-50 mt-1 hidden max-w-[280px] group-hover:block'>
                                     <span className='absolute -top-1 left-3 h-2 w-2 rotate-45 rounded-[2px] bg-gray-900' />
-                                    <span className='relative block rounded-md bg-gray-900 px-2.5 py-1.5 text-xs font-medium text-white shadow-lg'>
+                                    <span className='relative block rounded-[10px] bg-gray-900 px-3 py-1.5 type-caption font-medium text-white shadow-lg'>
                                       {displayName}
                                     </span>
                                   </span>
@@ -1340,23 +1351,34 @@ function AvailabilityContent() {
                               </div>
                             </div>
                           </td>
-                          <td className='px-6 py-3 text-theme-sm text-gray-500 dark:text-gray-400'>
+                          <td className='px-6 py-3 type-small text-gray-500 dark:text-gray-400'>
                             <span className='block truncate'>
                               {contactPhone || 'No phone saved'}
                             </span>
                           </td>
-                          <td className='px-6 py-3 text-theme-sm text-gray-500 dark:text-gray-400'>
+                          <td className='px-6 py-3 type-small text-gray-500 dark:text-gray-400'>
                             <span className='block truncate'>
                               {contactEmail || 'No email saved'}
                             </span>
                           </td>
-                          <td className='px-6 py-3 text-theme-sm capitalize text-gray-500 dark:text-gray-400'>
-                            {booking.channel || 'Direct'}
+                          <td className='px-6 py-3 type-small capitalize text-gray-500 dark:text-gray-400'>
+                            <span className='inline-flex items-center gap-2'>
+                              {booking.channel && CHANNEL_LOGOS[booking.channel.toLowerCase()] && (
+                                <Image
+                                  src={CHANNEL_LOGOS[booking.channel.toLowerCase()]}
+                                  alt={booking.channel}
+                                  width={16}
+                                  height={16}
+                                  className='h-4 w-4 shrink-0 object-contain'
+                                />
+                              )}
+                              <span className='truncate'>{booking.channel || 'Direct'}</span>
+                            </span>
                           </td>
-                          <td className='px-6 py-3 text-theme-sm text-gray-500 dark:text-gray-400'>
+                          <td className='px-6 py-3 type-small text-gray-500 dark:text-gray-400'>
                             {formatDate(booking.booking_date)}
                           </td>
-                          <td className='px-6 py-3 text-theme-sm text-gray-500 dark:text-gray-400'>
+                          <td className='px-6 py-3 type-small text-gray-500 dark:text-gray-400'>
                             {formatTime(booking.start_time)} -{' '}
                             {formatTime(booking.end_time)}
                           </td>
@@ -1377,7 +1399,7 @@ function AvailabilityContent() {
                                   disabled={isLoading}
                                   title='Mark as completed'
                                   aria-label='Mark as completed'
-                                  className='inline-flex h-8 items-center gap-2 rounded-lg bg-brand-500 px-3 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-brand-600 disabled:opacity-50'
+                                  className='inline-flex h-8 items-center gap-2 rounded-[10px] bg-brand-500 px-3 type-small font-medium text-white shadow-theme-xs hover:bg-brand-600 disabled:opacity-50'
                                 >
                                   {isLoading ? (
                                     <Loader2 className='h-3.5 w-3.5 animate-spin' />
@@ -1395,7 +1417,7 @@ function AvailabilityContent() {
                                   disabled={isLoading}
                                   title='Reschedule'
                                   aria-label='Reschedule booking'
-                                  className='inline-flex h-8 items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 text-theme-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-white/[0.03]'
+                                  className='inline-flex h-8 items-center gap-2 rounded-[10px] border border-gray-300 bg-white px-3 type-small font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-white/[0.03]'
                                 >
                                   <RotateCcw size={14} />
                                   Reschedule
@@ -1409,13 +1431,13 @@ function AvailabilityContent() {
                                   disabled={isLoading}
                                   title='Cancel booking'
                                   aria-label='Cancel booking'
-                                  className='inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-error-200 bg-error-50 text-error-600 hover:bg-error-100 disabled:opacity-50 dark:border-error-500/25 dark:bg-error-500/10 dark:text-error-400'
+                                  className='inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] border border-error-200 bg-error-50 text-error-600 hover:bg-error-100 disabled:opacity-50 dark:border-error-500/25 dark:bg-error-500/10 dark:text-error-400'
                                 >
                                   <Trash2 size={14} />
                                 </button>
                               </div>
                             ) : (
-                              <span className='text-theme-sm text-gray-400 dark:text-gray-500'>
+                              <span className='type-small text-gray-400 dark:text-gray-500'>
                                 No action
                               </span>
                             )}
@@ -1443,12 +1465,12 @@ function AvailabilityContent() {
         onClose={closeManualBooking}
         className='m-4 max-w-[720px]'
       >
-        <div className='flex max-h-[85vh] w-full flex-col overflow-hidden rounded-3xl bg-white dark:bg-gray-900'>
+        <div className='flex max-h-[85vh] w-full flex-col overflow-hidden rounded-[20px] bg-white dark:bg-gray-900'>
           <div className='border-b border-gray-100 px-6 py-5 pr-14 dark:border-gray-800'>
-            <h2 className='text-lg font-bold text-gray-800 dark:text-white/90'>
+            <h2 className='type-card-title font-bold text-gray-800 dark:text-white/90'>
               Add appointment
             </h2>
-            <p className='mt-1 text-sm text-gray-500 dark:text-gray-400'>
+            <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>
               Create a booking manually in{' '}
               {bookingSettings.booking_timezone || 'UTC'}.
             </p>
@@ -1457,15 +1479,15 @@ function AvailabilityContent() {
           <div className='custom-scrollbar flex flex-col gap-6 overflow-y-auto p-6'>
             {/* Customer details */}
             <section>
-              <div className='mb-3.5 flex items-center gap-2.5'>
-                <div className='flex h-8 w-8 items-center justify-center rounded-lg bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'>
+              <div className='mb-3.5 flex items-center gap-3'>
+                <div className='flex h-8 w-8 items-center justify-center rounded-[10px] bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'>
                   <User size={15} />
                 </div>
                 <div>
-                  <h3 className='text-sm font-bold text-gray-800 dark:text-white/90'>
+                  <h3 className='type-small font-bold text-gray-800 dark:text-white/90'>
                     Customer details
                   </h3>
-                  <p className='text-xs text-gray-400 dark:text-gray-500'>
+                  <p className='type-caption text-gray-400 dark:text-gray-500'>
                     Basic contact information for the appointment
                   </p>
                 </div>
@@ -1516,15 +1538,15 @@ function AvailabilityContent() {
                 <div className='h-px bg-gray-100 dark:bg-gray-800' />
 
                 <section>
-                  <div className='mb-3.5 flex items-center gap-2.5'>
-                    <div className='flex h-8 w-8 items-center justify-center rounded-lg bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'>
+                  <div className='mb-3.5 flex items-center gap-3'>
+                    <div className='flex h-8 w-8 items-center justify-center rounded-[10px] bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'>
                       <MessageSquare size={15} />
                     </div>
                     <div>
-                      <h3 className='text-sm font-bold text-gray-800 dark:text-white/90'>
+                      <h3 className='type-small font-bold text-gray-800 dark:text-white/90'>
                         Additional questions
                       </h3>
-                      <p className='text-xs text-gray-400 dark:text-gray-500'>
+                      <p className='type-caption text-gray-400 dark:text-gray-500'>
                         Custom information configured in booking settings
                       </p>
                     </div>
@@ -1595,15 +1617,15 @@ function AvailabilityContent() {
 
             {/* Appointment details */}
             <section>
-              <div className='mb-3.5 flex items-center gap-2.5'>
-                <div className='flex h-8 w-8 items-center justify-center rounded-lg bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'>
+              <div className='mb-3.5 flex items-center gap-3'>
+                <div className='flex h-8 w-8 items-center justify-center rounded-[10px] bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'>
                   <CalendarClock size={15} />
                 </div>
                 <div>
-                  <h3 className='text-sm font-bold text-gray-800 dark:text-white/90'>
+                  <h3 className='type-small font-bold text-gray-800 dark:text-white/90'>
                     Appointment details
                   </h3>
-                  <p className='text-xs text-gray-400 dark:text-gray-500'>
+                  <p className='type-caption text-gray-400 dark:text-gray-500'>
                     Choose an available date and time
                   </p>
                 </div>
@@ -1682,7 +1704,7 @@ function AvailabilityContent() {
             </section>
 
             {manualError && (
-              <div className='flex items-center gap-2 rounded-xl border border-error-200 bg-error-50 px-3.5 py-2.5 text-xs font-semibold text-error-600 dark:border-error-500/25 dark:bg-error-500/10 dark:text-error-400'>
+              <div className='flex items-center gap-2 rounded-xl border border-error-200 bg-error-50 px-3.5 py-2 type-caption font-semibold text-error-600 dark:border-error-500/25 dark:bg-error-500/10 dark:text-error-400'>
                 <AlertCircle size={15} className='shrink-0' />
                 {manualError}
               </div>
@@ -1718,20 +1740,20 @@ function AvailabilityContent() {
         onClose={() => setShowAvailabilityPanel(false)}
         className='m-4 max-w-[760px]'
       >
-        <div className='flex max-h-[85vh] w-full flex-col overflow-hidden rounded-3xl bg-white dark:bg-gray-900'>
+        <div className='flex max-h-[85vh] w-full flex-col overflow-hidden rounded-[20px] bg-white dark:bg-gray-900'>
           <div className='border-b border-gray-100 px-6 py-5 pr-14 dark:border-gray-800'>
             <Badge color='primary' startIcon={<CalendarDays size={13} />}>
               Availability
             </Badge>
-            <h2 className='mt-3 text-xl font-bold text-gray-800 dark:text-white/90'>
+            <h2 className='mt-3 type-h4 font-bold text-gray-800 dark:text-white/90'>
               Weekly availability
             </h2>
-            <p className='mt-1.5 text-sm text-gray-500 dark:text-gray-400'>
+            <p className='mt-1.5 type-small text-gray-500 dark:text-gray-400'>
               Choose active days and working hours for customer appointments.
             </p>
           </div>
 
-          <div className='custom-scrollbar flex flex-col gap-3 overflow-y-auto p-5'>
+          <div className='custom-scrollbar flex flex-col gap-3 overflow-y-auto p-6'>
             {availability.map((item) => (
               <div
                 key={item.day_of_week}
@@ -1744,7 +1766,7 @@ function AvailabilityContent() {
               >
                 <span
                   className={cn(
-                    'text-sm font-bold',
+                    'type-small font-bold',
                     item.is_active
                       ? 'text-gray-800 dark:text-white/90'
                       : 'text-gray-400 dark:text-gray-600',
@@ -1761,7 +1783,7 @@ function AvailabilityContent() {
                     })
                   }
                   className={cn(
-                    'h-[34px] rounded-full text-xs font-bold transition',
+                    'h-[34px] rounded-full type-caption font-bold transition',
                     item.is_active
                       ? 'bg-brand-500 text-white hover:bg-brand-600'
                       : 'bg-gray-100 text-gray-500 dark:bg-white/[0.08] dark:text-gray-400',
@@ -1783,7 +1805,7 @@ function AvailabilityContent() {
                     className={TIME_INPUT_CLASS}
                   />
 
-                  <span className='text-center text-xs font-bold text-gray-300 dark:text-gray-600'>
+                  <span className='text-center type-caption font-bold text-gray-300 dark:text-gray-600'>
                     to
                   </span>
 
@@ -1826,7 +1848,7 @@ function AvailabilityContent() {
           onClose={() => setRescheduleBooking(null)}
           className='m-4 max-w-[480px]'
         >
-          <div className='w-full rounded-3xl bg-white dark:bg-gray-900'>
+          <div className='w-full rounded-[20px] bg-white dark:bg-gray-900'>
             <div className='flex items-center gap-3 border-b border-gray-100 px-6 py-5 pr-14 dark:border-gray-800'>
               {(() => {
                 const { profilePic, displayName } =
@@ -1835,10 +1857,10 @@ function AvailabilityContent() {
                   <>
                     <Avatar name={displayName} src={profilePic} size={40} />
                     <div>
-                      <h2 className='text-base font-bold text-gray-800 dark:text-white/90'>
+                      <h2 className='type-body font-bold text-gray-800 dark:text-white/90'>
                         Reschedule booking
                       </h2>
-                      <p className='text-xs text-gray-400 dark:text-gray-500'>
+                      <p className='type-caption text-gray-400 dark:text-gray-500'>
                         {displayName}
                       </p>
                     </div>
@@ -1930,19 +1952,19 @@ function AvailabilityContent() {
               onClose={() => setSelectedBooking(null)}
               className='m-4 max-w-[440px]'
             >
-              <div className='max-h-[85vh] w-full overflow-y-auto rounded-3xl bg-white dark:bg-gray-900'>
+              <div className='max-h-[85vh] w-full overflow-y-auto rounded-[20px] bg-white dark:bg-gray-900'>
                 <div className='flex flex-col items-center border-b border-gray-100 px-6 py-8 dark:border-gray-800'>
                   <div className='relative'>
                     <Avatar name={displayName} src={profilePic} size={72} />
                   </div>
 
-                  <h2 className='mt-3 text-lg font-bold text-gray-800 dark:text-white/90'>
+                  <h2 className='mt-3 type-card-title font-bold text-gray-800 dark:text-white/90'>
                     {displayName}
                   </h2>
 
                   {selectedBooking.instagram_profile?.username &&
                     detailName && (
-                      <span className='mt-0.5 text-xs text-gray-400 dark:text-gray-500'>
+                      <span className='mt-0.5 type-caption text-gray-400 dark:text-gray-500'>
                         {detailName}
                       </span>
                     )}
@@ -1958,7 +1980,7 @@ function AvailabilityContent() {
                 </div>
 
                 <div className='border-b border-gray-100 px-6 py-4 dark:border-gray-800'>
-                  <p className='mb-3 text-[11px] font-bold uppercase tracking-wide text-gray-400 dark:text-gray-500'>
+                  <p className='mb-3 type-caption font-bold uppercase tracking-wide text-gray-400 dark:text-gray-500'>
                     Booking
                   </p>
                   <div className='flex flex-col gap-3'>
@@ -1976,7 +1998,7 @@ function AvailabilityContent() {
                 </div>
 
                 <div className='border-b border-gray-100 px-6 py-4 dark:border-gray-800'>
-                  <p className='mb-3 text-[11px] font-bold uppercase tracking-wide text-gray-400 dark:text-gray-500'>
+                  <p className='mb-3 type-caption font-bold uppercase tracking-wide text-gray-400 dark:text-gray-500'>
                     Customer details
                   </p>
                   <div className='flex flex-col gap-3'>
@@ -2016,14 +2038,14 @@ function AvailabilityContent() {
 
                 {selectedBooking.notes && (
                   <div className='border-b border-gray-100 px-6 py-4 dark:border-gray-800'>
-                    <p className='mb-3 text-[11px] font-bold uppercase tracking-wide text-gray-400 dark:text-gray-500'>
+                    <p className='mb-3 type-caption font-bold uppercase tracking-wide text-gray-400 dark:text-gray-500'>
                       Notes
                     </p>
                     <div className='flex items-start gap-3'>
-                      <div className='flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-400 dark:bg-white/[0.06] dark:text-gray-500'>
+                      <div className='flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-gray-100 text-gray-400 dark:bg-white/[0.06] dark:text-gray-500'>
                         <FileText size={14} />
                       </div>
-                      <span className='text-sm font-medium leading-relaxed text-gray-700 dark:text-gray-300'>
+                      <span className='type-small font-medium leading-relaxed text-gray-700 dark:text-gray-300'>
                         {selectedBooking.notes}
                       </span>
                     </div>
@@ -2067,17 +2089,17 @@ function AvailabilityContent() {
         onClose={() => setBookingToCancel(null)}
         className='m-4 max-w-[420px]'
       >
-        <div className='w-full rounded-3xl bg-white p-6 dark:bg-gray-900'>
+        <div className='w-full rounded-[20px] bg-white p-6 dark:bg-gray-900'>
           <div className='mb-4 flex items-center gap-3'>
-            <div className='flex h-10 w-10 items-center justify-center rounded-full bg-error-50 text-lg font-bold text-error-500 dark:bg-error-500/15 dark:text-error-400'>
+            <div className='flex h-10 w-10 items-center justify-center rounded-full bg-error-50 type-card-title font-bold text-error-500 dark:bg-error-500/15 dark:text-error-400'>
               !
             </div>
-            <h3 className='text-base font-bold text-gray-800 dark:text-white/90'>
+            <h3 className='type-body font-bold text-gray-800 dark:text-white/90'>
               Cancel booking?
             </h3>
           </div>
 
-          <p className='text-sm leading-relaxed text-gray-500 dark:text-gray-400'>
+          <p className='type-small leading-relaxed text-gray-500 dark:text-gray-400'>
             This booking will be marked as cancelled and the customer will no
             longer be able to use this reservation.
           </p>
@@ -2099,17 +2121,17 @@ function AvailabilityContent() {
         onClose={() => setBookingToComplete(null)}
         className='m-4 max-w-[420px]'
       >
-        <div className='w-full rounded-3xl bg-white p-6 dark:bg-gray-900'>
+        <div className='w-full rounded-[20px] bg-white p-6 dark:bg-gray-900'>
           <div className='mb-4 flex items-center gap-3'>
             <div className='flex h-10 w-10 items-center justify-center rounded-full bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'>
               <CheckCircle2 size={18} />
             </div>
-            <h3 className='text-base font-bold text-gray-800 dark:text-white/90'>
+            <h3 className='type-body font-bold text-gray-800 dark:text-white/90'>
               Mark booking as completed?
             </h3>
           </div>
 
-          <p className='text-sm leading-relaxed text-gray-500 dark:text-gray-400'>
+          <p className='type-small leading-relaxed text-gray-500 dark:text-gray-400'>
             This booking will be marked as completed and removed from active
             booking actions.
           </p>

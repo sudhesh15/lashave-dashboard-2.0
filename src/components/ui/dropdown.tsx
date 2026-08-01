@@ -58,7 +58,7 @@ export function DropdownItem({
   href,
   onClick,
   onItemClick,
-  baseClassName = "block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white",
+  baseClassName = "block w-full text-left px-4 py-2 type-small text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white",
   className = "",
   children,
 }: DropdownItemProps) {

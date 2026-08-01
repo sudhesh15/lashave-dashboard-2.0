@@ -406,11 +406,11 @@ function ChartCard({
 }) {
   return (
     <div className={cn(CARD, 'px-5 pb-5 pt-5 sm:px-6 sm:pt-6')}>
-      <h3 className='text-lg font-semibold text-gray-800 dark:text-white/90'>
+      <h3 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
         {title}
       </h3>
       {subtitle && (
-        <p className='mt-1 text-sm text-gray-500 dark:text-gray-400'>
+        <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>
           {subtitle}
         </p>
       )}
@@ -438,7 +438,7 @@ function CustomerTabControls({
       <div className='relative'>
         <button
           onClick={() => setSortDropdownOpen(!sortDropdownOpen)}
-          className='flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-gray-200 bg-white px-3.5 py-2 text-xs font-semibold text-gray-600 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300'
+          className='flex items-center gap-1.5 whitespace-nowrap rounded-[10px] border border-gray-200 bg-white px-3.5 py-2 type-caption font-semibold text-gray-600 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300'
         >
           <span>
             Sort:{' '}
@@ -450,7 +450,7 @@ function CustomerTabControls({
           </span>
           <span
             className={cn(
-              'text-[10px] transition-transform',
+              'type-caption transition-transform',
               sortDropdownOpen && 'rotate-180',
             )}
           >
@@ -458,7 +458,7 @@ function CustomerTabControls({
           </span>
         </button>
         {sortDropdownOpen && (
-          <div className='absolute right-0 top-[calc(100%+6px)] z-20 min-w-[150px] overflow-hidden rounded-lg border border-gray-200 bg-white shadow-theme-lg dark:border-gray-700 dark:bg-gray-900'>
+          <div className='absolute right-0 top-[calc(100%+6px)] z-20 min-w-[150px] overflow-hidden rounded-[10px] border border-gray-200 bg-white shadow-theme-lg dark:border-gray-700 dark:bg-gray-900'>
             {(
               [
                 { label: 'A–Z', value: 'name' },
@@ -475,7 +475,7 @@ function CustomerTabControls({
                     setSortDropdownOpen(false);
                   }}
                   className={cn(
-                    'cursor-pointer px-3.5 py-2.5 text-xs font-medium transition',
+                    'cursor-pointer px-3.5 py-2 type-caption font-medium transition',
                     active
                       ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400'
                       : 'text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/[0.03]',
@@ -523,7 +523,7 @@ function WeeklyReportButton() {
         {reporting ? 'Generating…' : 'Weekly Report'}
       </Button>
       {reportMsg && (
-        <div className='max-w-[220px] text-right text-xs text-gray-500 dark:text-gray-400'>
+        <div className='max-w-[220px] text-right type-caption text-gray-500 dark:text-gray-400'>
           {reportMsg}
         </div>
       )}
@@ -786,7 +786,7 @@ function MetricCard({
   };
 
   return (
-    <div className={cn(CARD, 'p-5 md:p-6')}>
+    <div className={cn(CARD, 'p-6 md:p-6')}>
       <div
         className={cn(
           'flex h-12 w-12 items-center justify-center rounded-xl',
@@ -796,7 +796,7 @@ function MetricCard({
         {icon}
       </div>
       <div className='mt-5'>
-        <span className='text-sm text-gray-500 dark:text-gray-400'>
+        <span className='type-small text-gray-500 dark:text-gray-400'>
           {label}
         </span>
         <h4 className='mt-2 text-title-sm font-bold text-gray-800 dark:text-white/90'>
@@ -811,7 +811,7 @@ function Empty({ label }: { label: string }) {
   return (
     <div className='flex flex-col items-center py-8 text-center'>
       <Inbox size={26} className='mb-2 text-gray-300 dark:text-gray-700' />
-      <p className='text-sm text-gray-400 dark:text-gray-500'>{label}</p>
+      <p className='type-small text-gray-400 dark:text-gray-500'>{label}</p>
     </div>
   );
 }
@@ -856,7 +856,7 @@ function CustomerTableRow({
             />
           ) : (
             <div
-              className='flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-theme-xs font-semibold'
+              className='flex h-9 w-9 shrink-0 items-center justify-center rounded-full type-caption font-semibold'
               style={{
                 background: isDark
                   ? `hsla(${hue},40%,28%,0.50)`
@@ -869,16 +869,16 @@ function CustomerTableRow({
             </div>
           )}
           <div className='min-w-0'>
-            <span className='group relative block max-w-[220px] text-theme-sm font-medium text-gray-800 dark:text-white/90'>
+            <span className='group relative block max-w-[220px] type-small font-medium text-gray-800 dark:text-white/90'>
               <span className='block truncate'>{label}</span>
               <span className='pointer-events-none absolute left-0 top-full z-50 mt-1 hidden max-w-[280px] group-hover:block'>
                 <span className='absolute -top-1 left-3 h-2 w-2 rotate-45 rounded-[2px] bg-gray-900' />
-                <span className='relative block rounded-md bg-gray-900 px-2.5 py-1.5 text-xs font-medium text-white shadow-lg'>
+                <span className='relative block rounded-[10px] bg-gray-900 px-3 py-1.5 type-caption font-medium text-white shadow-lg'>
                   {label}
                 </span>
               </span>
             </span>
-            <span className='mt-1 block max-w-[260px] truncate text-theme-xs text-gray-500 dark:text-gray-400'>
+            <span className='mt-1 block max-w-[260px] truncate type-caption text-gray-500 dark:text-gray-400'>
               {preview}
             </span>
           </div>
@@ -886,20 +886,27 @@ function CustomerTableRow({
       </td>
 
       <td className='px-6 py-3'>
-        {CHANNEL_CFG[(lead.channel || '').toLowerCase()]?.logo || (
-          <Globe size={16} className='text-gray-400 dark:text-gray-500' />
-        )}
+        <span className='inline-flex items-center gap-2 type-small text-gray-700 dark:text-gray-300'>
+          {CHANNEL_CFG[(lead.channel || '').toLowerCase()]?.logo || (
+            <Globe size={16} className='text-gray-400 dark:text-gray-500' />
+          )}
+          <span className='truncate'>
+            {lead.channel
+              ? lead.channel.charAt(0).toUpperCase() + lead.channel.slice(1)
+              : 'Channel'}
+          </span>
+        </span>
       </td>
 
-      <td className='px-6 py-3 text-theme-sm text-gray-500 dark:text-gray-400'>
+      <td className='px-6 py-3 type-small text-gray-500 dark:text-gray-400'>
         <span className='block max-w-[200px] truncate'>{email || '-'}</span>
       </td>
 
-      <td className='px-6 py-3 text-theme-sm text-gray-500 dark:text-gray-400'>
+      <td className='px-6 py-3 type-small text-gray-500 dark:text-gray-400'>
         {phone || '-'}
       </td>
 
-      <td className='px-6 py-3 text-theme-sm capitalize text-gray-500 dark:text-gray-400'>
+      <td className='px-6 py-3 type-small capitalize text-gray-500 dark:text-gray-400'>
         <span style={{ color: pipeCfg.color }}>{lead.status || 'new'}</span>
       </td>
 
@@ -907,7 +914,7 @@ function CustomerTableRow({
         <Badge color={segCfg.badge}>{segCfg.label}</Badge>
       </td>
 
-      <td className='px-6 py-3 text-theme-sm text-gray-500 dark:text-gray-400'>
+      <td className='px-6 py-3 type-small text-gray-500 dark:text-gray-400'>
         {ago(lead.updated_at)}
       </td>
 
@@ -915,7 +922,7 @@ function CustomerTableRow({
         <Link
           href={conversationHref}
           onClick={(event) => event.stopPropagation()}
-          className='inline-flex h-8 items-center gap-2 whitespace-nowrap rounded-lg bg-brand-500 px-3 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-brand-600'
+          className='inline-flex h-8 items-center gap-2 whitespace-nowrap rounded-[10px] bg-brand-500 px-3 type-small font-medium text-white shadow-theme-xs hover:bg-brand-600'
         >
           <Eye size={14} />
           View conversation
@@ -935,12 +942,12 @@ function InfoItem({
 }) {
   return (
     <div className='min-w-0'>
-      <p className='mb-1.5 text-xs leading-normal text-gray-500 dark:text-gray-400'>
+      <p className='mb-1.5 type-caption leading-normal text-gray-500 dark:text-gray-400'>
         {label}
       </p>
       <p
         className={cn(
-          'truncate text-sm font-medium',
+          'truncate type-small font-medium',
           !color && 'text-gray-800 dark:text-white/90',
         )}
         style={color ? { color } : undefined}
@@ -1003,7 +1010,7 @@ function CustomerModal({
 
   return (
     <Modal isOpen onClose={onClose} className='m-4 max-w-[700px]'>
-      <div className='no-scrollbar relative flex max-h-[85vh] w-full flex-col overflow-hidden rounded-3xl bg-white dark:bg-gray-900'>
+      <div className='no-scrollbar relative flex max-h-[85vh] w-full flex-col overflow-hidden rounded-[20px] bg-white dark:bg-gray-900'>
         {/* Header */}
         <div className='flex flex-col items-center gap-4 border-b border-gray-100 px-6 pb-6 pr-14 pt-8 dark:border-gray-800 sm:flex-row sm:items-center sm:text-left'>
           {profilePic ? (
@@ -1014,7 +1021,7 @@ function CustomerModal({
             />
           ) : (
             <div
-              className='flex h-20 w-20 shrink-0 items-center justify-center rounded-full border border-gray-200 text-lg font-bold dark:border-gray-800'
+              className='flex h-20 w-20 shrink-0 items-center justify-center rounded-full border border-gray-200 type-card-title font-bold dark:border-gray-800'
               style={{
                 background: isDark
                   ? `hsla(${hue},40%,28%,0.50)`
@@ -1027,7 +1034,7 @@ function CustomerModal({
           )}
 
           <div className='min-w-0 flex-1'>
-            <h4 className='mb-2 truncate text-lg font-semibold text-gray-800 dark:text-white/90'>
+            <h4 className='mb-2 truncate type-card-title font-semibold text-gray-800 dark:text-white/90'>
               {label}
             </h4>
             <div className='flex flex-wrap items-center justify-center gap-2 sm:justify-start'>
@@ -1040,7 +1047,7 @@ function CustomerModal({
                 )}
               </span>
               <span
-                className='w-fit rounded-full px-2.5 py-0.5 text-xs font-medium capitalize'
+                className='w-fit rounded-full px-3 py-0.5 type-caption font-medium capitalize'
                 style={{ color: pipeCfg.color, background: pipeCfg.bg }}
               >
                 {lead.status}
@@ -1051,7 +1058,7 @@ function CustomerModal({
             <div className='mt-3 flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 sm:justify-start'>
               <div className='flex items-center gap-1.5'>
                 <Mail size={12} className='text-gray-400 dark:text-gray-500' />
-                <span className='max-w-[180px] truncate text-xs text-gray-500 dark:text-gray-400'>
+                <span className='type-caption text-gray-500 dark:text-gray-400'>
                   {emails[0] || 'No email'}
                 </span>
                 {emails[0] && (
@@ -1068,7 +1075,7 @@ function CustomerModal({
                 )}
               </div>
               <div className='flex items-center gap-1.5'>
-                <span className='text-xs text-gray-500 dark:text-gray-400'>
+                <span className='type-caption text-gray-500 dark:text-gray-400'>
                   {phones[0] || 'No phone'}
                 </span>
                 {phones[0] && (
@@ -1092,16 +1099,16 @@ function CustomerModal({
         <div className='custom-scrollbar flex-1 overflow-y-auto px-6 py-6'>
           {lastText && (
             <div className='mb-6 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-white/[0.03]'>
-              <p className='mb-1 text-xs text-gray-500 dark:text-gray-400'>
+              <p className='mb-1 type-caption text-gray-500 dark:text-gray-400'>
                 Last message
               </p>
-              <p className='text-sm italic leading-relaxed text-gray-700 dark:text-gray-300'>
+              <p className='type-small italic leading-relaxed text-gray-700 dark:text-gray-300'>
                 &ldquo;{lastText}&rdquo;
               </p>
             </div>
           )}
 
-          <h5 className='mb-4 text-base font-medium text-gray-800 dark:text-white/90'>
+          <h5 className='mb-4 type-body font-medium text-gray-800 dark:text-white/90'>
             Engagement
           </h5>
           <div className='grid grid-cols-2 gap-x-6 gap-y-5 lg:grid-cols-3'>
@@ -1124,13 +1131,13 @@ function CustomerModal({
           </div>
 
           <div className='my-6 h-px bg-gray-100 dark:bg-gray-800' />
-          <h5 className='mb-4 text-base font-medium text-gray-800 dark:text-white/90'>
+          <h5 className='mb-4 type-body font-medium text-gray-800 dark:text-white/90'>
             Signals
           </h5>
           <div className='grid grid-cols-2 gap-x-6 gap-y-5 lg:grid-cols-3'>
             <InfoItem label='Mood' value={mood.label} color={mood.color} />
             <div>
-              <p className='mb-1.5 text-xs leading-normal text-gray-500 dark:text-gray-400'>
+              <p className='mb-1.5 type-caption leading-normal text-gray-500 dark:text-gray-400'>
                 Urgency
               </p>
               <Badge color={urgCfg.color}>{urgCfg.label}</Badge>
@@ -1146,7 +1153,7 @@ function CustomerModal({
 
           {(customTriggers.length > 0 || builtinTriggers.length > 0) && (
             <div className='mt-6'>
-              <p className='mb-2.5 text-xs leading-normal text-gray-500 dark:text-gray-400'>
+              <p className='mb-2.5 type-caption leading-normal text-gray-500 dark:text-gray-400'>
                 Keywords &amp; Triggers
               </p>
               <div className='flex flex-wrap gap-2'>
@@ -1168,7 +1175,7 @@ function CustomerModal({
 
           {objections.length > 0 && (
             <div className='mt-6'>
-              <p className='mb-2.5 text-xs leading-normal text-gray-500 dark:text-gray-400'>
+              <p className='mb-2.5 type-caption leading-normal text-gray-500 dark:text-gray-400'>
                 Sales Objections
               </p>
               <div className='flex flex-wrap gap-2'>
@@ -1182,7 +1189,7 @@ function CustomerModal({
           )}
 
           <div className='mt-6'>
-            <p className='mb-3 text-xs leading-normal text-gray-500 dark:text-gray-400'>
+            <p className='mb-3 type-caption leading-normal text-gray-500 dark:text-gray-400'>
               Pipeline Progress
             </p>
             <div className='flex gap-1.5'>
@@ -1203,7 +1210,7 @@ function CustomerModal({
                       }}
                     />
                     <div
-                      className='text-[11px] font-medium capitalize'
+                      className='type-caption font-medium capitalize'
                       style={{
                         color: done
                           ? sc.color
@@ -1263,7 +1270,7 @@ function ChannelDropdown({
     >
       <button
         onClick={() => setOpen((o) => !o)}
-        className='flex w-full items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3.5 py-2.5 text-left text-xs font-semibold text-gray-700 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300'
+        className='flex w-full items-center gap-1.5 rounded-[10px] border border-gray-200 bg-white px-3.5 py-2 text-left type-caption font-semibold text-gray-700 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300'
       >
         {chanFilter ? (
           <>
@@ -1280,7 +1287,7 @@ function ChannelDropdown({
         )}
         <span
           className={cn(
-            'ml-auto text-[10px] text-gray-400 transition-transform dark:text-gray-500',
+            'ml-auto type-caption text-gray-400 transition-transform dark:text-gray-500',
             open && 'rotate-180',
           )}
         >
@@ -1289,7 +1296,7 @@ function ChannelDropdown({
       </button>
 
       {open && (
-        <div className='absolute inset-x-0 top-[calc(100%+6px)] z-20 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-theme-lg dark:border-gray-700 dark:bg-gray-900'>
+        <div className='absolute inset-x-0 top-[calc(100%+6px)] z-20 overflow-hidden rounded-[10px] border border-gray-200 bg-white shadow-theme-lg dark:border-gray-700 dark:bg-gray-900'>
           {[
             {
               value: '',
@@ -1317,7 +1324,7 @@ function ChannelDropdown({
                   setOpen(false);
                 }}
                 className={cn(
-                  'flex cursor-pointer items-center gap-2 px-3.5 py-2.5 text-xs transition',
+                  'flex cursor-pointer items-center gap-2 px-3.5 py-2 type-caption transition',
                   i < arr.length - 1 &&
                     'border-b border-gray-100 dark:border-gray-800',
                   isActive
@@ -1571,10 +1578,10 @@ function CustomersTab({
       )}
       <div className='min-w-0 max-w-full overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]'>
         <div className='flex flex-col gap-2 border-b border-gray-100 px-5 py-5 dark:border-white/[0.05] sm:flex-row sm:items-center sm:justify-between sm:px-6'>
-          <h3 className='text-base font-semibold text-gray-800 dark:text-white/90'>
+          <h3 className='type-body font-semibold text-gray-800 dark:text-white/90'>
             Customers
           </h3>
-          <div className='text-theme-sm font-medium text-gray-500 dark:text-gray-400'>
+          <div className='type-small font-medium text-gray-500 dark:text-gray-400'>
             {displayed.length} contacts
           </div>
         </div>
@@ -1582,10 +1589,10 @@ function CustomersTab({
         <div className='min-w-0 px-5 py-5 sm:px-6'>
           <div className='flex flex-col gap-4 rounded-t-xl border border-b-0 border-gray-200 bg-white px-5 py-4 dark:border-white/[0.05] dark:bg-white/[0.01] lg:flex-row lg:items-center lg:justify-between'>
             <div>
-              <h4 className='text-lg font-semibold text-gray-800 dark:text-white/90'>
+              <h4 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
                 {activeContactFilter.label}
               </h4>
-              <p className='mt-1 text-theme-sm text-gray-500 dark:text-gray-400'>
+              <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>
                 {activeContactFilter.description}
               </p>
             </div>
@@ -1598,7 +1605,7 @@ function CustomersTab({
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
                   placeholder='Search name, intent, service'
-                  className='h-11 w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-11 pr-4 text-theme-sm text-gray-800 shadow-theme-xs outline-none placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-gray-500'
+                  className='h-10 w-full rounded-[10px] border border-gray-300 bg-white py-2 pl-11 pr-4 type-small text-gray-800 shadow-theme-xs outline-none placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-gray-500'
                 />
               </div>
 
@@ -1622,7 +1629,7 @@ function CustomersTab({
                         setOpenFilter(null);
                       }}
                       className={cn(
-                        'flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm font-medium transition',
+                        'flex w-full items-center justify-between rounded-[10px] px-3 py-2 text-left type-small font-medium transition',
                         !chanFilter
                           ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'
                           : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/[0.04]',
@@ -1632,7 +1639,7 @@ function CustomersTab({
                         <Globe size={14} />
                         All Channels
                       </span>
-                      <span className='text-xs text-gray-400 dark:text-gray-500'>
+                      <span className='type-caption text-gray-400 dark:text-gray-500'>
                         {leads.length}
                       </span>
                     </button>
@@ -1648,7 +1655,7 @@ function CustomersTab({
                             setOpenFilter(null);
                           }}
                           className={cn(
-                            'flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm font-medium capitalize transition',
+                            'flex w-full items-center justify-between rounded-[10px] px-3 py-2 text-left type-small font-medium capitalize transition',
                             active
                               ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'
                               : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/[0.04]',
@@ -1658,7 +1665,7 @@ function CustomersTab({
                             {logo || <Globe size={14} />}
                             {channel}
                           </span>
-                          <span className='text-xs text-gray-400 dark:text-gray-500'>
+                          <span className='type-caption text-gray-400 dark:text-gray-500'>
                             {channelCounts[channel] || 0}
                           </span>
                         </button>
@@ -1699,14 +1706,14 @@ function CustomersTab({
                             setOpenFilter(null);
                           }}
                           className={cn(
-                            'flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm font-medium transition',
+                            'flex w-full items-center justify-between rounded-[10px] px-3 py-2 text-left type-small font-medium transition',
                             active
                               ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'
                               : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/[0.04]',
                           )}
                         >
                           <span>{cfg.label}</span>
-                          <span className='text-xs text-gray-400 dark:text-gray-500'>
+                          <span className='type-caption text-gray-400 dark:text-gray-500'>
                             {segCounts[segment] || 0}
                           </span>
                         </button>
@@ -1720,10 +1727,10 @@ function CustomersTab({
 
           <div className='min-w-0 max-w-full overflow-hidden rounded-b-xl border border-gray-200 dark:border-white/[0.05]'>
             <div className='w-full overflow-x-auto'>
-              <table className='lashvae-column-dividers min-h-72 min-w-[1420px] table-fixed'>
+              <table className='lashvae-column-dividers min-h-72 min-w-[1480px] table-fixed'>
                 <colgroup>
                   <col className='w-[300px]' />
-                  <col className='w-[90px]' />
+                  <col className='w-[150px]' />
                   <col className='w-[220px]' />
                   <col className='w-[155px]' />
                   <col className='w-[150px]' />
@@ -1745,7 +1752,7 @@ function CustomersTab({
                     ].map((header) => (
                       <th
                         key={header}
-                        className='px-5 py-3 text-left text-base font-medium text-gray-500 dark:text-gray-400'
+                        className='px-5 py-3 text-left type-body font-medium text-gray-500 dark:text-gray-400'
                       >
                         {header}
                       </th>
@@ -1757,7 +1764,7 @@ function CustomersTab({
                     <tr>
                       <td
                         colSpan={8}
-                        className='px-5 py-14 text-center text-theme-sm text-gray-500 dark:text-gray-400'
+                        className='px-5 py-14 text-center type-small text-gray-500 dark:text-gray-400'
                       >
                         Loading customers
                       </td>
@@ -1768,7 +1775,7 @@ function CustomersTab({
                     <tr>
                       <td
                         colSpan={8}
-                        className='px-5 py-14 text-center text-theme-sm text-gray-500 dark:text-gray-400'
+                        className='px-5 py-14 text-center type-small text-gray-500 dark:text-gray-400'
                       >
                         {search.trim()
                           ? 'No customers match this search'
@@ -1908,31 +1915,31 @@ function OverviewTab({ isDark }: { isDark: boolean }) {
           <MetricCard
             label='Conversations'
             value={overview?.conversations ?? '—'}
-            icon={<MessageSquare className='size-6' />}
+            icon={<MessageSquare className='icon-nav' />}
             tone='brand'
           />
           <MetricCard
             label='Messages'
             value={overview?.messages ?? '—'}
-            icon={<Mail className='size-6' />}
+            icon={<Mail className='icon-nav' />}
             tone='gray'
           />
           <MetricCard
             label='Leads'
             value={overview?.leads ?? '—'}
-            icon={<Target className='size-6' />}
+            icon={<Target className='icon-nav' />}
             tone='success'
           />
           <MetricCard
             label='Handoffs'
             value={overview?.handoffs ?? '—'}
-            icon={<Users className='size-6' />}
+            icon={<Users className='icon-nav' />}
             tone='warning'
           />
           <MetricCard
             label='Avg Latency'
             value={overview ? `${num(overview.avg_latency_ms)}ms` : '—'}
-            icon={<Zap className='size-6' />}
+            icon={<Zap className='icon-nav' />}
             tone='brand'
           />
           <MetricCard
@@ -1942,7 +1949,7 @@ function OverviewTab({ isDark }: { isDark: boolean }) {
                 ? pct(overview.errors / overview.conversations)
                 : '—'
             }
-            icon={<AlertTriangle className='size-6' />}
+            icon={<AlertTriangle className='icon-nav' />}
             tone='error'
           />
         </div>
@@ -1967,7 +1974,7 @@ function OverviewTab({ isDark }: { isDark: boolean }) {
           {overview ? (
             <>
               <ConversionGauge value={convRate} isDark={isDark} />
-              <p className='mx-auto -mt-6 max-w-[280px] text-center text-sm text-gray-500 dark:text-gray-400'>
+              <p className='mx-auto -mt-6 max-w-[280px] text-center type-small text-gray-500 dark:text-gray-400'>
                 {overview.leads} of {overview.conversations} conversations
                 became leads.
               </p>
@@ -2018,7 +2025,7 @@ function OverviewTab({ isDark }: { isDark: boolean }) {
                   Object.values(pipeline).reduce((a, v) => a + v, 0) || 1;
                 return (
                   <div key={s.key} className='flex items-center gap-3'>
-                    <span className='w-20 shrink-0 text-xs font-medium capitalize text-gray-500 dark:text-gray-400'>
+                    <span className='w-20 shrink-0 type-caption font-medium capitalize text-gray-500 dark:text-gray-400'>
                       {s.key}
                     </span>
                     <div className='h-2.5 flex-1 overflow-hidden rounded-full bg-gray-100 dark:bg-white/[0.05]'>
@@ -2030,7 +2037,7 @@ function OverviewTab({ isDark }: { isDark: boolean }) {
                         }}
                       />
                     </div>
-                    <span className='w-6 shrink-0 text-right text-sm font-semibold text-gray-800 dark:text-white/90'>
+                    <span className='w-6 shrink-0 text-right type-small font-semibold text-gray-800 dark:text-white/90'>
                       {count}
                     </span>
                   </div>
@@ -2047,27 +2054,27 @@ function OverviewTab({ isDark }: { isDark: boolean }) {
             {returning ? (
               <div className='flex items-center gap-4'>
                 <div className='text-center'>
-                  <div className='text-3xl font-bold text-brand-500 dark:text-brand-400'>
+                  <div className='type-h2 font-bold text-brand-500 dark:text-brand-400'>
                     {pct(returning.return_rate)}
                   </div>
-                  <div className='mt-1 text-xs text-gray-400 dark:text-gray-500'>
+                  <div className='mt-1 type-caption text-gray-400 dark:text-gray-500'>
                     return rate
                   </div>
                 </div>
                 <div className='flex flex-1 flex-col gap-2'>
-                  <div className='rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 dark:border-gray-800 dark:bg-white/[0.03]'>
-                    <div className='text-[10px] uppercase tracking-wide text-gray-400 dark:text-gray-500'>
+                  <div className='rounded-[10px] border border-gray-200 bg-gray-50 px-3 py-2 dark:border-gray-800 dark:bg-white/[0.03]'>
+                    <div className='type-caption uppercase tracking-wide text-gray-400 dark:text-gray-500'>
                       Total returning
                     </div>
-                    <div className='text-base font-bold text-gray-800 dark:text-white/90'>
+                    <div className='type-body font-bold text-gray-800 dark:text-white/90'>
                       {num(returning.total_returning)}
                     </div>
                   </div>
-                  <div className='rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 dark:border-gray-800 dark:bg-white/[0.03]'>
-                    <div className='text-[10px] uppercase tracking-wide text-gray-400 dark:text-gray-500'>
+                  <div className='rounded-[10px] border border-gray-200 bg-gray-50 px-3 py-2 dark:border-gray-800 dark:bg-white/[0.03]'>
+                    <div className='type-caption uppercase tracking-wide text-gray-400 dark:text-gray-500'>
                       Avg returns/user
                     </div>
-                    <div className='text-base font-bold text-gray-800 dark:text-white/90'>
+                    <div className='type-body font-bold text-gray-800 dark:text-white/90'>
                       {num(returning.avg_returns, 1)}
                     </div>
                   </div>
@@ -2081,14 +2088,14 @@ function OverviewTab({ isDark }: { isDark: boolean }) {
           {peakLabel && (
             <ChartCard title={peakTitle} subtitle={peakSubtitle}>
               <div className='text-center'>
-                <div className='text-3xl font-bold text-gray-800 dark:text-white/90'>
+                <div className='type-h2 font-bold text-gray-800 dark:text-white/90'>
                   {peakLabel}
                 </div>
-                <div className='mt-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 dark:border-gray-800 dark:bg-white/[0.03]'>
-                  <div className='text-[10px] uppercase tracking-wide text-gray-400 dark:text-gray-500'>
+                <div className='mt-3 rounded-[10px] border border-gray-200 bg-gray-50 px-3 py-2 dark:border-gray-800 dark:bg-white/[0.03]'>
+                  <div className='type-caption uppercase tracking-wide text-gray-400 dark:text-gray-500'>
                     Peak messages
                   </div>
-                  <div className='text-base font-bold text-gray-800 dark:text-white/90'>
+                  <div className='type-body font-bold text-gray-800 dark:text-white/90'>
                     {peakBucket?.messages ?? 0}
                   </div>
                 </div>
@@ -2144,7 +2151,7 @@ export default function AnalyticsPage() {
               key={t.id}
               onClick={() => setTab(t.id)}
               className={cn(
-                'rounded-lg px-4 py-2 text-sm font-semibold transition',
+                'rounded-[10px] px-4 py-2 type-small font-semibold transition',
                 active
                   ? 'bg-white text-brand-500 shadow-theme-xs dark:bg-white/10 dark:text-brand-400'
                   : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300',

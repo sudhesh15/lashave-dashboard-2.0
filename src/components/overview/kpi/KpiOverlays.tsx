@@ -71,7 +71,7 @@ export function TargetRings({ active }: { active: boolean }) {
         />
       ))}
       <div
-        className='absolute text-xl'
+        className='absolute type-h4'
         style={{
           animation: 'target-pop .4s cubic-bezier(.34,1.8,.64,1) .05s both',
         }}
@@ -115,7 +115,7 @@ export function HandoffBadge({ active }: { active: boolean }) {
         style={{ animation: 'hoff-up .4s cubic-bezier(.34,1.4,.64,1) both' }}
       >
         <span
-          className='text-base'
+          className='type-body'
           style={{ animation: 'bob .7s ease-in-out .15s infinite alternate' }}
         >
           👤
@@ -131,7 +131,7 @@ export function HandoffBadge({ active }: { active: boolean }) {
           →→
         </span>
         <span
-          className='text-base'
+          className='type-body'
           style={{ animation: 'bob .7s ease-in-out .3s infinite alternate' }}
         >
           🧑‍💼

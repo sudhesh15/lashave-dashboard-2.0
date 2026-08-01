@@ -113,19 +113,19 @@ export function OnboardingCard({
     <section className='mb-6 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-theme-xs dark:border-gray-800 dark:bg-white/[0.03]'>
       <div className='flex flex-col gap-4 border-b border-gray-200 px-4 py-4 dark:border-gray-800 sm:flex-row sm:items-center sm:justify-between sm:px-5'>
         <div className='flex items-start gap-3'>
-          <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'>
+          <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'>
             <Sparkles className='h-5 w-5' />
           </div>
           <div>
             <div className='flex flex-wrap items-center gap-2'>
-              <h2 className='text-base font-semibold text-gray-800 dark:text-white/90'>
+              <h2 className='type-body font-semibold text-gray-800 dark:text-white/90'>
                 Getting started
               </h2>
               <Badge color={allDone ? 'success' : 'primary'}>
                 {allDone ? 'Complete' : `Step ${Math.min(activeStepIdx + 1, 3)} of 3`}
               </Badge>
             </div>
-            <p className='mt-1 text-theme-sm text-gray-500 dark:text-gray-400'>
+            <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>
               {progress} of {steps.length} setup steps complete
             </p>
           </div>
@@ -135,7 +135,7 @@ export function OnboardingCard({
           type='button'
           onClick={() => setDismissed(true)}
           aria-label='Dismiss onboarding'
-          className='inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 dark:text-gray-500 dark:hover:bg-white/[0.05] dark:hover:text-gray-300'
+          className='inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 dark:text-gray-500 dark:hover:bg-white/[0.05] dark:hover:text-gray-300'
         >
           <X className='h-4 w-4' />
         </button>
@@ -163,10 +163,10 @@ export function OnboardingCard({
             </div>
 
             <div className='min-w-0'>
-              <h3 className='text-lg font-semibold text-gray-800 dark:text-white/90'>
+              <h3 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
                 {headline}
               </h3>
-              <p className='mt-1 max-w-2xl text-theme-sm leading-6 text-gray-500 dark:text-gray-400'>
+              <p className='mt-1 max-w-2xl type-small leading-6 text-gray-500 dark:text-gray-400'>
                 {body}
               </p>
 
@@ -196,7 +196,7 @@ export function OnboardingCard({
               >
                 <div
                   className={cn(
-                    'mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-theme-xs font-semibold',
+                    'mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border type-caption font-semibold',
                     step.done
                       ? 'border-success-200 bg-success-50 text-success-600 dark:border-success-500/20 dark:bg-success-500/15 dark:text-success-500'
                       : step.active
@@ -214,10 +214,10 @@ export function OnboardingCard({
                 </div>
 
                 <div className='min-w-0'>
-                  <p className='text-theme-sm font-medium text-gray-800 dark:text-white/90'>
+                  <p className='type-small font-medium text-gray-800 dark:text-white/90'>
                     {step.title}
                   </p>
-                  <p className='mt-0.5 text-theme-xs text-gray-500 dark:text-gray-400'>
+                  <p className='mt-0.5 type-caption text-gray-500 dark:text-gray-400'>
                     {step.done
                       ? 'Done'
                       : step.active

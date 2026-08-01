@@ -562,7 +562,7 @@ const upcomingBookings = useMemo(
               background: '#ec4899',
               color: '#fff',
               fontSize: 11,
-              fontWeight: 800,
+              fontWeight: 600,
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -635,7 +635,7 @@ const upcomingBookings = useMemo(
           >
             Bookings
           </p>
-          <h3 style={{ fontSize: 18, fontWeight: 800, color: t.text }}>
+          <h3 style={{ fontSize: 18, fontWeight: 600, color: t.text }}>
             Today’s Schedule
           </h3>
         </div>
@@ -654,7 +654,7 @@ const upcomingBookings = useMemo(
                 alignItems: 'center',
                 justifyContent: 'center',
                 color: '#fff',
-                fontWeight: 900,
+                fontWeight: 700,
                 fontSize: 15,
               }}
             >
@@ -745,7 +745,7 @@ const upcomingBookings = useMemo(
                             justifyContent: 'center',
                             color: '#fff',
                             fontSize: 14,
-                            fontWeight: 800,
+                            fontWeight: 600,
                           }}
                         >
                           {getInitial(b.customer_name)}

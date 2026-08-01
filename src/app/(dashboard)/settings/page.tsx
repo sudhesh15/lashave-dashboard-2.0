@@ -15,6 +15,7 @@ import {
   MessageSquare,
   PlayCircle,
   Power,
+  User,
   Save,
   TimerReset,
   X,
@@ -112,16 +113,16 @@ function isUpcoming(dateStr: string) {
 }
 
 const SELECT_CLASS =
-  'h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-8 text-theme-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800';
+  'h-10 w-full appearance-none rounded-[10px] border border-gray-300 bg-transparent px-4 py-2 pr-8 type-small text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800';
 
 const TIME_INPUT_CLASS =
-  'h-10 w-full rounded-lg border border-gray-300 bg-white px-2.5 text-theme-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 disabled:opacity-40 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90';
+  'h-10 w-full rounded-[10px] border border-gray-300 bg-white px-3 type-small text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 disabled:opacity-40 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90';
 
 const INPUT_CLASS =
-  'h-11 rounded-lg border-gray-300 px-4 py-2.5 text-theme-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus-visible:border-brand-300 focus-visible:ring-3 focus-visible:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus-visible:border-brand-800';
+  'h-10 rounded-[10px] border-gray-300 px-4 py-2 type-small text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus-visible:border-brand-300 focus-visible:ring-3 focus-visible:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus-visible:border-brand-800';
 
 const TEXTAREA_CLASS =
-  'rounded-lg border-gray-300 px-4 py-3 text-theme-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus-visible:border-brand-300 focus-visible:ring-3 focus-visible:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus-visible:border-brand-800';
+  'rounded-[10px] border-gray-300 px-4 py-3 type-small text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus-visible:border-brand-300 focus-visible:ring-3 focus-visible:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus-visible:border-brand-800';
 
 export default function SettingsPage() {
   const { isDark } = useTheme();
@@ -552,25 +553,31 @@ export default function SettingsPage() {
       key: 'ai',
       title: 'General',
       subtitle: 'Auto reply, tone and behavior',
-      icon: <Bot size={18} />,
+      icon: <Bot size={20} />,
+    },
+    {
+      key: 'profile',
+      title: 'Profile',
+      subtitle: 'Account and security settings',
+      icon: <User size={20} />,
     },
     {
       key: 'booking',
       title: 'Smart Booking',
       subtitle: 'Manage booking preferences',
-      icon: <CalendarDays size={18} />,
+      icon: <CalendarDays size={20} />,
     },
     {
       key: 'channels',
       title: 'Channels',
       subtitle: 'Connect your channels',
-      icon: <MessageSquare size={18} />,
+      icon: <MessageSquare size={20} />,
     },
     {
       key: 'billing',
       title: 'Billing',
       subtitle: 'Plan and billing details',
-      icon: <CreditCard size={18} />,
+      icon: <CreditCard size={20} />,
     },
   ];
 
@@ -579,7 +586,7 @@ export default function SettingsPage() {
       <PageBreadcrumb pageTitle="Settings" />
 
       {err && (
-        <div className="mb-6 rounded-lg border border-error-200 bg-error-50 px-4 py-3 text-sm text-error-600 dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-400">
+        <div className="mb-6 rounded-[10px] border border-error-200 bg-error-50 px-4 py-3 type-small text-error-600 dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-400">
           {err}
         </div>
       )}
@@ -590,7 +597,7 @@ export default function SettingsPage() {
           {isMobile && (
             <button
               onClick={() => setSettingsMenuOpen((p) => !p)}
-              className="mb-3 flex h-11 w-full items-center justify-between rounded-lg border border-gray-200 bg-white px-4 text-theme-sm font-medium text-gray-700 shadow-theme-xs transition hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400 dark:hover:bg-white/[0.03]"
+              className="mb-3 flex h-10 w-full items-center justify-between rounded-[10px] border border-gray-200 bg-white px-4 type-small font-medium text-gray-700 shadow-theme-xs transition hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400 dark:hover:bg-white/[0.03]"
             >
               <span>Settings Menu</span>
               <Menu size={18} />
@@ -600,10 +607,10 @@ export default function SettingsPage() {
           {(!isMobile || settingsMenuOpen) && (
             <div className="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
               <div className="border-b border-gray-100 px-5 py-4 dark:border-gray-800">
-                <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
+                <h3 className="type-card-title font-semibold text-gray-800 dark:text-white/90">
                   Settings
                 </h3>
-                <p className="mt-1 text-theme-sm text-gray-500 dark:text-gray-400">
+                <p className="mt-1 type-small text-gray-500 dark:text-gray-400">
                   Manage workspace preferences
                 </p>
               </div>
@@ -616,6 +623,11 @@ export default function SettingsPage() {
                     <button
                       key={item.key}
                       onClick={() => {
+                        if (item.key === 'profile') {
+                          router.push('/profile');
+                          return;
+                        }
+
                         if (item.key === 'channels') {
                           router.push('/channels');
                           return;
@@ -630,7 +642,7 @@ export default function SettingsPage() {
                         setSettingsMenuOpen(false);
                       }}
                       className={cn(
-                        'flex w-full items-center justify-between gap-3 rounded-lg px-3 py-3 text-left transition',
+                        'flex w-full items-center justify-between gap-3 rounded-[10px] px-3 py-3 text-left transition',
                         active
                           ? 'bg-brand-50 dark:bg-brand-500/[0.12]'
                           : 'hover:bg-gray-50 dark:hover:bg-white/[0.03]',
@@ -639,7 +651,7 @@ export default function SettingsPage() {
                       <span className="flex items-center gap-3">
                         <span
                           className={cn(
-                            'flex h-9 w-9 items-center justify-center rounded-lg',
+                            'flex h-9 w-9 items-center justify-center rounded-[10px]',
                             active
                               ? 'bg-white text-brand-500 shadow-theme-xs dark:bg-white/10 dark:text-brand-400'
                               : 'text-gray-500 dark:text-gray-400',
@@ -651,7 +663,7 @@ export default function SettingsPage() {
                         <span>
                           <span
                             className={cn(
-                              'block text-theme-sm font-semibold',
+                              'block type-small font-semibold',
                               active
                                 ? 'text-brand-500 dark:text-brand-400'
                                 : 'text-gray-700 dark:text-gray-300',
@@ -659,7 +671,7 @@ export default function SettingsPage() {
                           >
                             {item.title}
                           </span>
-                          <span className="mt-0.5 block text-theme-xs font-normal text-gray-400 dark:text-gray-500">
+                          <span className="mt-0.5 block type-caption font-normal text-gray-400 dark:text-gray-500">
                             {item.subtitle}
                           </span>
                         </span>
@@ -687,13 +699,13 @@ export default function SettingsPage() {
           {activeSection === 'ai' && (
             <div className="flex flex-col gap-6">
               {/* AI enable card */}
-              <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] sm:p-6">
+              <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03] sm:p-6">
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <h2 className="text-lg font-semibold text-gray-800 dark:text-white/90">
+                    <h2 className="type-card-title font-semibold text-gray-800 dark:text-white/90">
                       AI Auto Reply
                     </h2>
-                    <p className="mt-1 text-theme-sm leading-6 text-gray-500 dark:text-gray-400">
+                    <p className="mt-1 type-small leading-6 text-gray-500 dark:text-gray-400">
                       Control whether the bot responds automatically to
                       incoming messages
                     </p>
@@ -723,13 +735,13 @@ export default function SettingsPage() {
                   )}
                 >
                   <div>
-                    <p className="flex items-center gap-1.5 text-theme-sm font-semibold text-gray-800 dark:text-white/90">
+                    <p className="flex items-center gap-1.5 type-small font-semibold text-gray-800 dark:text-white/90">
                       <Bot size={16} className="text-brand-500" />
                       {isLive
                         ? 'AI is responding automatically'
                         : 'Manual mode - AI is paused'}
                     </p>
-                    <p className="mt-1 text-theme-sm text-gray-500 dark:text-gray-400">
+                    <p className="mt-1 type-small text-gray-500 dark:text-gray-400">
                       {isLive
                         ? 'All incoming messages get an AI reply. Click to pause.'
                         : 'Messages are saved but no auto replies are sent. Click to resume.'}
@@ -745,12 +757,12 @@ export default function SettingsPage() {
               </div>
 
               {/* Handoff Automation */}
-              <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] sm:p-6">
+              <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03] sm:p-6">
                 <div className="mb-2">
-                  <h2 className="text-lg font-semibold text-gray-800 dark:text-white/90">
+                  <h2 className="type-card-title font-semibold text-gray-800 dark:text-white/90">
                     Handoff Automation
                   </h2>
-                  <p className="mt-1 text-theme-sm leading-6 text-gray-500 dark:text-gray-400">
+                  <p className="mt-1 type-small leading-6 text-gray-500 dark:text-gray-400">
                     Route conversations to your team automatically. The AI
                     does not reply when a handoff is triggered.
                   </p>
@@ -758,10 +770,10 @@ export default function SettingsPage() {
 
                 <div className="flex items-center justify-between gap-4 border-t border-gray-100 py-4 dark:border-gray-800">
                   <div className="min-w-0">
-                    <p className="text-theme-sm font-semibold text-gray-800 dark:text-white/90">
+                    <p className="type-small font-semibold text-gray-800 dark:text-white/90">
                       Auto-handoff verified Instagram accounts
                     </p>
-                    <p className="mt-1 text-theme-sm text-gray-500 dark:text-gray-400">
+                    <p className="mt-1 type-small text-gray-500 dark:text-gray-400">
                       Blue-tick verified IG profiles skip the AI and go
                       straight to your team.
                     </p>
@@ -776,10 +788,10 @@ export default function SettingsPage() {
 
                 <div className="flex items-center justify-between gap-4 border-t border-gray-100 py-4 dark:border-gray-800">
                   <div className="min-w-0">
-                    <p className="text-theme-sm font-semibold text-gray-800 dark:text-white/90">
+                    <p className="type-small font-semibold text-gray-800 dark:text-white/90">
                       Auto-handoff on keywords
                     </p>
-                    <p className="mt-1 text-theme-sm text-gray-500 dark:text-gray-400">
+                    <p className="mt-1 type-small text-gray-500 dark:text-gray-400">
                       Hand off when a customer message contains any keyword
                       below.
                     </p>
@@ -800,12 +812,12 @@ export default function SettingsPage() {
                 >
                   <div className="mb-1.5 flex items-baseline justify-between">
                     <Label className="mb-0">Handoff keywords</Label>
-                    <span className="font-mono text-theme-xs font-medium text-brand-500 dark:text-brand-400">
+                    <span className="font-mono type-caption font-medium text-brand-500 dark:text-brand-400">
                       {s?.handoff_keywords?.length ?? 0} active
                     </span>
                   </div>
 
-                  <p className="mb-2.5 text-theme-sm text-gray-500 dark:text-gray-400">
+                  <p className="mb-2.5 type-small text-gray-500 dark:text-gray-400">
                     Case-insensitive substring match. Use single words or
                     short phrases like <code>human</code>,{' '}
                     <code>refund</code>, <code>call me</code>.
@@ -813,7 +825,7 @@ export default function SettingsPage() {
 
                   <div className="mb-3 flex min-h-14 flex-wrap items-center gap-2 rounded-xl border border-gray-200 bg-gray-50/60 p-3 dark:border-gray-800 dark:bg-white/[0.02]">
                     {(s?.handoff_keywords?.length ?? 0) === 0 && (
-                      <span className="text-theme-sm text-gray-400 dark:text-gray-600">
+                      <span className="type-small text-gray-400 dark:text-gray-600">
                         No handoff keywords yet. Add one below.
                       </span>
                     )}
@@ -856,7 +868,7 @@ export default function SettingsPage() {
                 <div className="border-t border-gray-100 pt-4 dark:border-gray-800">
                   <div className="mb-1.5 flex items-baseline justify-between">
                     <Label className="mb-0">Opening message</Label>
-                    <span className="font-mono text-theme-xs font-medium text-brand-500 dark:text-brand-400">
+                    <span className="font-mono type-caption font-medium text-brand-500 dark:text-brand-400">
                       {(s?.verified_ig_handoff_message || '').length} chars
                     </span>
                   </div>
@@ -878,7 +890,7 @@ export default function SettingsPage() {
                     className={TEXTAREA_CLASS}
                   />
 
-                  <p className="mt-1.5 text-theme-sm text-gray-500 dark:text-gray-400">
+                  <p className="mt-1.5 type-small text-gray-500 dark:text-gray-400">
                     Sent once to the customer when handoff is triggered.
                     Used by both verified and keyword paths. Leave blank to
                     use the default.
@@ -886,7 +898,7 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                  <p className="text-theme-sm text-gray-500 dark:text-gray-400">
+                  <p className="type-small text-gray-500 dark:text-gray-400">
                     Toggles save instantly. Keywords and message save here.
                   </p>
 
@@ -901,8 +913,8 @@ export default function SettingsPage() {
               </div>
 
               {/* About */}
-              <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] sm:p-6">
-                <h2 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90">
+              <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03] sm:p-6">
+                <h2 className="mb-4 type-card-title font-semibold text-gray-800 dark:text-white/90">
                   About
                 </h2>
 
@@ -912,7 +924,7 @@ export default function SettingsPage() {
                   </Label>
                   <span
                     className={cn(
-                      'font-mono text-theme-xs font-semibold',
+                      'font-mono type-caption font-semibold',
                       (s?.system_prompt || '').length >= 900
                         ? 'text-gray-800 dark:text-white/90'
                         : 'text-brand-500 dark:text-brand-400',
@@ -948,19 +960,19 @@ export default function SettingsPage() {
               </div>
 
               {/* Test */}
-              <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] sm:p-6">
+              <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03] sm:p-6">
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <h2 className="text-lg font-semibold text-gray-800 dark:text-white/90">
+                    <h2 className="type-card-title font-semibold text-gray-800 dark:text-white/90">
                       Test Prompt
                     </h2>
-                    <p className="mt-1 text-theme-sm leading-6 text-gray-500 dark:text-gray-400">
+                    <p className="mt-1 type-small leading-6 text-gray-500 dark:text-gray-400">
                       Fire a live message against the current system prompt
                     </p>
                   </div>
 
                   {testing && (
-                    <div className="flex items-center gap-2 text-xs font-semibold text-brand-500 dark:text-brand-400">
+                    <div className="flex items-center gap-2 type-caption font-semibold text-brand-500 dark:text-brand-400">
                       <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-brand-200 border-t-brand-500 dark:border-brand-500/30 dark:border-t-brand-400" />
                       Thinking...
                     </div>
@@ -987,7 +999,7 @@ export default function SettingsPage() {
 
                 {testMsg && (
                   <div className="mb-2 flex justify-end">
-                    <div className="max-w-[65%] rounded-lg border border-gray-200 bg-gray-50 px-3.5 py-2 text-theme-sm text-gray-700 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300">
+                    <div className="max-w-[65%] rounded-[10px] border border-gray-200 bg-gray-50 px-3.5 py-2 type-small text-gray-700 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300">
                       {testMsg}
                     </div>
                   </div>
@@ -995,12 +1007,12 @@ export default function SettingsPage() {
 
                 {testOut && (
                   <div>
-                    <div className="mb-2 flex gap-2.5">
+                    <div className="mb-2 flex gap-3">
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400">
                         <Bot size={16} />
                       </div>
 
-                      <div className="flex-1 whitespace-pre-wrap rounded-lg border border-gray-200 bg-white px-4 py-3 text-theme-sm leading-6 text-gray-700 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-200">
+                      <div className="flex-1 whitespace-pre-wrap rounded-[10px] border border-gray-200 bg-white px-4 py-3 type-small leading-6 text-gray-700 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-200">
                         {testOut.answer || (
                           <span className="italic text-gray-400 dark:text-gray-600">
                             Empty response
@@ -1009,7 +1021,7 @@ export default function SettingsPage() {
                       </div>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2.5 pl-[42px] text-theme-xs text-gray-400 dark:text-gray-500">
+                    <div className="flex flex-wrap items-center gap-3 pl-[42px] type-caption text-gray-400 dark:text-gray-500">
                       <span>Latency: {testOut.latency_ms}ms</span>
                       <span>Model: {testOut.model}</span>
                       {testOut.provider && (
@@ -1027,13 +1039,13 @@ export default function SettingsPage() {
           )}
 
           {activeSection === 'booking' && (
-            <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] sm:p-6">
+            <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03] sm:p-6">
               <div className="mb-6">
                 <Badge color="primary">Smart Booking</Badge>
                 <h2 className="mt-3 text-title-sm font-bold text-gray-800 dark:text-white/90">
                   Smart Booking
                 </h2>
-                <p className="mt-2 max-w-xl text-theme-sm leading-6 text-gray-500 dark:text-gray-400">
+                <p className="mt-2 max-w-xl type-small leading-6 text-gray-500 dark:text-gray-400">
                   Configure how your customers can book appointments with
                   you.
                 </p>
@@ -1051,7 +1063,7 @@ export default function SettingsPage() {
                   actionColorClass="bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/[0.08] dark:text-gray-300 dark:hover:bg-white/[0.14]"
                   onAction={() => setShowBookingModal(true)}
                 >
-                  <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                  <div className="mt-4 grid grid-cols-1 gap-3 2xl:grid-cols-3">
                     {[
                       {
                         icon: <Clock3 size={16} />,
@@ -1076,13 +1088,13 @@ export default function SettingsPage() {
                     ].map((item) => (
                       <div
                         key={item.label}
-                        className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 dark:border-gray-800 dark:bg-white/[0.02]"
+                        className="min-w-0 rounded-[10px] border border-gray-200 bg-gray-50 px-3.5 py-3 dark:border-gray-800 dark:bg-white/[0.02]"
                       >
-                        <div className="mb-1 flex items-center gap-1.5 text-theme-xs font-medium text-gray-500 dark:text-gray-400">
+                        <div className="mb-1.5 flex items-center gap-1.5 whitespace-nowrap type-caption font-medium text-gray-500 dark:text-gray-400">
                           {item.icon}
                           <span>{item.label}</span>
                         </div>
-                        <div className="text-theme-sm font-semibold text-gray-800 dark:text-white/90">
+                        <div className="break-words type-small font-semibold text-gray-800 dark:text-white/90">
                           {item.value}
                         </div>
                       </div>
@@ -1105,7 +1117,7 @@ export default function SettingsPage() {
                       <span
                         key={`${day.day_of_week}-${index}`}
                         className={cn(
-                          'flex h-9 w-9 items-center justify-center rounded-lg text-theme-xs font-bold',
+                          'flex h-9 w-9 items-center justify-center rounded-[10px] type-caption font-bold',
                           day.is_active
                             ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'
                             : 'bg-gray-100 text-gray-400 dark:bg-white/[0.06] dark:text-gray-500',
@@ -1127,16 +1139,16 @@ export default function SettingsPage() {
                   onAction={() => router.push('/availability')}
                   onRowClick={() => router.push('/availability')}
                 >
-                  <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-10">
+                  <div className="mt-4 grid grid-cols-1 gap-3 2xl:grid-cols-3">
                     {bookingStats.map((item) => (
                       <div
                         key={item.label}
-                        className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 dark:border-gray-800 dark:bg-white/[0.02]"
+                        className="min-w-0 rounded-[10px] border border-gray-200 bg-gray-50 px-3.5 py-3 dark:border-gray-800 dark:bg-white/[0.02]"
                       >
-                        <div className="text-theme-xs font-medium text-gray-500 dark:text-gray-400">
+                        <div className="whitespace-nowrap type-caption font-medium text-gray-500 dark:text-gray-400">
                           {item.label}
                         </div>
-                        <div className="mt-1 text-theme-sm font-semibold text-gray-800 dark:text-white/90">
+                        <div className="mt-1 break-words type-small font-semibold text-gray-800 dark:text-white/90">
                           {item.value}
                         </div>
                       </div>
@@ -1152,7 +1164,7 @@ export default function SettingsPage() {
           )}
 
           {activeSection === 'billing' && (
-            <div className="rounded-2xl border border-gray-200 bg-white p-10 text-center text-sm text-gray-400 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-500">
+            <div className="rounded-2xl border border-gray-200 bg-white p-10 text-center type-small text-gray-400 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-500">
               Coming soon
             </div>
           )}
@@ -1165,16 +1177,16 @@ export default function SettingsPage() {
         onClose={() => setShowBookingModal(false)}
         className="m-4 max-w-[720px]"
       >
-        <div className="custom-scrollbar relative max-h-[85vh] w-full overflow-y-auto rounded-2xl bg-white p-5 dark:bg-gray-900 sm:p-8">
+        <div className="custom-scrollbar relative max-h-[85vh] w-full overflow-y-auto rounded-2xl bg-white p-6 dark:bg-gray-900 sm:p-8">
           <div className="mb-6 flex flex-wrap items-start justify-between gap-4 pr-10">
             <div>
               <Badge color="primary" startIcon={<CalendarDays size={14} />}>
                 Smart Booking
               </Badge>
-              <h3 className="mt-3 text-xl font-bold text-gray-800 dark:text-white/90 sm:text-2xl">
+              <h3 className="mt-3 type-h4 font-bold text-gray-800 dark:text-white/90 sm:type-h3">
                 Appointment booking
               </h3>
-              <p className="mt-2.5 max-w-lg text-sm leading-relaxed text-gray-500 dark:text-gray-400">
+              <p className="mt-2.5 max-w-lg type-small leading-relaxed text-gray-500 dark:text-gray-400">
                 Let customers book appointments directly from Instagram DM
                 and other connected channels. The AI checks your
                 availability, shows open slots, confirms with the customer,
@@ -1191,7 +1203,7 @@ export default function SettingsPage() {
                 }))
               }
               className={cn(
-                'inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-lg px-4 text-sm font-medium shadow-theme-xs transition',
+                'inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-[10px] px-4 type-small font-medium shadow-theme-xs transition',
                 bookingSettings.booking_enabled
                   ? 'bg-brand-500 text-white hover:bg-brand-600'
                   : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700 dark:hover:bg-white/[0.03]',
@@ -1226,14 +1238,14 @@ export default function SettingsPage() {
                 key={item.label}
                 className="flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-white/[0.03]"
               >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400">
                   {item.icon}
                 </div>
                 <div>
-                  <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">
+                  <div className="type-caption font-semibold text-gray-500 dark:text-gray-400">
                     {item.label}
                   </div>
-                  <div className="mt-0.5 text-sm font-bold text-gray-800 dark:text-white/90">
+                  <div className="mt-0.5 type-small font-bold text-gray-800 dark:text-white/90">
                     {item.value}
                   </div>
                 </div>
@@ -1303,7 +1315,7 @@ export default function SettingsPage() {
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-4">
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="type-caption text-gray-500 dark:text-gray-400">
               Booking works only when this toggle is enabled. Customers stay
               inside their original chat.
             </p>
@@ -1332,16 +1344,16 @@ export default function SettingsPage() {
             <Badge color="primary" startIcon={<CalendarDays size={13} />}>
               Availability
             </Badge>
-            <h2 className="mt-3 text-xl font-bold text-gray-800 dark:text-white/90">
+            <h2 className="mt-3 type-h4 font-bold text-gray-800 dark:text-white/90">
               Weekly availability
             </h2>
-            <p className="mt-1.5 text-sm text-gray-500 dark:text-gray-400">
+            <p className="mt-1.5 type-small text-gray-500 dark:text-gray-400">
               Choose active days and working hours for customer
               appointments.
             </p>
           </div>
 
-          <div className="custom-scrollbar flex flex-col gap-3 overflow-y-auto p-5">
+          <div className="custom-scrollbar flex flex-col gap-3 overflow-y-auto p-6">
             {availability.map((item) => (
               <div
                 key={item.day_of_week}
@@ -1354,7 +1366,7 @@ export default function SettingsPage() {
               >
                 <span
                   className={cn(
-                    'text-sm font-bold',
+                    'type-small font-bold',
                     item.is_active
                       ? 'text-gray-800 dark:text-white/90'
                       : 'text-gray-400 dark:text-gray-600',
@@ -1371,7 +1383,7 @@ export default function SettingsPage() {
                     })
                   }
                   className={cn(
-                    'h-[34px] rounded-full text-xs font-bold transition',
+                    'h-[34px] rounded-full type-caption font-bold transition',
                     item.is_active
                       ? 'bg-brand-500 text-white hover:bg-brand-600'
                       : 'bg-gray-100 text-gray-500 dark:bg-white/[0.08] dark:text-gray-400',
@@ -1393,7 +1405,7 @@ export default function SettingsPage() {
                     className={TIME_INPUT_CLASS}
                   />
 
-                  <span className="text-center text-xs font-bold text-gray-300 dark:text-gray-600">
+                  <span className="text-center type-caption font-bold text-gray-300 dark:text-gray-600">
                     to
                   </span>
 

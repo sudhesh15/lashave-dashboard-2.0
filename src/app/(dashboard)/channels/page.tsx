@@ -9,7 +9,6 @@ import WebsiteWidgetModal from '@/components/Websitewidgetmodal ';
 import { getPageItems, TablePagination } from '@/components/ui/table-pagination';
 import { apiFetch } from '@/lib/api';
 import { useTheme } from '@/lib/theme-context';
-import type { ApexOptions } from 'apexcharts';
 import {
   AlertTriangle,
   Check,
@@ -29,11 +28,7 @@ import {
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
-
-const ReactApexChart = dynamic(() => import('react-apexcharts'), {
-  ssr: false,
-});
+import { Suspense, useCallback, useEffect, useState } from 'react';
 
 const ChannelSettingsDrawer = dynamic(
   () =>
@@ -88,7 +83,6 @@ const ALL_PLATFORMS = ['instagram', 'telegram', 'facebook', 'google reviews'];
 const META_PLATFORMS = ['instagram', 'facebook'];
 const TOKEN_LIFETIME_DAYS = 60;
 const WARN_AFTER_DAYS = 50;
-const BRAND = '#465FFF';
 
 const PLATFORM_LABELS: Record<string, string> = {
   instagram: 'Instagram',
@@ -208,18 +202,18 @@ function MetricCard({
           : 'bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400';
 
   return (
-    <Card className='p-5 md:p-6'>
+    <Card className='p-6 md:p-6'>
       <div className='flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-white/90'>
         {icon}
       </div>
       <div className='mt-5 flex items-end justify-between gap-4'>
         <div>
-          <span className='text-sm text-gray-500 dark:text-gray-400'>{label}</span>
+          <span className='type-small text-gray-500 dark:text-gray-400'>{label}</span>
           <h3 className='mt-2 text-title-sm font-bold text-gray-800 dark:text-white/90'>
             {value}
           </h3>
         </div>
-        <span className={`shrink-0 rounded-full px-2.5 py-1 text-theme-xs font-medium ${badge}`}>
+        <span className={`shrink-0 rounded-full px-3 py-1 type-caption font-medium ${badge}`}>
           {sub}
         </span>
       </div>
@@ -230,162 +224,9 @@ function MetricCard({
 function ChartHeader({ title, subtitle }: { title: string; subtitle: string }) {
   return (
     <div className='mb-6'>
-      <h3 className='text-lg font-semibold text-gray-800 dark:text-white/90'>{title}</h3>
-      <p className='mt-1 text-theme-sm text-gray-500 dark:text-gray-400'>{subtitle}</p>
+      <h3 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>{title}</h3>
+      <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>{subtitle}</p>
     </div>
-  );
-}
-
-function StatusChart({
-  activeCount,
-  offlineCount,
-  isDark,
-}: {
-  activeCount: number;
-  offlineCount: number;
-  isDark: boolean;
-}) {
-  const total = activeCount + offlineCount;
-  const options: ApexOptions = {
-    chart: { type: 'donut', fontFamily: 'Outfit, sans-serif' },
-    colors: ['#465FFF', '#C2D6FF'],
-    labels: ['Active', 'Offline'],
-    legend: { show: false },
-    dataLabels: { enabled: false },
-    stroke: { width: 0 },
-    tooltip: { theme: isDark ? 'dark' : 'light' },
-    plotOptions: {
-      pie: {
-        donut: {
-          size: '72%',
-          labels: {
-            show: true,
-            total: {
-              show: true,
-              label: 'Channels',
-              formatter: () => String(total),
-            },
-          },
-        },
-      },
-    },
-  };
-
-  return (
-    <Card className='p-5 sm:p-6'>
-      <ChartHeader title='Channel Health' subtitle='Active and paused channel status' />
-      <ReactApexChart options={options} series={[activeCount, offlineCount]} type='donut' height={230} />
-      <div className='mt-2 space-y-3'>
-        {[
-          ['Active', activeCount, '#465FFF'],
-          ['Offline', offlineCount, '#C2D6FF'],
-        ].map(([label, value, color]) => (
-          <div key={label} className='flex items-center justify-between text-theme-sm'>
-            <span className='flex items-center gap-2 text-gray-700 dark:text-gray-300'>
-              <span className='h-2 w-2 rounded-full' style={{ backgroundColor: String(color) }} />
-              {label}
-            </span>
-            <span className='font-medium text-gray-800 dark:text-white/90'>{value}</span>
-          </div>
-        ))}
-      </div>
-    </Card>
-  );
-}
-const PLATFORM_BRAND_GRADIENTS: Record<string, [string, string]> = {
-  'website': ['#465FFF', '#7592FF'],
-  'instagram': ['#833AB4', '#F77737'],
-  'telegram': ['#2AABEE', '#229ED9'],
-  'facebook': ['#1877F2', '#0C63D4'],
-  'whatsapp': ['#25D366', '#128C7E'],
-  'youtube': ['#FF0000', '#CC0000'],
-  'google reviews': ['#4285F4', '#34A853'],
-  'google': ['#4285F4', '#34A853'],
-};
-
-function PlatformChart({
-  channels,
-  isDark,
-}: {
-  channels: Channel[];
-  isDark: boolean;
-}) {
-  const rows = useMemo(() => {
-    const counts = channels.reduce<Record<string, number>>((acc, channel) => {
-      const key = platformLabel(channel.platform);
-      acc[key] = (acc[key] || 0) + 1;
-      return acc;
-    }, {});
-    return Object.entries(counts);
-  }, [channels]);
-
-const gradients = rows.map(
-  ([label]) => PLATFORM_BRAND_GRADIENTS[label.toLowerCase()] || [BRAND, BRAND],
-);
-const colors = gradients.map(([from]) => from);
-const gradientToColors = gradients.map(([, to]) => to);
-
-const options: ApexOptions = {
-  colors,
-  fill: {
-    type: 'gradient',
-    gradient: {
-      type: 'vertical',
-      shadeIntensity: 0,
-      gradientToColors,
-      inverseColors: false,
-      opacityFrom: 1,
-      opacityTo: 1,
-      stops: [0, 100],
-    },
-  },
-  chart: {
-    fontFamily: 'Outfit, sans-serif',
-    type: 'bar',
-    height: 230,
-    toolbar: { show: false },
-  },
-  plotOptions: {
-    bar: {
-      borderRadius: 5,
-      columnWidth: '42%',
-      borderRadiusApplication: 'end',
-      distributed: true,
-    },
-  },
-  legend: { show: false },
-  dataLabels: { enabled: false },
-  grid: {
-    borderColor: isDark ? '#1D2939' : '#F2F4F7',
-    yaxis: { lines: { show: true } },
-    xaxis: { lines: { show: false } },
-  },
-  xaxis: {
-    categories: rows.map(([label]) => label),
-    axisBorder: { show: false },
-    axisTicks: { show: false },
-    labels: { style: { colors: isDark ? '#98A2B3' : '#667085' }, rotate: 0 },
-  },
-  yaxis: { labels: { style: { colors: isDark ? '#98A2B3' : '#667085' } } },
-  tooltip: { theme: isDark ? 'dark' : 'light' },
-};
-
-  return (
-    <Card className='p-5 sm:p-6'>
-      <ChartHeader title='Platform Coverage' subtitle='Connected accounts by platform' />
-      {rows.length > 0 ? (
-        <ReactApexChart
-          options={options}
-          series={[{ name: 'Channels', data: rows.map(([, count]) => count) }]}
-          type='bar'
-          height={230}
-        />
-      ) : (
-        <div className='flex min-h-56 items-center justify-center rounded-xl border border-dashed border-gray-200 text-sm text-gray-500 dark:border-gray-800 dark:text-gray-400'>
-          No connected channels yet
-        </div>
-      )}
-    </Card>
   );
 }
 
@@ -408,12 +249,12 @@ function ConnectModal({
 }) {
   const isTelegram = platform === 'telegram';
   return (
-    <div className='fixed inset-0 z-[400] grid place-items-center bg-gray-900/50 p-5 backdrop-blur-sm'>
+    <div className='fixed inset-0 z-[400] grid place-items-center bg-gray-900/50 p-6 backdrop-blur-sm'>
       <Card className='w-full max-w-lg p-6 shadow-theme-xl'>
-        <h2 className='text-lg font-semibold text-gray-800 dark:text-white/90'>
+        <h2 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
           Connect {platformLabel(platform)}
         </h2>
-        <p className='mt-2 text-theme-sm text-gray-500 dark:text-gray-400'>
+        <p className='mt-2 type-small text-gray-500 dark:text-gray-400'>
           Authorize this channel so Lashvae can manage customer messages from the dashboard.
         </p>
         {isTelegram && (
@@ -421,11 +262,11 @@ function ConnectModal({
             value={token}
             onChange={(event) => setToken(event.target.value)}
             placeholder='Telegram bot token'
-            className='mt-5 h-11 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-700 outline-none focus:border-brand-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300'
+            className='mt-5 h-10 w-full rounded-[10px] border border-gray-200 bg-white px-3 type-small text-gray-700 outline-none focus:border-brand-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300'
           />
         )}
         {error && (
-          <p className='mt-4 rounded-lg border border-error-200 bg-error-50 px-3 py-2 text-theme-sm text-error-700 dark:border-error-500/20 dark:bg-error-500/10 dark:text-error-500'>
+          <p className='mt-4 rounded-[10px] border border-error-200 bg-error-50 px-3 py-2 type-small text-error-700 dark:border-error-500/20 dark:bg-error-500/10 dark:text-error-500'>
             {error}
           </p>
         )}
@@ -434,7 +275,7 @@ function ConnectModal({
             type='button'
             onClick={onCancel}
             disabled={connecting}
-            className='h-10 rounded-lg border border-gray-200 bg-white px-4 text-theme-sm font-medium text-gray-700 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300'
+            className='h-10 rounded-[10px] border border-gray-200 bg-white px-4 type-small font-medium text-gray-700 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300'
           >
             Cancel
           </button>
@@ -442,7 +283,7 @@ function ConnectModal({
             type='button'
             onClick={onConfirm}
             disabled={connecting || (isTelegram && !token.trim())}
-            className='inline-flex h-10 items-center gap-2 rounded-lg bg-brand-500 px-4 text-theme-sm font-medium text-white disabled:opacity-60'
+            className='inline-flex h-10 items-center gap-2 rounded-[10px] bg-brand-500 px-4 type-small font-medium text-white disabled:opacity-60'
           >
             {connecting && <Loader2 className='h-4 w-4 animate-spin' />}
             Connect
@@ -469,7 +310,7 @@ function ConfirmModal({
   onConfirm: () => void;
 }) {
   return (
-    <div className='fixed inset-0 z-[400] grid place-items-center bg-gray-900/50 p-5 backdrop-blur-sm'>
+    <div className='fixed inset-0 z-[400] grid place-items-center bg-gray-900/50 p-6 backdrop-blur-sm'>
       <Card className='w-full max-w-md p-6 shadow-theme-xl'>
         <div
           className={`mb-4 flex h-12 w-12 items-center justify-center rounded-xl ${
@@ -480,20 +321,20 @@ function ConfirmModal({
         >
           <AlertTriangle className='h-5 w-5' />
         </div>
-        <h2 className='text-lg font-semibold text-gray-800 dark:text-white/90'>{title}</h2>
-        <p className='mt-2 text-theme-sm text-gray-500 dark:text-gray-400'>{description}</p>
+        <h2 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>{title}</h2>
+        <p className='mt-2 type-small text-gray-500 dark:text-gray-400'>{description}</p>
         <div className='mt-6 flex justify-end gap-3'>
           <button
             type='button'
             onClick={onCancel}
-            className='h-10 rounded-lg border border-gray-200 bg-white px-4 text-theme-sm font-medium text-gray-700 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300'
+            className='h-10 rounded-[10px] border border-gray-200 bg-white px-4 type-small font-medium text-gray-700 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300'
           >
             Cancel
           </button>
           <button
             type='button'
             onClick={onConfirm}
-            className={`h-10 rounded-lg px-4 text-theme-sm font-medium text-white ${
+            className={`h-10 rounded-[10px] px-4 type-small font-medium text-white ${
               tone === 'error' ? 'bg-error-500' : 'bg-warning-500'
             }`}
           >
@@ -637,8 +478,6 @@ function ChannelsInner() {
     return () => window.clearTimeout(timer);
   }, [channels, pendingLocationChannelId]);
 
-  const active = channels.filter((channel) => channel.is_active);
-  const offline = channels.filter((channel) => !channel.is_active);
   const pagedChannels = getPageItems(channels, channelsPage);
   const websiteChannel = channels.find((channel) => channel.platform?.toLowerCase?.().trim() === 'website');
   const websiteIsConnected = Boolean(websiteChannel);
@@ -917,13 +756,13 @@ function ChannelsInner() {
       <div className='mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 lg:px-8'>
         <div className='mb-6 flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between'>
           <div>
-            <p className='text-theme-sm font-medium text-brand-500 dark:text-brand-400'>
+            <p className='type-small font-medium text-brand-500 dark:text-brand-400'>
               Channels
             </p>
             <h1 className='mt-1 text-title-sm font-bold text-gray-800 dark:text-white/90'>
               Channel management
             </h1>
-            <p className='mt-2 max-w-2xl text-theme-sm text-gray-500 dark:text-gray-400'>
+            <p className='mt-2 max-w-2xl type-small text-gray-500 dark:text-gray-400'>
               Connect, monitor, pause, and configure customer communication
               channels.
             </p>
@@ -931,7 +770,7 @@ function ChannelsInner() {
           <button
             type='button'
             onClick={() => void load()}
-            className='inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 text-theme-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/[0.05]'
+            className='inline-flex h-10 items-center justify-center gap-2 rounded-[10px] border border-gray-200 bg-white px-4 type-small font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/[0.05]'
           >
             <RefreshCw className='h-4 w-4' />
             Refresh
@@ -939,7 +778,7 @@ function ChannelsInner() {
         </div>
 
         {success && (
-          <div className='mb-6 flex items-center gap-3 rounded-xl border border-success-200 bg-success-50 px-4 py-3 text-theme-sm font-medium text-success-700 dark:border-success-500/20 dark:bg-success-500/10 dark:text-success-500'>
+          <div className='mb-6 flex items-center gap-3 rounded-xl border border-success-200 bg-success-50 px-4 py-3 type-small font-medium text-success-700 dark:border-success-500/20 dark:bg-success-500/10 dark:text-success-500'>
             <Check className='h-4 w-4' />
             <span className='flex-1'>{success}</span>
             <button type='button' onClick={() => setSuccess('')}>
@@ -949,7 +788,7 @@ function ChannelsInner() {
         )}
 
         {err && (
-          <div className='mb-6 flex items-start gap-3 rounded-xl border border-error-200 bg-error-50 px-4 py-3 text-theme-sm font-medium text-error-700 dark:border-error-500/20 dark:bg-error-500/10 dark:text-error-500'>
+          <div className='mb-6 flex items-start gap-3 rounded-xl border border-error-200 bg-error-50 px-4 py-3 type-small font-medium text-error-700 dark:border-error-500/20 dark:bg-error-500/10 dark:text-error-500'>
             <AlertTriangle className='mt-0.5 h-4 w-4 shrink-0' />
             <span className='flex-1'>{err}</span>
             <button type='button' onClick={() => setErr('')}>
@@ -958,41 +797,28 @@ function ChannelsInner() {
           </div>
         )}
 
-        <div className='mt-6 grid grid-cols-1 gap-6 xl:grid-cols-12'>
-          <div className='xl:col-span-5'>
-            <StatusChart
-              activeCount={active.length}
-              offlineCount={offline.length}
-              isDark={isDark}
-            />
-          </div>
-          <div className='xl:col-span-7'>
-            <PlatformChart channels={channels} isDark={isDark} />
-          </div>
-        </div>
-
         <Card className='mt-6 overflow-hidden'>
           <div className='flex flex-col gap-2 border-b border-gray-100 px-5 py-5 dark:border-white/[0.05] sm:flex-row sm:items-center sm:justify-between sm:px-6'>
             <div>
-              <h3 className='text-base font-semibold text-gray-800 dark:text-white/90'>
+              <h3 className='type-body font-semibold text-gray-800 dark:text-white/90'>
                 Connected Channels
               </h3>
-              <p className='mt-1 text-theme-sm text-gray-500 dark:text-gray-400'>
+              <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>
                 Manage account status, verification, settings, and disconnect
                 actions.
               </p>
             </div>
-            <div className='text-theme-sm font-medium text-gray-500 dark:text-gray-400'>
+            <div className='type-small font-medium text-gray-500 dark:text-gray-400'>
               {channels.length} channels
             </div>
           </div>
 
           <div className='min-w-0 px-5 py-5 sm:px-6'>
             <div className='flex flex-col gap-4 rounded-t-xl border border-b-0 border-gray-200 bg-white px-5 py-4 dark:border-white/[0.05] dark:bg-white/[0.01] lg:flex-row lg:items-center lg:justify-between'>
-              <h4 className='text-lg font-semibold text-gray-800 dark:text-white/90'>
+              <h4 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
                 Connected channels
               </h4>
-              <p className='text-theme-sm text-gray-500 dark:text-gray-400'>
+              <p className='type-small text-gray-500 dark:text-gray-400'>
                 Verify, pause, configure, or update Google review locations.
               </p>
             </div>
@@ -1020,7 +846,7 @@ function ChannelsInner() {
                       ].map((header) => (
                         <th
                           key={header}
-                          className='px-5 py-3 text-left text-base font-medium text-gray-500 dark:text-gray-400'
+                          className='px-5 py-3 text-left type-body font-medium text-gray-500 dark:text-gray-400'
                         >
                           {header}
                         </th>
@@ -1032,7 +858,7 @@ function ChannelsInner() {
                       <tr>
                         <td
                           colSpan={6}
-                          className='px-5 py-14 text-center text-theme-sm text-gray-500 dark:text-gray-400'
+                          className='px-5 py-14 text-center type-small text-gray-500 dark:text-gray-400'
                         >
                           Loading channels
                         </td>
@@ -1041,7 +867,7 @@ function ChannelsInner() {
                       <tr>
                         <td
                           colSpan={6}
-                          className='px-5 py-14 text-center text-theme-sm text-gray-500 dark:text-gray-400'
+                          className='px-5 py-14 text-center type-small text-gray-500 dark:text-gray-400'
                         >
                           No channels connected yet
                         </td>
@@ -1070,22 +896,22 @@ function ChannelsInner() {
                                   />
                                 </div>
                                 <div className='min-w-0'>
-                                  <p className='truncate text-theme-sm font-medium text-gray-800 dark:text-white/90'>
+                                  <p className='truncate type-small font-medium text-gray-800 dark:text-white/90'>
                                     {channelName(channel)}
                                   </p>
-                                  <p className='mt-1 truncate text-theme-xs text-gray-500 dark:text-gray-400'>
+                                  <p className='mt-1 truncate type-caption text-gray-500 dark:text-gray-400'>
                                     {channel.location_name ||
                                       channel.platform_account_id}
                                   </p>
                                 </div>
                               </div>
                             </td>
-                            <td className='px-6 py-3 text-theme-sm text-gray-500 dark:text-gray-400'>
+                            <td className='px-6 py-3 type-small text-gray-500 dark:text-gray-400'>
                               {platformLabel(channel.platform)}
                             </td>
                             <td className='px-6 py-3'>
                               <span
-                                className={`inline-flex rounded-full px-2.5 py-1 text-theme-xs font-medium ${
+                                className={`inline-flex rounded-full px-3 py-1 type-caption font-medium ${
                                   channel.is_active
                                     ? 'bg-success-50 text-success-600 dark:bg-success-500/15 dark:text-success-500'
                                     : 'bg-warning-50 text-warning-600 dark:bg-warning-500/15 dark:text-orange-400'
@@ -1096,7 +922,7 @@ function ChannelsInner() {
                             </td>
                             <td className='px-6 py-3'>
                               <span
-                                className={`inline-flex rounded-full px-2.5 py-1 text-theme-xs font-medium ${
+                                className={`inline-flex rounded-full px-3 py-1 type-caption font-medium ${
                                   token?.status === 'expired'
                                     ? 'bg-error-50 text-error-600 dark:bg-error-500/15 dark:text-error-500'
                                     : token?.status === 'expiring'
@@ -1111,7 +937,7 @@ function ChannelsInner() {
                                   : 'Not applicable'}
                               </span>
                             </td>
-                            <td className='px-6 py-3 text-theme-sm text-gray-500 dark:text-gray-400'>
+                            <td className='px-6 py-3 type-small text-gray-500 dark:text-gray-400'>
                               {formatDate(
                                 channel.updated_at || channel.created_at,
                               )}
@@ -1140,7 +966,7 @@ function ChannelsInner() {
                                       },
                                     );
                                   }}
-                                  className='inline-flex h-8 items-center gap-2 whitespace-nowrap rounded-lg bg-brand-500 px-3 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-brand-600'
+                                  className='inline-flex h-8 items-center gap-2 whitespace-nowrap rounded-[10px] bg-brand-500 px-3 type-small font-medium text-white shadow-theme-xs hover:bg-brand-600'
                                 >
                                   Verify
                                 </button>
@@ -1151,7 +977,7 @@ function ChannelsInner() {
                                       ? setPauseTarget(channel)
                                       : void handleToggle(channel.id, true)
                                   }
-                                  className='inline-flex h-8 items-center gap-2 whitespace-nowrap rounded-lg border border-gray-200 bg-white px-3 text-theme-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-white/[0.03]'
+                                  className='inline-flex h-8 items-center gap-2 whitespace-nowrap rounded-[10px] border border-gray-200 bg-white px-3 type-small font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-white/[0.03]'
                                 >
                                   {channel.is_active ? (
                                     <PauseCircle className='h-4 w-4' />
@@ -1164,7 +990,7 @@ function ChannelsInner() {
                                   <button
                                     type='button'
                                     onClick={() => setLocationTarget(channel)}
-                                    className='inline-flex h-8 items-center gap-2 whitespace-nowrap rounded-lg bg-brand-500 px-3 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-brand-600'
+                                    className='inline-flex h-8 items-center gap-2 whitespace-nowrap rounded-[10px] bg-brand-500 px-3 type-small font-medium text-white shadow-theme-xs hover:bg-brand-600'
                                   >
                                     Location
                                   </button>
@@ -1175,7 +1001,7 @@ function ChannelsInner() {
                                     onClick={() =>
                                       router.push('/customize-chat')
                                     }
-                                    className='inline-flex h-8 items-center gap-2 whitespace-nowrap rounded-lg bg-brand-500 px-3 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-brand-600'
+                                    className='inline-flex h-8 items-center gap-2 whitespace-nowrap rounded-[10px] bg-brand-500 px-3 type-small font-medium text-white shadow-theme-xs hover:bg-brand-600'
                                   >
                                     Manage
                                   </button>
@@ -1190,7 +1016,7 @@ function ChannelsInner() {
                                           : channel.id,
                                       )
                                     }
-                                    className='flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03]'
+                                    className='flex h-8 w-8 items-center justify-center rounded-[10px] border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03]'
                                   >
                                     <MoreVertical className='h-4 w-4' />
                                   </button>
@@ -1202,7 +1028,7 @@ function ChannelsInner() {
                                           setSettingsTarget(channel);
                                           setOpenMenuId(null);
                                         }}
-                                        className='flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-theme-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5'
+                                        className='flex w-full items-center gap-2 rounded-[10px] px-3 py-2 text-left type-small text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5'
                                       >
                                         <Settings className='h-4 w-4' />
                                         Settings
@@ -1213,7 +1039,7 @@ function ChannelsInner() {
                                           setDisconnectTarget(channel);
                                           setOpenMenuId(null);
                                         }}
-                                        className='flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-theme-sm text-error-600 hover:bg-error-50 dark:text-error-500 dark:hover:bg-error-500/10'
+                                        className='flex w-full items-center gap-2 rounded-[10px] px-3 py-2 text-left type-small text-error-600 hover:bg-error-50 dark:text-error-500 dark:hover:bg-error-500/10'
                                       >
                                         <Trash2 className='h-4 w-4' />
                                         Disconnect
@@ -1239,7 +1065,7 @@ function ChannelsInner() {
           </div>
         </Card>
         {(available.length > 0 || !websiteIsConnected) && (
-          <Card className='mt-6 p-5 sm:p-6'>
+          <Card className='mt-6 p-6 sm:p-6'>
             <ChartHeader
               title='Add Channel'
               subtitle='Connect another source using the approved channel setup flow'
@@ -1249,15 +1075,15 @@ function ChannelsInner() {
                 <button
                   type='button'
                   onClick={() => void openWebsiteModal()}
-                  className='rounded-xl border border-gray-200 p-5 text-left transition hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/[0.03]'
+                  className='rounded-xl border border-gray-200 p-6 text-left transition hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/[0.03]'
                 >
-                  <div className='mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'>
+                  <div className='mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'>
                     <Globe2 className='h-5 w-5' />
                   </div>
-                  <h4 className='text-theme-sm font-semibold text-gray-800 dark:text-white/90'>
+                  <h4 className='type-small font-semibold text-gray-800 dark:text-white/90'>
                     Website Chatbot
                   </h4>
-                  <p className='mt-1 text-theme-sm text-gray-500 dark:text-gray-400'>
+                  <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>
                     Add AI chat to your website using one script tag.
                   </p>
                 </button>
@@ -1274,9 +1100,9 @@ function ChannelsInner() {
                     key={platform}
                     type='button'
                     onClick={() => openConnect(platform)}
-                    className='rounded-xl border border-gray-200 p-5 text-left transition hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/[0.03]'
+                    className='rounded-xl border border-gray-200 p-6 text-left transition hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/[0.03]'
                   >
-                    <div className='mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-gray-100 p-2 dark:bg-gray-800'>
+                    <div className='mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 p-2 dark:bg-gray-800'>
                       {logo ? (
                         <Image
                           src={logo}
@@ -1290,11 +1116,11 @@ function ChannelsInner() {
                       )}
                     </div>
 
-                    <h4 className='text-theme-sm font-semibold text-gray-800 dark:text-white/90'>
+                    <h4 className='type-small font-semibold text-gray-800 dark:text-white/90'>
                       {platformLabel(platform)}
                     </h4>
 
-                    <p className='mt-1 text-theme-sm text-gray-500 dark:text-gray-400'>
+                    <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>
                       Connect and manage this channel from Lashvae.
                     </p>
                   </button>

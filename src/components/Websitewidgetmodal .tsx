@@ -101,7 +101,7 @@ export default function WebsiteWidgetModal({
           }}
         >
           <div>
-            <h2 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: textPrimary }}>
+            <h2 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: textPrimary }}>
               Connect your website
             </h2>
             <p style={{ margin: '6px 0 0', fontSize: 13, color: textSecondary }}>
@@ -190,7 +190,7 @@ function NotConnectedState({
           marginBottom: 20,
         }}
       >
-        <div style={{ fontSize: 15, fontWeight: 800, color: isDark ? '#F8FAFC' : '#0F172A', marginBottom: 6 }}>
+        <div style={{ fontSize: 15, fontWeight: 600, color: isDark ? '#F8FAFC' : '#0F172A', marginBottom: 6 }}>
           Website chatbot is not connected yet
         </div>
         <div style={{ fontSize: 13, lineHeight: 1.6, color: isDark ? 'rgba(226,232,240,0.6)' : '#64748B' }}>
@@ -206,7 +206,7 @@ function NotConnectedState({
           width: '100%', height: 46, borderRadius: 14, border: 'none',
           cursor: saving ? 'not-allowed' : 'pointer',
           background: 'linear-gradient(135deg,#38BDF8,#6366F1)',
-          color: '#fff', fontWeight: 900, fontSize: 14,
+          color: '#fff', fontWeight: 700, fontSize: 14,
           opacity: saving ? 0.65 : 1,
         }}
       >
@@ -270,7 +270,7 @@ function ConnectedState({
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <span style={{ fontSize: 18 }}>✅</span>
           <div>
-            <div style={{ fontSize: 14, fontWeight: 800, color: textPrimary }}>
+            <div style={{ fontSize: 14, fontWeight: 600, color: textPrimary }}>
               Website chatbot is enabled
             </div>
             <div style={{ fontSize: 12, color: textSecondary, marginTop: 2 }}>
@@ -283,7 +283,7 @@ function ConnectedState({
             padding: '6px 10px', borderRadius: 999,
             color: '#34D399', background: 'rgba(16,185,129,0.12)',
             border: '1px solid rgba(16,185,129,0.24)',
-            fontSize: 11, fontWeight: 900, flex: '0 0 auto',
+            fontSize: 11, fontWeight: 700, flex: '0 0 auto',
           }}
         >
           LIVE
@@ -316,7 +316,7 @@ function ConnectedState({
                 color: active
                   ? (isDark ? '#E0E7FF' : '#4338CA')
                   : (isDark ? 'rgba(226,232,240,0.55)' : '#64748B'),
-                cursor: 'pointer', fontWeight: 800, fontSize: 13,
+                cursor: 'pointer', fontWeight: 600, fontSize: 13,
               }}
             >
               {tab === 'embed' ? 'Embed Script' : 'Quick Testing'}
@@ -343,7 +343,7 @@ function ConnectedState({
           <div style={{ marginBottom: 16 }}>
             <div
               style={{
-                fontSize: 11, fontWeight: 800, letterSpacing: '.1em',
+                fontSize: 11, fontWeight: 600, letterSpacing: '.1em',
                 textTransform: 'uppercase', color: textMuted, marginBottom: 10,
               }}
             >
@@ -370,7 +370,7 @@ function ConnectedState({
                       color: active
                         ? (isDark ? '#C4B5FD' : '#4F46E5')
                         : (isDark ? 'rgba(226,232,240,0.6)' : '#64748B'),
-                      cursor: 'pointer', fontWeight: 800, fontSize: 13,
+                      cursor: 'pointer', fontWeight: 600, fontSize: 13,
                       transition: 'all .15s ease',
                     }}
                   >
@@ -448,7 +448,7 @@ function ConnectedState({
             width: '100%', height: 44, borderRadius: 14, border: 'none',
             cursor: 'pointer',
             background: 'linear-gradient(135deg,#6366F1,#8B5CF6)',
-            color: '#fff', fontWeight: 900, fontSize: 13,
+            color: '#fff', fontWeight: 700, fontSize: 13,
             marginBottom: 10,
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
             boxShadow: '0 8px 24px rgba(99,102,241,.28)',
@@ -465,7 +465,7 @@ function ConnectedState({
             style={{
               height: 44, borderRadius: 14, border: 'none', cursor: 'pointer',
               background: 'linear-gradient(135deg,#F97316,#EC4899)',
-              color: '#fff', fontWeight: 900, fontSize: 13,
+              color: '#fff', fontWeight: 700, fontSize: 13,
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
             }}
           >
@@ -480,7 +480,7 @@ function ConnectedState({
               border: '1px solid rgba(239,68,68,0.28)',
               cursor: saving ? 'not-allowed' : 'pointer',
               background: 'rgba(239,68,68,0.08)',
-              color: '#F87171', fontWeight: 900, fontSize: 13,
+              color: '#F87171', fontWeight: 700, fontSize: 13,
               opacity: saving ? 0.65 : 1,
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
             }}
@@ -499,7 +499,7 @@ function ConnectedState({
               border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(15,23,42,0.10)',
               background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(15,23,42,0.03)',
               color: isDark ? '#CBD5E1' : '#475569',
-              cursor: 'pointer', fontWeight: 800, fontSize: 13,
+              cursor: 'pointer', fontWeight: 600, fontSize: 13,
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
             }}
           >
@@ -513,7 +513,7 @@ function ConnectedState({
               border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(15,23,42,0.10)',
               background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(15,23,42,0.03)',
               color: isDark ? '#CBD5E1' : '#475569',
-              cursor: 'pointer', fontWeight: 800, fontSize: 13,
+              cursor: 'pointer', fontWeight: 600, fontSize: 13,
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
             }}
           >
@@ -576,7 +576,7 @@ function QuickTestingPanel({
         >
           <div>
             <div style={{
-              fontSize: 11, fontWeight: 900, letterSpacing: '.12em',
+              fontSize: 11, fontWeight: 700, letterSpacing: '.12em',
               textTransform: 'uppercase',
               color: isDark ? '#94A3B8' : '#64748B',
             }}>
@@ -660,7 +660,7 @@ function WebsiteBuilderGuide({
       {/* ── Platform Picker ── */}
       <div style={{ marginBottom: 16 }}>
         <div style={{
-          fontSize: 11, fontWeight: 800, letterSpacing: '.1em',
+          fontSize: 11, fontWeight: 600, letterSpacing: '.1em',
           textTransform: 'uppercase', color: textMuted, marginBottom: 10,
         }}>
           Choose your platform
@@ -684,7 +684,7 @@ function WebsiteBuilderGuide({
                   color: active
                     ? (isDark ? '#C4B5FD' : '#4F46E5')
                     : (isDark ? 'rgba(226,232,240,0.6)' : '#64748B'),
-                  cursor: 'pointer', fontWeight: 800, fontSize: 12,
+                  cursor: 'pointer', fontWeight: 600, fontSize: 12,
                   display: 'flex', alignItems: 'center', gap: 6,
                   transition: 'all .15s ease',
                 }}
@@ -707,7 +707,7 @@ function WebsiteBuilderGuide({
         <div style={{ padding: 16 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 14 }}>
             <div style={{
-              fontSize: 14, fontWeight: 800, color: textPrimary,
+              fontSize: 14, fontWeight: 600, color: textPrimary,
               textTransform: 'uppercase', letterSpacing: '.06em',
             }}>
               {instructions.title}
@@ -734,7 +734,7 @@ function WebsiteBuilderGuide({
                     flex: '0 0 auto', width: 22, height: 22, borderRadius: 7,
                     background: isDark ? 'rgba(99,102,241,0.15)' : 'rgba(99,102,241,0.08)',
                     color: isDark ? '#A5B4FC' : '#6366F1',
-                    fontSize: 11, fontWeight: 900,
+                    fontSize: 11, fontWeight: 700,
                     display: 'grid', placeItems: 'center',
                   }}>
                     {i + 1}
@@ -806,7 +806,7 @@ function CustomCodeGuide({
       {/* ── Framework Tabs ── */}
       <div style={{ marginBottom: 16 }}>
         <div style={{
-          fontSize: 11, fontWeight: 800, letterSpacing: '.1em',
+          fontSize: 11, fontWeight: 600, letterSpacing: '.1em',
           textTransform: 'uppercase', color: textMuted, marginBottom: 10,
         }}>
           Install on
@@ -830,7 +830,7 @@ function CustomCodeGuide({
                   color: active
                     ? (isDark ? '#C4B5FD' : '#4F46E5')
                     : (isDark ? 'rgba(226,232,240,0.6)' : '#64748B'),
-                  cursor: 'pointer', fontWeight: 800, fontSize: 12,
+                  cursor: 'pointer', fontWeight: 600, fontSize: 12,
                   transition: 'all .15s ease',
                 }}
               >
@@ -852,7 +852,7 @@ function CustomCodeGuide({
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 6 }}>
             <div>
               <div style={{
-                fontSize: 14, fontWeight: 800, color: textPrimary,
+                fontSize: 14, fontWeight: 600, color: textPrimary,
                 textTransform: 'uppercase', letterSpacing: '.06em',
               }}>
                 {snippet.title}
@@ -948,7 +948,7 @@ Let me know once it's live. Thanks!`;
             📨
           </span>
           <div>
-            <div style={{ fontSize: 15, fontWeight: 800, color: textPrimary }}>
+            <div style={{ fontSize: 15, fontWeight: 600, color: textPrimary }}>
               Send this to your developer
             </div>
             <div style={{ fontSize: 12, color: textSecondary, marginTop: 2 }}>
@@ -982,7 +982,7 @@ Let me know once it's live. Thanks!`;
             border: '1px solid rgba(99,102,241,0.35)',
             background: 'rgba(99,102,241,0.12)',
             color: isDark ? '#C4B5FD' : '#4F46E5',
-            cursor: 'pointer', fontWeight: 900, fontSize: 13,
+            cursor: 'pointer', fontWeight: 700, fontSize: 13,
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
           }}
         >
@@ -1150,7 +1150,7 @@ function CopyButton({
         border: '1px solid rgba(99,102,241,0.32)',
         background: 'rgba(99,102,241,0.12)',
         color: isDark ? '#C4B5FD' : '#4F46E5',
-        cursor: 'pointer', fontSize: 12, fontWeight: 800,
+        cursor: 'pointer', fontSize: 12, fontWeight: 600,
         flex: '0 0 auto',
       }}
     >
@@ -1209,7 +1209,7 @@ function DisconnectConfirmModal({
         </div>
 
         <div style={{
-          fontSize: 19, fontWeight: 950, color: isDark ? '#F8FAFC' : '#111827',
+          fontSize: 19, fontWeight: 700, color: isDark ? '#F8FAFC' : '#111827',
           marginBottom: 8, letterSpacing: '-0.02em',
         }}>
           Disconnect website chatbot?
@@ -1234,7 +1234,7 @@ function DisconnectConfirmModal({
               background: isDark ? 'rgba(255,255,255,0.05)' : '#FFFFFF',
               color: isDark ? '#CBD5E1' : '#334155',
               cursor: saving ? 'not-allowed' : 'pointer',
-              fontWeight: 850, fontSize: 13, opacity: saving ? 0.65 : 1,
+              fontWeight: 600, fontSize: 13, opacity: saving ? 0.65 : 1,
             }}
           >
             Cancel
@@ -1249,7 +1249,7 @@ function DisconnectConfirmModal({
               background: saving ? 'rgba(239,68,68,0.45)' : 'linear-gradient(135deg,#EF4444,#DC2626)',
               color: '#FFFFFF',
               cursor: saving ? 'not-allowed' : 'pointer',
-              fontWeight: 950, fontSize: 13,
+              fontWeight: 700, fontSize: 13,
               boxShadow: '0 12px 28px rgba(239,68,68,0.28)',
               opacity: saving ? 0.72 : 1,
             }}

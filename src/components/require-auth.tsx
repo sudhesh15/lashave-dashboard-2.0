@@ -11,7 +11,7 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
     if (!loading && !token) router.replace("/login");
   }, [loading, token, router]);
 
-  if (loading) return <div className="p-6 text-sm text-muted-foreground">Loading…</div>;
-  if (!token) return <div className="p-6 text-sm text-muted-foreground">Redirecting…</div>;
+  if (loading) return <div className="p-6 type-small text-muted-foreground">Loading…</div>;
+  if (!token) return <div className="p-6 type-small text-muted-foreground">Redirecting…</div>;
   return <>{children}</>;
 }

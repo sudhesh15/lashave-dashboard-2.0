@@ -31,7 +31,7 @@ export function SettingsActionRow({
     <div
       onClick={onRowClick}
       className={cn(
-        "grid grid-cols-1 items-start gap-4 rounded-xl border border-gray-200 bg-white p-5 transition hover:bg-gray-50/50 dark:border-gray-800 dark:bg-white/[0.03] dark:hover:bg-white/[0.04] sm:grid-cols-[52px_1fr_auto] sm:gap-5 sm:p-6",
+        "grid grid-cols-1 items-start gap-4 rounded-xl border border-gray-200 bg-white p-6 transition hover:bg-gray-50/50 dark:border-gray-800 dark:bg-white/[0.03] dark:hover:bg-white/[0.04] sm:grid-cols-[52px_1fr_auto] sm:gap-5 sm:p-6",
         onRowClick && "cursor-pointer"
       )}
     >
@@ -45,10 +45,10 @@ export function SettingsActionRow({
       </div>
 
       <div className="min-w-0">
-        <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
+        <h3 className="type-card-title font-semibold text-gray-800 dark:text-white/90">
           {title}
         </h3>
-        <p className="mt-1.5 text-theme-sm leading-6 text-gray-500 dark:text-gray-400">
+        <p className="mt-1.5 type-small leading-6 text-gray-500 dark:text-gray-400">
           {description}
         </p>
         {children}
@@ -62,7 +62,7 @@ export function SettingsActionRow({
             onAction();
           }}
           className={cn(
-            "inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg px-5 text-theme-sm font-medium shadow-theme-xs transition sm:w-auto",
+            "inline-flex h-10 w-full items-center justify-center gap-2 rounded-[10px] px-5 type-small font-medium shadow-theme-xs transition sm:w-auto",
             actionLabel === "Configure" || actionLabel === "View Bookings"
               ? "bg-brand-500 text-white hover:bg-brand-600"
               : actionColorClass,

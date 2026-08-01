@@ -99,7 +99,7 @@ export function AvatarText({ name, className = "" }: AvatarTextProps) {
         className
       )}
     >
-      <span className="text-sm font-medium">{initials}</span>
+      <span className="type-small font-medium">{initials}</span>
     </div>
   );
 }

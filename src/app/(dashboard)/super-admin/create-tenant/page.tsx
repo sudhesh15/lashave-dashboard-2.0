@@ -23,11 +23,11 @@ function Field({
 }) {
   return (
     <div>
-      <label className="mb-1.5 block text-theme-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+      <label className="mb-1.5 block type-caption font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
         {label}
       </label>
       {children}
-      {hint && <p className="mt-1 text-theme-xs text-gray-400 dark:text-gray-500">{hint}</p>}
+      {hint && <p className="mt-1 type-caption text-gray-400 dark:text-gray-500">{hint}</p>}
     </div>
   );
 }
@@ -97,7 +97,7 @@ function CreateTenantForm() {
           Super Admin
         </Badge>
         <h1 className="text-title-sm font-bold text-gray-900 dark:text-white/90">Create Tenant</h1>
-        <p className="mt-1 text-theme-sm text-gray-500 dark:text-gray-400">
+        <p className="mt-1 type-small text-gray-500 dark:text-gray-400">
           Provision a new tenant with an admin account
         </p>
       </div>
@@ -105,7 +105,7 @@ function CreateTenantForm() {
       <form onSubmit={submit} className="space-y-5">
         <Card>
           <CardContent className="space-y-4 pt-0">
-            <p className="text-theme-xs font-semibold uppercase tracking-wide text-gray-400">Identity</p>
+            <p className="type-caption font-semibold uppercase tracking-wide text-gray-400">Identity</p>
             <Field label="Tenant ID" hint="Lowercase, underscores only — cannot be changed later">
               <Input
                 placeholder="acme_corp"
@@ -127,7 +127,7 @@ function CreateTenantForm() {
 
         <Card>
           <CardContent className="space-y-4 pt-0">
-            <p className="text-theme-xs font-semibold uppercase tracking-wide text-gray-400">Admin Account</p>
+            <p className="type-caption font-semibold uppercase tracking-wide text-gray-400">Admin Account</p>
             <Field label="Admin Email">
               <Input
                 type="email"
@@ -151,7 +151,7 @@ function CreateTenantForm() {
 
         <Card>
           <CardContent className="space-y-4 pt-0">
-            <p className="text-theme-xs font-semibold uppercase tracking-wide text-gray-400">
+            <p className="type-caption font-semibold uppercase tracking-wide text-gray-400">
               Bot Config <span className="normal-case text-gray-300">(optional)</span>
             </p>
             <Field label="System Prompt">

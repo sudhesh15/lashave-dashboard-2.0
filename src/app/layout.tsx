@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Outfit } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth";
 import { ThemeProvider } from "@/lib/theme-context";
@@ -7,7 +7,11 @@ import { SidebarProvider } from "@/lib/sidebar-context";
 import { Suspense } from 'react';
 
 
-const outfit = Outfit({ subsets: ["latin"] });
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Lashvae Dashboard",
@@ -58,7 +62,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     `
   }} />
 </head>
-      <body className={outfit.className}>
+      <body className={inter.className}>
         <AuthProvider>
           <ThemeProvider>
             <SidebarProvider>

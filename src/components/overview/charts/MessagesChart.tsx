@@ -86,7 +86,7 @@ export function MessagesChart({
 
   return (
     <div
-      className='rounded-2xl p-5 relative overflow-hidden transition-all duration-300'
+      className='rounded-2xl p-6 relative overflow-hidden transition-all duration-300'
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
       style={{
@@ -157,7 +157,7 @@ export function MessagesChart({
           <p
             className='msg-total'
             style={{
-              fontWeight: 900,
+              fontWeight: 700,
               color: t.text,
               letterSpacing: '-1.5px',
               lineHeight: 1,

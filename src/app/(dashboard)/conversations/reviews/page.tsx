@@ -245,16 +245,16 @@ function MetricCard({
           : 'bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400';
 
   return (
-    <Card className='p-5 md:p-6'>
+    <Card className='p-6 md:p-6'>
       <span
-        className={`inline-flex rounded-full px-2.5 py-1 text-theme-xs font-medium ${toneClass}`}
+        className={`inline-flex rounded-full px-3 py-1 type-caption font-medium ${toneClass}`}
       >
         {label}
       </span>
       <h3 className='mt-5 text-title-sm font-bold text-gray-800 dark:text-white/90'>
         {value}
       </h3>
-      <p className='mt-2 text-theme-sm text-gray-500 dark:text-gray-400'>
+      <p className='mt-2 type-small text-gray-500 dark:text-gray-400'>
         {sub}
       </p>
     </Card>
@@ -264,10 +264,10 @@ function MetricCard({
 function ChartHeader({ title, subtitle }: { title: string; subtitle: string }) {
   return (
     <div className='mb-6'>
-      <h3 className='text-lg font-semibold text-gray-800 dark:text-white/90'>
+      <h3 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
         {title}
       </h3>
-      <p className='mt-1 text-theme-sm text-gray-500 dark:text-gray-400'>
+      <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>
         {subtitle}
       </p>
     </div>
@@ -327,7 +327,7 @@ function RatingDistributionChart({
   };
 
   return (
-    <Card className='p-5 sm:p-6'>
+    <Card className='p-6 sm:p-6'>
       <ChartHeader
         title='Rating Distribution'
         subtitle='Star mix across the selected Google profile'
@@ -342,7 +342,7 @@ function RatingDistributionChart({
         <div className='space-y-3'>
           {distribution.map((item, index) => (
             <div key={item.rating}>
-              <div className='mb-1 flex justify-between text-theme-sm'>
+              <div className='mb-1 flex justify-between type-small'>
                 <span className='flex items-center gap-2 text-gray-700 dark:text-gray-300'>
                   <span
                     className='h-2 w-2 rounded-full'
@@ -425,7 +425,7 @@ function KeywordSignalChart({
   };
 
   return (
-    <Card className='p-5 sm:p-6'>
+    <Card className='p-6 sm:p-6'>
       <ChartHeader
         title='Review Signals'
         subtitle='Recurring topics found in review text and replies'
@@ -440,7 +440,7 @@ function KeywordSignalChart({
           height={260}
         />
       ) : (
-        <div className='flex min-h-56 items-center justify-center rounded-xl border border-dashed border-gray-200 text-sm text-gray-500 dark:border-gray-800 dark:text-gray-400'>
+        <div className='flex min-h-56 items-center justify-center rounded-xl border border-dashed border-gray-200 type-small text-gray-500 dark:border-gray-800 dark:text-gray-400'>
           No keyword signals detected
         </div>
       )}
@@ -530,24 +530,24 @@ function ReviewRow({
       <tr className='align-top hover:bg-gray-50 dark:hover:bg-white/[0.02]'>
         <td className='px-5 py-4 sm:px-6'>
           <div className='flex items-start gap-3'>
-            <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-theme-sm font-semibold text-gray-700 dark:bg-gray-800 dark:text-gray-300'>
+            <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 type-small font-semibold text-gray-700 dark:bg-gray-800 dark:text-gray-300'>
               {initials(review.reviewer_name)}
             </div>
             <div className='min-w-0'>
-              <span className='group relative block max-w-full text-theme-sm font-medium text-gray-800 dark:text-white/90'>
+              <span className='group relative block max-w-full type-small font-medium text-gray-800 dark:text-white/90'>
                 <span className='block truncate'>
                   {review.reviewer_name || 'Google reviewer'}
                 </span>
                 <span className='pointer-events-none absolute left-0 top-full z-50 mt-1 hidden max-w-[280px] group-hover:block'>
                   <span className='absolute -top-1 left-3 h-2 w-2 rotate-45 rounded-[2px] bg-gray-900' />
-                  <span className='relative block rounded-md bg-gray-900 px-2.5 py-1.5 text-xs font-medium text-white shadow-lg'>
+                  <span className='relative block rounded-[10px] bg-gray-900 px-3 py-1.5 type-caption font-medium text-white shadow-lg'>
                     {review.reviewer_name || 'Google reviewer'}
                   </span>
                 </span>
               </span>
               <div className='mt-1 flex items-center gap-2'>
                 <RatingStars rating={rating} />
-                <span className='text-theme-xs text-gray-500 dark:text-gray-400'>
+                <span className='type-caption text-gray-500 dark:text-gray-400'>
                   {formatDate(review.review_created_at)}
                 </span>
               </div>
@@ -555,19 +555,19 @@ function ReviewRow({
           </div>
         </td>
         <td className='max-w-[420px] px-5 py-4'>
-          <p className='line-clamp-3 text-theme-sm text-gray-700 dark:text-gray-300'>
+          <p className='line-clamp-3 type-small text-gray-700 dark:text-gray-300'>
             {review.comment ||
               `Rated ${rating || 'unknown'} stars with no written review.`}
           </p>
           {review.critical_reasons && review.critical_reasons.length > 0 && (
-            <p className='mt-2 text-theme-xs text-gray-500 dark:text-gray-400'>
+            <p className='mt-2 type-caption text-gray-500 dark:text-gray-400'>
               {review.critical_reasons.join(', ')}
             </p>
           )}
         </td>
         <td className='px-5 py-4'>
           <span
-            className={`inline-flex rounded-full px-2.5 py-1 text-theme-xs font-medium ${
+            className={`inline-flex rounded-full px-3 py-1 type-caption font-medium ${
               replied
                 ? 'bg-success-50 text-success-600 dark:bg-success-500/15 dark:text-success-500'
                 : lowRating || review.is_critical
@@ -584,7 +584,7 @@ function ReviewRow({
         </td>
         <td className='px-5 py-4'>
           {replied ? (
-            <p className='max-w-[320px] text-theme-sm text-gray-500 dark:text-gray-400'>
+            <p className='max-w-[320px] type-small text-gray-500 dark:text-gray-400'>
               {review.reply_text || 'Reply published.'}
             </p>
           ) : (
@@ -593,7 +593,7 @@ function ReviewRow({
                 type='button'
                 onClick={() => void generateAiSuggestion()}
                 disabled={publishing || aiProcessing}
-                className='inline-flex h-9 items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 text-theme-sm font-medium text-gray-700 disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300'
+                className='inline-flex h-9 items-center gap-2 rounded-[10px] border border-gray-200 bg-white px-3 type-small font-medium text-gray-700 disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300'
               >
                 {aiProcessing && needsManual ? (
                   <Loader2 className='h-4 w-4 animate-spin' />
@@ -610,7 +610,7 @@ function ReviewRow({
                 disabled={
                   publishing || aiProcessing || (needsManual && !reply.trim())
                 }
-                className='inline-flex h-9 items-center gap-2 rounded-lg bg-brand-500 px-3 text-theme-sm font-medium text-white disabled:opacity-50'
+                className='inline-flex h-9 items-center gap-2 rounded-[10px] bg-brand-500 px-3 type-small font-medium text-white disabled:opacity-50'
               >
                 {publishing || (aiProcessing && !needsManual) ? (
                   <Loader2 className='h-4 w-4 animate-spin' />
@@ -633,7 +633,7 @@ function ReviewRow({
               value={reply}
               onChange={(event) => setReply(event.target.value)}
               placeholder='Write a reply or generate an AI draft'
-              className='mt-2 min-h-24 w-full resize-y rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 outline-none focus:border-brand-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300'
+              className='mt-2 min-h-24 w-full resize-y rounded-[10px] border border-gray-200 bg-white px-3 py-2 type-small text-gray-700 outline-none focus:border-brand-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300'
             />
           </td>
         </tr>
@@ -993,13 +993,13 @@ function ReviewsInner() {
     <div className='mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 lg:px-8'>
       <div className='mb-6 flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between'>
         <div>
-          <p className='text-theme-sm font-medium text-brand-500 dark:text-brand-400'>
+          <p className='type-small font-medium text-brand-500 dark:text-brand-400'>
             Reviews
           </p>
           <h1 className='mt-1 text-title-sm font-bold text-gray-800 dark:text-white/90'>
             Review response workspace
           </h1>
-          <p className='mt-2 max-w-2xl text-theme-sm text-gray-500 dark:text-gray-400'>
+          <p className='mt-2 max-w-2xl type-small text-gray-500 dark:text-gray-400'>
             Track rating quality, urgent review signals, and reply coverage for
             connected Google profiles.
           </p>
@@ -1011,7 +1011,7 @@ function ReviewsInner() {
               type='button'
               onClick={() => setChannelMenuOpen((value) => !value)}
               disabled={loadingChannels || channels.length === 0}
-              className='inline-flex h-11 min-w-[240px] items-center justify-between rounded-lg border border-gray-200 bg-white px-4 text-left text-theme-sm font-medium text-gray-700 disabled:opacity-60 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300'
+              className='inline-flex h-10 min-w-[240px] items-center justify-between rounded-[10px] border border-gray-200 bg-white px-4 text-left type-small font-medium text-gray-700 disabled:opacity-60 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300'
             >
               <span className='truncate'>
                 {loadingChannels
@@ -1036,7 +1036,7 @@ function ReviewsInner() {
                         setSelectedChannelId(channel.id);
                         setChannelMenuOpen(false);
                       }}
-                      className={`w-full rounded-lg px-3 py-2 text-left text-theme-sm font-medium ${
+                      className={`w-full rounded-[10px] px-3 py-2 text-left type-small font-medium ${
                         active
                           ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'
                           : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5'
@@ -1055,7 +1055,7 @@ function ReviewsInner() {
             type='button'
             onClick={() => void syncReviews()}
             disabled={!selectedChannelId || loadingReviews}
-            className='inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 text-theme-sm font-medium text-gray-700 disabled:opacity-60 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300'
+            className='inline-flex h-10 items-center justify-center gap-2 rounded-[10px] border border-gray-200 bg-white px-4 type-small font-medium text-gray-700 disabled:opacity-60 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300'
           >
             <RefreshCw
               className={`h-4 w-4 ${loadingReviews ? 'animate-spin' : ''}`}
@@ -1066,7 +1066,7 @@ function ReviewsInner() {
       </div>
 
       {success && (
-        <div className='mb-6 flex items-center gap-3 rounded-xl border border-success-200 bg-success-50 px-4 py-3 text-theme-sm font-medium text-success-700 dark:border-success-500/20 dark:bg-success-500/10 dark:text-success-500'>
+        <div className='mb-6 flex items-center gap-3 rounded-xl border border-success-200 bg-success-50 px-4 py-3 type-small font-medium text-success-700 dark:border-success-500/20 dark:bg-success-500/10 dark:text-success-500'>
           <Check className='h-4 w-4' />
           <span className='flex-1'>{success}</span>
           <button type='button' onClick={() => setSuccess('')}>
@@ -1076,7 +1076,7 @@ function ReviewsInner() {
       )}
 
       {error && (
-        <div className='mb-6 flex items-start gap-3 rounded-xl border border-error-200 bg-error-50 px-4 py-3 text-theme-sm font-medium text-error-700 dark:border-error-500/20 dark:bg-error-500/10 dark:text-error-500'>
+        <div className='mb-6 flex items-start gap-3 rounded-xl border border-error-200 bg-error-50 px-4 py-3 type-small font-medium text-error-700 dark:border-error-500/20 dark:bg-error-500/10 dark:text-error-500'>
           <AlertTriangle className='mt-0.5 h-4 w-4 shrink-0' />
           <span className='flex-1'>{error}</span>
           <button type='button' onClick={() => setError('')}>
@@ -1087,10 +1087,10 @@ function ReviewsInner() {
 
       {channels.length === 0 && !loadingChannels ? (
         <Card className='p-12 text-center'>
-          <h2 className='text-lg font-semibold text-gray-800 dark:text-white/90'>
+          <h2 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
             Google Reviews is not connected
           </h2>
-          <p className='mt-2 text-theme-sm text-gray-500 dark:text-gray-400'>
+          <p className='mt-2 type-small text-gray-500 dark:text-gray-400'>
             Connect a Google Business profile from the Channels page first.
           </p>
         </Card>
@@ -1132,17 +1132,17 @@ function ReviewsInner() {
 
           <div className='mt-6 min-w-0 max-w-full overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]'>
             <div className='flex flex-col gap-2 border-b border-gray-100 px-5 py-5 dark:border-white/[0.05] sm:flex-row sm:items-center sm:justify-between sm:px-6'>
-              <h3 className='text-base font-semibold text-gray-800 dark:text-white/90'>
+              <h3 className='type-body font-semibold text-gray-800 dark:text-white/90'>
                 Reviews
               </h3>
-              <div className='text-theme-sm font-medium text-gray-500 dark:text-gray-400'>
+              <div className='type-small font-medium text-gray-500 dark:text-gray-400'>
                 {filteredReviews.length} reviews
               </div>
             </div>
 
             <div className='min-w-0 px-5 py-5 sm:px-6'>
               <div className='flex flex-col gap-4 rounded-t-xl border border-b-0 border-gray-200 bg-white px-5 py-4 dark:border-white/[0.05] dark:bg-white/[0.01] lg:flex-row lg:items-center lg:justify-between'>
-                <h4 className='text-lg font-semibold text-gray-800 dark:text-white/90'>
+                <h4 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
                   {activeStatusTab.label} reviews
                 </h4>
                 <div className='flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end'>
@@ -1153,7 +1153,7 @@ function ReviewsInner() {
                       value={search}
                       onChange={(event) => setSearch(event.target.value)}
                       placeholder='Search reviewer or text'
-                      className='h-11 w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-11 pr-4 text-theme-sm text-gray-800 shadow-theme-xs outline-none placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-gray-500'
+                      className='h-10 w-full rounded-[10px] border border-gray-300 bg-white py-2 pl-11 pr-4 type-small text-gray-800 shadow-theme-xs outline-none placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-gray-500'
                     />
                   </div>
 
@@ -1179,7 +1179,7 @@ function ReviewsInner() {
                                 setStatusFilterOpen(false);
                               }}
                               className={cn(
-                                'flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm font-medium transition',
+                                'flex w-full items-center justify-between rounded-[10px] px-3 py-2 text-left type-small font-medium transition',
                                 isActive
                                   ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'
                                   : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/[0.04]',
@@ -1189,7 +1189,7 @@ function ReviewsInner() {
                                 {tab.icon}
                                 {tab.label}
                               </span>
-                              <span className='text-xs text-gray-400 dark:text-gray-500'>
+                              <span className='type-caption text-gray-400 dark:text-gray-500'>
                                 {count}
                               </span>
                             </button>
@@ -1202,7 +1202,7 @@ function ReviewsInner() {
                   <button
                     type='button'
                     onClick={() => setSelectedKeyword('all')}
-                    className={`h-10 shrink-0 rounded-lg px-4 text-theme-sm font-medium transition ${
+                    className={`h-10 shrink-0 rounded-[10px] px-4 type-small font-medium transition ${
                       selectedKeyword === 'all'
                         ? 'bg-brand-500 text-white'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-white/5'
@@ -1219,7 +1219,7 @@ function ReviewsInner() {
                           selectedKeyword === keyword.key ? 'all' : keyword.key,
                         )
                       }
-                      className={`h-10 shrink-0 rounded-lg px-4 text-theme-sm font-medium transition ${
+                      className={`h-10 shrink-0 rounded-[10px] px-4 type-small font-medium transition ${
                         selectedKeyword === keyword.key
                           ? 'bg-brand-500 text-white'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-white/5'
@@ -1255,11 +1255,11 @@ function ReviewsInner() {
                 {filter === 'critical' && pendingCriticalCount > 0 && (
                   <div className='flex flex-col gap-3 rounded-xl border border-warning-200 bg-warning-50 p-4 dark:border-warning-500/20 dark:bg-warning-500/10 sm:flex-row sm:items-center sm:justify-between'>
                     <div>
-                      <p className='text-theme-sm font-semibold text-gray-800 dark:text-white/90'>
+                      <p className='type-small font-semibold text-gray-800 dark:text-white/90'>
                         {pendingCriticalCount} reviews waiting for
                         classification
                       </p>
-                      <p className='mt-1 text-theme-xs text-gray-500 dark:text-gray-400'>
+                      <p className='mt-1 type-caption text-gray-500 dark:text-gray-400'>
                         {needsHumanReviewCount} currently need human review.
                       </p>
                     </div>
@@ -1267,7 +1267,7 @@ function ReviewsInner() {
                       type='button'
                       disabled={classifyingReviews}
                       onClick={() => void classifyPendingCriticalReviews()}
-                      className='inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-brand-500 px-4 text-theme-sm font-medium text-white disabled:opacity-60'
+                      className='inline-flex h-10 items-center justify-center gap-2 rounded-[10px] bg-brand-500 px-4 type-small font-medium text-white disabled:opacity-60'
                     >
                       {classifyingReviews && (
                         <Loader2 className='h-4 w-4 animate-spin' />
@@ -1293,7 +1293,7 @@ function ReviewsInner() {
                           (header) => (
                             <th
                               key={header}
-                              className='px-5 py-3 text-left text-base font-medium text-gray-500 dark:text-gray-400'
+                              className='px-5 py-3 text-left type-body font-medium text-gray-500 dark:text-gray-400'
                             >
                               {header}
                             </th>
@@ -1306,7 +1306,7 @@ function ReviewsInner() {
                         <tr>
                           <td
                             colSpan={4}
-                            className='px-5 py-14 text-center text-theme-sm text-gray-500 dark:text-gray-400'
+                            className='px-5 py-14 text-center type-small text-gray-500 dark:text-gray-400'
                           >
                             Loading reviews
                           </td>
@@ -1315,7 +1315,7 @@ function ReviewsInner() {
                         <tr>
                           <td
                             colSpan={4}
-                            className='px-5 py-14 text-center text-theme-sm text-gray-500 dark:text-gray-400'
+                            className='px-5 py-14 text-center type-small text-gray-500 dark:text-gray-400'
                           >
                             No reviews match this filter
                           </td>

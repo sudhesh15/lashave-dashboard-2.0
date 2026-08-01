@@ -20,7 +20,7 @@ export default function CustomerInfoCard({ fieldCount, onOpen }: Props) {
       onRowClick={onOpen}
       meta={
         fieldCount !== undefined ? (
-          <span className="inline-flex rounded-full bg-gray-100 px-2.5 py-1 text-theme-xs font-medium text-gray-700 dark:bg-white/5 dark:text-white/80">
+          <span className="inline-flex rounded-full bg-gray-100 px-3 py-1 type-caption font-medium text-gray-700 dark:bg-white/5 dark:text-white/80">
             {fieldCount} field{fieldCount !== 1 ? "s" : ""} configured
           </span>
         ) : null
@@ -30,12 +30,12 @@ export default function CustomerInfoCard({ fieldCount, onOpen }: Props) {
         {["Name", "Phone", "Email"].map((field) => (
           <div
             key={field}
-            className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 dark:border-gray-800 dark:bg-white/[0.02]"
+            className="rounded-[10px] border border-gray-200 bg-gray-50 px-3 py-2 dark:border-gray-800 dark:bg-white/[0.02]"
           >
-            <div className="text-theme-xs font-medium text-gray-500 dark:text-gray-400">
+            <div className="type-caption font-medium text-gray-500 dark:text-gray-400">
               Field
             </div>
-            <div className="mt-1 text-theme-sm font-semibold text-gray-800 dark:text-white/90">
+            <div className="mt-1 type-small font-semibold text-gray-800 dark:text-white/90">
               {field}
             </div>
           </div>

@@ -230,7 +230,7 @@ export function LivePulseFeed({
               pointerEvents: 'none',
             }}
           />
-          <div className='flex items-start gap-2.5'>
+          <div className='flex items-start gap-3'>
             <div
               style={{
                 width: 34,
@@ -253,7 +253,7 @@ export function LivePulseFeed({
               <div
                 style={{
                   fontSize: 9,
-                  fontWeight: 800,
+                  fontWeight: 600,
                   letterSpacing: '.14em',
                   color: p.accent,
                   marginBottom: 3,

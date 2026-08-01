@@ -67,7 +67,7 @@ export function OnboardingSequentialStepper({
                 border: `2px solid ${dotColor}`,
                 color: '#fff',
                 fontSize: 11,
-                fontWeight: 800,
+                fontWeight: 600,
                 flexShrink: 0,
               }}
             >

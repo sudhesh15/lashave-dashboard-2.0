@@ -803,7 +803,7 @@ export function TopicsPanel({
                 }`,
                 color: isDark ? '#A8BFFF' : '#2563EB',
                 fontSize: 10,
-                fontWeight: 800,
+                fontWeight: 600,
                 letterSpacing: '.12em',
                 textTransform: 'uppercase',
                 marginBottom: 10,
@@ -817,7 +817,7 @@ export function TopicsPanel({
                 margin: 0,
                 color: t.text,
                 fontSize: 22,
-                fontWeight: 900,
+                fontWeight: 700,
                 letterSpacing: '-.6px',
                 lineHeight: 1.15,
               }}
@@ -855,7 +855,7 @@ export function TopicsPanel({
             <div
               style={{
                 fontSize: 22,
-                fontWeight: 900,
+                fontWeight: 700,
                 color: t.text,
                 lineHeight: 1,
               }}
@@ -945,7 +945,7 @@ export function TopicsPanel({
                         style={{
                           color: t.text,
                           fontSize: 13,
-                          fontWeight: 800,
+                          fontWeight: 600,
                           lineHeight: 1.35,
                           textTransform: 'capitalize',
                         }}
@@ -960,7 +960,7 @@ export function TopicsPanel({
                           background: `${accent}14`,
                           color: accent,
                           fontSize: 11,
-                          fontWeight: 900,
+                          fontWeight: 700,
                           flexShrink: 0,
                         }}
                       >

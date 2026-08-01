@@ -25,7 +25,7 @@ function Switch({
       disabled={disabled}
       onClick={() => !disabled && onChange(!checked)}
       className={cn(
-        "relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition duration-150 ease-linear",
+        "relative inline-flex h-6 w-10 shrink-0 items-center rounded-full transition duration-150 ease-linear",
         disabled
           ? "cursor-not-allowed bg-gray-100 dark:bg-gray-800"
           : checked

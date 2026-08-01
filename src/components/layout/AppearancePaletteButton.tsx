@@ -29,9 +29,9 @@ export function AppearancePaletteButton() {
         type="button"
         onClick={() => setOpen((value) => !value)}
         aria-label="Appearance color"
-        className="relative flex h-11 w-11 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
+        className="relative flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
       >
-        <Palette className="size-5" />
+        <Palette className="icon-default" />
         <span
           className="absolute bottom-1.5 right-1.5 h-3 w-3 rounded-full border-2 border-white dark:border-gray-900"
           style={{ backgroundColor: appearanceColor }}
@@ -40,7 +40,7 @@ export function AppearancePaletteButton() {
 
       {open && (
         <div className="absolute right-0 top-[calc(100%+10px)] z-50 w-56 rounded-2xl border border-gray-200 bg-white p-4 shadow-theme-lg dark:border-gray-800 dark:bg-gray-900">
-          <div className="mb-3 text-sm font-semibold text-gray-800 dark:text-white/90">
+          <div className="mb-3 type-small font-semibold text-gray-800 dark:text-white/90">
             Appearance
           </div>
           <div className="grid grid-cols-6 gap-2">

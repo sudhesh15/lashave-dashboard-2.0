@@ -34,10 +34,10 @@ const variantClasses: Record<AlertVariant, { container: string; icon: string }> 
 };
 
 const icons: Record<AlertVariant, React.ReactNode> = {
-  success: <CheckCircle2 className="size-5" />,
-  error: <XCircle className="size-5" />,
-  warning: <AlertTriangle className="size-5" />,
-  info: <Info className="size-5" />,
+  success: <CheckCircle2 className="icon-default" />,
+  error: <XCircle className="icon-default" />,
+  warning: <AlertTriangle className="icon-default" />,
+  info: <Info className="icon-default" />,
 };
 
 export function Alert({
@@ -53,12 +53,12 @@ export function Alert({
       <div className="flex items-start gap-3">
         <div className={cn("-mt-0.5", variantClasses[variant].icon)}>{icons[variant]}</div>
         <div>
-          <h4 className="mb-1 text-sm font-semibold text-gray-800 dark:text-white/90">{title}</h4>
-          <p className="text-sm text-gray-500 dark:text-gray-400">{message}</p>
+          <h4 className="mb-1 type-small font-semibold text-gray-800 dark:text-white/90">{title}</h4>
+          <p className="type-small text-gray-500 dark:text-gray-400">{message}</p>
           {showLink && (
             <Link
               href={linkHref}
-              className="mt-3 inline-block text-sm font-medium text-gray-500 underline dark:text-gray-400"
+              className="mt-3 inline-block type-small font-medium text-gray-500 underline dark:text-gray-400"
             >
               {linkText}
             </Link>

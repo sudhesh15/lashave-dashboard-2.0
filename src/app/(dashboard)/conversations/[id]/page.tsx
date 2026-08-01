@@ -242,10 +242,10 @@ function MetricCard({
           {icon}
         </div>
         <div>
-          <p className='text-theme-xs text-gray-500 dark:text-gray-400'>
+          <p className='type-caption text-gray-500 dark:text-gray-400'>
             {label}
           </p>
-          <p className='mt-1 text-theme-sm font-semibold text-gray-800 dark:text-white/90'>
+          <p className='mt-1 type-small font-semibold text-gray-800 dark:text-white/90'>
             {value}
           </p>
         </div>
@@ -286,11 +286,11 @@ function MessageMixChart({
   };
 
   return (
-    <Card className='p-5'>
-      <h3 className='text-lg font-semibold text-gray-800 dark:text-white/90'>
+    <Card className='p-6'>
+      <h3 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
         Message Mix
       </h3>
-      <p className='mt-1 text-theme-sm text-gray-500 dark:text-gray-400'>
+      <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>
         Customer, AI, and agent messages
       </p>
       <ReactApexChart
@@ -344,11 +344,11 @@ function LatencyChart({
   };
 
   return (
-    <Card className='p-5'>
-      <h3 className='text-lg font-semibold text-gray-800 dark:text-white/90'>
+    <Card className='p-6'>
+      <h3 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
         Response Latency
       </h3>
-      <p className='mt-1 text-theme-sm text-gray-500 dark:text-gray-400'>
+      <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>
         Recent AI response times
       </p>
       {rows.length > 0 ? (
@@ -359,7 +359,7 @@ function LatencyChart({
           height={240}
         />
       ) : (
-        <div className='flex h-[240px] items-center justify-center text-theme-sm text-gray-500 dark:text-gray-400'>
+        <div className='flex h-[240px] items-center justify-center type-small text-gray-500 dark:text-gray-400'>
           No latency data available
         </div>
       )}
@@ -388,11 +388,11 @@ function MessageBubble({
               : `rounded-tr-md ${theme.bubble} ${theme.bubbleText}`
         }`}
       >
-        <p className='whitespace-pre-wrap text-theme-sm leading-6'>
+        <p className='whitespace-pre-wrap type-small leading-6'>
           {message.content}
         </p>
         <div
-          className={`mt-2 flex items-center gap-2 text-theme-xs ${fromCustomer ? 'text-gray-400' : 'text-white/70'}`}
+          className={`mt-2 flex items-center gap-2 type-caption ${fromCustomer ? 'text-gray-400' : 'text-white/70'}`}
         >
           <span>{formatDate(message.created_at)}</span>
           {message.latency_ms != null && (
@@ -407,10 +407,10 @@ function MessageBubble({
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <div className='flex items-start justify-between gap-4 border-b border-gray-100 py-3 last:border-b-0 dark:border-gray-800'>
-      <span className='text-theme-sm text-gray-500 dark:text-gray-400'>
+      <span className='type-small text-gray-500 dark:text-gray-400'>
         {label}
       </span>
-      <span className='max-w-[55%] break-words text-right text-theme-sm font-medium text-gray-800 dark:text-white/90'>
+      <span className='max-w-[55%] break-words text-right type-small font-medium text-gray-800 dark:text-white/90'>
         {value}
       </span>
     </div>
@@ -576,16 +576,16 @@ export default function ConversationDetailPage() {
             <button
               type='button'
               onClick={() => router.push('/conversations')}
-              className='flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400 dark:hover:bg-white/[0.05]'
+              className='flex h-10 w-10 items-center justify-center rounded-[10px] border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400 dark:hover:bg-white/[0.05]'
               aria-label='Back to conversations'
             >
               <ArrowLeft className='h-5 w-5' />
             </button>
             <div>
-              <h1 className='text-2xl font-semibold text-gray-800 dark:text-white/90'>
+              <h1 className='type-h3 font-semibold text-gray-800 dark:text-white/90'>
                 Conversation Detail
               </h1>
-              <p className='mt-1 text-theme-sm text-gray-500 dark:text-gray-400'>
+              <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>
                 Review messages, customer context, and lead stage.
               </p>
             </div>
@@ -594,7 +594,7 @@ export default function ConversationDetailPage() {
             <button
               type='button'
               onClick={() => void load()}
-              className='inline-flex h-11 items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 text-theme-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300'
+              className='inline-flex h-10 items-center gap-2 rounded-[10px] border border-gray-200 bg-white px-4 type-small font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300'
             >
               <RefreshCw className='h-4 w-4' />
               Refresh
@@ -603,7 +603,7 @@ export default function ConversationDetailPage() {
         </div>
 
         {err && (
-          <div className='mb-6 flex items-start gap-3 rounded-xl border border-error-200 bg-error-50 px-4 py-3 text-theme-sm text-error-700 dark:border-error-500/20 dark:bg-error-500/10 dark:text-error-500'>
+          <div className='mb-6 flex items-start gap-3 rounded-xl border border-error-200 bg-error-50 px-4 py-3 type-small text-error-700 dark:border-error-500/20 dark:bg-error-500/10 dark:text-error-500'>
             <AlertTriangle className='mt-0.5 h-4 w-4 shrink-0' />
             {err}
           </div>
@@ -614,8 +614,8 @@ export default function ConversationDetailPage() {
             <Card className='overflow-hidden'>
               <div className='flex items-center justify-between border-b border-gray-200 px-5 py-4 dark:border-gray-800 sm:px-6'>
                 <div className='flex min-w-0 items-center gap-3'>
-                  <div className='relative h-11 w-11 shrink-0'>
-                    <div className='h-11 w-11 overflow-hidden rounded-full border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-gray-800'>
+                  <div className='relative h-10 w-10 shrink-0'>
+                    <div className='h-10 w-10 overflow-hidden rounded-full border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-gray-800'>
                       {profilePic ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
@@ -624,7 +624,7 @@ export default function ConversationDetailPage() {
                           className='h-full w-full object-cover'
                         />
                       ) : (
-                        <div className='flex h-full w-full items-center justify-center text-theme-sm font-semibold text-gray-700 dark:text-gray-300'>
+                        <div className='flex h-full w-full items-center justify-center type-small font-semibold text-gray-700 dark:text-gray-300'>
                           {initials(customerName)}
                         </div>
                       )}
@@ -637,29 +637,29 @@ export default function ConversationDetailPage() {
                     />
                   </div>
                   <div className='min-w-0'>
-                    <h2 className='truncate text-lg font-semibold text-gray-800 dark:text-white/90'>
+                    <h2 className='truncate type-card-title font-semibold text-gray-800 dark:text-white/90'>
                       {customerName}
                     </h2>
                     <div className='mt-1 flex flex-wrap items-center gap-2'>
-                      <span className='text-theme-sm text-gray-500 dark:text-gray-400'>
+                      <span className='type-small text-gray-500 dark:text-gray-400'>
                         {platformLabel(convo?.channel)}
                       </span>
                       <span
-                        className={`rounded-full px-2.5 py-1 text-theme-xs font-medium capitalize ${statusClass(convo?.status)}`}
+                        className={`rounded-full px-3 py-1 type-caption font-medium capitalize ${statusClass(convo?.status)}`}
                       >
                         {convo?.status || 'unknown'}
                       </span>
                     </div>
                   </div>
                 </div>
-                <p className='hidden text-theme-sm text-gray-500 dark:text-gray-400 sm:block'>
+                <p className='hidden type-small text-gray-500 dark:text-gray-400 sm:block'>
                   Last activity {formatDate(convo?.last_message_at)}
                 </p>
               </div>
 
               <div className='h-[560px] space-y-5 overflow-y-auto bg-gray-50 px-5 py-6 custom-scrollbar dark:bg-gray-900 sm:px-6'>
                 {messages.length === 0 ? (
-                  <div className='flex h-full items-center justify-center text-theme-sm text-gray-500 dark:text-gray-400'>
+                  <div className='flex h-full items-center justify-center type-small text-gray-500 dark:text-gray-400'>
                     No messages found
                   </div>
                 ) : (
@@ -674,7 +674,7 @@ export default function ConversationDetailPage() {
                 <div ref={bottomRef} />
               </div>
 
-              <div className='border-t border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03] sm:p-5'>
+              <div className='border-t border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03] sm:p-6'>
                 <div className='flex items-center gap-2 sm:gap-3'>
                   <input
                     type='text'
@@ -689,13 +689,13 @@ export default function ConversationDetailPage() {
                       }
                     }}
                     placeholder='Message as agent…'
-                    className={`h-11 min-w-0 flex-1 rounded-full border border-gray-300 bg-transparent px-4 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 sm:h-12 sm:px-5 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 ${channelTheme.ring}`}
+                    className={`h-10 min-w-0 flex-1 rounded-full border border-gray-300 bg-transparent px-4 type-small text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 sm:h-12 sm:px-5 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 ${channelTheme.ring}`}
                   />
                   <button
                     type='button'
                     onClick={() => void sendReply()}
                     disabled={!replyText.trim() || sending}
-                    className={`inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-full px-4 text-theme-sm font-medium text-white disabled:opacity-60 sm:h-12 sm:px-6 ${channelTheme.accent} ${channelTheme.accentHover}`}
+                    className={`inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-full px-4 type-small font-medium text-white disabled:opacity-60 sm:h-12 sm:px-6 ${channelTheme.accent} ${channelTheme.accentHover}`}
                   >
                     {sending ? (
                       <Loader2 className='h-4 w-4 animate-spin' />
@@ -705,7 +705,7 @@ export default function ConversationDetailPage() {
                     <span className='hidden sm:inline'>Send</span>
                   </button>
                 </div>
-                <p className='mt-1.5 hidden text-xs text-gray-400 sm:block dark:text-gray-500'>
+                <p className='mt-1.5 hidden type-caption text-gray-400 sm:block dark:text-gray-500'>
                   Cmd/Ctrl + Enter to send
                 </p>
 
@@ -714,7 +714,7 @@ export default function ConversationDetailPage() {
                     type='button'
                     onClick={() => void act(isHandoff ? 'reopen' : 'handoff')}
                     disabled={Boolean(actionLoading)}
-                    className='inline-flex h-11 items-center justify-center gap-2 rounded-full border border-success-200 bg-success-50 px-2 text-xs font-medium text-success-600 disabled:opacity-60 sm:text-theme-sm dark:border-success-500/20 dark:bg-success-500/10 dark:text-success-400'
+                    className='inline-flex h-10 items-center justify-center gap-2 rounded-full border border-success-200 bg-success-50 px-2 type-caption font-medium text-success-600 disabled:opacity-60 sm:type-small dark:border-success-500/20 dark:bg-success-500/10 dark:text-success-400'
                   >
                     {actionLoading === 'handoff' ||
                     actionLoading === 'reopen' ? (
@@ -730,7 +730,7 @@ export default function ConversationDetailPage() {
                     type='button'
                     onClick={() => void act(isClosed ? 'reopen' : 'close')}
                     disabled={Boolean(actionLoading)}
-                    className='inline-flex h-11 items-center justify-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-2 text-xs font-medium text-gray-700 disabled:opacity-60 sm:text-theme-sm dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300'
+                    className='inline-flex h-10 items-center justify-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-2 type-caption font-medium text-gray-700 disabled:opacity-60 sm:type-small dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300'
                   >
                     {actionLoading === 'close' || actionLoading === 'reopen' ? (
                       <Loader2 className='h-4 w-4 shrink-0 animate-spin' />
@@ -757,15 +757,15 @@ export default function ConversationDetailPage() {
                 label='Mood'
                 value={mood?.label || 'Neutral'}
                 icon={
-                  <span className='text-lg leading-none'>
+                  <span className='type-card-title leading-none'>
                     {mood?.emoji || '🙂'}
                   </span>
                 }
               />
             </div>
 
-            <Card className='p-5'>
-              <h3 className='text-lg font-semibold text-gray-800 dark:text-white/90'>
+            <Card className='p-6'>
+              <h3 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
                 Customer Context
               </h3>
               <div className='mt-4'>
@@ -784,18 +784,18 @@ export default function ConversationDetailPage() {
               </div>
               {convo?.summary && (
                 <div className='mt-4 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-900'>
-                  <p className='text-theme-sm font-medium text-gray-800 dark:text-white/90'>
+                  <p className='type-small font-medium text-gray-800 dark:text-white/90'>
                     Summary
                   </p>
-                  <p className='mt-2 text-theme-sm leading-6 text-gray-500 dark:text-gray-400'>
+                  <p className='mt-2 type-small leading-6 text-gray-500 dark:text-gray-400'>
                     {convo.summary}
                   </p>
                 </div>
               )}
             </Card>
 
-            <Card className='p-5'>
-              <h3 className='text-lg font-semibold text-gray-800 dark:text-white/90'>
+            <Card className='p-6'>
+              <h3 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
                 Lead Details
               </h3>
               {lead ? (
@@ -819,13 +819,13 @@ export default function ConversationDetailPage() {
                     />
                   </div>
                   <div className='mt-4'>
-                    <label className='mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400'>
+                    <label className='mb-1.5 block type-small font-medium text-gray-700 dark:text-gray-400'>
                       Pipeline stage
                     </label>
                     <select
                       value={leadStatus}
                       onChange={(event) => setLeadStatus(event.target.value)}
-                      className='h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90'
+                      className='h-10 w-full rounded-[10px] border border-gray-300 bg-transparent px-4 type-small text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90'
                     >
                       {PIPELINE.map((stage) => (
                         <option key={stage} value={stage}>
@@ -837,7 +837,7 @@ export default function ConversationDetailPage() {
                       type='button'
                       onClick={() => void saveStage()}
                       disabled={savingStage || leadStatus === lead.status}
-                      className='mt-3 inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-brand-500 px-4 text-theme-sm font-medium text-white disabled:opacity-60'
+                      className='mt-3 inline-flex h-10 w-full items-center justify-center gap-2 rounded-[10px] bg-brand-500 px-4 type-small font-medium text-white disabled:opacity-60'
                     >
                       {savingStage && (
                         <Loader2 className='h-4 w-4 animate-spin' />
@@ -848,10 +848,10 @@ export default function ConversationDetailPage() {
                   {lead.contacts.emails?.length ||
                   lead.contacts.phones?.length ? (
                     <div className='mt-4 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-900'>
-                      <p className='text-theme-sm font-medium text-gray-800 dark:text-white/90'>
+                      <p className='type-small font-medium text-gray-800 dark:text-white/90'>
                         Contacts
                       </p>
-                      <div className='mt-2 space-y-1 text-theme-sm text-gray-500 dark:text-gray-400'>
+                      <div className='mt-2 space-y-1 type-small text-gray-500 dark:text-gray-400'>
                         {(lead.contacts.emails || []).map((email) => (
                           <p key={email}>{email}</p>
                         ))}
@@ -865,7 +865,7 @@ export default function ConversationDetailPage() {
               ) : (
                 <div className='mt-4 flex items-start gap-3 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-900'>
                   <ShieldAlert className='mt-0.5 h-4 w-4 text-gray-500 dark:text-gray-400' />
-                  <p className='text-theme-sm text-gray-500 dark:text-gray-400'>
+                  <p className='type-small text-gray-500 dark:text-gray-400'>
                     No lead has been created for this conversation yet.
                   </p>
                 </div>

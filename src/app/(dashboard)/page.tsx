@@ -311,13 +311,13 @@ function MetricCard({
         : 'bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400';
 
   return (
-    <Card className='p-5 md:p-6'>
+    <Card className='p-6 md:p-6'>
       <div className='flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-white/90'>
         {icon}
       </div>
       <div className='mt-5 flex items-end justify-between gap-4'>
         <div className='min-w-0'>
-          <span className='text-sm text-gray-500 dark:text-gray-400'>
+          <span className='type-small text-gray-500 dark:text-gray-400'>
             {label}
           </span>
           <h3 className='mt-2 text-title-sm font-bold text-gray-800 dark:text-white/90'>
@@ -325,7 +325,7 @@ function MetricCard({
           </h3>
         </div>
         <span
-          className={`shrink-0 rounded-full px-2.5 py-1 text-theme-xs font-medium ${badgeClass}`}
+          className={`shrink-0 rounded-full px-3 py-1 type-caption font-medium ${badgeClass}`}
         >
           {sub}
         </span>
@@ -346,11 +346,11 @@ function ChartHeader({
   return (
     <div className='mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between'>
       <div>
-        <h3 className='text-lg font-semibold text-gray-800 dark:text-white/90'>
+        <h3 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
           {title}
         </h3>
         {subtitle && (
-          <p className='mt-1 text-theme-sm text-gray-500 dark:text-gray-400'>
+          <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>
             {subtitle}
           </p>
         )}
@@ -362,7 +362,7 @@ function ChartHeader({
 
 function EmptyBlock({ label }: { label: string }) {
   return (
-    <div className='flex min-h-40 items-center justify-center rounded-xl border border-dashed border-gray-200 text-sm text-gray-500 dark:border-gray-800 dark:text-gray-400'>
+    <div className='flex min-h-40 items-center justify-center rounded-xl border border-dashed border-gray-200 type-small text-gray-500 dark:border-gray-800 dark:text-gray-400'>
       {label}
     </div>
   );
@@ -380,8 +380,8 @@ function DateFilter({
   setActivePreset: (value: number | null) => void;
 }) {
   return (
-    <div className='flex flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-3 dark:border-gray-800 dark:bg-white/[0.03] sm:flex-row sm:items-center'>
-      <div className='grid grid-cols-3 gap-2 sm:w-auto'>
+    <div className='flex w-full min-w-0 flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-3 dark:border-gray-800 dark:bg-white/[0.03] xl:w-auto xl:flex-row xl:flex-wrap xl:items-center'>
+      <div className='grid shrink-0 grid-cols-3 gap-2 xl:w-auto'>
         {[
           { label: 'Today', days: 0 },
           { label: '7 Days', days: 7 },
@@ -389,7 +389,7 @@ function DateFilter({
         ].map((preset) => (
           <button
             key={preset.label}
-            className={`h-10 rounded-lg px-3 text-theme-sm font-medium transition ${
+            className={`h-10 whitespace-nowrap rounded-[10px] px-3 type-small font-medium transition ${
               activePreset === preset.days
                 ? 'bg-brand-500 text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-white/5'
@@ -407,7 +407,7 @@ function DateFilter({
         ))}
       </div>
 
-      <div className='grid grid-cols-2 gap-2'>
+      <div className='grid shrink-0 grid-cols-2 gap-2'>
         <input
           type='date'
           value={dateRange?.from ?? ''}
@@ -418,7 +418,7 @@ function DateFilter({
               to: dateRange?.to ?? toDateStr(new Date()),
             });
           }}
-          className='h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-700 outline-none focus:border-brand-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300'
+          className='h-10 min-w-[150px] rounded-[10px] border border-gray-200 bg-white px-3 type-small text-gray-700 outline-none focus:border-brand-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300'
         />
         <input
           type='date'
@@ -430,13 +430,13 @@ function DateFilter({
               to: e.target.value,
             });
           }}
-          className='h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-700 outline-none focus:border-brand-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300'
+          className='h-10 min-w-[150px] rounded-[10px] border border-gray-200 bg-white px-3 type-small text-gray-700 outline-none focus:border-brand-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300'
         />
       </div>
 
       {dateRange && (
         <button
-          className='h-10 rounded-lg border border-gray-200 px-4 text-theme-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5'
+          className='h-10 shrink-0 whitespace-nowrap rounded-[10px] border border-gray-200 px-4 type-small font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5'
           onClick={() => {
             setDateRange(null);
             setActivePreset(null);
@@ -566,7 +566,7 @@ function PipelineChart({
   };
 
   return (
-    <Card className='p-5 sm:p-6'>
+    <Card className='p-6 sm:p-6'>
       <ChartHeader title='Lead Pipeline' subtitle='Distribution by status' />
       {hasData ? (
         <>
@@ -582,7 +582,7 @@ function PipelineChart({
               const pct = total > 0 ? Math.round((value / total) * 100) : 0;
               return (
                 <div key={status}>
-                  <div className='mb-1 flex items-center justify-between text-theme-xs'>
+                  <div className='mb-1 flex items-center justify-between type-caption'>
                     <div className='flex items-center gap-2 font-medium capitalize text-gray-700 dark:text-gray-300'>
                       <span
                         className='h-2 w-2 rounded-full'
@@ -649,7 +649,7 @@ function TopicsCard({
   const max = Math.max(...topics.map((topic) => topic.count), 1);
 
   return (
-    <Card className='p-5 sm:p-6'>
+    <Card className='p-6 sm:p-6'>
       <ChartHeader
         title='Customer Intent'
         subtitle='Common themes detected across conversations'
@@ -665,7 +665,7 @@ function TopicsCard({
             const color = getTopicColor(topic.topic);
             return (
               <div key={topic.topic}>
-                <div className='mb-2 flex justify-between gap-3 text-theme-sm'>
+                <div className='mb-2 flex justify-between gap-3 type-small'>
                   <span className='font-medium capitalize text-gray-700 dark:text-gray-300'>
                     {topic.topic.replace(/_/g, ' ')}
                   </span>
@@ -699,7 +699,7 @@ function FaqGapsCard({
   loading: boolean;
 }) {
   return (
-    <Card className='p-5 sm:p-6'>
+    <Card className='p-6 sm:p-6'>
       <ChartHeader
         title='FAQ Content Gaps'
         subtitle='Questions the AI needs better source material for'
@@ -716,14 +716,14 @@ function FaqGapsCard({
               className='flex items-center justify-between gap-4 border-b border-gray-200 px-4 py-3 last:border-b-0 dark:border-gray-800'
             >
               <div className='min-w-0'>
-                <p className='truncate text-theme-sm font-medium text-gray-800 dark:text-white/90'>
+                <p className='truncate type-small font-medium text-gray-800 dark:text-white/90'>
                   {gap.query}
                 </p>
-                <p className='mt-1 text-theme-xs text-gray-500 dark:text-gray-400'>
+                <p className='mt-1 type-caption text-gray-500 dark:text-gray-400'>
                   Last seen {new Date(gap.last_seen).toLocaleDateString()}
                 </p>
               </div>
-              <span className='shrink-0 rounded-full bg-brand-50 px-2.5 py-1 text-theme-xs font-medium text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400'>
+              <span className='shrink-0 rounded-full bg-brand-50 px-3 py-1 type-caption font-medium text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400'>
                 {gap.count}
               </span>
             </div>
@@ -820,17 +820,17 @@ function ActiveChannelsCard({
     <div>
       <div className='mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between'>
         <div>
-          <h3 className='text-xl font-semibold text-gray-800 dark:text-white/90'>
+          <h3 className='type-h4 font-semibold text-gray-800 dark:text-white/90'>
             Connected Channels
           </h3>
-          <p className='mt-1 text-theme-sm text-gray-500 dark:text-gray-400'>
+          <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>
             {active.length} active channels
           </p>
         </div>
         <button
           type='button'
           onClick={onConnectNow}
-          className='inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 text-theme-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/[0.05]'
+          className='inline-flex h-10 items-center justify-center gap-2 rounded-[10px] border border-gray-200 bg-white px-4 type-small font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/[0.05]'
         >
           <Plus className='h-4 w-4' />
           Manage channels
@@ -861,10 +861,10 @@ function ActiveChannelsCard({
                     />
                   </div>
                   <div className='min-w-0'>
-                    <p className='truncate text-base font-semibold capitalize text-gray-800 dark:text-white/90'>
+                    <p className='truncate type-body font-semibold capitalize text-gray-800 dark:text-white/90'>
                       {item.label}
                     </p>
-                    <p className='mt-1 truncate text-theme-sm capitalize text-gray-500 dark:text-gray-400'>
+                    <p className='mt-1 truncate type-small capitalize text-gray-500 dark:text-gray-400'>
                       {labelForPlatform(item.platform)}
                     </p>
                   </div>
@@ -872,19 +872,19 @@ function ActiveChannelsCard({
 
                 <div className='mt-7 flex items-end justify-between gap-4'>
                   <div className='min-w-0'>
-                    <p className='text-xl font-bold text-gray-800 dark:text-white/90'>
+                    <p className='type-h4 font-bold text-gray-800 dark:text-white/90'>
                       {item.connected
                         ? messagesToday.toLocaleString()
                         : '0'}
                     </p>
-                    <p className='mt-1 text-theme-xs text-gray-500 dark:text-gray-400'>
+                    <p className='mt-1 type-caption text-gray-500 dark:text-gray-400'>
                       Messages Today
                     </p>
                   </div>
 
                   {item.connected ? (
                     <span
-                      className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1 text-theme-xs font-medium ${
+                      className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1 type-caption font-medium ${
                         isActive
                           ? 'bg-success-50 text-success-600 dark:bg-success-500/15 dark:text-success-500'
                           : 'bg-gray-100 text-gray-700 dark:bg-white/5 dark:text-white/80'
@@ -897,7 +897,7 @@ function ActiveChannelsCard({
                     <button
                       type='button'
                       onClick={onConnectNow}
-                      className='inline-flex shrink-0 items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-theme-xs font-medium text-brand-500 hover:bg-brand-100 dark:bg-brand-500/15 dark:text-brand-400'
+                      className='inline-flex shrink-0 items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 type-caption font-medium text-brand-500 hover:bg-brand-100 dark:bg-brand-500/15 dark:text-brand-400'
                     >
                       <Plus className='h-3 w-3' />
                       Connect Now
@@ -946,7 +946,7 @@ function AttentionCard({
   loading: boolean;
 }) {
   return (
-    <Card className='p-5 sm:p-6'>
+    <Card className='p-6 sm:p-6'>
       <ChartHeader
         title='Needs Attention'
         subtitle='Conversations and signals that need a team review'
@@ -974,20 +974,20 @@ function AttentionCard({
                 />
                 <div className='min-w-0 flex-1'>
                   <div className='flex items-center justify-between gap-3'>
-                    <p className='truncate text-theme-sm font-medium text-gray-800 dark:text-white/90'>
+                    <p className='truncate type-small font-medium text-gray-800 dark:text-white/90'>
                       {item.sender_name || 'Unknown customer'}
                     </p>
                     <span
-                      className={`shrink-0 rounded-full px-2.5 py-1 text-theme-xs font-medium capitalize ${cfg.badge}`}
+                      className={`shrink-0 rounded-full px-3 py-1 type-caption font-medium capitalize ${cfg.badge}`}
                     >
                       {cfg.label}
                     </span>
                   </div>
-                  <p className='mt-1 line-clamp-2 text-theme-sm text-gray-500 dark:text-gray-400'>
+                  <p className='mt-1 line-clamp-2 type-small text-gray-500 dark:text-gray-400'>
                     {item.message ||
                       'Review this conversation for next action.'}
                   </p>
-                  <p className='mt-2 text-theme-xs text-gray-400 dark:text-gray-500'>
+                  <p className='mt-2 type-caption text-gray-400 dark:text-gray-500'>
                     {timeAgo(item.created_at)} · {item.tenant_id || 'Tenant'}
                   </p>
                 </div>
@@ -1434,13 +1434,13 @@ ${about}`.trim();
       <div className='mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 lg:px-8'>
         <div className='mb-6 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between'>
           <div>
-            <p className='text-theme-sm font-medium text-brand-500 dark:text-brand-400'>
+            <p className='type-small font-medium text-brand-500 dark:text-brand-400'>
               Overview
             </p>
             <h1 className='mt-1 text-title-sm font-bold text-gray-800 dark:text-white/90'>
               Business dashboard
             </h1>
-            <p className='mt-2 max-w-2xl text-theme-sm text-gray-500 dark:text-gray-400'>
+            <p className='mt-2 max-w-2xl type-small text-gray-500 dark:text-gray-400'>
               Monitor conversations, leads, channels, and AI knowledge coverage.
             </p>
           </div>
@@ -1468,7 +1468,7 @@ ${about}`.trim();
         )}
 
         {err && (
-          <div className='mb-6 rounded-xl border border-error-200 bg-error-50 px-4 py-3 text-theme-sm text-error-700 dark:border-error-500/20 dark:bg-error-500/10 dark:text-error-400'>
+          <div className='mb-6 rounded-xl border border-error-200 bg-error-50 px-4 py-3 type-small text-error-700 dark:border-error-500/20 dark:bg-error-500/10 dark:text-error-400'>
             {err}
           </div>
         )}
@@ -1557,7 +1557,7 @@ ${about}`.trim();
             <FaqGapsCard gaps={faqGaps} loading={faqLoading} />
           </div>
           <div className='xl:col-span-5'>
-            <Card className='p-5 sm:p-6'>
+            <Card className='p-6 sm:p-6'>
               <ChartHeader
                 title='Operational Summary'
                 subtitle={
@@ -1596,13 +1596,13 @@ ${about}`.trim();
                     key={item.label}
                     className='rounded-xl border border-gray-200 p-4 dark:border-gray-800'
                   >
-                    <div className='mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'>
+                    <div className='mb-4 flex h-10 w-10 items-center justify-center rounded-[10px] bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'>
                       {item.icon}
                     </div>
-                    <p className='text-theme-xs text-gray-500 dark:text-gray-400'>
+                    <p className='type-caption text-gray-500 dark:text-gray-400'>
                       {item.label}
                     </p>
-                    <p className='mt-1 text-lg font-semibold text-gray-800 dark:text-white/90'>
+                    <p className='mt-1 type-card-title font-semibold text-gray-800 dark:text-white/90'>
                       {item.value}
                     </p>
                   </div>

@@ -52,7 +52,7 @@ export function DateFilter({
             'border-brand-300 bg-brand-50 text-brand-500 dark:border-brand-500/30 dark:bg-brand-500/15 dark:text-brand-400',
         )}
       >
-        <Calendar className='size-4' />
+        <Calendar className='icon-small' />
         {dateRange
           ? `${formatDate(dateRange.from)} to ${formatDate(dateRange.to)}`
           : 'Date'}
@@ -83,7 +83,7 @@ export function DateFilter({
                   });
                 }}
                 className={cn(
-                  'rounded-lg border px-2 py-2 text-theme-xs font-medium transition',
+                  'rounded-[10px] border px-2 py-2 type-caption font-medium transition',
                   activePreset === preset.days
                     ? 'border-brand-300 bg-brand-50 text-brand-500 dark:border-brand-500/30 dark:bg-brand-500/15 dark:text-brand-400'
                     : 'border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03]',
@@ -95,7 +95,7 @@ export function DateFilter({
           </div>
 
           <div className='mt-4 grid gap-3'>
-            <label className='grid gap-1.5 text-theme-xs font-medium text-gray-500 dark:text-gray-400'>
+            <label className='grid gap-1.5 type-caption font-medium text-gray-500 dark:text-gray-400'>
               From
               <input
                 type='date'
@@ -107,11 +107,11 @@ export function DateFilter({
                     to: dateRange?.to ?? toDateStr(new Date()),
                   });
                 }}
-                className='h-9 rounded-lg border border-gray-300 bg-transparent px-3 text-theme-sm text-gray-700 outline-none focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-gray-300'
+                className='h-9 rounded-[10px] border border-gray-300 bg-transparent px-3 type-small text-gray-700 outline-none focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-gray-300'
               />
             </label>
 
-            <label className='grid gap-1.5 text-theme-xs font-medium text-gray-500 dark:text-gray-400'>
+            <label className='grid gap-1.5 type-caption font-medium text-gray-500 dark:text-gray-400'>
               To
               <input
                 type='date'
@@ -123,7 +123,7 @@ export function DateFilter({
                     to: event.target.value,
                   });
                 }}
-                className='h-9 rounded-lg border border-gray-300 bg-transparent px-3 text-theme-sm text-gray-700 outline-none focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-gray-300'
+                className='h-9 rounded-[10px] border border-gray-300 bg-transparent px-3 type-small text-gray-700 outline-none focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-gray-300'
               />
             </label>
           </div>

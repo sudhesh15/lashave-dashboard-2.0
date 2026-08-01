@@ -1,5 +1,13 @@
 "use client";
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useRef } from "react";
+
+type ScreenBucket = "mobile" | "smallDesktop" | "desktop";
+
+function getBucket(width: number): ScreenBucket {
+  if (width < 1024) return "mobile";
+  if (width < 1280) return "smallDesktop";
+  return "desktop";
+}
 
 type SidebarContextType = {
   isExpanded: boolean;
@@ -28,12 +36,24 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
   const [isMobile, setIsMobile] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
+  const prevBucket = useRef<ScreenBucket | null>(null);
 
   useEffect(() => {
     const handleResize = () => {
-      const mobile = window.innerWidth < 1024;
+      const bucket = getBucket(window.innerWidth);
+      const mobile = bucket === "mobile";
       setIsMobile(mobile);
       if (!mobile) setIsMobileOpen(false);
+
+      // Only reset the expanded default when crossing into a new size
+      // bucket, so it doesn't fight a manual toggle during same-bucket
+      // resizes. Small desktop (1024-1279px) defaults to collapsed so
+      // pages get more room; full desktop (1280px+) defaults expanded.
+      if (prevBucket.current !== bucket) {
+        if (bucket === "smallDesktop") setIsExpanded(false);
+        if (bucket === "desktop") setIsExpanded(true);
+        prevBucket.current = bucket;
+      }
     };
     handleResize();
     window.addEventListener("resize", handleResize);

@@ -236,7 +236,7 @@ export function ChannelStrip({
                 justifyContent: 'center',
                 color: '#fff',
                 fontSize: 13,
-                fontWeight: 800,
+                fontWeight: 600,
                 letterSpacing: '-.02em',
                 boxShadow: `0 4px 12px ${isActive ? 'rgba(0,0,0,0.25)' : 'rgba(0,0,0,0.15)'}`,
                 opacity: isComingSoon ? 0.7 : 1,
@@ -344,7 +344,7 @@ export function ChannelStrip({
                   <span
                     style={{
                       fontSize: 13,
-                      fontWeight: 800,
+                      fontWeight: 600,
                       color: isDark ? '#8da6ff' : '#2563EB',
                     }}
                   >

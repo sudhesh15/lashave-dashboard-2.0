@@ -98,7 +98,7 @@ export default function DataProcessingAgreementModal({
       >
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 14 }}>
           <div>
-            <h2 style={{ fontSize: 19, fontWeight: 900, color: textPrimary, margin: '0 0 4px' }}>
+            <h2 style={{ fontSize: 19, fontWeight: 700, color: textPrimary, margin: '0 0 4px' }}>
               Customer data processing
             </h2>
             <p style={{ fontSize: 12, color: textSub, margin: 0 }}>{platformLabel}</p>
@@ -178,7 +178,7 @@ export default function DataProcessingAgreementModal({
           disabled={!accepted || saving}
           style={{
             marginTop: 20, width: '100%', padding: '12px 0', borderRadius: 12,
-            border: 'none', fontSize: 13, fontWeight: 800, color: '#fff',
+            border: 'none', fontSize: 13, fontWeight: 600, color: '#fff',
             background: accepted ? '#111827' : (isDark ? 'rgba(255,255,255,.12)' : '#cbd5e1'),
             cursor: !accepted || saving ? 'default' : 'pointer',
             opacity: saving ? 0.7 : 1,

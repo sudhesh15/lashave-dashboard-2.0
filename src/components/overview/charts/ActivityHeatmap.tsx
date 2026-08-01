@@ -80,7 +80,7 @@ export function ActivityHeatmap({
           >
             Activity Heatmap · all channels
           </p>
-          <p style={{ fontSize: 30, fontWeight: 900, color: t.text }}>
+          <p style={{ fontSize: 30, fontWeight: 700, color: t.text }}>
             {totalInWindow.toLocaleString()}
           </p>
           <p style={{ fontSize: 11, color: t.textSub, marginTop: 2 }}>

@@ -129,6 +129,18 @@ function pct(used: number, limit: number): number {
   return Math.min(100, Math.round((used / limit) * 100));
 }
 
+function usageMetric(
+  usage: UsageSummary | null,
+  key: keyof UsageSummary['usage'],
+  fallbackLimit: number,
+) {
+  const metric = usage?.usage?.[key];
+  return {
+    used: metric?.used ?? 0,
+    limit: metric?.limit ?? fallbackLimit,
+  };
+}
+
 // ─────────────────────────────────────────────────────────
 // Main tab component
 // ─────────────────────────────────────────────────────────
@@ -269,6 +281,9 @@ export default function SubscriptionTab({ me }: { me: any }) {
   const trialDaysLeft = daysUntil(status?.trial_ends_at ?? null);
   const currentPlan = usage?.plan_id ?? 'starter';
   const currentPlanInfo = PLAN_INFO[currentPlan as keyof typeof PLAN_INFO];
+  const aiMessages = usageMetric(usage, 'ai_messages', 1000);
+  const channels = usageMetric(usage, 'channels', 2);
+  const knowledgeDocs = usageMetric(usage, 'knowledge_docs', 10);
 
   return (
     <>
@@ -355,18 +370,18 @@ export default function SubscriptionTab({ me }: { me: any }) {
             <div className='sub-usage-grid'>
               <UsageBar
                 label='AI messages this month'
-                used={usage.usage.ai_messages.used}
-                limit={usage.usage.ai_messages.limit}
+                used={aiMessages.used}
+                limit={aiMessages.limit}
               />
               <UsageBar
                 label='Connected channels'
-                used={usage.usage.channels.used}
-                limit={5}
+                used={channels.used}
+                limit={channels.limit}
               />
               <UsageBar
                 label='Knowledge documents'
-                used={usage.usage.knowledge_docs.used}
-                limit={20}
+                used={knowledgeDocs.used}
+                limit={knowledgeDocs.limit}
               />
             </div>
           </div>
@@ -560,7 +575,7 @@ export default function SubscriptionTab({ me }: { me: any }) {
         .sub-section-title {
           font-size: 16px;
           font-weight: 700;
-          color: ${isDark ? '#f8fafc' : '#0f172a'};
+          color: var(--app-primary);
         }
         .sub-section-sub {
           font-size: 13px;
@@ -586,8 +601,8 @@ export default function SubscriptionTab({ me }: { me: any }) {
           transition: all 0.15s;
         }
         .sub-cycle-toggle button.active {
-          background: ${isDark ? 'rgba(245,158,11,0.14)' : '#fff'};
-          color: ${isDark ? '#fbbf24' : '#b45309'};
+          background: ${isDark ? 'color-mix(in oklab, var(--app-primary) 18%, transparent)' : '#fff'};
+          color: var(--app-primary);
           box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
         }
         .sub-plans-grid {
@@ -605,8 +620,8 @@ export default function SubscriptionTab({ me }: { me: any }) {
           flex-direction: column;
         }
         .sub-plan-highlight {
-          border-color: rgba(245, 158, 11, 0.5);
-          box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+          border-color: color-mix(in oklab, var(--app-primary) 50%, transparent);
+          box-shadow: 0 0 0 3px color-mix(in oklab, var(--app-primary) 12%, transparent);
         }
         .sub-plan-current {
           border-color: rgba(34, 197, 94, 0.4);
@@ -616,7 +631,7 @@ export default function SubscriptionTab({ me }: { me: any }) {
           top: -10px;
           right: 16px;
           padding: 3px 10px;
-          background: linear-gradient(135deg, #f59e0b, #d97706);
+          background: linear-gradient(135deg, var(--app-primary), var(--app-primary-hover));
           color: white;
           font-size: 10px;
           font-weight: 700;
@@ -677,17 +692,17 @@ export default function SubscriptionTab({ me }: { me: any }) {
           padding: 10px 18px;
           border-radius: 10px;
           border: none;
-          background: linear-gradient(135deg, #f59e0b, #d97706);
+          background: linear-gradient(135deg, var(--app-primary), var(--app-primary-hover));
           color: white;
           font-size: 13px;
           font-weight: 600;
           cursor: pointer;
           transition: all 0.15s;
-          box-shadow: 0 2px 8px rgba(245, 158, 11, 0.28);
+          box-shadow: 0 2px 8px color-mix(in oklab, var(--app-primary) 28%, transparent);
         }
         .sub-btn-primary:hover:not(:disabled) {
           transform: translateY(-1px);
-          box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+          box-shadow: 0 4px 12px color-mix(in oklab, var(--app-primary) 40%, transparent);
         }
         .sub-btn-primary:disabled {
           opacity: 0.5;

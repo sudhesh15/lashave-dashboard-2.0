@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { Modal } from "@/components/ui/modal";
 import { AvatarText } from "@/components/ui/avatar";
+import { getPageItems, getTotalPages, TablePagination } from "@/components/ui/table-pagination";
 
 type Tenant = {
   id: string;
@@ -51,14 +52,14 @@ function DeleteModal({
 }) {
   return (
     <Modal isOpen onClose={onCancel} className="max-w-[400px] p-6">
-      <AvatarText name={tenant.name} className="mx-auto mb-4 h-12 w-12 text-lg" />
-      <h3 className="mb-2 text-center text-theme-sm font-bold text-gray-900 dark:text-white/90">
+      <AvatarText name={tenant.name} className="mx-auto mb-4 h-12 w-12 type-card-title" />
+      <h3 className="mb-2 text-center type-small font-bold text-gray-900 dark:text-white/90">
         Delete &quot;{tenant.name}&quot;?
       </h3>
-      <p className="mb-1 text-center text-theme-xs text-error-500">
+      <p className="mb-1 text-center type-caption text-error-500">
         This will permanently delete the tenant and <strong>all associated data</strong>:
       </p>
-      <p className="mb-6 text-center text-theme-xs leading-relaxed text-gray-400">
+      <p className="mb-6 text-center type-caption leading-relaxed text-gray-400">
         conversations · messages · leads · channels · FAQs · admin users
       </p>
       <div className="flex gap-3">
@@ -118,25 +119,25 @@ function EditModal({
 
   return (
     <Modal isOpen onClose={onClose} className="max-w-[520px]" showCloseButton={false}>
-      <div className="flex items-center justify-between border-b border-gray-200 p-5 dark:border-gray-800">
+      <div className="flex items-center justify-between border-b border-gray-200 p-6 dark:border-gray-800">
         <div className="flex items-center gap-3">
           <AvatarText name={tenant.name} className="h-9 w-9" />
           <div>
-            <div className="text-theme-sm font-bold text-gray-900 dark:text-white/90">Edit Tenant</div>
-            <div className="font-mono text-theme-xs text-gray-400">{tenant.id}</div>
+            <div className="type-small font-bold text-gray-900 dark:text-white/90">Edit Tenant</div>
+            <div className="font-mono type-caption text-gray-400">{tenant.id}</div>
           </div>
         </div>
         <button
           onClick={onClose}
-          className="flex h-7 w-7 items-center justify-center rounded-md bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-white/5 dark:text-gray-400"
+          className="flex h-7 w-7 items-center justify-center rounded-[10px] bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-white/5 dark:text-gray-400"
         >
-          <X className="size-4" />
+          <X className="icon-small" />
         </button>
       </div>
 
-      <div className="max-h-[70vh] space-y-4 overflow-y-auto p-5">
+      <div className="max-h-[70vh] space-y-4 overflow-y-auto p-6">
         <div>
-          <label className="mb-1.5 block text-theme-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+          <label className="mb-1.5 block type-caption font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
             Tenant Name
           </label>
           <Input value={form.name} onChange={(e) => set("name", e.target.value)} />
@@ -153,7 +154,7 @@ function EditModal({
               key={key}
               onClick={() => set(key, !(form as any)[key])}
               className={
-                "flex flex-1 items-center justify-center gap-2 rounded-lg border py-2.5 text-theme-xs font-semibold transition-colors " +
+                "flex flex-1 items-center justify-center gap-2 rounded-[10px] border py-2 type-caption font-semibold transition-colors " +
                 ((form as any)[key]
                   ? color === "success"
                     ? "border-success-300 bg-success-50 text-success-600 dark:border-success-500/30 dark:bg-success-500/10"
@@ -173,7 +174,7 @@ function EditModal({
         </div>
 
         <div>
-          <label className="mb-1.5 block text-theme-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+          <label className="mb-1.5 block type-caption font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
             System Prompt
           </label>
           <Textarea
@@ -184,7 +185,7 @@ function EditModal({
         </div>
 
         <div>
-          <label className="mb-1.5 block text-theme-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+          <label className="mb-1.5 block type-caption font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
             Opening Message
           </label>
           <Input value={form.opening_message} onChange={(e) => set("opening_message", e.target.value)} />
@@ -192,7 +193,7 @@ function EditModal({
 
         <div className="flex gap-3">
           <div className="flex-1">
-            <label className="mb-1.5 block text-theme-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+            <label className="mb-1.5 block type-caption font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
               Temperature
             </label>
             <Input
@@ -205,7 +206,7 @@ function EditModal({
             />
           </div>
           <div className="flex-1">
-            <label className="mb-1.5 block text-theme-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+            <label className="mb-1.5 block type-caption font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
               Max Tokens
             </label>
             <Input
@@ -220,16 +221,16 @@ function EditModal({
 
         {tenant.users.length > 0 && (
           <div>
-            <label className="mb-2 block text-theme-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+            <label className="mb-2 block type-caption font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
               Admin Users
             </label>
             <div className="space-y-1.5">
               {tenant.users.map((u) => (
                 <div
                   key={u.id}
-                  className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 dark:border-gray-800 dark:bg-white/[0.03]"
+                  className="flex items-center justify-between rounded-[10px] border border-gray-200 bg-gray-50 px-3 py-2 dark:border-gray-800 dark:bg-white/[0.03]"
                 >
-                  <span className="font-mono text-theme-xs text-gray-600 dark:text-gray-400">{u.email}</span>
+                  <span className="font-mono type-caption text-gray-600 dark:text-gray-400">{u.email}</span>
                   <div className="flex items-center gap-2">
                     <Badge variant="light" color="light">
                       {u.role}
@@ -261,6 +262,7 @@ function TenantsList() {
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
   const [delTarget, setDelTarget] = useState<Tenant | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [editTarget, setEditTarget] = useState<TenantDetail | null>(null);
@@ -284,6 +286,10 @@ function TenantsList() {
   useEffect(() => {
     load();
   }, [load]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [search]);
 
   async function openEdit(tenant: Tenant) {
     setLoadingEdit(true);
@@ -321,6 +327,9 @@ function TenantsList() {
   const filtered = tenants.filter(
     (t) => t.id.toLowerCase().includes(search.toLowerCase()) || t.name.toLowerCase().includes(search.toLowerCase())
   );
+  const totalPages = getTotalPages(filtered.length, 8);
+  const currentPage = Math.min(page, totalPages);
+  const pageItems = getPageItems(filtered, currentPage, 8);
   const activeCount = tenants.filter((t) => t.is_active).length;
 
   return (
@@ -328,7 +337,7 @@ function TenantsList() {
       {toast && (
         <div
           className={
-            "fixed bottom-6 left-1/2 z-[200] -translate-x-1/2 whitespace-nowrap rounded-xl border px-5 py-3 text-theme-sm font-medium shadow-theme-lg " +
+            "fixed bottom-6 left-1/2 z-[200] -translate-x-1/2 whitespace-nowrap rounded-xl border px-5 py-3 type-small font-medium shadow-theme-lg " +
             (toast.type === "ok"
               ? "border-success-200 bg-success-50 text-success-700 dark:border-success-500/30 dark:bg-success-500/10 dark:text-success-400"
               : "border-error-200 bg-error-50 text-error-700 dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-400")
@@ -356,19 +365,19 @@ function TenantsList() {
             Super Admin
           </Badge>
           <h1 className="text-title-sm font-bold text-gray-900 dark:text-white/90">Tenants</h1>
-          <p className="mt-1 text-theme-sm text-gray-500 dark:text-gray-400">
+          <p className="mt-1 type-small text-gray-500 dark:text-gray-400">
             {tenants.length} total · {activeCount} active
           </p>
         </div>
         <Button asChild>
           <Link href="/super-admin/create-tenant">
-            <Plus className="size-4" /> New Tenant
+            <Plus className="icon-small" /> New Tenant
           </Link>
         </Button>
       </div>
 
       <div className="relative mb-5">
-        <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
+        <Search className="absolute left-3.5 top-1/2 icon-small -translate-y-1/2 text-gray-400" />
         <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by name or ID…" className="pl-10" />
       </div>
 
@@ -381,7 +390,7 @@ function TenantsList() {
           ].map(({ label, value }) => (
             <Card key={label} className="items-center py-4 text-center">
               <div className="text-title-sm font-bold text-gray-900 dark:text-white/90">{value}</div>
-              <div className="mt-0.5 text-theme-xs font-medium uppercase tracking-wide text-gray-400">{label}</div>
+              <div className="mt-0.5 type-caption font-medium uppercase tracking-wide text-gray-400">{label}</div>
             </Card>
           ))}
         </div>
@@ -394,12 +403,12 @@ function TenantsList() {
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="rounded-2xl border border-gray-200 bg-gray-50 py-16 text-center text-theme-sm text-gray-400 dark:border-gray-800 dark:bg-white/[0.02]">
+        <div className="rounded-2xl border border-gray-200 bg-gray-50 py-16 text-center type-small text-gray-400 dark:border-gray-800 dark:bg-white/[0.02]">
           {search ? `No tenants matching "${search}"` : "No tenants yet"}
         </div>
       ) : (
         <div className="space-y-2">
-          {filtered.map((t) => (
+          {pageItems.map((t) => (
             <div
               key={t.id}
               className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-gray-200 bg-white p-4 transition-colors hover:border-brand-200 hover:bg-brand-25 dark:border-gray-800 dark:bg-white/[0.03] dark:hover:border-brand-500/30 dark:hover:bg-brand-500/5"
@@ -407,8 +416,8 @@ function TenantsList() {
               <div className="flex items-center gap-3.5">
                 <AvatarText name={t.name} className="h-10 w-10" />
                 <div>
-                  <div className="text-theme-sm font-semibold text-gray-900 dark:text-white/90">{t.name}</div>
-                  <div className="font-mono text-theme-xs text-gray-400">{t.id}</div>
+                  <div className="type-small font-semibold text-gray-900 dark:text-white/90">{t.name}</div>
+                  <div className="font-mono type-caption text-gray-400">{t.id}</div>
                 </div>
               </div>
 
@@ -416,9 +425,9 @@ function TenantsList() {
                 <Badge variant="light" color={t.is_active ? "success" : "light"}>
                   {t.is_active ? "Active" : "Inactive"}
                 </Badge>
-                <span className="text-theme-xs text-gray-400">{timeAgo(t.created_at)}</span>
+                <span className="type-caption text-gray-400">{timeAgo(t.created_at)}</span>
                 <Button size="sm" variant="outline" onClick={() => openEdit(t)} disabled={loadingEdit}>
-                  <Pencil className="size-3.5" /> Edit
+                  <Pencil className="icon-tiny" /> Edit
                 </Button>
                 <Button
                   size="sm"
@@ -426,11 +435,12 @@ function TenantsList() {
                   className="border-error-200 text-error-600 hover:bg-error-50 dark:border-error-500/30 dark:text-error-400 dark:hover:bg-error-500/10"
                   onClick={() => setDelTarget(t)}
                 >
-                  <Trash2 className="size-3.5" /> Delete
+                  <Trash2 className="icon-tiny" /> Delete
                 </Button>
               </div>
             </div>
           ))}
+          <TablePagination page={currentPage} totalItems={filtered.length} onPageChange={setPage} pageSize={8} />
         </div>
       )}
     </div>

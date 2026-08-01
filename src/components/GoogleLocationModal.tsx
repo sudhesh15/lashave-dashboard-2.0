@@ -138,7 +138,7 @@ export default function GoogleLocationModal({
       className="m-4 max-w-[680px]"
       showCloseButton={false}
     >
-      <div className="flex max-h-[85vh] w-full flex-col overflow-hidden rounded-3xl bg-white dark:bg-gray-900">
+      <div className="flex max-h-[85vh] w-full flex-col overflow-hidden rounded-[20px] bg-white dark:bg-gray-900">
         <div className="flex items-start justify-between gap-5 border-b border-gray-100 px-6 py-5 pr-5 dark:border-gray-800">
           <div className="min-w-0">
             <Badge
@@ -155,15 +155,15 @@ export default function GoogleLocationModal({
             >
               Google Reviews
             </Badge>
-            <h2 className="mt-3 text-xl font-bold text-gray-800 dark:text-white/90">
+            <h2 className="mt-3 type-h4 font-bold text-gray-800 dark:text-white/90">
               Select business location
             </h2>
-            <p className="mt-1.5 max-w-xl text-theme-sm leading-6 text-gray-500 dark:text-gray-400">
+            <p className="mt-1.5 max-w-xl type-small leading-6 text-gray-500 dark:text-gray-400">
               Lashvae reads and replies to reviews for the Google Business
               Profile location you choose.
             </p>
             {accountId && (
-              <p className="mt-2 text-theme-xs text-gray-400 dark:text-gray-500">
+              <p className="mt-2 type-caption text-gray-400 dark:text-gray-500">
                 Account: {shortId(accountId)}
               </p>
             )}
@@ -187,7 +187,7 @@ export default function GoogleLocationModal({
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Filter by name, phone or website"
-                className="h-11 w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-11 pr-4 text-theme-sm text-gray-800 shadow-theme-xs outline-none placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-gray-500"
+                className="h-10 w-full rounded-[10px] border border-gray-300 bg-white py-2 pl-11 pr-4 type-small text-gray-800 shadow-theme-xs outline-none placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-gray-500"
               />
             </div>
           )}
@@ -203,7 +203,7 @@ export default function GoogleLocationModal({
             </div>
           ) : err && locations.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 px-5 py-10 text-center dark:border-gray-800 dark:bg-white/[0.02]">
-              <p className="mx-auto max-w-md text-theme-sm leading-6 text-gray-500 dark:text-gray-400">
+              <p className="mx-auto max-w-md type-small leading-6 text-gray-500 dark:text-gray-400">
                 {err}
               </p>
               <Button className="mt-5" variant="outline" onClick={fetchLocations}>
@@ -213,7 +213,7 @@ export default function GoogleLocationModal({
             </div>
           ) : filtered.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 px-5 py-10 text-center dark:border-gray-800 dark:bg-white/[0.02]">
-              <p className="mx-auto max-w-md text-theme-sm leading-6 text-gray-500 dark:text-gray-400">
+              <p className="mx-auto max-w-md type-small leading-6 text-gray-500 dark:text-gray-400">
                 {query
                   ? 'No location matches that filter.'
                   : 'This Google account has no business locations. Add one in Google Business Profile, then reopen this window.'}
@@ -249,10 +249,10 @@ export default function GoogleLocationModal({
                     </span>
 
                     <span className="min-w-0">
-                      <span className="block truncate text-theme-sm font-semibold text-gray-800 dark:text-white/90">
+                      <span className="block truncate type-small font-semibold text-gray-800 dark:text-white/90">
                         {location.location_name || 'Unnamed location'}
                       </span>
-                      <span className="mt-1 block truncate text-theme-xs text-gray-500 dark:text-gray-400">
+                      <span className="mt-1 block truncate type-caption text-gray-500 dark:text-gray-400">
                         {[location.phone, location.website]
                           .filter(Boolean)
                           .join(' | ') || shortId(location.location_id)}
@@ -271,14 +271,14 @@ export default function GoogleLocationModal({
           )}
 
           {err && locations.length > 0 && (
-            <div className="mt-4 rounded-xl border border-error-200 bg-error-50 px-4 py-3 text-theme-sm font-medium text-error-700 dark:border-error-500/20 dark:bg-error-500/10 dark:text-error-500">
+            <div className="mt-4 rounded-xl border border-error-200 bg-error-50 px-4 py-3 type-small font-medium text-error-700 dark:border-error-500/20 dark:bg-error-500/10 dark:text-error-500">
               {err}
             </div>
           )}
         </div>
 
         <div className="flex flex-col-reverse gap-3 border-t border-gray-100 px-6 py-4 dark:border-gray-800 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-theme-xs text-gray-500 dark:text-gray-400">
+          <p className="type-caption text-gray-500 dark:text-gray-400">
             You can switch locations later from the channel row.
           </p>
           <div className="flex justify-end gap-3">

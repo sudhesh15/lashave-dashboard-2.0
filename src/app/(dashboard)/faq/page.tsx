@@ -51,6 +51,7 @@ import {
   Loader2,
   MessageSquare,
   MessageSquareText,
+  Minus,
   Plus,
   RefreshCw,
   Search,
@@ -68,6 +69,7 @@ import PageBreadcrumb from '@/components/common/PageBreadcrumb';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { getPageItems, TablePagination } from '@/components/ui/table-pagination';
 
 type FaqItem = {
   id: number;
@@ -344,19 +346,19 @@ function DelModal({
       className='fixed inset-0 z-[100] flex items-center justify-center bg-gray-400/50 p-4 backdrop-blur-[10px] dark:bg-black/70'
     >
       <div className='w-full max-w-[390px] rounded-2xl border border-error-200 bg-white p-6 shadow-theme-xl dark:border-error-500/30 dark:bg-gray-900'>
-        <div className='mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-error-50 text-error-500 dark:bg-error-500/15 dark:text-error-400'>
+        <div className='mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-error-50 text-error-500 dark:bg-error-500/15 dark:text-error-400'>
           <Trash2 size={20} />
         </div>
         <h3
           id='del-modal-title'
-          className='mb-2 text-center text-base font-semibold text-gray-800 dark:text-white/90'
+          className='mb-2 text-center type-body font-semibold text-gray-800 dark:text-white/90'
         >
           Delete this FAQ?
         </h3>
-        <p className='mb-1.5 line-clamp-2 text-center text-sm text-gray-500 dark:text-gray-400'>
+        <p className='mb-1.5 line-clamp-2 text-center type-small text-gray-500 dark:text-gray-400'>
           &ldquo;{item.question}&rdquo;
         </p>
-        <p className='mb-5 text-center text-xs text-error-500'>
+        <p className='mb-5 text-center type-caption text-error-500'>
           Permanent — cannot be undone.
         </p>
 
@@ -430,7 +432,7 @@ function ConfirmModal({
           <span
             aria-hidden
             className={cn(
-              'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-lg font-bold',
+              'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl type-card-title font-bold',
               danger
                 ? 'bg-error-50 text-error-500 dark:bg-error-500/15 dark:text-error-400'
                 : 'bg-gray-100 text-gray-700 dark:bg-white/[0.06] dark:text-gray-300',
@@ -441,12 +443,12 @@ function ConfirmModal({
           <div className='min-w-0 flex-1'>
             <h3
               id='confirm-modal-title'
-              className='text-base font-semibold text-gray-800 dark:text-white/90'
+              className='type-body font-semibold text-gray-800 dark:text-white/90'
             >
               {title}
             </h3>
             {detail && (
-              <p className='mt-1 text-sm leading-relaxed text-gray-500 dark:text-gray-400'>
+              <p className='mt-1 type-small leading-relaxed text-gray-500 dark:text-gray-400'>
                 {detail}
               </p>
             )}
@@ -673,17 +675,17 @@ function TestDrawer({
   }
 
   return (
-    <div className='rounded-2xl border border-brand-200 bg-brand-50/40 p-5 dark:border-brand-500/25 dark:bg-brand-500/[0.04]'>
+    <div className='rounded-2xl border border-brand-200 bg-brand-50/40 p-6 dark:border-brand-500/25 dark:bg-brand-500/[0.04]'>
       <div className='mb-3 flex items-center justify-between'>
-        <div className='flex items-center gap-2.5'>
-          <div className='flex h-8 w-8 items-center justify-center rounded-lg bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'>
+        <div className='flex items-center gap-3'>
+          <div className='flex h-8 w-8 items-center justify-center rounded-[10px] bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'>
             <FlaskConical size={15} />
           </div>
           <div>
-            <p className='text-sm font-semibold text-gray-800 dark:text-white/90'>
+            <p className='type-small font-semibold text-gray-800 dark:text-white/90'>
               FAQ Match Tester
             </p>
-            <p className='text-xs text-gray-400 dark:text-gray-500'>
+            <p className='type-caption text-gray-400 dark:text-gray-500'>
               Simulate how a customer message would match
             </p>
           </div>
@@ -691,7 +693,7 @@ function TestDrawer({
 
         <button
           onClick={onClose}
-          className='rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:text-gray-500 dark:hover:bg-white/[0.06] dark:hover:text-gray-300'
+          className='rounded-[10px] p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:text-gray-500 dark:hover:bg-white/[0.06] dark:hover:text-gray-300'
         >
           <X size={16} />
         </button>
@@ -715,10 +717,10 @@ function TestDrawer({
           {res.ok ? (
             <div className='rounded-xl border border-success-200 bg-success-50 p-4 dark:border-success-500/25 dark:bg-success-500/10'>
               <div className='mb-2 flex items-center justify-between'>
-                <span className='text-xs font-semibold tracking-wide text-success-700 dark:text-success-400'>
+                <span className='type-caption font-semibold tracking-wide text-success-700 dark:text-success-400'>
                   {res.source === 'rag' ? 'RAG ANSWER' : 'FAQ MATCH'}
                 </span>
-                <span className='font-mono text-[11px] text-gray-400 dark:text-gray-500'>
+                <span className='font-mono type-caption text-gray-400 dark:text-gray-500'>
                   {res.score != null
                     ? `score ${res.score}`
                     : res.routedTo || 'retrieval'}
@@ -726,10 +728,10 @@ function TestDrawer({
                 </span>
               </div>
 
-              <p className='mb-1.5 text-xs text-gray-500 dark:text-gray-400'>
+              <p className='mb-1.5 type-caption text-gray-500 dark:text-gray-400'>
                 → {res.question}
               </p>
-              <p className='text-sm leading-relaxed text-gray-700 dark:text-gray-200'>
+              <p className='type-small leading-relaxed text-gray-700 dark:text-gray-200'>
                 {res.answer}
               </p>
             </div>
@@ -737,7 +739,7 @@ function TestDrawer({
             <div className='rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900'>
               <p
                 className={cn(
-                  'text-xs text-gray-500 dark:text-gray-400',
+                  'type-caption text-gray-500 dark:text-gray-400',
                   res.top?.length ? 'mb-2.5' : '',
                 )}
               >
@@ -746,7 +748,7 @@ function TestDrawer({
 
               {res.top?.length > 0 && (
                 <>
-                  <p className='mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500'>
+                  <p className='mb-1.5 type-caption font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500'>
                     Closest misses
                   </p>
 
@@ -760,10 +762,10 @@ function TestDrawer({
                           : '',
                       )}
                     >
-                      <p className='mr-2 flex-1 truncate text-xs text-gray-500 dark:text-gray-400'>
+                      <p className='mr-2 flex-1 truncate type-caption text-gray-500 dark:text-gray-400'>
                         {m.q}
                       </p>
-                      <span className='shrink-0 font-mono text-[11px] text-gray-400 dark:text-gray-500'>
+                      <span className='shrink-0 font-mono type-caption text-gray-400 dark:text-gray-500'>
                         {m.s}
                       </span>
                     </div>
@@ -858,7 +860,7 @@ function FaqCard({
         className='flex cursor-pointer items-center gap-3 px-4 py-3.5'
         onClick={() => setOpen((v) => !v)}
       >
-        <p className='min-w-0 flex-1 truncate text-sm font-semibold text-gray-800 dark:text-white/90'>
+        <p className='min-w-0 flex-1 truncate type-small font-semibold text-gray-800 dark:text-white/90'>
           <Hl text={item.question} q={sq} />
         </p>
 
@@ -867,27 +869,27 @@ function FaqCard({
         </Badge>
 
         {!open && (
-          <p className='hidden max-w-[200px] truncate text-xs text-gray-500 dark:text-gray-400 sm:block'>
+          <p className='hidden max-w-[220px] truncate type-caption text-gray-500 dark:text-gray-400 lg:block'>
             {item.answer}
           </p>
         )}
 
         {tagList.length > 0 && (
-          <div className='hidden shrink-0 items-center gap-1 sm:flex'>
+          <div className='hidden shrink-0 items-center gap-1 lg:flex'>
             {tagList.slice(0, 2).map((t) => (
               <Badge key={t} color='primary'>
                 {t}
               </Badge>
             ))}
             {tagList.length > 2 && (
-              <span className='text-xs text-gray-400 dark:text-gray-500'>
+              <span className='type-caption text-gray-400 dark:text-gray-500'>
                 +{tagList.length - 2}
               </span>
             )}
           </div>
         )}
 
-        <span className='hidden w-14 shrink-0 text-right text-xs text-gray-400 dark:text-gray-500 sm:block'>
+        <span className='hidden w-14 shrink-0 text-right type-caption text-gray-400 dark:text-gray-500 lg:block'>
           {timeAgo(item.updated_at)}
         </span>
 
@@ -921,7 +923,7 @@ function FaqCard({
       {open && (
         <div className='flex flex-col gap-3.5 border-t border-gray-100 px-4 pb-4 pt-3.5 dark:border-gray-800'>
           <div>
-            <label className='mb-1.5 block text-xs font-medium text-gray-500 dark:text-gray-400'>
+            <label className='mb-1.5 block type-caption font-medium text-gray-500 dark:text-gray-400'>
               Question
             </label>
             <Input
@@ -934,9 +936,9 @@ function FaqCard({
           </div>
 
           <div>
-            <label className='mb-1.5 flex items-center justify-between text-xs font-medium text-gray-500 dark:text-gray-400'>
+            <label className='mb-1.5 flex items-center justify-between type-caption font-medium text-gray-500 dark:text-gray-400'>
               <span>Answer</span>
-              <span className='font-mono text-[11px] font-normal'>
+              <span className='font-mono type-caption font-normal'>
                 {answer.length} ch
               </span>
             </label>
@@ -948,13 +950,13 @@ function FaqCard({
                 setDirty(true);
               }}
               rows={3}
-              className='min-h-[80px] w-full resize-none rounded-lg border border-gray-300 bg-transparent px-3.5 py-2.5 text-sm leading-relaxed text-gray-800 shadow-theme-xs outline-none focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800'
+              className='min-h-[80px] w-full resize-none rounded-[10px] border border-gray-300 bg-transparent px-3.5 py-2 type-small leading-relaxed text-gray-800 shadow-theme-xs outline-none focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800'
             />
           </div>
 
           <div className='grid grid-cols-1 gap-3 sm:grid-cols-2'>
             <div>
-              <label className='mb-1.5 block text-xs font-medium text-gray-500 dark:text-gray-400'>
+              <label className='mb-1.5 block type-caption font-medium text-gray-500 dark:text-gray-400'>
                 Tags
               </label>
               <Input
@@ -968,7 +970,7 @@ function FaqCard({
             </div>
 
             <div>
-              <label className='mb-1.5 block text-xs font-medium text-gray-500 dark:text-gray-400'>
+              <label className='mb-1.5 block type-caption font-medium text-gray-500 dark:text-gray-400'>
                 Synonyms
               </label>
               <Input
@@ -1001,7 +1003,7 @@ function FaqCard({
                 size='sm'
                 onClick={save}
                 disabled={saving}
-                className='h-9 min-w-[118px] rounded-lg bg-brand-500 px-4 font-semibold text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-400 disabled:opacity-70'
+                className='h-9 min-w-[118px] rounded-[10px] bg-brand-500 px-4 font-semibold text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-400 disabled:opacity-70'
               >
                 {saving ? 'Saving...' : saved ? 'Saved' : 'Save FAQ'}
               </Button>
@@ -1366,7 +1368,7 @@ function CatalogueUploadModal({
                 display: 'grid',
                 placeItems: 'center',
                 fontSize: 11,
-                fontWeight: 800,
+                fontWeight: 600,
                 flex: '0 0 auto',
                 lineHeight: 1,
               }}
@@ -1769,7 +1771,7 @@ function RagStatusCard({
               padding: '3px 8px',
               borderRadius: 999,
               fontSize: 10,
-              fontWeight: 800,
+              fontWeight: 600,
               letterSpacing: '.06em',
               textTransform: 'uppercase',
               color,
@@ -2556,7 +2558,7 @@ function WebsiteScrapeStatusPanel({
               <div
                 style={{
                   fontSize: 20,
-                  fontWeight: 800,
+                  fontWeight: 600,
                   color: th.text,
                   fontVariantNumeric: 'tabular-nums',
                   marginTop: 2,
@@ -2587,7 +2589,7 @@ function WebsiteScrapeStatusPanel({
               <div
                 style={{
                   fontSize: 20,
-                  fontWeight: 800,
+                  fontWeight: 600,
                   color: th.text,
                   fontVariantNumeric: 'tabular-nums',
                   marginTop: 2,
@@ -2624,7 +2626,7 @@ function WebsiteScrapeStatusPanel({
                   fontSize: 12,
                   color: failed ? '#991b1b' : th.text,
                   fontVariantNumeric: 'tabular-nums',
-                  fontWeight: 800,
+                  fontWeight: 600,
                 }}
               >
                 {failed ? '—' : `${Math.round(progress)}%`}
@@ -2999,7 +3001,7 @@ function WebsiteEntryCard({
                 borderRadius: 999,
                 padding: '5px 9px',
                 fontSize: 10,
-                fontWeight: 900,
+                fontWeight: 700,
                 textTransform: 'uppercase',
                 letterSpacing: '.05em',
                 color,
@@ -3010,20 +3012,20 @@ function WebsiteEntryCard({
               {status}
             </span>
             <span
-              style={{ color: th.textMuted, fontSize: 11, fontWeight: 800 }}
+              style={{ color: th.textMuted, fontSize: 11, fontWeight: 600 }}
             >
               Confidence {confidenceLabel(entry.confidence)}
             </span>
             {entry.category && (
               <span
-                style={{ color: th.textMuted, fontSize: 11, fontWeight: 800 }}
+                style={{ color: th.textMuted, fontSize: 11, fontWeight: 600 }}
               >
                 {entry.category}
               </span>
             )}
             {entry.entry_type && (
               <span
-                style={{ color: th.textMuted, fontSize: 11, fontWeight: 800 }}
+                style={{ color: th.textMuted, fontSize: 11, fontWeight: 600 }}
               >
                 {entry.entry_type}
               </span>
@@ -3063,7 +3065,7 @@ function WebsiteEntryCard({
                   borderRadius: 12,
                   padding: '10px 12px',
                   fontSize: 13,
-                  fontWeight: 800,
+                  fontWeight: 600,
                   outline: 'none',
                 }}
               />
@@ -3137,7 +3139,7 @@ function WebsiteEntryCard({
                   color: th.text,
                   fontSize: 15,
                   lineHeight: 1.35,
-                  fontWeight: 900,
+                  fontWeight: 700,
                   margin: 0,
                 }}
               >
@@ -3149,7 +3151,7 @@ function WebsiteEntryCard({
                     color: th.textSub,
                     margin: '4px 0 0',
                     fontSize: 12,
-                    fontWeight: 800,
+                    fontWeight: 600,
                   }}
                 >
                   {entry.question}
@@ -3185,7 +3187,7 @@ function WebsiteEntryCard({
                 borderRadius: 999,
                 padding: '5px 9px',
                 fontSize: 11,
-                fontWeight: 800,
+                fontWeight: 600,
               }}
             >
               {tag}
@@ -3201,7 +3203,7 @@ function WebsiteEntryCard({
               borderRadius: 999,
               padding: '5px 9px',
               fontSize: 11,
-              fontWeight: 800,
+              fontWeight: 600,
             }}
           >
             {key}
@@ -3227,7 +3229,7 @@ function WebsiteEntryCard({
             style={{
               color: th.textMuted,
               fontSize: 11,
-              fontWeight: 800,
+              fontWeight: 600,
               textDecoration: 'none',
               display: 'inline-flex',
               alignItems: 'center',
@@ -3324,8 +3326,8 @@ function reviewButtonStyle(
     border: `1px solid ${color ? `${color}33` : th.cardBorder}`,
     background: color ? (isDark ? `${color}18` : '#fff') : th.cardBg,
     color: color || th.textSub,
-    padding: '8px 10px',
-    fontSize: 11,
+    padding: '9px 12px',
+    fontSize: 13,
     fontWeight: 500,
     cursor: 'pointer',
     boxShadow: isDark ? 'none' : '0 2px 8px rgba(15,23,42,.04)',
@@ -3359,7 +3361,7 @@ function inspectorFieldStyle(th: FaqTheme): React.CSSProperties {
     background: th.inputBg,
     color: th.text,
     padding: '10px 12px',
-    fontSize: 13,
+    fontSize: 14,
     outline: 'none',
     boxSizing: 'border-box',
   };
@@ -3489,7 +3491,7 @@ function WebsiteEntriesReview({
         }}
       >
         <div>
-          <div style={{ color: th.text, fontSize: 18, fontWeight: 950 }}>
+          <div style={{ color: th.text, fontSize: 18, fontWeight: 700 }}>
             Knowledge Review
           </div>
           <div style={{ color: th.textSub, fontSize: 12, marginTop: 4 }}>
@@ -3581,14 +3583,14 @@ function WebsiteEntriesReview({
                   cursor: 'pointer',
                 }}
               >
-                <div style={{ color, fontSize: 18, fontWeight: 950 }}>
+                <div style={{ color, fontSize: 18, fontWeight: 700 }}>
                   {count}
                 </div>
                 <div
                   style={{
                     color: th.textMuted,
                     fontSize: 10,
-                    fontWeight: 900,
+                    fontWeight: 700,
                     textTransform: 'uppercase',
                   }}
                 >
@@ -3637,7 +3639,7 @@ function WebsiteEntriesReview({
                   padding: '9px 14px',
                   color: th.textMuted,
                   fontSize: 10,
-                  fontWeight: 900,
+                  fontWeight: 700,
                   textTransform: 'uppercase',
                   borderTop: `1px solid ${th.cardBorder}`,
                   borderBottom: `1px solid ${th.cardBorder}`,
@@ -3689,7 +3691,7 @@ function WebsiteEntriesReview({
                         style={{
                           color: th.text,
                           fontSize: 13,
-                          fontWeight: 850,
+                          fontWeight: 600,
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
                           whiteSpace: 'nowrap',
@@ -3720,7 +3722,7 @@ function WebsiteEntriesReview({
                             ? '#059669'
                             : '#d97706',
                         fontSize: 12,
-                        fontWeight: 850,
+                        fontWeight: 600,
                       }}
                     >
                       {confidenceLabel(entry.confidence)}
@@ -3729,7 +3731,7 @@ function WebsiteEntriesReview({
                       style={{
                         color: statusColor(entry.status),
                         fontSize: 11,
-                        fontWeight: 950,
+                        fontWeight: 700,
                         textTransform: 'capitalize',
                       }}
                     >
@@ -3760,7 +3762,7 @@ function WebsiteEntriesReview({
               style={{
                 color: th.text,
                 fontSize: 13,
-                fontWeight: 950,
+                fontWeight: 700,
                 marginBottom: 10,
               }}
             >
@@ -3804,7 +3806,7 @@ function WebsiteEntriesReview({
                         style={{
                           padding: '9px 6px',
                           color: th.text,
-                          fontWeight: 800,
+                          fontWeight: 600,
                         }}
                       >
                         {entry.question}
@@ -3864,7 +3866,7 @@ function WebsiteEntriesReview({
                     style={{
                       color: statusColor(active.status),
                       fontSize: 11,
-                      fontWeight: 950,
+                      fontWeight: 700,
                       textTransform: 'uppercase',
                     }}
                   >
@@ -3876,14 +3878,14 @@ function WebsiteEntriesReview({
                       fontSize: 17,
                       lineHeight: 1.35,
                       margin: '6px 0 0',
-                      fontWeight: 950,
+                      fontWeight: 700,
                     }}
                   >
                     {active.display_title || active.question}
                   </h3>
                 </div>
                 <span
-                  style={{ color: th.textMuted, fontSize: 12, fontWeight: 850 }}
+                  style={{ color: th.textMuted, fontSize: 12, fontWeight: 600 }}
                 >
                   {confidenceLabel(active.confidence)}
                 </span>
@@ -3934,7 +3936,7 @@ function WebsiteEntriesReview({
                           padding: '5px 8px',
                           color: th.textSub,
                           fontSize: 11,
-                          fontWeight: 800,
+                          fontWeight: 600,
                         }}
                       >
                         {tag}
@@ -3950,7 +3952,7 @@ function WebsiteEntriesReview({
                         color: th.accent,
                         textDecoration: 'none',
                         fontSize: 12,
-                        fontWeight: 850,
+                        fontWeight: 600,
                         display: 'inline-flex',
                         gap: 6,
                         alignItems: 'center',
@@ -4088,7 +4090,7 @@ function WorkbenchTab({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        'relative flex min-h-[132px] flex-col items-start overflow-hidden rounded-xl border p-5 text-left shadow-theme-xs transition-all duration-200',
+        'relative flex min-h-[132px] flex-col items-start overflow-hidden rounded-xl border p-6 text-left shadow-theme-xs transition-all duration-200',
         active
           ? 'border-brand-300 bg-gradient-to-br from-brand-50 via-white to-blue-50 shadow-sm dark:border-brand-500/30 dark:from-brand-500/15 dark:via-gray-900 dark:to-blue-500/10'
           : 'border-gray-200 bg-gradient-to-br from-white via-white to-gray-50 hover:border-brand-200 hover:from-brand-50/60 hover:to-blue-50/60 hover:shadow-sm dark:border-gray-800 dark:from-gray-900 dark:via-gray-900 dark:to-white/[0.03] dark:hover:border-brand-500/20 dark:hover:from-brand-500/10 dark:hover:to-blue-500/5',
@@ -4124,7 +4126,7 @@ function WorkbenchTab({
         {typeof count === 'number' && (
           <span
             className={cn(
-              'rounded-full px-3 py-1.5 text-theme-sm font-semibold tabular-nums',
+              'rounded-full px-3 py-1.5 type-small font-semibold tabular-nums',
               active
                 ? 'bg-brand-500 text-white shadow-sm'
                 : 'bg-white/80 text-gray-700 ring-1 ring-gray-200 dark:bg-white/5 dark:text-white/80 dark:ring-white/10',
@@ -4135,11 +4137,11 @@ function WorkbenchTab({
         )}
       </div>
 
-      <span className='relative z-10 mt-4 text-base font-semibold text-gray-800 dark:text-white/90'>
+      <span className='relative z-10 mt-4 type-body font-semibold text-gray-800 dark:text-white/90'>
         {label}
       </span>
 
-      <span className='relative z-10 mt-2 text-theme-sm leading-6 text-gray-500 dark:text-gray-400'>
+      <span className='relative z-10 mt-2 type-small leading-6 text-gray-500 dark:text-gray-400'>
         {description}
       </span>
     </button>
@@ -4168,14 +4170,14 @@ function TabTeachingBanner({
 
   return (
     <div className='flex flex-col gap-5 border-b border-gray-100 bg-gray-50 p-6 dark:border-gray-800 dark:bg-white/[0.02] sm:flex-row sm:items-center'>
-      <div className='flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300'>
+      <div className='flex h-12 w-12 shrink-0 items-center justify-center rounded-[10px] border border-gray-200 bg-white text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300'>
         {icon}
       </div>
       <div className='min-w-0 flex-1'>
-        <div className='text-base font-semibold text-gray-800 dark:text-white/90'>
+        <div className='type-body font-semibold text-gray-800 dark:text-white/90'>
           {title}
         </div>
-        <div className='mt-2 text-theme-sm leading-6 text-gray-500 dark:text-gray-400'>
+        <div className='mt-2 type-small leading-6 text-gray-500 dark:text-gray-400'>
           {detail}
         </div>
       </div>
@@ -4315,15 +4317,15 @@ function KnowledgeWorkbench({
       <div className='border-b border-gray-100 px-6 py-6 dark:border-gray-800'>
         <div className='mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between'>
           <div>
-            <h2 className='text-xl font-semibold text-gray-800 dark:text-white/90'>
+            <h2 className='type-h4 font-semibold text-gray-800 dark:text-white/90'>
               Knowledge sources
             </h2>
-            <p className='mt-1 max-w-2xl text-theme-sm leading-6 text-gray-500 dark:text-gray-400'>
+            <p className='mt-1 max-w-2xl type-small leading-6 text-gray-500 dark:text-gray-400'>
               Add, review, and manage the content your bot can use for customer
               answers.
             </p>
           </div>
-          <span className='text-theme-sm font-medium text-gray-500 dark:text-gray-400'>
+          <span className='type-small font-medium text-gray-500 dark:text-gray-400'>
             {totalSaved} live items
           </span>
         </div>
@@ -4366,7 +4368,7 @@ function KnowledgeWorkbench({
           />
         </div>
       </div>
-      <div className='border-b border-gray-100 bg-gray-50 px-6 py-4 text-base leading-7 text-gray-500 dark:border-gray-800 dark:bg-white/[0.02] dark:text-gray-400'>
+      <div className='border-b border-gray-100 bg-gray-50 px-6 py-4 type-body leading-7 text-gray-500 dark:border-gray-800 dark:bg-white/[0.02] dark:text-gray-400'>
         {view === 'manual' && (
           <>
             <strong className='font-semibold text-gray-800 dark:text-white/90'>
@@ -4672,18 +4674,18 @@ function CatalogueWorkspace({
   }).length;
 
   return (
-    <div className='grid min-h-[560px] grid-cols-1 items-start lg:grid-cols-[minmax(300px,.9fr)_minmax(420px,1.1fr)_minmax(360px,.95fr)]'>
+    <div className='grid min-h-[560px] grid-cols-1 items-start xl:grid-cols-[minmax(300px,1fr)_minmax(420px,1.2fr)]'>
       {/* Documents column */}
       <div
-        className='min-w-0 border-t lg:border-t-0 lg:border-r first:border-t-0'
+        className='min-w-0 border-t first:border-t-0 xl:border-t-0 xl:border-r'
         style={{ borderColor: th.cardBorder }}
       >
-        <div className='flex flex-wrap items-center justify-between gap-2.5 p-3.5'>
+        <div className='flex flex-wrap items-center justify-between gap-3 p-3.5'>
           <div>
-            <div style={{ color: th.text, fontSize: 14, fontWeight: 600 }}>
+            <div style={{ color: th.text, fontSize: 16, fontWeight: 600 }}>
               Uploaded documents
             </div>
-            <div style={{ color: th.textMuted, fontSize: 11, marginTop: 2 }}>
+            <div style={{ color: th.textMuted, fontSize: 12, marginTop: 2 }}>
               {loading ? 'Refreshing...' : `${documents.length} files`}
             </div>
           </div>
@@ -4691,7 +4693,7 @@ function CatalogueWorkspace({
             onClick={onRefresh}
             style={{ ...reviewButtonStyle(th, isDark), fontWeight: 500 }}
           >
-            <RefreshCw style={{ width: 13, height: 13 }} />
+            <RefreshCw style={{ width: 15, height: 15 }} />
             Refresh
           </button>
         </div>
@@ -4717,25 +4719,25 @@ function CatalogueWorkspace({
               >
                 <button
                   onClick={() => onSelect(doc.document_id)}
-                  className='grid min-w-0 cursor-pointer grid-cols-[28px_1fr_auto] items-center gap-2.5 border-0 bg-transparent px-3.5 py-3.5 text-left'
+                  className='grid min-w-0 cursor-pointer grid-cols-[32px_1fr_auto] items-center gap-3 border-0 bg-transparent px-3.5 py-3.5 text-left'
                   style={{ color: th.text }}
                 >
                   <span
-                    className='grid h-[26px] w-[26px] place-items-center rounded-lg border'
+                    className='grid h-[30px] w-[30px] place-items-center rounded-[10px] border'
                     style={{
                       borderColor: th.cardBorder,
                       color: th.textMuted,
                       background: active ? th.cardBg : 'transparent',
                     }}
                   >
-                    <FileText style={{ width: 14, height: 14 }} />
+                    <FileText style={{ width: 16, height: 16 }} />
                   </span>
                   <span className='min-w-0'>
-                    <span className='block overflow-hidden text-ellipsis whitespace-nowrap text-[13px] font-medium'>
+                    <span className='block overflow-hidden text-ellipsis whitespace-nowrap type-small font-medium'>
                       {doc.filename}
                     </span>
                     <span
-                      className='mt-[3px] block text-[11px]'
+                      className='mt-[3px] block type-caption'
                       style={{ color: th.textMuted }}
                     >
                       {documentClassLabel(doc)}
@@ -4746,7 +4748,7 @@ function CatalogueWorkspace({
                     </span>
                   </span>
                   <span
-                    className='whitespace-nowrap rounded-full px-2 py-[5px] text-[11px] font-medium'
+                    className='whitespace-nowrap rounded-full px-2 py-[5px] type-caption font-medium'
                     style={{
                       color: th.textSub,
                       background: isDark ? 'rgba(255,255,255,.04)' : '#f8fafc',
@@ -4764,7 +4766,7 @@ function CatalogueWorkspace({
                   className='flex cursor-pointer items-center justify-center border-0 bg-transparent px-3'
                   style={{ color: th.textMuted }}
                 >
-                  <X style={{ width: 14, height: 14 }} />
+                  <X style={{ width: 16, height: 16 }} />
                 </button>
               </div>
             );
@@ -4772,7 +4774,7 @@ function CatalogueWorkspace({
 
           {!documents.length && (
             <div
-              className='p-7 text-center text-xs'
+              className='p-7 text-center type-small'
               style={{ color: th.textSub }}
             >
               {loading
@@ -4785,7 +4787,7 @@ function CatalogueWorkspace({
 
       {/* Preview column */}
       <div
-        className='min-w-0 border-t lg:border-t-0'
+        className='min-w-0 border-t xl:border-t-0'
         style={{ borderColor: th.cardBorder }}
       >
         <DocumentPreviewPanel
@@ -4797,19 +4799,19 @@ function CatalogueWorkspace({
         />
       </div>
 
-      {/* Review column */}
+      {/* Review row (spans both columns, sits below Documents + Preview) */}
       <div
-        className='min-w-0 border-t lg:border-t-0 lg:border-l'
+        className='min-w-0 border-t xl:col-span-2'
         style={{ borderColor: th.cardBorder }}
       >
         <div className='border-b p-4' style={{ borderColor: th.cardBorder }}>
           <div className='flex flex-wrap items-start justify-between gap-3'>
             <div className='min-w-0 flex-1'>
-              <div style={{ color: th.text, fontSize: 15, fontWeight: 700 }}>
+              <div style={{ color: th.text, fontSize: 17, fontWeight: 700 }}>
                 Review what we found
               </div>
               <div
-                className='mt-[3px] text-xs leading-relaxed'
+                className='mt-[3px] type-small leading-relaxed'
                 style={{ color: th.textSub }}
               >
                 {detailLoading
@@ -4852,49 +4854,72 @@ function CatalogueWorkspace({
               borderColor: th.cardBorder,
             }}
           >
-            <div className='mb-2 flex flex-wrap items-center justify-between gap-3'>
+            <div className='flex flex-wrap items-center justify-between gap-3'>
               <div>
-                <div style={{ color: th.text, fontSize: 12, fontWeight: 700 }}>
+                <div style={{ color: th.text, fontSize: 14, fontWeight: 700 }}>
                   How picky should we be?
                 </div>
                 <div
-                  className='mt-0.5 text-[11px]'
+                  className='mt-0.5 type-small'
                   style={{ color: th.textMuted }}
                 >
                   Only auto-approve items we&apos;re at least this sure about.
                 </div>
               </div>
-              <span
-                className='min-w-[60px] rounded-lg border px-2.5 py-1 text-center text-[15px] font-extrabold tabular-nums'
-                style={{
-                  color: th.text,
-                  background: th.accentBg,
-                  borderColor: th.accentBorder,
-                }}
+
+              <div
+                className='inline-flex shrink-0 items-center gap-2 rounded-[10px] border p-1'
+                style={{ borderColor: th.cardBorder }}
               >
-                {threshold}%
-              </span>
+                <button
+                  type='button'
+                  onClick={() => onThreshold(Math.max(50, threshold - 5))}
+                  disabled={threshold <= 50}
+                  aria-label='Lower the confidence bar'
+                  style={{
+                    ...previewIconButton(th, isDark),
+                    width: 32,
+                    height: 32,
+                    borderRadius: 8,
+                    opacity: threshold <= 50 ? 0.4 : 1,
+                    cursor: threshold <= 50 ? 'not-allowed' : 'pointer',
+                  }}
+                >
+                  <Minus size={16} />
+                </button>
+                <span
+                  className='min-w-[58px] text-center type-card-title font-extrabold tabular-nums'
+                  style={{ color: th.text }}
+                >
+                  {threshold}%
+                </span>
+                <button
+                  type='button'
+                  onClick={() => onThreshold(Math.min(100, threshold + 5))}
+                  disabled={threshold >= 100}
+                  aria-label='Raise the confidence bar'
+                  style={{
+                    ...previewIconButton(th, isDark),
+                    width: 32,
+                    height: 32,
+                    borderRadius: 8,
+                    opacity: threshold >= 100 ? 0.4 : 1,
+                    cursor: threshold >= 100 ? 'not-allowed' : 'pointer',
+                  }}
+                >
+                  <Plus size={16} />
+                </button>
+              </div>
             </div>
-            <input
-              type='range'
-              min={50}
-              max={100}
-              step={5}
-              value={threshold}
-              onChange={(event) => onThreshold(Number(event.target.value))}
-              aria-label='Confidence bar for auto-approval'
-              className='h-6 w-full'
-              style={{ accentColor: th.accent }}
-            />
             <div
-              className='mt-0.5 flex flex-wrap justify-between gap-1 text-[10px] font-semibold'
+              className='mt-2 flex flex-wrap justify-between gap-1 type-caption font-semibold'
               style={{ color: th.textMuted }}
             >
               <span>50% — more items, less careful</span>
               <span>100% — only the surest matches</span>
             </div>
             <div
-              className='mt-2.5 text-[11px] leading-relaxed'
+              className='mt-2.5 type-small leading-relaxed'
               style={{ color: th.textMuted }}
             >
               Anything less confident stays as a draft below for you to check by
@@ -4995,7 +5020,7 @@ function DocumentPreviewPanel({
           <div
             style={{
               color: th.text,
-              fontSize: 14,
+              fontSize: 16,
               fontWeight: 600,
               overflow: 'hidden',
               textOverflow: 'ellipsis',
@@ -5004,7 +5029,7 @@ function DocumentPreviewPanel({
           >
             {doc?.filename || 'Document preview'}
           </div>
-          <div style={{ color: th.textMuted, fontSize: 11, marginTop: 2 }}>
+          <div style={{ color: th.textMuted, fontSize: 12, marginTop: 2 }}>
             {doc
               ? `${documentClassLabel(doc)}${doc.page_count ? ` - ${doc.page_count} pages` : ''}${compactFileSize(doc.file_size_bytes) ? ` - ${compactFileSize(doc.file_size_bytes)}` : ''}`
               : 'Select a file to preview it'}
@@ -5015,13 +5040,13 @@ function DocumentPreviewPanel({
             onClick={() => setZoom((value) => Math.max(0.6, value - 0.1))}
             style={previewIconButton(th, isDark)}
           >
-            <ZoomOut style={{ width: 14, height: 14 }} />
+            <ZoomOut style={{ width: 17, height: 17 }} />
           </button>
           <button
             onClick={() => setZoom((value) => Math.min(1.8, value + 0.1))}
             style={previewIconButton(th, isDark)}
           >
-            <ZoomIn style={{ width: 14, height: 14 }} />
+            <ZoomIn style={{ width: 17, height: 17 }} />
           </button>
           {previewUrl && (
             <a
@@ -5033,7 +5058,7 @@ function DocumentPreviewPanel({
                 textDecoration: 'none',
               }}
             >
-              <ExternalLink style={{ width: 14, height: 14 }} />
+              <ExternalLink style={{ width: 17, height: 17 }} />
             </a>
           )}
         </div>
@@ -5079,12 +5104,12 @@ function DocumentPreviewPanel({
             />
           ) : (
             <div
-              style={{ color: th.textSub, textAlign: 'center', fontSize: 12 }}
+              style={{ color: th.textSub, textAlign: 'center', fontSize: 13 }}
             >
               <FileSearch
                 style={{
-                  width: 28,
-                  height: 28,
+                  width: 32,
+                  height: 32,
                   margin: '0 auto 10px',
                   color: th.textMuted,
                 }}
@@ -5093,11 +5118,11 @@ function DocumentPreviewPanel({
             </div>
           )
         ) : previewError ? (
-          <div style={{ color: th.textSub, textAlign: 'center', fontSize: 12 }}>
+          <div style={{ color: th.textSub, textAlign: 'center', fontSize: 13 }}>
             <FileSearch
               style={{
-                width: 28,
-                height: 28,
+                width: 32,
+                height: 32,
                 margin: '0 auto 10px',
                 color: th.textMuted,
               }}
@@ -5105,11 +5130,11 @@ function DocumentPreviewPanel({
             {previewError}
           </div>
         ) : (
-          <div style={{ color: th.textSub, textAlign: 'center', fontSize: 12 }}>
+          <div style={{ color: th.textSub, textAlign: 'center', fontSize: 13 }}>
             <FileSearch
               style={{
-                width: 28,
-                height: 28,
+                width: 32,
+                height: 32,
                 margin: '0 auto 10px',
                 color: th.textMuted,
               }}
@@ -5292,9 +5317,9 @@ function DocumentEntityReview({
                     : '#f8fafc'
                   : 'transparent',
                 color: th.text,
-                padding: '11px 14px',
+                padding: '12px 14px',
                 display: 'grid',
-                gridTemplateColumns: '1fr 78px 82px',
+                gridTemplateColumns: '1fr 86px 92px',
                 gap: 10,
                 alignItems: 'center',
                 textAlign: 'left',
@@ -5305,7 +5330,7 @@ function DocumentEntityReview({
                 <span
                   style={{
                     display: 'block',
-                    fontSize: 13,
+                    fontSize: 15,
                     fontWeight: 500,
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
@@ -5318,7 +5343,7 @@ function DocumentEntityReview({
                   style={{
                     display: 'block',
                     color: th.textMuted,
-                    fontSize: 11,
+                    fontSize: 12,
                     marginTop: 3,
                   }}
                 >
@@ -5332,14 +5357,14 @@ function DocumentEntityReview({
                 </span>
               </span>
               <span
-                style={{ color: th.textSub, fontSize: 12, fontWeight: 500 }}
+                style={{ color: th.textSub, fontSize: 13, fontWeight: 500 }}
               >
                 {confidenceLabel(confidence)}
               </span>
               <span
                 style={{
                   color: th.textSub,
-                  fontSize: 11,
+                  fontSize: 12,
                   fontWeight: 500,
                   textTransform: 'capitalize',
                 }}
@@ -5355,7 +5380,7 @@ function DocumentEntityReview({
               padding: 28,
               color: th.textSub,
               textAlign: 'center',
-              fontSize: 12,
+              fontSize: 13,
             }}
           >
             {loading
@@ -5387,7 +5412,7 @@ function DocumentEntityReview({
           >
             Previous
           </button>
-          <span style={{ color: th.textSub, fontSize: 12, fontWeight: 500 }}>
+          <span style={{ color: th.textSub, fontSize: 13, fontWeight: 500 }}>
             Page {currentPage} of {totalPages}
           </span>
           <button
@@ -5423,14 +5448,14 @@ function DocumentEntityReview({
               <span
                 style={{
                   color: th.textSub,
-                  fontSize: 11,
+                  fontSize: 12,
                   fontWeight: 500,
                   textTransform: 'uppercase',
                 }}
               >
                 {active.approval_status}
               </span>
-              <span style={{ color: th.textMuted, fontSize: 11 }}>
+              <span style={{ color: th.textMuted, fontSize: 12 }}>
                 {confidenceLabel(entityConfidence(active))}
               </span>
             </div>
@@ -5477,18 +5502,18 @@ function DocumentEntityReview({
               </>
             ) : (
               <>
-                <div style={{ color: th.text, fontSize: 14, fontWeight: 600 }}>
+                <div style={{ color: th.text, fontSize: 16, fontWeight: 600 }}>
                   {active.name}
                 </div>
                 {entityPriceLabel(active) && (
                   <div
-                    style={{ color: th.text, fontSize: 12, fontWeight: 700 }}
+                    style={{ color: th.text, fontSize: 14, fontWeight: 700 }}
                   >
                     {entityPriceLabel(active)}
                   </div>
                 )}
                 <div
-                  style={{ color: th.textSub, fontSize: 12, lineHeight: 1.55 }}
+                  style={{ color: th.textSub, fontSize: 14, lineHeight: 1.55 }}
                 >
                   {active.description ||
                     active.raw_text ||
@@ -5526,7 +5551,7 @@ function DocumentEntityReview({
                   onClick={beginEdit}
                   style={{ ...reviewButtonStyle(th, isDark), fontWeight: 500 }}
                 >
-                  <Edit3 style={{ width: 13, height: 13 }} />
+                  <Edit3 style={{ width: 15, height: 15 }} />
                   Edit
                 </button>
               )}
@@ -5566,7 +5591,7 @@ function DocumentEntityReview({
             </div>
           </div>
         ) : (
-          <div style={{ color: th.textSub, textAlign: 'center', fontSize: 12 }}>
+          <div style={{ color: th.textSub, textAlign: 'center', fontSize: 13 }}>
             Select an extracted item to review it.
           </div>
         )}
@@ -5836,7 +5861,7 @@ function WebsiteImportLanding({
           >
             <div style={{ display: 'flex', gap: 8 }}>
               <span
-                style={{ color: th.accent, fontWeight: 800, flexShrink: 0 }}
+                style={{ color: th.accent, fontWeight: 600, flexShrink: 0 }}
               >
                 1.
               </span>
@@ -5844,7 +5869,7 @@ function WebsiteImportLanding({
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
               <span
-                style={{ color: th.accent, fontWeight: 800, flexShrink: 0 }}
+                style={{ color: th.accent, fontWeight: 600, flexShrink: 0 }}
               >
                 2.
               </span>
@@ -5852,7 +5877,7 @@ function WebsiteImportLanding({
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
               <span
-                style={{ color: th.accent, fontWeight: 800, flexShrink: 0 }}
+                style={{ color: th.accent, fontWeight: 600, flexShrink: 0 }}
               >
                 3.
               </span>
@@ -6294,23 +6319,26 @@ function WebsiteReviewPane({
                 <span style={{ color: th.text, fontWeight: 600, fontSize: 12 }}>
                   How picky?
                 </span>
-                <input
-                  type='range'
-                  min={50}
-                  max={100}
-                  step={5}
-                  value={threshold}
-                  onInput={(event) =>
-                    onThreshold(Number(event.currentTarget.value))
-                  }
-                  onChange={(event) => onThreshold(Number(event.target.value))}
-                  aria-label='Confidence bar for auto-approval'
-                  style={{ width: 120, accentColor: th.accent }}
-                />
+                <button
+                  type='button'
+                  onClick={() => onThreshold(Math.max(50, threshold - 5))}
+                  disabled={threshold <= 50}
+                  aria-label='Lower the confidence bar'
+                  style={{
+                    ...previewIconButton(th, isDark),
+                    width: 24,
+                    height: 24,
+                    borderRadius: 7,
+                    opacity: threshold <= 50 ? 0.4 : 1,
+                    cursor: threshold <= 50 ? 'not-allowed' : 'pointer',
+                  }}
+                >
+                  <Minus size={12} />
+                </button>
                 <span
                   style={{
                     color: th.text,
-                    fontWeight: 800,
+                    fontWeight: 600,
                     fontVariantNumeric: 'tabular-nums',
                     padding: '3px 8px',
                     borderRadius: 6,
@@ -6323,6 +6351,22 @@ function WebsiteReviewPane({
                 >
                   {threshold}%
                 </span>
+                <button
+                  type='button'
+                  onClick={() => onThreshold(Math.min(100, threshold + 5))}
+                  disabled={threshold >= 100}
+                  aria-label='Raise the confidence bar'
+                  style={{
+                    ...previewIconButton(th, isDark),
+                    width: 24,
+                    height: 24,
+                    borderRadius: 7,
+                    opacity: threshold >= 100 ? 0.4 : 1,
+                    cursor: threshold >= 100 ? 'not-allowed' : 'pointer',
+                  }}
+                >
+                  <Plus size={12} />
+                </button>
               </div>
               <span
                 style={{ color: th.textMuted, fontSize: 12, fontWeight: 500 }}
@@ -7002,6 +7046,13 @@ function SavedKnowledgeLedger({
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const allSelected = rows.length > 0 && rows.every((r) => selected.has(r.id));
 
+  const [page, setPage] = useState(1);
+  const totalPages = Math.max(1, Math.ceil(rows.length / 8));
+  useEffect(() => {
+    setPage((value) => Math.min(Math.max(1, value), totalPages));
+  }, [totalPages]);
+  const pagedRows = getPageItems(rows, page, 8);
+
   return (
     <div style={{ padding: 16 }}>
       <div
@@ -7121,7 +7172,7 @@ function SavedKnowledgeLedger({
             </tr>
           </thead>
           <tbody>
-            {rows.map((row) => (
+            {pagedRows.map((row) => (
               <tr
                 key={row.id}
                 style={{ borderTop: `1px solid ${th.cardBorder}` }}
@@ -7235,6 +7286,8 @@ function SavedKnowledgeLedger({
           </tbody>
         </table>
       </div>
+
+      <TablePagination page={page} totalItems={rows.length} onPageChange={setPage} pageSize={8} />
     </div>
   );
 }
@@ -7255,7 +7308,7 @@ function MiniMetric({
       <div
         style={{
           color: th.textMuted,
-          fontSize: 10,
+          fontSize: 11,
           fontWeight: 500,
           textTransform: 'uppercase',
           marginBottom: 3,
@@ -7266,7 +7319,7 @@ function MiniMetric({
       <div
         style={{
           color,
-          fontSize: 12,
+          fontSize: 14,
           fontWeight: 500,
           overflow: 'hidden',
           textOverflow: 'ellipsis',
@@ -7281,8 +7334,8 @@ function MiniMetric({
 
 function previewIconButton(th: FaqTheme, isDark: boolean): React.CSSProperties {
   return {
-    width: 34,
-    height: 34,
+    width: 38,
+    height: 38,
     display: 'grid',
     placeItems: 'center',
     borderRadius: 10,
@@ -9156,7 +9209,7 @@ export default function FAQPage() {
           <div className='flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between'>
             <div>
               <PageBreadcrumb pageTitle='Knowledge' />
-              <p className='-mt-4 text-theme-sm text-gray-500 dark:text-gray-400'>
+              <p className='-mt-4 type-small text-gray-500 dark:text-gray-400'>
                 {totalKnowledgeCount} entries powering automatic chat replies
               </p>
             </div>
@@ -9185,13 +9238,13 @@ export default function FAQPage() {
             <button
               type='button'
               onClick={() => setKnowledgeView('saved')}
-              className='rounded-xl border border-brand-100 bg-brand-50 p-5 text-left transition hover:border-brand-200 hover:bg-brand-100/60 dark:border-brand-500/20 dark:bg-brand-500/10 dark:hover:bg-brand-500/15'
+              className='rounded-xl border border-brand-100 bg-brand-50 p-6 text-left transition hover:border-brand-200 hover:bg-brand-100/60 dark:border-brand-500/20 dark:bg-brand-500/10 dark:hover:bg-brand-500/15'
             >
-              <div className='flex items-center gap-2.5'>
-                <div className='flex h-9 w-9 items-center justify-center rounded-lg bg-brand-500/15 text-brand-500 dark:bg-brand-500/20 dark:text-brand-400'>
+              <div className='flex items-center gap-3'>
+                <div className='flex h-9 w-9 items-center justify-center rounded-[10px] bg-brand-500/15 text-brand-500 dark:bg-brand-500/20 dark:text-brand-400'>
                   <Database size={16} />
                 </div>
-                <span className='text-theme-sm font-medium text-gray-600 dark:text-gray-400'>
+                <span className='type-small font-medium text-gray-600 dark:text-gray-400'>
                   Total knowledge
                 </span>
               </div>
@@ -9206,13 +9259,13 @@ export default function FAQPage() {
             <button
               type='button'
               onClick={() => setKnowledgeView('manual')}
-              className='rounded-xl border border-success-100 bg-success-50 p-5 text-left transition hover:border-success-200 hover:bg-success-100/60 dark:border-success-500/20 dark:bg-success-500/10 dark:hover:bg-success-500/15'
+              className='rounded-xl border border-success-100 bg-success-50 p-6 text-left transition hover:border-success-200 hover:bg-success-100/60 dark:border-success-500/20 dark:bg-success-500/10 dark:hover:bg-success-500/15'
             >
-              <div className='flex items-center gap-2.5'>
-                <div className='flex h-9 w-9 items-center justify-center rounded-lg bg-success-500/15 text-success-600 dark:bg-success-500/20 dark:text-success-400'>
+              <div className='flex items-center gap-3'>
+                <div className='flex h-9 w-9 items-center justify-center rounded-[10px] bg-success-500/15 text-success-600 dark:bg-success-500/20 dark:text-success-400'>
                   <MessageSquare size={16} />
                 </div>
-                <span className='text-theme-sm font-medium text-gray-600 dark:text-gray-400'>
+                <span className='type-small font-medium text-gray-600 dark:text-gray-400'>
                   Manual FAQs
                 </span>
               </div>
@@ -9227,13 +9280,13 @@ export default function FAQPage() {
             <button
               type='button'
               onClick={() => setKnowledgeView('catalogue')}
-              className='rounded-xl border border-warning-100 bg-warning-50 p-5 text-left transition hover:border-warning-200 hover:bg-warning-100/60 dark:border-warning-500/20 dark:bg-warning-500/10 dark:hover:bg-warning-500/15'
+              className='rounded-xl border border-warning-100 bg-warning-50 p-6 text-left transition hover:border-warning-200 hover:bg-warning-100/60 dark:border-warning-500/20 dark:bg-warning-500/10 dark:hover:bg-warning-500/15'
             >
-              <div className='flex items-center gap-2.5'>
-                <div className='flex h-9 w-9 items-center justify-center rounded-lg bg-warning-500/15 text-warning-600 dark:bg-warning-500/20 dark:text-warning-400'>
+              <div className='flex items-center gap-3'>
+                <div className='flex h-9 w-9 items-center justify-center rounded-[10px] bg-warning-500/15 text-warning-600 dark:bg-warning-500/20 dark:text-warning-400'>
                   <FileText size={16} />
                 </div>
-                <span className='text-theme-sm font-medium text-gray-600 dark:text-gray-400'>
+                <span className='type-small font-medium text-gray-600 dark:text-gray-400'>
                   Uploaded docs
                 </span>
               </div>
@@ -9248,13 +9301,13 @@ export default function FAQPage() {
             <button
               type='button'
               onClick={() => setKnowledgeView('website')}
-              className='rounded-xl border border-purple-100 bg-purple-50 p-5 text-left transition hover:border-purple-200 hover:bg-purple-100/60 dark:border-purple-500/20 dark:bg-purple-500/10 dark:hover:bg-purple-500/15'
+              className='rounded-xl border border-purple-100 bg-purple-50 p-6 text-left transition hover:border-purple-200 hover:bg-purple-100/60 dark:border-purple-500/20 dark:bg-purple-500/10 dark:hover:bg-purple-500/15'
             >
-              <div className='flex items-center gap-2.5'>
-                <div className='flex h-9 w-9 items-center justify-center rounded-lg bg-purple-500/15 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400'>
+              <div className='flex items-center gap-3'>
+                <div className='flex h-9 w-9 items-center justify-center rounded-[10px] bg-purple-500/15 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400'>
                   <Globe size={16} />
                 </div>
-                <span className='text-theme-sm font-medium text-gray-600 dark:text-gray-400'>
+                <span className='type-small font-medium text-gray-600 dark:text-gray-400'>
                   Website entries
                 </span>
               </div>
@@ -9295,7 +9348,7 @@ export default function FAQPage() {
               return (
                 <div
                   className={cn(
-                    'flex items-start gap-3 rounded-xl border px-4 py-3 text-sm',
+                    'flex items-start gap-3 rounded-xl border px-4 py-3 type-small',
                     isSuccess
                       ? 'border-success-200 bg-success-50 text-success-700 dark:border-success-500/30 dark:bg-success-500/10 dark:text-success-400'
                       : 'border-error-200 bg-error-50 text-error-600 dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-400',
@@ -9327,10 +9380,10 @@ export default function FAQPage() {
             <div
               role='status'
               aria-live='polite'
-              className='fixed bottom-6 right-6 z-[90] flex items-center gap-2.5 rounded-xl border border-success-200 bg-white px-4 py-3 shadow-theme-lg dark:border-success-500/30 dark:bg-gray-900'
+              className='fixed bottom-6 right-6 z-[90] flex items-center gap-3 rounded-xl border border-success-200 bg-white px-4 py-3 shadow-theme-lg dark:border-success-500/30 dark:bg-gray-900'
             >
               <CheckCircle2 size={18} className='text-success-500' />
-              <span className='text-sm font-semibold text-success-700 dark:text-success-400'>
+              <span className='type-small font-semibold text-success-700 dark:text-success-400'>
                 FAQ added
               </span>
             </div>
@@ -9432,7 +9485,7 @@ export default function FAQPage() {
                           key={s.l}
                           onClick={() => setFilter(s.f)}
                           className={cn(
-                            'w-full rounded-2xl border bg-white p-5 text-left transition dark:bg-white/[0.03]',
+                            'w-full rounded-2xl border bg-white p-6 text-left transition dark:bg-white/[0.03]',
                             isSelected
                               ? 'border-brand-300 shadow-theme-sm dark:border-brand-500/40'
                               : 'border-gray-200 hover:border-gray-300 dark:border-gray-800 dark:hover:border-gray-700',
@@ -9441,7 +9494,7 @@ export default function FAQPage() {
                           <p className='text-title-sm font-semibold tabular-nums text-gray-800 dark:text-white/90'>
                             {s.n}
                           </p>
-                          <p className='mt-2 text-theme-sm text-gray-500 dark:text-gray-400'>
+                          <p className='mt-2 type-small text-gray-500 dark:text-gray-400'>
                             {s.l}
                           </p>
                         </button>
@@ -9487,7 +9540,7 @@ export default function FAQPage() {
                     )}
                     {loading && (
                       <div
-                        className='pointer-events-none absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-1.5 text-xs font-medium text-gray-400 dark:text-gray-500'
+                        className='pointer-events-none absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-1.5 type-caption font-medium text-gray-400 dark:text-gray-500'
                         aria-live='polite'
                       >
                         <Loader2 size={14} className='animate-spin' />
@@ -9499,7 +9552,7 @@ export default function FAQPage() {
                   <select
                     value={sort}
                     onChange={(e) => setSort(e.target.value as SortKey)}
-                    className='h-9 rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-700 shadow-theme-xs outline-none focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300'
+                    className='h-9 rounded-[10px] border border-gray-300 bg-transparent px-3 type-small text-gray-700 shadow-theme-xs outline-none focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300'
                   >
                     <option value='updated'>Updated</option>
                     <option value='created'>Created</option>
@@ -9552,10 +9605,10 @@ export default function FAQPage() {
                     className='rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]'
                   >
                     <div className='border-b border-gray-100 px-6 py-5 dark:border-gray-800'>
-                      <h2 className='text-base font-medium text-gray-800 dark:text-white/90'>
+                      <h2 className='type-body font-medium text-gray-800 dark:text-white/90'>
                         New FAQ entry
                       </h2>
-                      <p className='mt-1 text-theme-sm text-gray-500 dark:text-gray-400'>
+                      <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>
                         Add one approved question and answer to the manual
                         knowledge base.
                       </p>
@@ -9572,7 +9625,7 @@ export default function FAQPage() {
                         onChange={(e) => setNA(e.target.value)}
                         rows={3}
                         placeholder='Write the answer your bot will give...'
-                        className='w-full resize-none rounded-lg border border-gray-300 bg-transparent px-3.5 py-2.5 text-sm leading-relaxed text-gray-800 shadow-theme-xs outline-none focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800'
+                        className='w-full resize-none rounded-[10px] border border-gray-300 bg-transparent px-3.5 py-2 type-small leading-relaxed text-gray-800 shadow-theme-xs outline-none focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800'
                       />
                       <div className='grid grid-cols-1 gap-3 sm:grid-cols-2'>
                         <Input
@@ -9589,7 +9642,7 @@ export default function FAQPage() {
                       <Button
                         onClick={createFaq}
                         disabled={adding || !nQ.trim() || !nA.trim()}
-                        className='mt-1 h-11 w-full rounded-lg bg-brand-500 text-sm font-semibold text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-400 disabled:opacity-70'
+                        className='mt-1 h-10 w-full rounded-[10px] bg-brand-500 type-small font-semibold text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-400 disabled:opacity-70'
                       >
                         {adding ? 'Saving FAQ...' : 'Save FAQ'}
                       </Button>
@@ -9606,19 +9659,19 @@ export default function FAQPage() {
                     const offPage = selectedFaqIds.size - onThisPage;
                     return (
                       <div
-                        className='flex flex-wrap items-center gap-2.5 rounded-xl border border-brand-200 bg-brand-50 p-3 dark:border-brand-500/25 dark:bg-brand-500/10'
+                        className='flex flex-wrap items-center gap-3 rounded-xl border border-brand-200 bg-brand-50 p-3 dark:border-brand-500/25 dark:bg-brand-500/10'
                         role='region'
                         aria-label='Bulk actions'
                       >
-                        <span className='inline-flex items-center gap-2 text-sm font-semibold text-brand-600 dark:text-brand-400'>
-                          <span className='inline-grid min-w-[22px] place-items-center rounded-full bg-brand-500 px-1.5 py-0.5 text-xs font-bold text-white tabular-nums'>
+                        <span className='inline-flex items-center gap-2 type-small font-semibold text-brand-600 dark:text-brand-400'>
+                          <span className='inline-grid min-w-[22px] place-items-center rounded-full bg-brand-500 px-1.5 py-0.5 type-caption font-bold text-white tabular-nums'>
                             {selectedFaqIds.size}
                           </span>
                           {selectedFaqIds.size === 1
                             ? 'FAQ selected'
                             : 'FAQs selected'}
                           {offPage > 0 && (
-                            <span className='text-xs font-medium text-gray-500 dark:text-gray-400'>
+                            <span className='type-caption font-medium text-gray-500 dark:text-gray-400'>
                               ({offPage} on other page{offPage === 1 ? '' : 's'}
                               )
                             </span>
@@ -9679,7 +9732,7 @@ export default function FAQPage() {
                     Array.from({ length: 5 }).map((_, i) => (
                       <div
                         key={i}
-                        className='flex animate-pulse flex-col gap-2.5 rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.02]'
+                        className='flex animate-pulse flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.02]'
                         aria-hidden
                       >
                         <div
@@ -9709,14 +9762,14 @@ export default function FAQPage() {
                           />
                         )}
                       </div>
-                      <p className='text-base font-semibold text-gray-800 dark:text-white/90'>
+                      <p className='type-body font-semibold text-gray-800 dark:text-white/90'>
                         {rawQ
                           ? `No FAQs match "${rawQ}"`
                           : filter !== 'all'
                             ? `No ${filter} FAQs yet`
                             : "No FAQs yet - let's add one"}
                       </p>
-                      <p className='mx-auto mt-2 max-w-[380px] text-sm leading-relaxed text-gray-400 dark:text-gray-500'>
+                      <p className='mx-auto mt-2 max-w-[380px] type-small leading-relaxed text-gray-400 dark:text-gray-500'>
                         {rawQ
                           ? 'Try a broader search term, check the filter above, or add this as a new FAQ.'
                           : 'Add FAQs by hand. Best when you already know what customers ask. For anything at scale, try uploading docs or importing from your site.'}
@@ -9747,7 +9800,7 @@ export default function FAQPage() {
                   {pageItems.map((item, i) => {
                     const selected = selectedFaqIds.has(item.id);
                     return (
-                      <div key={item.id} className='flex items-stretch gap-2.5'>
+                      <div key={item.id} className='flex items-stretch gap-3'>
                         <label
                           onClick={(e) => e.stopPropagation()}
                           className='flex cursor-pointer select-none items-start pt-4'
@@ -9777,8 +9830,8 @@ export default function FAQPage() {
 
                 {/* Pagination */}
                 {displayed.length > 0 && (
-                  <div className='flex flex-wrap items-center justify-between gap-2.5 border-t border-gray-100 pt-3 dark:border-gray-800'>
-                    <div className='text-xs text-gray-500 dark:text-gray-400'>
+                  <div className='flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 pt-3 dark:border-gray-800'>
+                    <div className='type-caption text-gray-500 dark:text-gray-400'>
                       Showing{' '}
                       <span className='font-semibold text-gray-800 dark:text-white/90'>
                         {pageStart + 1}
@@ -9797,7 +9850,7 @@ export default function FAQPage() {
                       <button
                         onClick={() => setManualPage((p) => Math.max(1, p - 1))}
                         disabled={currentPage === 1}
-                        className='flex h-8.5 w-8.5 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400'
+                        className='flex h-8.5 w-8.5 items-center justify-center rounded-[10px] border border-gray-200 bg-white text-gray-500 disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400'
                       >
                         <ChevronLeft size={15} />
                       </button>
@@ -9819,7 +9872,7 @@ export default function FAQPage() {
                           p === 'gap' ? (
                             <span
                               key={`gap-${idx}`}
-                              className='px-1 text-xs text-gray-400 dark:text-gray-500'
+                              className='px-1 type-caption text-gray-400 dark:text-gray-500'
                             >
                               ...
                             </span>
@@ -9828,7 +9881,7 @@ export default function FAQPage() {
                               key={p}
                               onClick={() => setManualPage(p)}
                               className={cn(
-                                'flex h-8.5 min-w-8.5 items-center justify-center rounded-lg px-2.5 text-sm font-medium transition',
+                                'flex h-8.5 min-w-8.5 items-center justify-center rounded-[10px] px-3 type-small font-medium transition',
                                 p === currentPage
                                   ? 'bg-brand-500 text-white'
                                   : 'border border-gray-200 bg-white text-gray-500 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400',
@@ -9845,13 +9898,13 @@ export default function FAQPage() {
                           setManualPage((p) => Math.min(totalPages, p + 1))
                         }
                         disabled={currentPage === totalPages}
-                        className='flex h-8.5 w-8.5 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400'
+                        className='flex h-8.5 w-8.5 items-center justify-center rounded-[10px] border border-gray-200 bg-white text-gray-500 disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400'
                       >
                         <ChevronRight size={15} />
                       </button>
                     </div>
 
-                    <span className='text-xs text-gray-400 dark:text-gray-500'>
+                    <span className='type-caption text-gray-400 dark:text-gray-500'>
                       8 rows per page
                     </span>
                   </div>

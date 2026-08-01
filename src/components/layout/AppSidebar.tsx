@@ -14,6 +14,7 @@ import {
   Calendar,
   Settings,
   Plug,
+  Globe,
 } from "lucide-react";
 import { useSidebar } from "@/lib/sidebar-context";
 import { apiFetch } from "@/lib/api";
@@ -31,6 +32,7 @@ const navItems: NavItem[] = [
   { name: "Conversations", icon: <MessageSquare />, path: "/conversations", exact: true },
   { name: "Reviews", icon: <Star />, path: "/conversations/reviews" },
   { name: "Channels", icon: <Plug />, path: "/channels" },
+  { name: "Website Widget", icon: <Globe />, path: "/customize-chat" },
   { name: "Leads", icon: <Users />, path: "/leads" },
   { name: "Knowledge", icon: <BookOpen />, path: "/faq" },
   { name: "Analytics", icon: <BarChart3 />, path: "/analytics" },
@@ -68,7 +70,7 @@ export function AppSidebar() {
   return (
     <aside
       className={`fixed mt-16 flex flex-col lg:mt-0 top-0 left-0 z-50 h-screen border-r border-[var(--app-primary)] bg-[var(--app-primary)] px-5 text-[var(--app-sidebar-text)] transition-all duration-300 ease-in-out
-        ${isExpanded || isMobileOpen ? "w-[290px]" : isHovered ? "w-[290px]" : "w-[90px]"}
+        ${isMobileOpen ? "w-[290px]" : isExpanded || isHovered ? "w-[240px] xl:w-[290px]" : "w-[90px]"}
         ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
         lg:translate-x-0`}
       onMouseEnter={() => !isExpanded && setIsHovered(true)}
@@ -78,8 +80,8 @@ export function AppSidebar() {
         <Link href="/" className="flex items-center gap-2">
           <Image src="/lashvaelogo.png" alt="Lashvae" width={showLabel ? 36 : 32} height={showLabel ? 36 : 32} />
           {showLabel && (
-            <span className="text-lg font-semibold tracking-wide text-[var(--app-sidebar-text)]">
-              LASHVAE
+            <span className="type-card-title font-semibold tracking-wide text-[var(--app-sidebar-text)]">
+              LASHVAE AI
             </span>
           )}
         </Link>

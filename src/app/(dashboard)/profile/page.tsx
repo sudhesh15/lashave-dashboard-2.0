@@ -13,10 +13,12 @@ import {
   Camera,
   CheckCircle2,
   CreditCard,
+  ChevronRight,
   Headphones,
   Loader2,
   LockKeyhole,
   Mail,
+  Menu,
   Pencil,
   Save,
   ShieldCheck,
@@ -116,6 +118,12 @@ function fieldValue(value?: string | null) {
   return value?.trim() || 'Not set';
 }
 
+function formatRole(role: string) {
+  return role === 'super_admin'
+    ? 'SUPER ADMIN'
+    : role.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
 function profileScore(me: MeResp) {
   const values = [
     me.user.email,
@@ -150,8 +158,8 @@ function Card({
 function SectionHeader({ title, subtitle }: { title: string; subtitle: string }) {
   return (
     <div className='mb-5'>
-      <h3 className='text-lg font-semibold text-gray-800 dark:text-white/90'>{title}</h3>
-      <p className='mt-1 text-theme-sm text-gray-500 dark:text-gray-400'>{subtitle}</p>
+      <h3 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>{title}</h3>
+      <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>{subtitle}</p>
     </div>
   );
 }
@@ -168,7 +176,7 @@ function FormField({
 }: FormFieldProps) {
   return (
     <label className='block'>
-      <span className='mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400'>
+      <span className='mb-1.5 block type-small font-medium text-gray-700 dark:text-gray-400'>
         {label}
         {required && <span className='text-error-500'> *</span>}
       </span>
@@ -179,13 +187,13 @@ function FormField({
         onBlur={onBlur}
         placeholder={placeholder}
         className={cn(
-          'h-11 w-full rounded-lg border bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:outline-hidden focus:ring-3 dark:bg-gray-900 dark:text-white/90',
+          'h-10 w-full rounded-[10px] border bg-transparent px-4 py-2 type-small text-gray-800 shadow-theme-xs focus:outline-hidden focus:ring-3 dark:bg-gray-900 dark:text-white/90',
           error
             ? 'border-error-500 focus:border-error-500 focus:ring-error-500/10'
             : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10 dark:border-gray-700',
         )}
       />
-      {error && <p className='mt-1.5 text-xs text-error-500'>{error}</p>}
+      {error && <p className='mt-1.5 type-caption text-error-500'>{error}</p>}
     </label>
   );
 }
@@ -203,7 +211,7 @@ function AlertBox({
         ? 'border-brand-500/20 bg-brand-50 text-brand-500 dark:bg-brand-500/10 dark:text-brand-400'
         : 'border-error-500/20 bg-error-50 text-error-600 dark:bg-error-500/10 dark:text-error-500';
 
-  return <div className={`rounded-xl border px-4 py-3 text-theme-sm ${classes}`}>{children}</div>;
+  return <div className={`rounded-xl border px-4 py-3 type-small ${classes}`}>{children}</div>;
 }
 
 function SaveButton({
@@ -216,7 +224,7 @@ function SaveButton({
   onClick: () => void;
 }) {
   return (
-    <Button type='button' onClick={onClick} disabled={loading} className='h-11 px-5'>
+    <Button type='button' onClick={onClick} disabled={loading} className='h-10 px-5'>
       {loading ? (
         <>
           <Loader2 className='h-4 w-4 animate-spin' />
@@ -279,7 +287,7 @@ function AvatarUploader({
       <button
         type='button'
         onClick={() => fileRef.current?.click()}
-        className='group relative h-24 w-24 overflow-hidden rounded-full border border-gray-200 bg-gray-100 text-xl font-semibold text-gray-700 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-300'
+        className='group relative h-24 w-24 overflow-hidden rounded-full border border-gray-200 bg-gray-100 type-h4 font-semibold text-gray-700 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-300'
         aria-label='Change profile photo'
       >
         {photoUrl ? (
@@ -293,7 +301,7 @@ function AvatarUploader({
         </span>
       </button>
       <input ref={fileRef} type='file' accept='image/*' className='hidden' onChange={handleFile} />
-      {err && <p className='text-theme-xs text-error-500'>{err}</p>}
+      {err && <p className='type-caption text-error-500'>{err}</p>}
     </div>
   );
 }
@@ -321,12 +329,12 @@ function CompletionChart({ score }: { score: number }) {
   };
 
   return (
-    <Card className='p-5'>
+    <Card className='p-6'>
       <SectionHeader title='Profile Completion' subtitle='Completed account and workspace fields' />
-      <div className='mx-auto max-w-[260px]'>
-        <ReactApexChart options={options} series={[score]} type='radialBar' height={230} />
+      <div className='mx-auto max-w-[320px]'>
+        <ReactApexChart options={options} series={[score]} type='radialBar' height={290} />
       </div>
-      <p className='text-center text-theme-sm text-gray-500 dark:text-gray-400'>
+      <p className='text-center type-small text-gray-500 dark:text-gray-400'>
         Keep profile and company information current for better account management.
       </p>
     </Card>
@@ -345,22 +353,22 @@ function MetaCard({
   const name = displayName(me);
 
   return (
-    <Card className='p-5 lg:p-6'>
+    <Card className='p-6 lg:p-6'>
       <div className='flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between'>
         <div className='flex flex-col items-center gap-6 text-center xl:flex-row xl:text-left'>
           <AvatarUploader me={me} photoUrl={photoUrl} onUploaded={setPhotoUrl} />
           <div>
-            <h2 className='text-xl font-semibold text-gray-800 dark:text-white/90'>{name}</h2>
-            <div className='mt-2 flex flex-col items-center gap-2 text-theme-sm text-gray-500 dark:text-gray-400 xl:flex-row'>
+            <h2 className='type-h4 font-semibold text-gray-800 dark:text-white/90'>{name}</h2>
+            <div className='mt-2 flex flex-col items-center gap-2 type-small text-gray-500 dark:text-gray-400 xl:flex-row'>
               <span>{me.user.email}</span>
               <span className='hidden h-3.5 w-px bg-gray-300 dark:bg-gray-700 xl:block' />
               <span>{fieldValue(me.user.location)}</span>
             </div>
           </div>
         </div>
-        <span className='inline-flex items-center justify-center gap-2 rounded-full bg-brand-50 px-3 py-1 text-theme-sm font-medium capitalize text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400'>
+        <span className='inline-flex items-center justify-center gap-2 rounded-full bg-brand-50 px-3 py-1 type-small font-medium text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400'>
           <BadgeCheck className='h-4 w-4' />
-          {me.user.role}
+          {formatRole(me.user.role)}
         </span>
       </div>
     </Card>
@@ -370,8 +378,8 @@ function MetaCard({
 function InfoItem({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className='mb-2 text-theme-xs text-gray-500 dark:text-gray-400'>{label}</p>
-      <p className='break-words text-theme-sm font-medium text-gray-800 dark:text-white/90'>{value}</p>
+      <p className='mb-2 type-caption text-gray-500 dark:text-gray-400'>{label}</p>
+      <p className='break-words type-small font-medium text-gray-800 dark:text-white/90'>{value}</p>
     </div>
   );
 }
@@ -380,7 +388,7 @@ function OverviewTab({ me }: { me: MeResp }) {
   return (
     <div className='grid grid-cols-1 gap-6 xl:grid-cols-12'>
       <div className='space-y-6 xl:col-span-8'>
-        <Card className='p-5 lg:p-6'>
+        <Card className='p-6 lg:p-6'>
           <SectionHeader title='Personal Information' subtitle='Primary account profile fields' />
           <div className='grid grid-cols-1 gap-5 md:grid-cols-2'>
             <InfoItem label='First Name' value={fieldValue(me.user.first_name)} />
@@ -388,11 +396,11 @@ function OverviewTab({ me }: { me: MeResp }) {
             <InfoItem label='Email Address' value={me.user.email} />
             <InfoItem label='Phone' value={fieldValue(me.user.phone)} />
             <InfoItem label='Location' value={fieldValue(me.user.location)} />
-            <InfoItem label='Role' value={me.user.role} />
+            <InfoItem label='Role' value={formatRole(me.user.role)} />
           </div>
         </Card>
 
-        <Card className='p-5 lg:p-6'>
+        <Card className='p-6 lg:p-6'>
           <SectionHeader title='Company Information' subtitle='Workspace details attached to this account' />
           <div className='grid grid-cols-1 gap-5 md:grid-cols-2'>
             <InfoItem label='Company Name' value={fieldValue(me.tenant?.name)} />
@@ -523,7 +531,7 @@ function DetailsTab({ me }: { me: MeResp }) {
   }
 
   return (
-    <Card className='p-5 lg:p-6'>
+    <Card className='p-6 lg:p-6'>
       <div className='mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
         <SectionHeader title='Details' subtitle='Update your personal or company information' />
         <SaveButton loading={loading} saved={saved} onClick={() => void handleSave()} />
@@ -531,13 +539,13 @@ function DetailsTab({ me }: { me: MeResp }) {
 
       {apiErr && <div className='mb-5'><AlertBox>{apiErr}</AlertBox></div>}
 
-      <div className='mb-6 inline-flex rounded-lg border border-gray-200 bg-gray-50 p-1 dark:border-gray-800 dark:bg-gray-900'>
+      <div className='mb-6 inline-flex rounded-[10px] border border-gray-200 bg-gray-50 p-1 dark:border-gray-800 dark:bg-gray-900'>
         {(['personal', 'company'] as const).map((item) => (
           <button
             key={item}
             type='button'
             onClick={() => setMode(item)}
-            className={`rounded-md px-4 py-2 text-theme-sm font-medium capitalize transition ${
+            className={`rounded-[10px] px-4 py-2 type-small font-medium capitalize transition ${
               mode === item
                 ? 'bg-white text-brand-500 shadow-theme-xs dark:bg-white/[0.05] dark:text-brand-400'
                 : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white/90'
@@ -573,10 +581,10 @@ function DetailsTab({ me }: { me: MeResp }) {
               <div className='flex items-start gap-3'>
                 <Mail className='mt-0.5 h-4 w-4 text-gray-500 dark:text-gray-400' />
                 <div>
-                  <p className='text-theme-sm font-medium text-gray-800 dark:text-white/90'>
+                  <p className='type-small font-medium text-gray-800 dark:text-white/90'>
                     {emailVerified ? 'Email verified' : 'Email verification'}
                   </p>
-                  <p className='mt-1 text-theme-xs text-gray-500 dark:text-gray-400'>
+                  <p className='mt-1 type-caption text-gray-500 dark:text-gray-400'>
                     Verify this address before saving sensitive account changes.
                   </p>
                 </div>
@@ -596,13 +604,13 @@ function DetailsTab({ me }: { me: MeResp }) {
             </div>
             {showOtp && (
               <div className='mt-3 rounded-xl border border-brand-500/20 bg-brand-50 p-4 dark:bg-brand-500/10'>
-                <p className='text-theme-sm font-semibold text-gray-800 dark:text-white/90'>Enter verification code</p>
-                <p className='mt-1 text-theme-xs text-gray-500 dark:text-gray-400'>We sent a 6-digit code to {email.trim()}.</p>
+                <p className='type-small font-semibold text-gray-800 dark:text-white/90'>Enter verification code</p>
+                <p className='mt-1 type-caption text-gray-500 dark:text-gray-400'>We sent a 6-digit code to {email.trim()}.</p>
                 <Input
                   value={otpCode}
                   onChange={(event) => setOtpCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
                   placeholder='000000'
-                  className='mt-4 h-11 max-w-[180px] rounded-lg border-gray-300 text-center text-lg tracking-[0.35em] shadow-theme-xs focus-visible:border-brand-300 focus-visible:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900'
+                  className='mt-4 h-10 max-w-[180px] rounded-[10px] border-gray-300 text-center type-card-title tracking-[0.35em] shadow-theme-xs focus-visible:border-brand-300 focus-visible:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900'
                 />
                 <div className='mt-4 flex flex-wrap items-center gap-3'>
                   <Button type='button' size='sm' onClick={() => void handleVerifyEmailOtp()} disabled={otpBusy}>
@@ -671,15 +679,15 @@ function DeleteAccountSection() {
 
   return (
     <>
-      <Card className='border-error-500/20 bg-error-50 p-5 dark:bg-error-500/10'>
+      <Card className='border-error-500/20 bg-error-50 p-6 dark:bg-error-500/10'>
         <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
           <div className='flex items-start gap-3'>
-            <div className='flex h-11 w-11 items-center justify-center rounded-xl bg-error-500/10 text-error-500'>
+            <div className='flex h-10 w-10 items-center justify-center rounded-xl bg-error-500/10 text-error-500'>
               <Trash2 className='h-5 w-5' />
             </div>
             <div>
-              <h3 className='text-theme-sm font-semibold text-error-600 dark:text-error-500'>Delete Account</h3>
-              <p className='mt-1 text-theme-sm text-error-600/80 dark:text-error-500/80'>
+              <h3 className='type-small font-semibold text-error-600 dark:text-error-500'>Delete Account</h3>
+              <p className='mt-1 type-small text-error-600/80 dark:text-error-500/80'>
                 Permanently delete your account and associated workspace data.
               </p>
             </div>
@@ -695,8 +703,8 @@ function DeleteAccountSection() {
           <div className='w-full max-w-[440px] rounded-2xl border border-gray-200 bg-white p-6 shadow-theme-lg dark:border-gray-800 dark:bg-gray-900'>
             <div className='mb-5 flex items-start justify-between gap-4'>
               <div>
-                <h3 className='text-lg font-semibold text-gray-800 dark:text-white/90'>Delete your account?</h3>
-                <p className='mt-1 text-theme-sm text-gray-500 dark:text-gray-400'>
+                <h3 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>Delete your account?</h3>
+                <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>
                   This action cannot be undone. Type DELETE to confirm.
                 </p>
               </div>
@@ -774,18 +782,18 @@ function SecurityTab() {
 
   return (
     <div className='space-y-6'>
-      <Card className='p-5 lg:p-6'>
+      <Card className='p-6 lg:p-6'>
         <div className='mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
           <SectionHeader title='Security' subtitle='Manage your password and account access' />
           <SaveButton loading={loading} saved={saved} onClick={() => void handleSave()} />
         </div>
-        <div className='mb-6 rounded-2xl border border-gray-200 bg-gray-50 p-5 dark:border-gray-800 dark:bg-gray-900'>
+        <div className='mb-6 rounded-2xl border border-gray-200 bg-gray-50 p-6 dark:border-gray-800 dark:bg-gray-900'>
           <div className='flex items-start gap-3'>
-            <div className='flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400'>
+            <div className='flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400'>
               <LockKeyhole className='h-5 w-5' />
             </div>
             <div>
-              <p className='text-theme-sm font-semibold text-gray-800 dark:text-white/90'>Password strength: {strength}</p>
+              <p className='type-small font-semibold text-gray-800 dark:text-white/90'>Password strength: {strength}</p>
               <div className='mt-3 h-2 w-full max-w-[320px] rounded-full bg-gray-200 dark:bg-gray-800'>
                 <div className='h-2 rounded-full bg-brand-500 transition-all' style={{ width: `${strengthPct}%` }} />
               </div>
@@ -797,7 +805,7 @@ function SecurityTab() {
           <FormField label='Current Password' value={current} onChange={setCurrent} type={show ? 'text' : 'password'} />
           <FormField label='New Password' value={next} onChange={setNext} type={show ? 'text' : 'password'} />
           <FormField label='Confirm New Password' value={confirm} onChange={setConfirm} type={show ? 'text' : 'password'} />
-          <label className='inline-flex items-center gap-2 text-theme-sm text-gray-600 dark:text-gray-400'>
+          <label className='inline-flex items-center gap-2 type-small text-gray-600 dark:text-gray-400'>
             <input type='checkbox' checked={show} onChange={(event) => setShow(event.target.checked)} className='h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500/20' />
             Show password fields
           </label>
@@ -944,7 +952,7 @@ function SupportPanel() {
   }
 
   return (
-    <Card className='p-5 lg:p-6'>
+    <Card className='p-6 lg:p-6'>
       <SectionHeader
         title='Support'
         subtitle='Send a message to the Lashvae team'
@@ -990,7 +998,7 @@ function SupportPanel() {
           />
 
           <label className='block'>
-            <span className='mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400'>
+            <span className='mb-1.5 block type-small font-medium text-gray-700 dark:text-gray-400'>
               Subject <span className='text-error-500'>*</span>
             </span>
             <select
@@ -1000,7 +1008,7 @@ function SupportPanel() {
               }
               onBlur={() => handleBlur('subject', subject)}
               className={cn(
-                'h-11 w-full rounded-lg border bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:outline-hidden focus:ring-3 dark:bg-gray-900 dark:text-white/90',
+                'h-10 w-full rounded-[10px] border bg-transparent px-4 py-2 type-small text-gray-800 shadow-theme-xs focus:outline-hidden focus:ring-3 dark:bg-gray-900 dark:text-white/90',
                 touched.subject && errors.subject
                   ? 'border-error-500 focus:border-error-500 focus:ring-error-500/10'
                   : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10 dark:border-gray-700',
@@ -1016,13 +1024,13 @@ function SupportPanel() {
               ))}
             </select>
             {touched.subject && errors.subject && (
-              <p className='mt-1.5 text-xs text-error-500'>{errors.subject}</p>
+              <p className='mt-1.5 type-caption text-error-500'>{errors.subject}</p>
             )}
           </label>
         </div>
 
         <label className='block'>
-          <span className='mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-400'>
+          <span className='mb-1.5 block type-small font-medium text-gray-700 dark:text-gray-400'>
             Your Message <span className='text-error-500'>*</span>
           </span>
           <Textarea
@@ -1033,18 +1041,18 @@ function SupportPanel() {
             onBlur={() => handleBlur('message', message)}
             placeholder='Tell us about your question or request.'
             className={cn(
-              'min-h-[150px] rounded-lg shadow-theme-xs dark:bg-gray-900',
+              'min-h-[150px] rounded-[10px] shadow-theme-xs dark:bg-gray-900',
               touched.message && errors.message
                 ? 'border-error-500 focus-visible:border-error-500 focus-visible:ring-error-500/10'
                 : 'border-gray-300 focus-visible:border-brand-300 focus-visible:ring-brand-500/10 dark:border-gray-700',
             )}
           />
           {touched.message && errors.message && (
-            <p className='mt-1.5 text-xs text-error-500'>{errors.message}</p>
+            <p className='mt-1.5 type-caption text-error-500'>{errors.message}</p>
           )}
         </label>
 
-        <label className='flex items-start gap-3 rounded-xl border border-gray-200 bg-gray-50 p-4 text-theme-sm text-gray-600 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400'>
+        <label className='flex items-start gap-3 rounded-xl border border-gray-200 bg-gray-50 p-4 type-small text-gray-600 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400'>
           <input
             type='checkbox'
             checked={agreed}
@@ -1062,7 +1070,7 @@ function SupportPanel() {
             type='button'
             disabled={!canSubmit}
             onClick={() => void handleSubmit()}
-            className='h-11 px-5'
+            className='h-10 px-5'
           >
             {sending && <Loader2 className='h-4 w-4 animate-spin' />}
             Send Message
@@ -1075,8 +1083,8 @@ function SupportPanel() {
 function LoadingProfile() {
   return (
     <div className='mx-auto max-w-screen-2xl p-4 md:p-6'>
-      <div className='rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6'>
-        <div className='mb-5 h-6 w-24 animate-pulse rounded-md bg-gray-100 dark:bg-white/[0.05] lg:mb-7' />
+      <div className='rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6'>
+        <div className='mb-5 h-6 w-24 animate-pulse rounded-[10px] bg-gray-100 dark:bg-white/[0.05] lg:mb-7' />
         <div className='space-y-6'>
           <div className='h-[148px] animate-pulse rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.05]' />
           <div className='h-[420px] animate-pulse rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.05]' />
@@ -1088,11 +1096,14 @@ function LoadingProfile() {
 
 function ProfileContent() {
   const searchParams = useSearchParams();
-  const initialNav = searchParams.get('activeNav') === 'subscription' ? 'subscription' : 'overview';
+  const billingRequested = searchParams.get('billing') === 'True' || searchParams.get('billing') === 'true';
+  const initialNav = searchParams.get('activeNav') === 'subscription' || billingRequested ? 'subscription' : 'overview';
   const [activeNav, setActiveNav] = useState<NavId>(initialNav);
   const [me, setMe] = useState<MeResp | null>(null);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [fetchErr, setFetchErr] = useState('');
+  const [isMobile, setIsMobile] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 
   const loadProfile = useCallback(async () => {
     setFetchErr('');
@@ -1112,10 +1123,19 @@ function ProfileContent() {
     return () => window.clearTimeout(timer);
   }, [loadProfile]);
 
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 900);
+
+    check();
+    window.addEventListener('resize', check);
+
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
   return (
     <div className='mx-auto max-w-screen-2xl p-4 md:p-6'>
-      <div className='rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6'>
-        <h3 className='mb-5 text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-7'>
+      <div className='rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6'>
+        <h3 className='mb-5 type-card-title font-semibold text-gray-800 dark:text-white/90 lg:mb-7'>
           Profile
         </h3>
 
@@ -1134,31 +1154,98 @@ function ProfileContent() {
           <div className='space-y-6'>
             <MetaCard me={me} photoUrl={photoUrl} setPhotoUrl={setPhotoUrl} />
 
-            <div className='overflow-x-auto'>
-              <nav className='inline-flex min-w-full gap-2 rounded-xl border border-gray-200 bg-gray-50 p-1 dark:border-gray-800 dark:bg-gray-900 sm:min-w-0'>
-                {NAV.map((item) => (
+            <div className='grid grid-cols-1 gap-6 lg:grid-cols-[290px_1fr] lg:items-start'>
+              <div>
+                {isMobile && (
                   <button
-                    key={item.id}
                     type='button'
-                    onClick={() => setActiveNav(item.id)}
-                    className={`inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg px-3 text-theme-sm font-medium transition ${
-                      activeNav === item.id
-                        ? 'bg-white text-brand-500 shadow-theme-xs dark:bg-white/[0.05] dark:text-brand-400'
-                        : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white/90'
-                    }`}
+                    onClick={() => setProfileMenuOpen((p) => !p)}
+                    className='mb-3 flex h-10 w-full items-center justify-between rounded-[10px] border border-gray-200 bg-white px-4 type-small font-medium text-gray-700 shadow-theme-xs transition hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400 dark:hover:bg-white/[0.03]'
                   >
-                    {item.icon}
-                    {item.label}
+                    <span>Profile Menu</span>
+                    <Menu size={18} />
                   </button>
-                ))}
-              </nav>
-            </div>
+                )}
 
-            {activeNav === 'overview' && <OverviewTab me={me} />}
-            {activeNav === 'details' && <DetailsTab me={me} />}
-            {activeNav === 'security' && <SecurityTab />}
-            {activeNav === 'subscription' && <SubscriptionTab me={me} />}
-            {activeNav === 'support' && <SupportPanel />}
+                {(!isMobile || profileMenuOpen) && (
+                  <div className='rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]'>
+                    <div className='border-b border-gray-100 px-5 py-4 dark:border-gray-800'>
+                      <h3 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
+                        Profile
+                      </h3>
+                      <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>
+                        Manage account preferences
+                      </p>
+                    </div>
+
+                    <div className='flex flex-col gap-1 p-3'>
+                      {NAV.map((item) => {
+                        const active = activeNav === item.id;
+
+                        return (
+                          <button
+                            key={item.id}
+                            type='button'
+                            onClick={() => {
+                              setActiveNav(item.id);
+                              setProfileMenuOpen(false);
+                            }}
+                            className={cn(
+                              'flex w-full items-center justify-between gap-3 rounded-[10px] px-3 py-3 text-left transition',
+                              active
+                                ? 'bg-brand-50 dark:bg-brand-500/[0.12]'
+                                : 'hover:bg-gray-50 dark:hover:bg-white/[0.03]',
+                            )}
+                          >
+                            <span className='flex items-center gap-3'>
+                              <span
+                                className={cn(
+                                  'flex h-9 w-9 items-center justify-center rounded-[10px]',
+                                  active
+                                    ? 'bg-white text-brand-500 shadow-theme-xs dark:bg-white/10 dark:text-brand-400'
+                                    : 'text-gray-500 dark:text-gray-400',
+                                )}
+                              >
+                                {item.icon}
+                              </span>
+
+                              <span
+                                className={cn(
+                                  'block type-small font-semibold',
+                                  active
+                                    ? 'text-brand-500 dark:text-brand-400'
+                                    : 'text-gray-700 dark:text-gray-300',
+                                )}
+                              >
+                                {item.label}
+                              </span>
+                            </span>
+
+                            <ChevronRight
+                              size={16}
+                              className={cn(
+                                'shrink-0',
+                                active
+                                  ? 'text-brand-400'
+                                  : 'text-gray-300 dark:text-gray-600',
+                              )}
+                            />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className='min-w-0'>
+                {activeNav === 'overview' && <OverviewTab me={me} />}
+                {activeNav === 'details' && <DetailsTab me={me} />}
+                {activeNav === 'security' && <SecurityTab />}
+                {activeNav === 'subscription' && <SubscriptionTab me={me} />}
+                {activeNav === 'support' && <SupportPanel />}
+              </div>
+            </div>
           </div>
         ) : null}
       </div>

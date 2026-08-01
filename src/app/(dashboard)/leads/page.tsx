@@ -10,13 +10,7 @@ import { Input } from '@/components/ui/input';
 import { getPageItems, TablePagination } from '@/components/ui/table-pagination';
 import { useOutsideClick } from '@/hooks/useOutsideClick';
 import { apiFetch } from '@/lib/api';
-import {
-  CATEGORY_CFG,
-  detectCategory,
-  resolveMoodForLead,
-  type Category,
-  type Mood,
-} from '@/lib/chat-classifiers';
+import { type Mood } from '@/lib/chat-classifiers';
 import { cn } from '@/lib/utils';
 import {
   AlertTriangle,
@@ -89,6 +83,17 @@ const STAGE_TABS: { key: string; label: string; icon: React.ReactNode }[] = [
   { key: 'lost', label: 'Lost', icon: <X size={13} /> },
 ];
 
+const CHANNEL_LOGOS: Record<string, string> = {
+  facebook: '/brand-logo/facebook.png',
+  google: '/brand-logo/google-map.png',
+  instagram: '/brand-logo/instagram.png',
+  meta: '/brand-logo/meta.png',
+  telegram: '/brand-logo/telegram.png',
+  website: '/brand-logo/website.png',
+  whatsapp: '/brand-logo/whatsapp.png',
+  youtube: '/brand-logo/youtube.png',
+};
+
 const QUICK_KW = [
   { label: 'Pricing', kws: ['price', 'cost', 'budget', 'quote', 'fee'] },
   { label: 'Intent', kws: ['urgent', 'asap', 'demo', 'call', 'book'] },
@@ -150,27 +155,6 @@ function getDisplayInfo(lead: LeadItem) {
   };
 }
 
-function getMoodForLead(lead: LeadItem): Mood {
-  return resolveMoodForLead({
-    storedMood: lead.meta?.mood,
-    text_preview: lead.meta?.text_preview,
-    triggers: lead.meta?.triggers,
-    intent: lead.intent,
-  });
-}
-
-function getCategoryForLead(lead: LeadItem): Category {
-  const mood = getMoodForLead(lead);
-  return detectCategory({
-    text_preview: lead.meta?.text_preview,
-    triggers: lead.meta?.triggers,
-    intent: lead.intent,
-    service: lead.service,
-    mood: mood.mood,
-    contacts: lead.contacts,
-  });
-}
-
 function Highlight({ text, query }: { text: string; query: string }) {
   if (!query || !text) return <>{text}</>;
   const idx = text.toLowerCase().indexOf(query.toLowerCase());
@@ -210,7 +194,7 @@ function LeadAvatar({ lead, label }: { lead: LeadItem; label: string }) {
   }
 
   return (
-    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-theme-xs font-medium text-gray-600 dark:bg-white/5 dark:text-gray-300">
+    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 type-caption font-medium text-gray-600 dark:bg-white/5 dark:text-gray-300">
       {initials || 'LD'}
     </span>
   );
@@ -244,21 +228,21 @@ function MetricCard({
       type='button'
       onClick={onClick}
       className={cn(
-        'rounded-2xl border p-5 text-left transition',
+        'rounded-2xl border p-6 text-left transition',
         toneBg[tone],
         active
           ? 'border-brand-300 shadow-theme-sm dark:border-brand-500/40'
           : 'border-gray-200 hover:border-gray-300 dark:border-gray-800 dark:hover:border-gray-700',
       )}
     >
-      <span className='text-theme-xs font-medium uppercase text-gray-500 dark:text-gray-400'>
+      <span className='type-caption font-medium uppercase text-gray-500 dark:text-gray-400'>
         {label}
       </span>
       <div className='mt-3 flex items-end justify-between gap-3'>
         <span className='text-title-sm font-semibold text-gray-800 dark:text-white/90'>
           {value}
         </span>
-        <span className='text-theme-xs text-gray-400 dark:text-gray-500'>
+        <span className='type-caption text-gray-400 dark:text-gray-500'>
           {detail}
         </span>
       </div>
@@ -298,7 +282,7 @@ function StageSelect({
         type="button"
         disabled={disabled}
         onClick={() => setOpen((value) => !value)}
-        className="flex h-10 w-full items-center justify-between gap-2 rounded-lg border border-gray-200 bg-white px-3 text-theme-sm font-medium outline-none transition hover:bg-gray-50 disabled:opacity-60 dark:border-gray-800 dark:bg-gray-900 dark:hover:bg-white/[0.03]"
+        className="flex h-10 w-full items-center justify-between gap-2 rounded-[10px] border border-gray-200 bg-white px-3 type-small font-medium outline-none transition hover:bg-gray-50 disabled:opacity-60 dark:border-gray-800 dark:bg-gray-900 dark:hover:bg-white/[0.03]"
         aria-label={`Change stage for ${label}`}
       >
         <span className={cn('inline-flex items-center gap-2 truncate', toneClass)}>
@@ -306,9 +290,9 @@ function StageSelect({
           {current.label}
         </span>
         {disabled ? (
-          <Loader2 className="size-4 shrink-0 animate-spin text-gray-400" />
+          <Loader2 className="icon-small shrink-0 animate-spin text-gray-400" />
         ) : (
-          <ChevronDown className={cn('size-4 shrink-0 text-gray-400 transition-transform', open && 'rotate-180')} />
+          <ChevronDown className={cn('icon-small shrink-0 text-gray-400 transition-transform', open && 'rotate-180')} />
         )}
       </button>
 
@@ -327,7 +311,7 @@ function StageSelect({
                   setOpen(false);
                 }}
                 className={cn(
-                  'flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium transition',
+                  'flex w-full items-center gap-2 rounded-[10px] px-3 py-2 text-left type-small font-medium transition',
                   isActive
                     ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'
                     : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/[0.04]',
@@ -360,11 +344,11 @@ function LeadWorklist({
   return (
     <div className="min-w-0 max-w-full overflow-hidden rounded-b-xl border border-gray-200 dark:border-white/[0.05]">
       <div className="w-full overflow-x-auto">
-        <table className="lashvae-column-dividers min-w-[1400px] table-fixed">
+        <table className="lashvae-column-dividers min-w-[1360px] table-fixed">
           <colgroup>
             <col className="w-[280px]" />
             <col className="w-[170px]" />
-            <col className="w-[200px]" />
+            <col className="w-[160px]" />
             <col className="w-[240px]" />
             <col className="w-[200px]" />
             <col className="w-[120px]" />
@@ -372,11 +356,11 @@ function LeadWorklist({
           </colgroup>
           <thead className="border-b border-gray-100 dark:border-white/[0.05]">
             <tr>
-              {['Lead', 'Stage', 'Requirement', 'Email', 'Phone', 'Activity', 'Actions'].map(
+              {['Lead', 'Stage', 'Channel', 'Email', 'Phone', 'Activity', 'Actions'].map(
                 (header) => (
                   <th
                     key={header}
-                    className="px-5 py-3 text-left text-base font-medium text-gray-500 dark:text-gray-400"
+                    className="px-5 py-3 text-left type-body font-medium text-gray-500 dark:text-gray-400"
                   >
                     {header}
                   </th>
@@ -387,7 +371,7 @@ function LeadWorklist({
           <tbody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
             {loading && items.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-5 py-14 text-center text-theme-sm text-gray-500 dark:text-gray-400">
+                <td colSpan={7} className="px-5 py-14 text-center type-small text-gray-500 dark:text-gray-400">
                   Loading leads
                 </td>
               </tr>
@@ -395,7 +379,7 @@ function LeadWorklist({
 
             {!loading && items.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-5 py-14 text-center text-theme-sm text-gray-500 dark:text-gray-400">
+                <td colSpan={7} className="px-5 py-14 text-center type-small text-gray-500 dark:text-gray-400">
                   {searchQ ? 'No leads match this search' : 'No leads found'}
                 </td>
               </tr>
@@ -405,18 +389,13 @@ function LeadWorklist({
               const display = getDisplayInfo(lead);
               const email = lead.contacts?.emails?.[0] || '';
               const phone = lead.contacts?.phones?.[0] || '';
-              const category = getCategoryForLead(lead);
-              const categoryLabel = CATEGORY_CFG[category]?.label || 'General';
-              const intent = lead.intent && lead.intent !== 'unknown' ? titleCase(lead.intent) : 'Unknown';
-              const service = lead.service && lead.service !== 'unknown' ? titleCase(lead.service) : '';
-
               return (
                 <tr key={lead.id} className="transition hover:bg-gray-50 dark:hover:bg-white/[0.02]">
                   <td className="px-5 py-3 sm:px-6">
                     <div className="flex items-center gap-3">
                       <LeadAvatar lead={lead} label={display.label} />
                       <div className="min-w-0">
-                        <span className="group relative block max-w-full text-theme-sm font-medium text-gray-800 dark:text-white/90">
+                        <span className="group relative block max-w-full type-small font-medium text-gray-800 dark:text-white/90">
                           <Link
                             href={`/conversations/${lead.conversation_id}`}
                             className="block truncate hover:text-brand-500 dark:hover:text-brand-400"
@@ -425,18 +404,11 @@ function LeadWorklist({
                           </Link>
                           <span className="pointer-events-none absolute left-0 top-full z-50 mt-1 hidden max-w-[280px] group-hover:block">
                             <span className="absolute -top-1 left-3 h-2 w-2 rotate-45 rounded-[2px] bg-gray-900" />
-                            <span className="relative block rounded-md bg-gray-900 px-2.5 py-1.5 text-xs font-medium text-white shadow-lg">
+                            <span className="relative block rounded-[10px] bg-gray-900 px-3 py-1.5 type-caption font-medium text-white shadow-lg">
                               {display.label}
                             </span>
                           </span>
                         </span>
-                        <p
-                          title={display.isPsid ? display.subtitle : undefined}
-                          className="mt-1 truncate text-theme-xs text-gray-500 dark:text-gray-400"
-                        >
-                          #{lead.conversation_id} / {titleCase(lead.channel || 'channel')}
-                          {display.isPsid ? ` - ${display.subtitle}` : ''}
-                        </p>
                       </div>
                     </div>
                   </td>
@@ -449,33 +421,34 @@ function LeadWorklist({
                     />
                   </td>
                   <td className="px-6 py-3">
-                    <p
-                      title={`${intent}${service ? ` - ${service}` : ''}`}
-                      className="truncate text-theme-sm font-medium text-gray-700 dark:text-gray-300"
-                    >
-                      {intent}
-                    </p>
-                    <p className="mt-1 truncate text-theme-xs text-gray-500 dark:text-gray-400">
-                      {service || categoryLabel} / Score {lead.meta?.score ?? 0}
-                    </p>
+                    <span className="inline-flex items-center gap-2 type-small text-gray-700 dark:text-gray-300">
+                      <Image
+                        src={CHANNEL_LOGOS[(lead.channel || '').toLowerCase()] || '/brand-logo/website.png'}
+                        alt={titleCase(lead.channel || 'Channel')}
+                        width={18}
+                        height={18}
+                        className="h-[18px] w-[18px] shrink-0 object-contain"
+                      />
+                      <span className="truncate">{titleCase(lead.channel || 'Channel')}</span>
+                    </span>
                   </td>
-                  <td className="px-6 py-3 text-theme-sm text-gray-500 dark:text-gray-400">
+                  <td className="px-6 py-3 type-small text-gray-500 dark:text-gray-400">
                     <span className="block truncate" title={email || undefined}>
                       {email || 'No email saved'}
                     </span>
                   </td>
-                  <td className="px-6 py-3 text-theme-sm text-gray-500 dark:text-gray-400">
+                  <td className="px-6 py-3 type-small text-gray-500 dark:text-gray-400">
                     <span className="block truncate" title={phone || undefined}>
                       {phone || 'No phone saved'}
                     </span>
                   </td>
-                  <td className="px-6 py-3 text-theme-sm tabular-nums text-gray-500 dark:text-gray-400">
+                  <td className="px-6 py-3 type-small tabular-nums text-gray-500 dark:text-gray-400">
                     {timeAgo(lead.updated_at)}
                   </td>
                   <td className="px-6 py-3">
                     <Link
                       href={`/conversations/${lead.conversation_id}`}
-                      className="inline-flex h-8 items-center gap-2 whitespace-nowrap rounded-lg bg-brand-500 px-3 text-theme-sm font-medium text-white shadow-theme-xs hover:bg-brand-600"
+                      className="inline-flex h-8 items-center gap-2 whitespace-nowrap rounded-[10px] bg-brand-500 px-3 type-small font-medium text-white shadow-theme-xs hover:bg-brand-600"
                     >
                       <Eye size={14} />
                       View conversation
@@ -689,7 +662,7 @@ export default function LeadsPage() {
             <h1 className='text-title-sm font-semibold text-gray-800 dark:text-white/90'>
               Leads
             </h1>
-            <p className='mt-1 text-theme-sm text-gray-500 dark:text-gray-400'>
+            <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>
               Manage lead qualification, follow-ups, and pipeline movement from
               one focused workspace.
             </p>
@@ -702,7 +675,7 @@ export default function LeadsPage() {
               onClick={() => load()}
               disabled={loading}
             >
-              <RefreshCw className={cn('size-4', loading && 'animate-spin')} />
+              <RefreshCw className={cn('icon-small', loading && 'animate-spin')} />
               Refresh
             </Button>
           </div>
@@ -755,17 +728,17 @@ export default function LeadsPage() {
           <div className='flex flex-col gap-6'>
             <div className='min-w-0 max-w-full overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]'>
               <div className='flex flex-col gap-2 border-b border-gray-100 px-5 py-5 dark:border-white/[0.05] sm:flex-row sm:items-center sm:justify-between sm:px-6'>
-                <h3 className='text-base font-semibold text-gray-800 dark:text-white/90'>
+                <h3 className='type-body font-semibold text-gray-800 dark:text-white/90'>
                   Lead pipeline
                 </h3>
-                <div className='text-theme-sm font-medium text-gray-500 dark:text-gray-400'>
+                <div className='type-small font-medium text-gray-500 dark:text-gray-400'>
                   {total} leads
                 </div>
               </div>
 
               <div className='min-w-0 px-5 py-5 sm:px-6'>
                 <div className='flex flex-col gap-4 rounded-t-xl border border-b-0 border-gray-200 bg-white px-5 py-4 dark:border-white/[0.05] dark:bg-white/[0.01] lg:flex-row lg:items-center lg:justify-between'>
-                  <h4 className='text-lg font-semibold text-gray-800 dark:text-white/90'>
+                  <h4 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
                     {activeStageTab.label} leads
                   </h4>
                   <div className='flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end'>
@@ -779,7 +752,7 @@ export default function LeadsPage() {
                           setSearching(!!event.target.value);
                         }}
                         placeholder='Search name, intent, service, or message'
-                        className='h-11 w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-11 pr-9 text-theme-sm text-gray-800 shadow-theme-xs outline-none placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-gray-500'
+                        className='h-10 w-full rounded-[10px] border border-gray-300 bg-white py-2 pl-11 pr-9 type-small text-gray-800 shadow-theme-xs outline-none placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-gray-500'
                       />
                       {searchQ && !searching && (
                         <button
@@ -788,11 +761,11 @@ export default function LeadsPage() {
                           className='absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 transition hover:text-gray-600 dark:hover:text-gray-300'
                           aria-label='Clear search'
                         >
-                          <X className='size-4' />
+                          <X className='icon-small' />
                         </button>
                       )}
                       {searching && (
-                        <Loader2 className='pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 animate-spin text-gray-400' />
+                        <Loader2 className='pointer-events-none absolute right-3 top-1/2 icon-small -translate-y-1/2 animate-spin text-gray-400' />
                       )}
                     </div>
 
@@ -847,7 +820,7 @@ export default function LeadsPage() {
                                   setOpenFilter(null);
                                 }}
                                 className={cn(
-                                  'flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm font-medium transition',
+                                  'flex w-full items-center justify-between rounded-[10px] px-3 py-2 text-left type-small font-medium transition',
                                   isActive
                                     ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'
                                     : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/[0.04]',
@@ -857,7 +830,7 @@ export default function LeadsPage() {
                                   {tab.icon}
                                   {tab.label}
                                 </span>
-                                <span className='text-xs text-gray-400 dark:text-gray-500'>
+                                <span className='type-caption text-gray-400 dark:text-gray-500'>
                                   {count}
                                 </span>
                               </button>
@@ -888,7 +861,7 @@ export default function LeadsPage() {
                 </div>
 
                 {debouncedQ && !loading && (
-                  <div className='border-x border-gray-200 bg-white px-5 py-3 text-theme-sm text-brand-500 dark:border-white/[0.05] dark:bg-white/[0.01] dark:text-brand-400'>
+                  <div className='border-x border-gray-200 bg-white px-5 py-3 type-small text-brand-500 dark:border-white/[0.05] dark:bg-white/[0.01] dark:text-brand-400'>
                     {total > 0
                       ? `${total} leads match "${debouncedQ}"`
                       : `No leads match "${debouncedQ}"`}
@@ -896,8 +869,8 @@ export default function LeadsPage() {
                 )}
 
                 {err && (
-                  <div className='mt-3 flex items-center gap-2 rounded-lg border border-error-200 bg-error-50 px-4 py-3 text-theme-sm text-error-600 dark:border-error-500/30 dark:bg-error-500/15 dark:text-error-500'>
-                    <AlertTriangle className='size-4 shrink-0' />
+                  <div className='mt-3 flex items-center gap-2 rounded-[10px] border border-error-200 bg-error-50 px-4 py-3 type-small text-error-600 dark:border-error-500/30 dark:bg-error-500/15 dark:text-error-500'>
+                    <AlertTriangle className='icon-small shrink-0' />
                     {err}
                   </div>
                 )}
@@ -924,10 +897,10 @@ export default function LeadsPage() {
               <div className='border-b border-gray-100 px-6 py-5 dark:border-gray-800'>
                 <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
                   <div>
-                    <h3 className='text-base font-semibold text-gray-800 dark:text-white/90'>
+                    <h3 className='type-body font-semibold text-gray-800 dark:text-white/90'>
                       Lead keywords
                     </h3>
-                    <p className='mt-1 text-theme-sm text-gray-500 dark:text-gray-400'>
+                    <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>
                       Terms that boost a conversation&apos;s lead score
                       automatically.
                     </p>
@@ -938,17 +911,17 @@ export default function LeadsPage() {
 
               <div className='grid gap-4 p-4 sm:p-6 lg:grid-cols-2'>
                 <div className='flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-white/[0.02]'>
-                  <div className='flex items-center gap-2 text-theme-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400'>
-                    <Tag className='size-3.5' />
+                  <div className='flex items-center gap-2 type-caption font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400'>
+                    <Tag className='icon-tiny' />
                     Active keywords
                   </div>
-                  <p className='text-theme-xs text-gray-500 dark:text-gray-400'>
+                  <p className='type-caption text-gray-500 dark:text-gray-400'>
                     Each keyword adds 2 points. Strong intent terms can qualify
                     a conversation automatically.
                   </p>
-                  <div className='flex min-h-24 flex-1 flex-wrap content-start gap-2 rounded-lg border border-gray-200 bg-white p-3 dark:border-gray-800 dark:bg-gray-900'>
+                  <div className='flex min-h-24 flex-1 flex-wrap content-start gap-2 rounded-[10px] border border-gray-200 bg-white p-3 dark:border-gray-800 dark:bg-gray-900'>
                     {keywords.length === 0 ? (
-                      <span className='self-center text-theme-sm text-gray-400 dark:text-gray-500'>
+                      <span className='self-center type-small text-gray-400 dark:text-gray-500'>
                         No keywords added yet
                       </span>
                     ) : (
@@ -961,7 +934,7 @@ export default function LeadsPage() {
                             className='text-brand-500/70 transition hover:text-brand-500 dark:text-brand-400/70 dark:hover:text-brand-400'
                             aria-label={`Remove ${kw}`}
                           >
-                            <X className='size-3' />
+                            <X className='icon-tiny' />
                           </button>
                         </Badge>
                       ))
@@ -970,8 +943,8 @@ export default function LeadsPage() {
                 </div>
 
                 <div className='flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-white/[0.02]'>
-                  <div className='flex items-center gap-2 text-theme-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400'>
-                    <Plus className='size-3.5' />
+                  <div className='flex items-center gap-2 type-caption font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400'>
+                    <Plus className='icon-tiny' />
                     Add a keyword
                   </div>
                   <div className='flex gap-2'>
@@ -980,25 +953,25 @@ export default function LeadsPage() {
                       onChange={(event) => setKwInput(event.target.value)}
                       onKeyDown={(event) => event.key === 'Enter' && addKw()}
                       placeholder='e.g. pricing, urgent'
-                      className='h-10 rounded-lg bg-white dark:bg-gray-900'
+                      className='h-10 rounded-[10px] bg-white dark:bg-gray-900'
                     />
                     <Button
-                      className='h-10 shrink-0 rounded-lg px-5'
+                      className='h-10 shrink-0 rounded-[10px] px-5'
                       onClick={addKw}
                       disabled={!kwInput.trim()}
                     >
-                      <Plus className='size-4' />
+                      <Plus className='icon-small' />
                       Add
                     </Button>
                   </div>
 
                   <div className='flex flex-1 flex-col gap-3'>
-                    <p className='text-theme-xs font-medium text-gray-500 dark:text-gray-400'>
+                    <p className='type-caption font-medium text-gray-500 dark:text-gray-400'>
                       Suggested
                     </p>
                     {QUICK_KW.map((group) => (
                       <div key={group.label} className='flex flex-col gap-1.5'>
-                        <span className='text-theme-xs text-gray-400 dark:text-gray-500'>
+                        <span className='type-caption text-gray-400 dark:text-gray-500'>
                           {group.label}
                         </span>
                         <div className='flex flex-wrap gap-2'>
@@ -1013,7 +986,7 @@ export default function LeadsPage() {
                                   setKeywords((prev) => [...prev, kw])
                                 }
                                 className={cn(
-                                  'inline-flex items-center rounded-lg border px-2.5 py-1.5 text-theme-xs font-medium transition',
+                                  'inline-flex items-center rounded-[10px] border px-3 py-1.5 type-caption font-medium transition',
                                   already
                                     ? 'border-gray-200 bg-gray-100 text-gray-400 dark:border-gray-800 dark:bg-white/[0.04] dark:text-gray-500'
                                     : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-white/[0.03]',
@@ -1036,7 +1009,7 @@ export default function LeadsPage() {
                     'Saving'
                   ) : savedKW ? (
                     <>
-                      <Check className='size-4' />
+                      <Check className='icon-small' />
                       Saved
                     </>
                   ) : (
@@ -1050,10 +1023,10 @@ export default function LeadsPage() {
               <div className='border-b border-gray-100 px-6 py-5 dark:border-gray-800'>
                 <div className='flex items-center justify-between gap-3'>
                   <div>
-                    <h3 className='text-base font-medium text-gray-800 dark:text-white/90'>
+                    <h3 className='type-body font-medium text-gray-800 dark:text-white/90'>
                       Follow-ups
                     </h3>
-                    <p className='mt-1 text-theme-sm text-gray-500 dark:text-gray-400'>
+                    <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>
                       Recommended conversations to revisit.
                     </p>
                   </div>
@@ -1064,10 +1037,10 @@ export default function LeadsPage() {
               <div className='space-y-3 p-4 sm:p-6'>
                 {voiceFollowUps.length === 0 ? (
                   <div className='rounded-xl border border-gray-200 bg-gray-50 px-4 py-8 text-center dark:border-gray-800 dark:bg-white/[0.02]'>
-                    <p className='text-theme-sm font-medium text-gray-700 dark:text-gray-300'>
+                    <p className='type-small font-medium text-gray-700 dark:text-gray-300'>
                       No follow-ups waiting
                     </p>
-                    <p className='mt-1 text-theme-xs text-gray-500 dark:text-gray-400'>
+                    <p className='mt-1 type-caption text-gray-500 dark:text-gray-400'>
                       Growth recommendations will appear here.
                     </p>
                   </div>
@@ -1080,13 +1053,13 @@ export default function LeadsPage() {
                     >
                       <div className='flex items-start justify-between gap-3'>
                         <div className='min-w-0'>
-                          <p className='truncate text-theme-sm font-medium text-gray-800 dark:text-white/90'>
+                          <p className='truncate type-small font-medium text-gray-800 dark:text-white/90'>
                             {followUp.name ||
                               followUp.lead_or_customer ||
                               followUp.title ||
                               `Follow-up ${index + 1}`}
                           </p>
-                          <p className='mt-1 line-clamp-2 text-theme-xs text-gray-500 dark:text-gray-400'>
+                          <p className='mt-1 line-clamp-2 type-caption text-gray-500 dark:text-gray-400'>
                             {followUp.reason ||
                               followUp.insight ||
                               'No reason provided'}
