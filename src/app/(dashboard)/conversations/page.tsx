@@ -3,12 +3,17 @@
 import {
   ChannelFilter,
   ChannelFilterValue,
+  ChannelFilterValueLabel,
+  ChannelItem,
   useChannelFilter,
 } from '@/components/channel-filter';
 import { DateFilter } from '@/components/date-filter';
 import { RequireAuth } from '@/components/require-auth';
 import { Button } from '@/components/ui/button';
-import { getPageItems, TablePagination } from '@/components/ui/table-pagination';
+import {
+  getPageItems,
+  TablePagination,
+} from '@/components/ui/table-pagination';
 import { useOutsideClick } from '@/hooks/useOutsideClick';
 import { apiFetch } from '@/lib/api';
 import { cn } from '@/lib/utils';
@@ -120,7 +125,10 @@ function platformLabel(channel?: string) {
     website: 'Website',
     test: 'Test',
   };
-  return map[channel.toLowerCase()] || channel.charAt(0).toUpperCase() + channel.slice(1);
+  return (
+    map[channel.toLowerCase()] ||
+    channel.charAt(0).toUpperCase() + channel.slice(1)
+  );
 }
 
 function displayName(c: ConvoItem) {
@@ -274,6 +282,7 @@ const INBOX_TABS: { key: string; label: string; icon: React.ReactNode }[] = [
 
 type InboxFilterKey = 'conversation' | 'channel' | 'date';
 
+// ── Table ────────────────────────────────────────────────────────────────────────
 function ConversationTable({
   items,
   loading,
@@ -288,6 +297,11 @@ function ConversationTable({
   onSeeAll,
   channelFilter,
   setChannelFilter,
+  channels,
+  channelsLoading,
+  selectedChannels,
+  channelCounts,
+  channelTotal,
   dateRange,
   setDateRange,
   activePreset,
@@ -308,6 +322,11 @@ function ConversationTable({
   onSeeAll: () => void;
   channelFilter: ChannelFilterValue;
   setChannelFilter: (value: ChannelFilterValue) => void;
+  channels: ChannelItem[];
+  channelsLoading: boolean;
+  selectedChannels: ChannelItem[];
+  channelCounts: Record<number, number>;
+  channelTotal: number;
   dateRange: { from: string; to: string } | null;
   setDateRange: (range: { from: string; to: string } | null) => void;
   activePreset: number | null;
@@ -322,25 +341,29 @@ function ConversationTable({
   const conversationFilterRef = useRef<HTMLDivElement>(null);
   const dateFilterRef = useRef<HTMLDivElement>(null);
 
-  useOutsideClick(channelFilterRef, () => setOpenFilter(null), openFilter === 'channel');
-  useOutsideClick(conversationFilterRef, () => setOpenFilter(null), openFilter === 'conversation');
-  useOutsideClick(dateFilterRef, () => setOpenFilter(null), openFilter === 'date');
+  useOutsideClick(
+    channelFilterRef,
+    () => setOpenFilter(null),
+    openFilter === 'channel',
+  );
+  useOutsideClick(
+    conversationFilterRef,
+    () => setOpenFilter(null),
+    openFilter === 'conversation',
+  );
+  useOutsideClick(
+    dateFilterRef,
+    () => setOpenFilter(null),
+    openFilter === 'date',
+  );
 
   useEffect(() => {
     const timer = window.setTimeout(() => setPage(1), 0);
     return () => window.clearTimeout(timer);
   }, [status, items.length]);
 
-  const activeTab = INBOX_TABS.find((tab) => tab.key === status) ?? INBOX_TABS[0];
-
-  const channelCounts = useMemo(
-    () =>
-      items.reduce<Record<number, number>>((acc, item) => {
-        if (item.channel_id != null) acc[item.channel_id] = (acc[item.channel_id] || 0) + 1;
-        return acc;
-      }, {}),
-    [items],
-  );
+  const activeTab =
+    INBOX_TABS.find((tab) => tab.key === status) ?? INBOX_TABS[0];
 
   return (
     <div className='min-w-0 max-w-full overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]'>
@@ -375,21 +398,22 @@ function ConversationTable({
             <div ref={channelFilterRef} className='relative'>
               <Button
                 variant='outline'
-                onClick={() => setOpenFilter(openFilter === 'channel' ? null : 'channel')}
+                onClick={() =>
+                  setOpenFilter(openFilter === 'channel' ? null : 'channel')
+                }
               >
                 <Radio size={14} />
-                Channel
+                <ChannelFilterValueLabel selected={selectedChannels} />
               </Button>
               {openFilter === 'channel' && (
                 <div className='absolute right-0 z-20 mt-2 w-64 overflow-hidden rounded-xl border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-800 dark:bg-gray-900'>
                   <ChannelFilter
                     value={channelFilter}
-                    onChange={(value) => {
-                      setChannelFilter(value);
-                      setOpenFilter(null);
-                    }}
+                    onChange={setChannelFilter}
+                    channels={channels}
+                    loading={channelsLoading}
                     counts={channelCounts}
-                    totalCount={items.length}
+                    totalCount={channelTotal}
                   />
                 </div>
               )}
@@ -399,7 +423,11 @@ function ConversationTable({
             <div ref={conversationFilterRef} className='relative'>
               <Button
                 variant='outline'
-                onClick={() => setOpenFilter(openFilter === 'conversation' ? null : 'conversation')}
+                onClick={() =>
+                  setOpenFilter(
+                    openFilter === 'conversation' ? null : 'conversation',
+                  )
+                }
               >
                 <SlidersHorizontal size={14} />
                 Conversation
@@ -446,7 +474,9 @@ function ConversationTable({
                 setDateRange={setDateRange}
                 setActivePreset={setActivePreset}
                 open={openFilter === 'date'}
-                onToggle={() => setOpenFilter(openFilter === 'date' ? null : 'date')}
+                onToggle={() =>
+                  setOpenFilter(openFilter === 'date' ? null : 'date')
+                }
                 onClose={() => setOpenFilter(null)}
               />
             </div>
@@ -485,7 +515,15 @@ function ConversationTable({
               </colgroup>
               <thead className='border-b border-gray-100 dark:border-white/[0.05]'>
                 <tr>
-                  {['Customer', 'Channel', 'Intent', 'Status', 'Lead', 'Last active', 'Actions'].map((header) => (
+                  {[
+                    'Customer',
+                    'Channel',
+                    'Intent',
+                    'Status',
+                    'Lead',
+                    'Last active',
+                    'Actions',
+                  ].map((header) => (
                     <th
                       key={header}
                       className='px-5 py-3 text-left type-body font-medium text-gray-500 dark:text-gray-400'
@@ -498,7 +536,10 @@ function ConversationTable({
               <tbody className='divide-y divide-gray-100 dark:divide-white/[0.05]'>
                 {loading && (
                   <tr>
-                    <td colSpan={7} className='px-5 py-14 text-center type-small text-gray-500 dark:text-gray-400'>
+                    <td
+                      colSpan={7}
+                      className='px-5 py-14 text-center type-small text-gray-500 dark:text-gray-400'
+                    >
                       Loading conversations
                     </td>
                   </tr>
@@ -506,8 +547,13 @@ function ConversationTable({
 
                 {!loading && items.length === 0 && (
                   <tr>
-                    <td colSpan={7} className='px-5 py-14 text-center type-small text-gray-500 dark:text-gray-400'>
-                      {q.trim() ? 'No conversations match this search' : 'No conversations found'}
+                    <td
+                      colSpan={7}
+                      className='px-5 py-14 text-center type-small text-gray-500 dark:text-gray-400'
+                    >
+                      {q.trim()
+                        ? 'No conversations match this search'
+                        : 'No conversations found'}
                     </td>
                   </tr>
                 )}
@@ -515,14 +561,26 @@ function ConversationTable({
                 {!loading &&
                   pageItems.map((item) => {
                     const category = getCategory(item);
-                    const preview = item.lead?.meta?.text_preview || item.preview || 'No preview available';
+                    const preview =
+                      item.lead?.meta?.text_preview ||
+                      item.preview ||
+                      'No preview available';
                     const name = displayName(item);
                     return (
-                      <tr key={item.id} className='transition hover:bg-gray-50 dark:hover:bg-white/[0.02]'>
+                      <tr
+                        key={item.id}
+                        className='transition hover:bg-gray-50 dark:hover:bg-white/[0.02]'
+                      >
                         <td className='px-5 py-3 sm:px-6'>
-                          <Link href={`/conversations/${item.id}`} className='flex items-center gap-3'>
+                          <Link
+                            href={`/conversations/${item.id}`}
+                            className='flex items-center gap-3'
+                          >
                             <div className='relative shrink-0'>
-                              <ConversationAvatar conversation={item} size={34} />
+                              <ConversationAvatar
+                                conversation={item}
+                                size={34}
+                              />
                             </div>
                             <div className='min-w-0'>
                               <div className='flex items-center gap-2'>
@@ -535,11 +593,12 @@ function ConversationTable({
                                     </span>
                                   </span>
                                 </span>
-                                {item.unread_count != null && item.unread_count > 0 && (
-                                  <span className='shrink-0 rounded-full bg-brand-50 px-2 py-0.5 type-caption font-medium text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'>
-                                    {item.unread_count}
-                                  </span>
-                                )}
+                                {item.unread_count != null &&
+                                  item.unread_count > 0 && (
+                                    <span className='shrink-0 rounded-full bg-brand-50 px-2 py-0.5 type-caption font-medium text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'>
+                                      {item.unread_count}
+                                    </span>
+                                  )}
                               </div>
                               <span className='mt-1 block max-w-[260px] truncate type-caption text-gray-500 dark:text-gray-400'>
                                 {preview}
@@ -550,13 +609,19 @@ function ConversationTable({
                         <td className='px-6 py-3 type-small text-gray-500 dark:text-gray-400'>
                           <span className='inline-flex items-center gap-2'>
                             <Image
-                              src={CHANNEL_LOGOS[(item.channel || '').toLowerCase()] || '/brand-logo/website.png'}
+                              src={
+                                CHANNEL_LOGOS[
+                                  (item.channel || '').toLowerCase()
+                                ] || '/brand-logo/website.png'
+                              }
                               alt={platformLabel(item.channel)}
                               width={18}
                               height={18}
                               className='h-[18px] w-[18px] shrink-0 object-contain'
                             />
-                            <span className='truncate'>{platformLabel(item.channel)}</span>
+                            <span className='truncate'>
+                              {platformLabel(item.channel)}
+                            </span>
                           </span>
                         </td>
                         <td className='px-6 py-3'>
@@ -565,13 +630,17 @@ function ConversationTable({
                           </span>
                         </td>
                         <td className='px-6 py-3'>
-                          <span className={`inline-flex items-center rounded-full px-3 py-1 type-caption font-medium capitalize ${badgeClass(item.status)}`}>
+                          <span
+                            className={`inline-flex items-center rounded-full px-3 py-1 type-caption font-medium capitalize ${badgeClass(item.status)}`}
+                          >
                             {item.status || 'unknown'}
                           </span>
                         </td>
                         <td className='px-6 py-3'>
                           {item.lead ? (
-                            <span className={`inline-flex items-center rounded-full px-3 py-1 type-caption font-medium capitalize ${leadBadgeClass(item.lead.status)}`}>
+                            <span
+                              className={`inline-flex items-center rounded-full px-3 py-1 type-caption font-medium capitalize ${leadBadgeClass(item.lead.status)}`}
+                            >
                               {item.lead.status || 'new'}
                             </span>
                           ) : (
@@ -599,15 +668,26 @@ function ConversationTable({
             </table>
           </div>
         </div>
-        <TablePagination page={page} totalItems={items.length} onPageChange={setPage} />
+        <TablePagination
+          page={page}
+          totalItems={items.length}
+          onPageChange={setPage}
+        />
       </div>
     </div>
   );
 }
 
+// ── Page ─────────────────────────────────────────────────────────────────────────
 export default function ConversationsPage() {
-  const { filter: channelFilter, setFilter: setChannelFilter } =
-    useChannelFilter();
+  const {
+    filter: channelFilter,
+    setFilter: setChannelFilter,
+    channels,
+    loading: channelsLoading,
+    selectedChannels,
+    clear: clearChannels,
+  } = useChannelFilter();
 
   const [items, setItems] = useState<ConvoItem[]>([]);
   const [filterLead, setFilterLead] = useState(false);
@@ -617,9 +697,10 @@ export default function ConversationsPage() {
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
-  const [dateRange, setDateRange] = useState<{ from: string; to: string } | null>(
-    null,
-  );
+  const [dateRange, setDateRange] = useState<{
+    from: string;
+    to: string;
+  } | null>(null);
   const [activePreset, setActivePreset] = useState<number | null>(null);
 
   const load = useCallback(
@@ -633,10 +714,10 @@ export default function ConversationsPage() {
         qs.set('offset', '0');
         if (q.trim()) qs.set('q', q.trim());
         if (status !== 'all') qs.set('status', status);
-        if (channelFilter.channel) qs.set('channel', channelFilter.channel);
-        if (channelFilter.channel_id !== null) {
-          qs.set('channel_id', String(channelFilter.channel_id));
-        }
+
+        // NOTE: channel filter is applied CLIENT-SIDE (see visibleItems / channelCounts).
+        // Do NOT send channel_id here — doing so narrows `items` and breaks the counts.
+
         if (dateRange?.from) {
           qs.set('from_ts', new Date(dateRange.from).toISOString());
         }
@@ -661,7 +742,7 @@ export default function ConversationsPage() {
         if (!opts?.silent) setLoading(false);
       }
     },
-    [channelFilter, dateRange, q, status],
+    [dateRange, q, status], // channelFilter intentionally NOT here — no refetch on channel select
   );
 
   useEffect(() => {
@@ -674,9 +755,35 @@ export default function ConversationsPage() {
     return () => clearInterval(timer);
   }, [load]);
 
-  const visibleItems = useMemo(
+  // Lead-filtered but NOT channel-filtered — the source of truth for channel counts.
+  const leadFilteredItems = useMemo(
     () => items.filter((item) => !filterLead || isRealLead(item.lead)),
     [filterLead, items],
+  );
+
+  // Channel counts computed BEFORE the channel filter, so every channel keeps its
+  // real total whether or not it's selected.
+  const channelCounts = useMemo(
+    () =>
+      leadFilteredItems.reduce<Record<number, number>>((acc, item) => {
+        if (item.channel_id != null)
+          acc[item.channel_id] = (acc[item.channel_id] || 0) + 1;
+        return acc;
+      }, {}),
+    [leadFilteredItems],
+  );
+
+  // What the table actually renders — channel filter applied here on top.
+  const visibleItems = useMemo(
+    () =>
+      channelFilter.channel_ids.length === 0
+        ? leadFilteredItems
+        : leadFilteredItems.filter(
+            (item) =>
+              item.channel_id != null &&
+              channelFilter.channel_ids.includes(item.channel_id),
+          ),
+    [leadFilteredItems, channelFilter],
   );
 
   const statusCounts = useMemo(
@@ -717,11 +824,11 @@ export default function ConversationsPage() {
     setStatus('all');
     setQ('');
     setFilterLead(false);
-    setChannelFilter({ channel: null, channel_id: null });
+    clearChannels();
     setDateRange(null);
     setActivePreset(null);
     setOpenFilter(null);
-  }, [setChannelFilter]);
+  }, [clearChannels]);
 
   return (
     <RequireAuth>
@@ -829,6 +936,11 @@ export default function ConversationsPage() {
             onSeeAll={handleSeeAll}
             channelFilter={channelFilter}
             setChannelFilter={setChannelFilter}
+            channels={channels}
+            channelsLoading={channelsLoading}
+            selectedChannels={selectedChannels}
+            channelCounts={channelCounts}
+            channelTotal={leadFilteredItems.length}
             dateRange={dateRange}
             setDateRange={setDateRange}
             activePreset={activePreset}
@@ -848,4 +960,3 @@ export default function ConversationsPage() {
     </RequireAuth>
   );
 }
-
