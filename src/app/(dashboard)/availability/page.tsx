@@ -123,7 +123,13 @@ type Booking = {
   } | null;
 };
 
-type TabKey = 'all' | 'today' | 'upcoming' | 'confirmed' | 'cancelled';
+type TabKey =
+  | 'all'
+  | 'today'
+  | 'upcoming'
+  | 'confirmed'
+  | 'completed'
+  | 'cancelled';
 type BookingSortKey =
   | 'created'
   | 'customer'
@@ -204,7 +210,6 @@ const getTimeMinutes = (value: string) => {
 const getDateKey = (value: string) => {
   return value.slice(0, 10); // "2026-06-15"
 };
-
 
 const getTodayLocalKey = () => {
   const now = new Date();
@@ -380,6 +385,7 @@ const TABS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
   { key: 'today', label: 'Today', icon: <CalendarDays size={13} /> },
   { key: 'upcoming', label: 'Upcoming', icon: <CalendarCheck size={13} /> },
   { key: 'confirmed', label: 'Confirmed', icon: <CheckCircle2 size={13} /> },
+  { key: 'completed', label: 'Completed', icon: <CheckCircle2 size={13} /> },
   { key: 'cancelled', label: 'Cancelled', icon: <CalendarX size={13} /> },
 ];
 
@@ -471,11 +477,12 @@ function AvailabilityContent() {
       all: bookings.filter((b) => b.status !== 'cancelled').length,
       today: bookings.filter((b) => isToday(b.start_time)).length,
       upcoming: bookings.filter(
-        (b) => isUpcoming(b.start_time) && !['cancelled'].includes(b.status),
+        (b) => isUpcoming(b.start_time) && b.status !== 'cancelled',
       ).length,
       confirmed: bookings.filter((b) =>
         ['confirmed', 'rescheduled'].includes(b.status),
       ).length,
+      completed: bookings.filter((b) => isBookingCompleted(b)).length,
       cancelled: bookings.filter((b) => b.status === 'cancelled').length,
     }),
     [bookings],
@@ -487,16 +494,23 @@ function AvailabilityContent() {
       switch (activeTab) {
         case 'today':
           return bookings.filter((b) => isToday(b.start_time));
+
         case 'upcoming':
           return bookings.filter(
             (b) => isUpcoming(b.start_time) && b.status !== 'cancelled',
           );
+
         case 'confirmed':
           return bookings.filter((b) =>
             ['confirmed', 'rescheduled'].includes(b.status),
           );
+
+        case 'completed':
+          return bookings.filter((b) => isBookingCompleted(b));
+
         case 'cancelled':
           return bookings.filter((b) => b.status === 'cancelled');
+
         default:
           return bookings.filter((b) => b.status !== 'cancelled');
       }
@@ -1165,6 +1179,9 @@ function AvailabilityContent() {
                           type='button'
                           onClick={() => {
                             setActiveTab(tab.key);
+                            setBookingDateRange(null);
+                            setBookingDatePreset(null);
+                            setBookingSearch('');
                             setCurrentPage(1);
                             setOpenBookingFilter(null);
                           }}
@@ -1179,6 +1196,7 @@ function AvailabilityContent() {
                             {tab.icon}
                             {tab.label} bookings
                           </span>
+
                           <span className='type-caption text-gray-400 dark:text-gray-500'>
                             {count}
                           </span>
@@ -1363,16 +1381,25 @@ function AvailabilityContent() {
                           </td>
                           <td className='px-6 py-3 type-small capitalize text-gray-500 dark:text-gray-400'>
                             <span className='inline-flex items-center gap-2'>
-                              {booking.channel && CHANNEL_LOGOS[booking.channel.toLowerCase()] && (
-                                <Image
-                                  src={CHANNEL_LOGOS[booking.channel.toLowerCase()]}
-                                  alt={booking.channel}
-                                  width={16}
-                                  height={16}
-                                  className='h-4 w-4 shrink-0 object-contain'
-                                />
-                              )}
-                              <span className='truncate'>{booking.channel || 'Direct'}</span>
+                              {booking.channel &&
+                                CHANNEL_LOGOS[
+                                  booking.channel.toLowerCase()
+                                ] && (
+                                  <Image
+                                    src={
+                                      CHANNEL_LOGOS[
+                                        booking.channel.toLowerCase()
+                                      ]
+                                    }
+                                    alt={booking.channel}
+                                    width={16}
+                                    height={16}
+                                    className='h-4 w-4 shrink-0 object-contain'
+                                  />
+                                )}
+                              <span className='truncate'>
+                                {booking.channel || 'Direct'}
+                              </span>
                             </span>
                           </td>
                           <td className='px-6 py-3 type-small text-gray-500 dark:text-gray-400'>
