@@ -301,11 +301,11 @@ function RatingDistributionChart({
   isDark: boolean;
 }) {
   const RATING_COLORS: Record<number, string> = {
-    5: '#D1E0FF', // brand-100/200
-    4: '#B2CCFF', // brand-200
-    3: '#FEDF89', // warning-200
-    2: '#FDB022', // warning-400/orange
-    1: '#FDA29B', // error-300
+    5: '#E6EEFF',
+    4: '#9DB9FF',
+    3: '#FFE29A',
+    2: '#F59E0B',
+    1: '#F87171', // error-300
   };
   const colors = distribution.map(
     (item) => RATING_COLORS[item.rating] || '#465FFF',
@@ -994,10 +994,10 @@ function ReviewsInner() {
       <div className='mb-6 flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between'>
         <div>
           <p className='type-small font-medium text-brand-500 dark:text-brand-400'>
-            Reviews
+            Google Reviews
           </p>
           <h1 className='mt-1 text-title-sm font-bold text-gray-800 dark:text-white/90'>
-            Review response workspace
+            Google Review response workspace
           </h1>
           <p className='mt-2 max-w-2xl type-small text-gray-500 dark:text-gray-400'>
             Track rating quality, urgent review signals, and reply coverage for
@@ -1013,21 +1013,43 @@ function ReviewsInner() {
               disabled={loadingChannels || channels.length === 0}
               className='inline-flex h-10 min-w-[240px] items-center justify-between rounded-[10px] border border-gray-200 bg-white px-4 text-left type-small font-medium text-gray-700 disabled:opacity-60 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300'
             >
-              <span className='truncate'>
-                {loadingChannels
-                  ? 'Loading profile'
-                  : channels.length === 0
-                    ? 'No Google profile'
-                    : channelName}
-              </span>
+              {loadingChannels ? (
+                <span>Loading profile</span>
+              ) : channels.length === 0 ? (
+                <span>No Google profile</span>
+              ) : (
+                <span className='inline-flex min-w-0 items-center gap-2'>
+                  <img
+                    src='/brand-logo/google-map.png'
+                    alt='Google Reviews'
+                    className='h-4 w-4 shrink-0 object-contain'
+                  />
+
+                  <span className='truncate'>
+                    {'Google Reviews'}
+                  </span>
+
+                  <span className='shrink-0 rounded-full bg-brand-50 px-2 py-0.5 type-caption font-medium text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'>
+                    Google Reviews
+                  </span>
+                </span>
+              )}
+
               {channels.length > 1 && (
-                <ChevronDown className='h-4 w-4 text-gray-400' />
+                <ChevronDown className='ml-2 h-4 w-4 shrink-0 text-gray-400' />
               )}
             </button>
+
             {channelMenuOpen && channels.length > 1 && (
               <div className='absolute right-0 top-[calc(100%+8px)] z-20 w-[300px] rounded-xl border border-gray-200 bg-white p-2 shadow-theme-lg dark:border-gray-800 dark:bg-gray-900'>
                 {channels.map((channel) => {
                   const active = channel.id === selectedChannelId;
+
+                  const profileName =
+                    channel.account_name?.trim() ||
+                    channel.display_name?.trim() ||
+                    'Google Reviews';
+
                   return (
                     <button
                       key={channel.id}
@@ -1036,21 +1058,32 @@ function ReviewsInner() {
                         setSelectedChannelId(channel.id);
                         setChannelMenuOpen(false);
                       }}
-                      className={`w-full rounded-[10px] px-3 py-2 text-left type-small font-medium ${
+                      className={`flex w-full items-center justify-between gap-3 rounded-[10px] px-3 py-2 text-left type-small font-medium ${
                         active
                           ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'
                           : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5'
                       }`}
                     >
-                      {channel.account_name ||
-                        channel.display_name ||
-                        channel.platform_account_id}
+                      <span className='inline-flex min-w-0 items-center gap-2'>
+                        <img
+                          src='/brand-logo/google-map.png'
+                          alt=''
+                          className='h-4 w-4 shrink-0 object-contain'
+                        />
+
+                        <span className='truncate'>{profileName}</span>
+                      </span>
+
+                      <span className='shrink-0 rounded-full bg-gray-100 px-2 py-0.5 type-caption text-gray-500 dark:bg-white/[0.06] dark:text-gray-400'>
+                        Reviews
+                      </span>
                     </button>
                   );
                 })}
               </div>
             )}
           </div>
+
           <button
             type='button'
             onClick={() => void syncReviews()}
