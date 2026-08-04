@@ -506,6 +506,26 @@ function LeadWorklist({
 
 type LeadFilterKey = 'channel' | 'stage' | 'date';
 
+function getLast7DaysRange() {
+  const to = new Date();
+  const from = new Date();
+
+  from.setDate(to.getDate() - 6);
+
+  const formatDate = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+  };
+
+  return {
+    from: formatDate(from),
+    to: formatDate(to),
+  };
+}
+
 export default function LeadsPage() {
   const [items, setItems] = useState<LeadItem[]>([]);
   const [total, setTotal] = useState(0);
@@ -516,6 +536,7 @@ export default function LeadsPage() {
   const [searching, setSearching] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+  
   const [updatingId, setUpdatingId] = useState<number | null>(null);
   const {
     filter: channelFilter,
@@ -533,8 +554,8 @@ export default function LeadsPage() {
   const [dateRange, setDateRange] = useState<{
     from: string;
     to: string;
-  } | null>(null);
-  const [activePreset, setActivePreset] = useState<number | null>(null);
+  } | null>(() => getLast7DaysRange());
+ const [activePreset, setActivePreset] = useState<number | null>(7);
   const [openFilter, setOpenFilter] = useState<LeadFilterKey | null>(null);
 
   const channelFilterRef = useRef<HTMLDivElement>(null);
@@ -780,7 +801,7 @@ export default function LeadsPage() {
           <MetricCard
             label='Total leads'
             value={total}
-            detail={debouncedQ ? 'Filtered result' : 'Current view'}
+            detail=''
             active={filterStatus === 'all'}
             tone='warning'
             onClick={() => setFilterStatus('all')}
@@ -788,11 +809,7 @@ export default function LeadsPage() {
           <MetricCard
             label='New'
             value={counts.new || 0}
-            detail={
-              pipelineTotal
-                ? `${Math.round(((counts.new || 0) / pipelineTotal) * 100)}% pipeline`
-                : 'No data'
-            }
+            detail=''
             active={filterStatus === 'new'}
             tone='brand'
             onClick={() =>
@@ -802,7 +819,7 @@ export default function LeadsPage() {
           <MetricCard
             label='Qualified'
             value={qualifiedTotal}
-            detail='Qualified and won'
+            detail=''
             active={filterStatus === 'qualified'}
             tone='success'
             onClick={() =>
@@ -814,7 +831,7 @@ export default function LeadsPage() {
           <MetricCard
             label='Follow-ups'
             value={voiceFollowUps.length}
-            detail='Growth queue'
+            detail=''
             tone='error'
           />
         </div>
