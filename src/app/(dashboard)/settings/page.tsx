@@ -15,9 +15,9 @@ import {
   MessageSquare,
   PlayCircle,
   Power,
-  User,
   Save,
   TimerReset,
+  User,
   X,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
@@ -583,21 +583,21 @@ export default function SettingsPage() {
 
   return (
     <RequireAuth>
-      <PageBreadcrumb pageTitle="Settings" />
+      <PageBreadcrumb pageTitle='Settings' />
 
       {err && (
-        <div className="mb-6 rounded-[10px] border border-error-200 bg-error-50 px-4 py-3 type-small text-error-600 dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-400">
+        <div className='mb-6 rounded-[10px] border border-error-200 bg-error-50 px-4 py-3 type-small text-error-600 dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-400'>
           {err}
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[290px_1fr] lg:items-start">
+      <div className='grid grid-cols-1 gap-6 lg:grid-cols-[290px_1fr] lg:items-start'>
         {/* SIDEBAR */}
         <div>
           {isMobile && (
             <button
               onClick={() => setSettingsMenuOpen((p) => !p)}
-              className="mb-3 flex h-10 w-full items-center justify-between rounded-[10px] border border-gray-200 bg-white px-4 type-small font-medium text-gray-700 shadow-theme-xs transition hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400 dark:hover:bg-white/[0.03]"
+              className='mb-3 flex h-10 w-full items-center justify-between rounded-[10px] border border-gray-200 bg-white px-4 type-small font-medium text-gray-700 shadow-theme-xs transition hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400 dark:hover:bg-white/[0.03]'
             >
               <span>Settings Menu</span>
               <Menu size={18} />
@@ -605,17 +605,17 @@ export default function SettingsPage() {
           )}
 
           {(!isMobile || settingsMenuOpen) && (
-            <div className="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
-              <div className="border-b border-gray-100 px-5 py-4 dark:border-gray-800">
-                <h3 className="type-card-title font-semibold text-gray-800 dark:text-white/90">
+            <div className='rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]'>
+              <div className='border-b border-gray-100 px-5 py-4 dark:border-gray-800'>
+                <h3 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
                   Settings
                 </h3>
-                <p className="mt-1 type-small text-gray-500 dark:text-gray-400">
+                <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>
                   Manage workspace preferences
                 </p>
               </div>
 
-              <div className="flex flex-col gap-1 p-3">
+              <div className='flex flex-col gap-1 p-3'>
                 {SETTINGS_ITEMS.map((item) => {
                   const active = activeSection === item.key;
 
@@ -648,7 +648,7 @@ export default function SettingsPage() {
                           : 'hover:bg-gray-50 dark:hover:bg-white/[0.03]',
                       )}
                     >
-                      <span className="flex items-center gap-3">
+                      <span className='flex items-center gap-3'>
                         <span
                           className={cn(
                             'flex h-9 w-9 items-center justify-center rounded-[10px]',
@@ -671,7 +671,7 @@ export default function SettingsPage() {
                           >
                             {item.title}
                           </span>
-                          <span className="mt-0.5 block type-caption font-normal text-gray-400 dark:text-gray-500">
+                          <span className='mt-0.5 block type-caption font-normal text-gray-400 dark:text-gray-500'>
                             {item.subtitle}
                           </span>
                         </span>
@@ -695,19 +695,19 @@ export default function SettingsPage() {
         </div>
 
         {/* CONTENT */}
-        <div className="min-w-0">
+        <div className='min-w-0'>
           {activeSection === 'ai' && (
-            <div className="flex flex-col gap-6">
+            <div className='flex flex-col gap-6'>
               {/* AI enable card */}
-              <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03] sm:p-6">
-                <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <div className='rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03] sm:p-6'>
+                <div className='mb-4 flex flex-wrap items-center justify-between gap-3'>
                   <div>
-                    <h2 className="type-card-title font-semibold text-gray-800 dark:text-white/90">
+                    <h2 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
                       AI Auto Reply
                     </h2>
-                    <p className="mt-1 type-small leading-6 text-gray-500 dark:text-gray-400">
-                      Control whether the bot responds automatically to
-                      incoming messages
+                    <p className='mt-1 type-small leading-6 text-gray-500 dark:text-gray-400'>
+                      Control whether the bot responds automatically to incoming
+                      messages
                     </p>
                   </div>
 
@@ -735,13 +735,13 @@ export default function SettingsPage() {
                   )}
                 >
                   <div>
-                    <p className="flex items-center gap-1.5 type-small font-semibold text-gray-800 dark:text-white/90">
-                      <Bot size={16} className="text-brand-500" />
+                    <p className='flex items-center gap-1.5 type-small font-semibold text-gray-800 dark:text-white/90'>
+                      <Bot size={16} className='text-brand-500' />
                       {isLive
                         ? 'AI is responding automatically'
                         : 'Manual mode - AI is paused'}
                     </p>
-                    <p className="mt-1 type-small text-gray-500 dark:text-gray-400">
+                    <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>
                       {isLive
                         ? 'All incoming messages get an AI reply. Click to pause.'
                         : 'Messages are saved but no auto replies are sent. Click to resume.'}
@@ -757,25 +757,36 @@ export default function SettingsPage() {
               </div>
 
               {/* Handoff Automation */}
-              <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03] sm:p-6">
-                <div className="mb-2">
-                  <h2 className="type-card-title font-semibold text-gray-800 dark:text-white/90">
+              <div className='rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03] sm:p-6'>
+                <div className='mb-2'>
+                  <h2 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
                     Handoff Automation
                   </h2>
-                  <p className="mt-1 type-small leading-6 text-gray-500 dark:text-gray-400">
-                    Route conversations to your team automatically. The AI
-                    does not reply when a handoff is triggered.
+                  <p className='mt-1 type-small leading-6 text-gray-500 dark:text-gray-400'>
+                    Route conversations to your team automatically. The AI does
+                    not reply when a handoff is triggered.
                   </p>
                 </div>
 
-                <div className="flex items-center justify-between gap-4 border-t border-gray-100 py-4 dark:border-gray-800">
-                  <div className="min-w-0">
-                    <p className="type-small font-semibold text-gray-800 dark:text-white/90">
+                <div className='flex items-center justify-between gap-4 border-t border-gray-100 py-4 dark:border-gray-800'>
+                  <div className='min-w-0'>
+                    <p className='type-small font-semibold text-gray-800 dark:text-white/90'>
                       Auto-handoff verified Instagram accounts
                     </p>
-                    <p className="mt-1 type-small text-gray-500 dark:text-gray-400">
-                      Blue-tick verified IG profiles skip the AI and go
-                      straight to your team.
+                    <p className='mt-1 type-small text-gray-500 dark:text-gray-400 flex items-center gap-1'>
+                      <svg
+                        xmlns='http://www.w3.org/2000/svg'
+                        viewBox='0 0 24 24'
+                        fill='#0095F6'
+                        className='h-4 w-4 flex-shrink-0'
+                      >
+                        <path d='M22 12l-2.1-2.4.3-3.2-3.1-.7L15.5 3 12 4.6 8.5 3 6.9 5.7l-3.1.7.3 3.2L2 12l2.1 2.4-.3 3.2 3.1.7L8.5 21l3.5-1.6 3.5 1.6 1.6-2.7 3.1-.7-.3-3.2L22 12zm-11 3.2l-2.3-2.3 1.1-1.1 1.2 1.2 3.1-3.1 1.1 1.1-4.2 4.2z' />
+                      </svg>
+
+                      <span>
+                        Verified Instagram profiles skip the AI and go straight
+                        to your team.
+                      </span>
                     </p>
                   </div>
 
@@ -786,12 +797,12 @@ export default function SettingsPage() {
                   />
                 </div>
 
-                <div className="flex items-center justify-between gap-4 border-t border-gray-100 py-4 dark:border-gray-800">
-                  <div className="min-w-0">
-                    <p className="type-small font-semibold text-gray-800 dark:text-white/90">
+                <div className='flex items-center justify-between gap-4 border-t border-gray-100 py-4 dark:border-gray-800'>
+                  <div className='min-w-0'>
+                    <p className='type-small font-semibold text-gray-800 dark:text-white/90'>
                       Auto-handoff on keywords
                     </p>
-                    <p className="mt-1 type-small text-gray-500 dark:text-gray-400">
+                    <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>
                       Hand off when a customer message contains any keyword
                       below.
                     </p>
@@ -810,33 +821,33 @@ export default function SettingsPage() {
                     !s?.keyword_handoff_enabled && 'opacity-55',
                   )}
                 >
-                  <div className="mb-1.5 flex items-baseline justify-between">
-                    <Label className="mb-0">Handoff keywords</Label>
-                    <span className="font-mono type-caption font-medium text-brand-500 dark:text-brand-400">
+                  <div className='mb-1.5 flex items-baseline justify-between'>
+                    <Label className='mb-0'>Handoff keywords</Label>
+                    <span className='font-mono type-caption font-medium text-brand-500 dark:text-brand-400'>
                       {s?.handoff_keywords?.length ?? 0} active
                     </span>
                   </div>
 
-                  <p className="mb-2.5 type-small text-gray-500 dark:text-gray-400">
-                    Case-insensitive substring match. Use single words or
-                    short phrases like <code>human</code>,{' '}
-                    <code>refund</code>, <code>call me</code>.
+                  <p className='mb-2.5 type-small text-gray-500 dark:text-gray-400'>
+                    Case-insensitive substring match. Use single words or short
+                    phrases like <code>human</code>, <code>refund</code>,{' '}
+                    <code>call me</code>.
                   </p>
 
-                  <div className="mb-3 flex min-h-14 flex-wrap items-center gap-2 rounded-xl border border-gray-200 bg-gray-50/60 p-3 dark:border-gray-800 dark:bg-white/[0.02]">
+                  <div className='mb-3 flex min-h-14 flex-wrap items-center gap-2 rounded-xl border border-gray-200 bg-gray-50/60 p-3 dark:border-gray-800 dark:bg-white/[0.02]'>
                     {(s?.handoff_keywords?.length ?? 0) === 0 && (
-                      <span className="type-small text-gray-400 dark:text-gray-600">
+                      <span className='type-small text-gray-400 dark:text-gray-600'>
                         No handoff keywords yet. Add one below.
                       </span>
                     )}
 
                     {(s?.handoff_keywords ?? []).map((kw) => (
-                      <Badge key={kw} color="light" className="gap-1.5">
+                      <Badge key={kw} color='light' className='gap-1.5'>
                         {kw}
                         <button
-                          type="button"
+                          type='button'
                           onClick={() => removeHandoffKw(kw)}
-                          className="text-gray-400 transition hover:text-gray-700 dark:hover:text-white/80"
+                          className='text-gray-400 transition hover:text-gray-700 dark:hover:text-white/80'
                           aria-label={`Remove ${kw}`}
                         >
                           <X size={12} />
@@ -845,18 +856,18 @@ export default function SettingsPage() {
                     ))}
                   </div>
 
-                  <div className="mb-4 flex gap-2">
+                  <div className='mb-4 flex gap-2'>
                     <Input
                       value={handoffKwInput}
                       onChange={(e) => setHandoffKwInput(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && addHandoffKw()}
-                      placeholder="Type a keyword or phrase and press Enter"
+                      placeholder='Type a keyword or phrase and press Enter'
                       className={INPUT_CLASS}
                     />
 
                     <Button
-                      variant="outline"
-                      size="lg"
+                      variant='outline'
+                      size='lg'
                       onClick={addHandoffKw}
                       disabled={!handoffKwInput.trim()}
                     >
@@ -865,10 +876,10 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
-                <div className="border-t border-gray-100 pt-4 dark:border-gray-800">
-                  <div className="mb-1.5 flex items-baseline justify-between">
-                    <Label className="mb-0">Opening message</Label>
-                    <span className="font-mono type-caption font-medium text-brand-500 dark:text-brand-400">
+                <div className='border-t border-gray-100 pt-4 dark:border-gray-800'>
+                  <div className='mb-1.5 flex items-baseline justify-between'>
+                    <Label className='mb-0'>Opening message</Label>
+                    <span className='font-mono type-caption font-medium text-brand-500 dark:text-brand-400'>
                       {(s?.verified_ig_handoff_message || '').length} chars
                     </span>
                   </div>
@@ -890,19 +901,22 @@ export default function SettingsPage() {
                     className={TEXTAREA_CLASS}
                   />
 
-                  <p className="mt-1.5 type-small text-gray-500 dark:text-gray-400">
-                    Sent once to the customer when handoff is triggered.
-                    Used by both verified and keyword paths. Leave blank to
-                    use the default.
+                  <p className='mt-1.5 type-small text-gray-500 dark:text-gray-400'>
+                    Sent once to the customer when handoff is triggered. Used by
+                    both verified and keyword paths. Leave blank to use the
+                    default.
                   </p>
                 </div>
 
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                  <p className="type-small text-gray-500 dark:text-gray-400">
+                <div className='mt-4 flex flex-wrap items-center justify-between gap-3'>
+                  <p className='type-small text-gray-500 dark:text-gray-400'>
                     Toggles save instantly. Keywords and message save here.
                   </p>
 
-                  <Button onClick={saveHandoffSettings} disabled={savingHandoff}>
+                  <Button
+                    onClick={saveHandoffSettings}
+                    disabled={savingHandoff}
+                  >
                     {savingHandoff
                       ? 'Saving...'
                       : savedHandoff
@@ -913,13 +927,13 @@ export default function SettingsPage() {
               </div>
 
               {/* About */}
-              <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03] sm:p-6">
-                <h2 className="mb-4 type-card-title font-semibold text-gray-800 dark:text-white/90">
+              <div className='rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03] sm:p-6'>
+                <h2 className='mb-4 type-card-title font-semibold text-gray-800 dark:text-white/90'>
                   About
                 </h2>
 
-                <div className="mb-1.5 flex items-baseline justify-between">
-                  <Label className="mb-0">
+                <div className='mb-1.5 flex items-baseline justify-between'>
+                  <Label className='mb-0'>
                     Tell us more about your business
                   </Label>
                   <span
@@ -944,11 +958,11 @@ export default function SettingsPage() {
                   }}
                   maxLength={1000}
                   rows={5}
-                  placeholder="You are a helpful assistant for..."
+                  placeholder='You are a helpful assistant for...'
                   className={cn(TEXTAREA_CLASS, 'min-h-[120px] resize-none')}
                 />
 
-                <div className="mt-4 flex justify-end">
+                <div className='mt-4 flex justify-end'>
                   <Button onClick={saveAISettings} disabled={savingAI}>
                     {savingAI
                       ? 'Saving...'
@@ -960,31 +974,31 @@ export default function SettingsPage() {
               </div>
 
               {/* Test */}
-              <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03] sm:p-6">
-                <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <div className='rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03] sm:p-6'>
+                <div className='mb-4 flex flex-wrap items-center justify-between gap-3'>
                   <div>
-                    <h2 className="type-card-title font-semibold text-gray-800 dark:text-white/90">
+                    <h2 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
                       Test Prompt
                     </h2>
-                    <p className="mt-1 type-small leading-6 text-gray-500 dark:text-gray-400">
+                    <p className='mt-1 type-small leading-6 text-gray-500 dark:text-gray-400'>
                       Fire a live message against the current system prompt
                     </p>
                   </div>
 
                   {testing && (
-                    <div className="flex items-center gap-2 type-caption font-semibold text-brand-500 dark:text-brand-400">
-                      <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-brand-200 border-t-brand-500 dark:border-brand-500/30 dark:border-t-brand-400" />
+                    <div className='flex items-center gap-2 type-caption font-semibold text-brand-500 dark:text-brand-400'>
+                      <span className='h-3.5 w-3.5 animate-spin rounded-full border-2 border-brand-200 border-t-brand-500 dark:border-brand-500/30 dark:border-t-brand-400' />
                       Thinking...
                     </div>
                   )}
                 </div>
 
-                <div className="mb-4 flex gap-2">
+                <div className='mb-4 flex gap-2'>
                   <Input
                     value={testMsg}
                     onChange={(e) => setTestMsg(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && runTest()}
-                    placeholder="Type a test message"
+                    placeholder='Type a test message'
                     className={INPUT_CLASS}
                   />
 
@@ -998,8 +1012,8 @@ export default function SettingsPage() {
                 </div>
 
                 {testMsg && (
-                  <div className="mb-2 flex justify-end">
-                    <div className="max-w-[65%] rounded-[10px] border border-gray-200 bg-gray-50 px-3.5 py-2 type-small text-gray-700 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300">
+                  <div className='mb-2 flex justify-end'>
+                    <div className='max-w-[65%] rounded-[10px] border border-gray-200 bg-gray-50 px-3.5 py-2 type-small text-gray-700 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300'>
                       {testMsg}
                     </div>
                   </div>
@@ -1007,21 +1021,21 @@ export default function SettingsPage() {
 
                 {testOut && (
                   <div>
-                    <div className="mb-2 flex gap-3">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400">
+                    <div className='mb-2 flex gap-3'>
+                      <div className='flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'>
                         <Bot size={16} />
                       </div>
 
-                      <div className="flex-1 whitespace-pre-wrap rounded-[10px] border border-gray-200 bg-white px-4 py-3 type-small leading-6 text-gray-700 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-200">
+                      <div className='flex-1 whitespace-pre-wrap rounded-[10px] border border-gray-200 bg-white px-4 py-3 type-small leading-6 text-gray-700 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-200'>
                         {testOut.answer || (
-                          <span className="italic text-gray-400 dark:text-gray-600">
+                          <span className='italic text-gray-400 dark:text-gray-600'>
                             Empty response
                           </span>
                         )}
                       </div>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-3 pl-[42px] type-caption text-gray-400 dark:text-gray-500">
+                    <div className='flex flex-wrap items-center gap-3 pl-[42px] type-caption text-gray-400 dark:text-gray-500'>
                       <span>Latency: {testOut.latency_ms}ms</span>
                       <span>Model: {testOut.model}</span>
                       {testOut.provider && (
@@ -1039,31 +1053,30 @@ export default function SettingsPage() {
           )}
 
           {activeSection === 'booking' && (
-            <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03] sm:p-6">
-              <div className="mb-6">
-                <Badge color="primary">Smart Booking</Badge>
-                <h2 className="mt-3 text-title-sm font-bold text-gray-800 dark:text-white/90">
+            <div className='rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03] sm:p-6'>
+              <div className='mb-6'>
+                <Badge color='primary'>Smart Booking</Badge>
+                <h2 className='mt-3 text-title-sm font-bold text-gray-800 dark:text-white/90'>
                   Smart Booking
                 </h2>
-                <p className="mt-2 max-w-xl type-small leading-6 text-gray-500 dark:text-gray-400">
-                  Configure how your customers can book appointments with
-                  you.
+                <p className='mt-2 max-w-xl type-small leading-6 text-gray-500 dark:text-gray-400'>
+                  Configure how your customers can book appointments with you.
                 </p>
               </div>
 
-              <div className="flex flex-col gap-4">
+              <div className='flex flex-col gap-4'>
                 <SettingsActionRow
                   icon={<Power size={28} />}
-                  iconColorClass="bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400"
+                  iconColorClass='bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'
                   title={`General (${
                     bookingSettings.booking_enabled ? 'Enabled' : 'Disabled'
                   })`}
-                  description="Enable or disable Smart Booking and configure basic booking preferences."
-                  actionLabel="Configure"
-                  actionColorClass="bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/[0.08] dark:text-gray-300 dark:hover:bg-white/[0.14]"
+                  description='Enable or disable Smart Booking and configure basic booking preferences.'
+                  actionLabel='Configure'
+                  actionColorClass='bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/[0.08] dark:text-gray-300 dark:hover:bg-white/[0.14]'
                   onAction={() => setShowBookingModal(true)}
                 >
-                  <div className="mt-4 grid grid-cols-1 gap-3 2xl:grid-cols-3">
+                  <div className='mt-4 grid grid-cols-1 gap-3 2xl:grid-cols-3'>
                     {[
                       {
                         icon: <Clock3 size={16} />,
@@ -1088,13 +1101,13 @@ export default function SettingsPage() {
                     ].map((item) => (
                       <div
                         key={item.label}
-                        className="min-w-0 rounded-[10px] border border-gray-200 bg-gray-50 px-3.5 py-3 dark:border-gray-800 dark:bg-white/[0.02]"
+                        className='min-w-0 rounded-[10px] border border-gray-200 bg-gray-50 px-3.5 py-3 dark:border-gray-800 dark:bg-white/[0.02]'
                       >
-                        <div className="mb-1.5 flex items-center gap-1.5 whitespace-nowrap type-caption font-medium text-gray-500 dark:text-gray-400">
+                        <div className='mb-1.5 flex items-center gap-1.5 whitespace-nowrap type-caption font-medium text-gray-500 dark:text-gray-400'>
                           {item.icon}
                           <span>{item.label}</span>
                         </div>
-                        <div className="break-words type-small font-semibold text-gray-800 dark:text-white/90">
+                        <div className='break-words type-small font-semibold text-gray-800 dark:text-white/90'>
                           {item.value}
                         </div>
                       </div>
@@ -1104,15 +1117,15 @@ export default function SettingsPage() {
 
                 <SettingsActionRow
                   icon={<CalendarDays size={28} />}
-                  iconColorClass="bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400"
-                  title="Availability (Weekly)"
-                  description="Set your working days and available hours for appointments."
-                  actionLabel="Configure"
-                  actionColorClass="bg-brand-50 text-brand-500 hover:bg-brand-100 dark:bg-brand-500/15 dark:hover:bg-brand-500/25"
+                  iconColorClass='bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'
+                  title='Availability (Weekly)'
+                  description='Set your working days and available hours for appointments.'
+                  actionLabel='Configure'
+                  actionColorClass='bg-brand-50 text-brand-500 hover:bg-brand-100 dark:bg-brand-500/15 dark:hover:bg-brand-500/25'
                   onAction={() => setShowAvailabilityPanel(true)}
                   onRowClick={() => setShowAvailabilityPanel(true)}
                 >
-                  <div className="mt-4 flex flex-wrap gap-2">
+                  <div className='mt-4 flex flex-wrap gap-2'>
                     {availability.map((day, index) => (
                       <span
                         key={`${day.day_of_week}-${index}`}
@@ -1131,24 +1144,24 @@ export default function SettingsPage() {
 
                 <SettingsActionRow
                   icon={<CalendarDays size={28} />}
-                  iconColorClass="bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400"
-                  title="Appointments"
-                  description="View and manage your upcoming, rescheduled and cancelled appointments."
-                  actionLabel="View Bookings"
-                  actionColorClass="bg-brand-50 text-brand-500 hover:bg-brand-100 dark:bg-brand-500/15 dark:hover:bg-brand-500/25"
+                  iconColorClass='bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'
+                  title='Appointments'
+                  description='View and manage your upcoming, rescheduled and cancelled appointments.'
+                  actionLabel='View Bookings'
+                  actionColorClass='bg-brand-50 text-brand-500 hover:bg-brand-100 dark:bg-brand-500/15 dark:hover:bg-brand-500/25'
                   onAction={() => router.push('/availability')}
                   onRowClick={() => router.push('/availability')}
                 >
-                  <div className="mt-4 grid grid-cols-1 gap-3 2xl:grid-cols-3">
+                  <div className='mt-4 grid grid-cols-1 gap-3 2xl:grid-cols-3'>
                     {bookingStats.map((item) => (
                       <div
                         key={item.label}
-                        className="min-w-0 rounded-[10px] border border-gray-200 bg-gray-50 px-3.5 py-3 dark:border-gray-800 dark:bg-white/[0.02]"
+                        className='min-w-0 rounded-[10px] border border-gray-200 bg-gray-50 px-3.5 py-3 dark:border-gray-800 dark:bg-white/[0.02]'
                       >
-                        <div className="whitespace-nowrap type-caption font-medium text-gray-500 dark:text-gray-400">
+                        <div className='whitespace-nowrap type-caption font-medium text-gray-500 dark:text-gray-400'>
                           {item.label}
                         </div>
-                        <div className="mt-1 break-words type-small font-semibold text-gray-800 dark:text-white/90">
+                        <div className='mt-1 break-words type-small font-semibold text-gray-800 dark:text-white/90'>
                           {item.value}
                         </div>
                       </div>
@@ -1164,7 +1177,7 @@ export default function SettingsPage() {
           )}
 
           {activeSection === 'billing' && (
-            <div className="rounded-2xl border border-gray-200 bg-white p-10 text-center type-small text-gray-400 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-500">
+            <div className='rounded-2xl border border-gray-200 bg-white p-10 text-center type-small text-gray-400 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-500'>
               Coming soon
             </div>
           )}
@@ -1175,27 +1188,26 @@ export default function SettingsPage() {
       <Modal
         isOpen={showBookingModal}
         onClose={() => setShowBookingModal(false)}
-        className="m-4 max-w-[720px]"
+        className='m-4 max-w-[720px]'
       >
-        <div className="custom-scrollbar relative max-h-[85vh] w-full overflow-y-auto rounded-2xl bg-white p-6 dark:bg-gray-900 sm:p-8">
-          <div className="mb-6 flex flex-wrap items-start justify-between gap-4 pr-10">
+        <div className='custom-scrollbar relative max-h-[85vh] w-full overflow-y-auto rounded-2xl bg-white p-6 dark:bg-gray-900 sm:p-8'>
+          <div className='mb-6 flex flex-wrap items-start justify-between gap-4 pr-10'>
             <div>
-              <Badge color="primary" startIcon={<CalendarDays size={14} />}>
+              <Badge color='primary' startIcon={<CalendarDays size={14} />}>
                 Smart Booking
               </Badge>
-              <h3 className="mt-3 type-h4 font-bold text-gray-800 dark:text-white/90 sm:type-h3">
+              <h3 className='mt-3 type-h4 font-bold text-gray-800 dark:text-white/90 sm:type-h3'>
                 Appointment booking
               </h3>
-              <p className="mt-2.5 max-w-lg type-small leading-relaxed text-gray-500 dark:text-gray-400">
-                Let customers book appointments directly from Instagram DM
-                and other connected channels. The AI checks your
-                availability, shows open slots, confirms with the customer,
-                and stores the booking.
+              <p className='mt-2.5 max-w-lg type-small leading-relaxed text-gray-500 dark:text-gray-400'>
+                Let customers book appointments directly from Instagram DM and
+                other connected channels. The AI checks your availability, shows
+                open slots, confirms with the customer, and stores the booking.
               </p>
             </div>
 
             <button
-              type="button"
+              type='button'
               onClick={() =>
                 setBookingSettings((prev) => ({
                   ...prev,
@@ -1214,7 +1226,7 @@ export default function SettingsPage() {
             </button>
           </div>
 
-          <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className='mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3'>
             {[
               {
                 icon: <Clock3 size={18} />,
@@ -1236,16 +1248,16 @@ export default function SettingsPage() {
             ].map((item) => (
               <div
                 key={item.label}
-                className="flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-white/[0.03]"
+                className='flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-white/[0.03]'
               >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400">
+                <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'>
                   {item.icon}
                 </div>
                 <div>
-                  <div className="type-caption font-semibold text-gray-500 dark:text-gray-400">
+                  <div className='type-caption font-semibold text-gray-500 dark:text-gray-400'>
                     {item.label}
                   </div>
-                  <div className="mt-0.5 type-small font-bold text-gray-800 dark:text-white/90">
+                  <div className='mt-0.5 type-small font-bold text-gray-800 dark:text-white/90'>
                     {item.value}
                   </div>
                 </div>
@@ -1253,7 +1265,7 @@ export default function SettingsPage() {
             ))}
           </div>
 
-          <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className='mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3'>
             <div>
               <Label>Slot duration</Label>
               <select
@@ -1305,17 +1317,17 @@ export default function SettingsPage() {
                 }
                 className={SELECT_CLASS}
               >
-                <option value="Asia/Kolkata">Asia/Kolkata</option>
-                <option value="Europe/London">Europe/London</option>
-                <option value="Asia/Dubai">Asia/Dubai</option>
-                <option value="Asia/Singapore">Asia/Singapore</option>
-                <option value="America/New_York">America/New_York</option>
+                <option value='Asia/Kolkata'>Asia/Kolkata</option>
+                <option value='Europe/London'>Europe/London</option>
+                <option value='Asia/Dubai'>Asia/Dubai</option>
+                <option value='Asia/Singapore'>Asia/Singapore</option>
+                <option value='America/New_York'>America/New_York</option>
               </select>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <p className="type-caption text-gray-500 dark:text-gray-400">
+          <div className='flex flex-wrap items-center justify-between gap-4'>
+            <p className='type-caption text-gray-500 dark:text-gray-400'>
               Booking works only when this toggle is enabled. Customers stay
               inside their original chat.
             </p>
@@ -1337,23 +1349,22 @@ export default function SettingsPage() {
       <Modal
         isOpen={showAvailabilityPanel}
         onClose={() => setShowAvailabilityPanel(false)}
-        className="m-4 max-w-[760px]"
+        className='m-4 max-w-[760px]'
       >
-        <div className="flex max-h-[85vh] w-full flex-col overflow-hidden rounded-2xl bg-white dark:bg-gray-900">
-          <div className="border-b border-gray-100 px-6 py-5 pr-14 dark:border-gray-800">
-            <Badge color="primary" startIcon={<CalendarDays size={13} />}>
+        <div className='flex max-h-[85vh] w-full flex-col overflow-hidden rounded-2xl bg-white dark:bg-gray-900'>
+          <div className='border-b border-gray-100 px-6 py-5 pr-14 dark:border-gray-800'>
+            <Badge color='primary' startIcon={<CalendarDays size={13} />}>
               Availability
             </Badge>
-            <h2 className="mt-3 type-h4 font-bold text-gray-800 dark:text-white/90">
+            <h2 className='mt-3 type-h4 font-bold text-gray-800 dark:text-white/90'>
               Weekly availability
             </h2>
-            <p className="mt-1.5 type-small text-gray-500 dark:text-gray-400">
-              Choose active days and working hours for customer
-              appointments.
+            <p className='mt-1.5 type-small text-gray-500 dark:text-gray-400'>
+              Choose active days and working hours for customer appointments.
             </p>
           </div>
 
-          <div className="custom-scrollbar flex flex-col gap-3 overflow-y-auto p-6">
+          <div className='custom-scrollbar flex flex-col gap-3 overflow-y-auto p-6'>
             {availability.map((item) => (
               <div
                 key={item.day_of_week}
@@ -1376,7 +1387,7 @@ export default function SettingsPage() {
                 </span>
 
                 <button
-                  type="button"
+                  type='button'
                   onClick={() =>
                     updateAvailability(item.day_of_week, {
                       is_active: !item.is_active,
@@ -1392,9 +1403,9 @@ export default function SettingsPage() {
                   {item.is_active ? 'ON' : 'OFF'}
                 </button>
 
-                <div className="grid grid-cols-[1fr_24px_1fr] items-center gap-2">
+                <div className='grid grid-cols-[1fr_24px_1fr] items-center gap-2'>
                   <input
-                    type="time"
+                    type='time'
                     value={item.start_time}
                     disabled={!item.is_active}
                     onChange={(e) =>
@@ -1405,12 +1416,12 @@ export default function SettingsPage() {
                     className={TIME_INPUT_CLASS}
                   />
 
-                  <span className="text-center type-caption font-bold text-gray-300 dark:text-gray-600">
+                  <span className='text-center type-caption font-bold text-gray-300 dark:text-gray-600'>
                     to
                   </span>
 
                   <input
-                    type="time"
+                    type='time'
                     value={item.end_time}
                     disabled={!item.is_active}
                     onChange={(e) =>
@@ -1425,9 +1436,9 @@ export default function SettingsPage() {
             ))}
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 px-6 py-4 dark:border-gray-800">
+          <div className='flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 px-6 py-4 dark:border-gray-800'>
             <Button
-              variant="outline"
+              variant='outline'
               onClick={() => setShowAvailabilityPanel(false)}
             >
               Discard
