@@ -652,7 +652,7 @@ function ActivityAreaChart({
     { name: 'Messages', data: data.map((d) => d.messages) },
     { name: 'Conversations', data: data.map((d) => d.conversations) },
     { name: 'Leads', data: data.map((d) => d.leads) },
-    { name: 'Errors', data: data.map((d) => d.errors) },
+    { name: 'Knowledge Gap', data: data.map((d) => d.errors) },
   ];
   return (
     <ReactApexChart
@@ -1906,6 +1906,7 @@ function OverviewTab({ isDark }: { isDark: boolean }) {
   const peakLabel = formatActivityBucket(peakBucket?.bucket);
   const peakUsesTime = bucketHasTime(peakBucket?.bucket);
   const peakTitle = peakUsesTime ? 'Peak Activity' : 'Peak Day';
+
   const peakSubtitle = peakUsesTime ? 'busiest time slot' : 'busiest day';
 
   return (
@@ -1943,7 +1944,7 @@ function OverviewTab({ isDark }: { isDark: boolean }) {
             tone='brand'
           />
           <MetricCard
-            label='Error Rate'
+            label='Knowledge Gap'
             value={
               overview && overview.conversations
                 ? pct(overview.errors / overview.conversations)
@@ -1966,7 +1967,7 @@ function OverviewTab({ isDark }: { isDark: boolean }) {
         </ChartCard>
       </div>
 
-      <div className='col-span-12 xl:col-span-5'>
+      <div className='col-span-12 xl:col-span-5 flex flex-col space-y-8'>
         <ChartCard
           title='Conversion Rate'
           subtitle='Leads captured per conversation'
@@ -1983,12 +1984,29 @@ function OverviewTab({ isDark }: { isDark: boolean }) {
             <Empty label='No conversion data yet' />
           )}
         </ChartCard>
+        {peakLabel && (
+          <ChartCard title={peakTitle} subtitle={peakSubtitle}>
+            <div className='text-center'>
+              <div className='type-h2 font-bold text-gray-800 dark:text-white/90'>
+                {peakLabel}
+              </div>
+              <div className='mt-3 rounded-[10px] border border-gray-200 bg-gray-50 px-3 py-2 dark:border-gray-800 dark:bg-white/[0.03]'>
+                <div className='type-caption uppercase tracking-wide text-gray-400 dark:text-gray-500'>
+                  Peak messages
+                </div>
+                <div className='type-body font-bold text-gray-800 dark:text-white/90'>
+                  {peakBucket?.messages ?? 0}
+                </div>
+              </div>
+            </div>
+          </ChartCard>
+        )}
       </div>
 
       <div className='col-span-12'>
         <ChartCard
           title='Activity Over Time'
-          subtitle='Messages, conversations, leads and errors'
+          subtitle='Messages, conversations, leads and knowledge gap'
         >
           {timeseries.length > 1 ? (
             <div className='max-w-full overflow-x-auto custom-scrollbar'>
@@ -2049,7 +2067,7 @@ function OverviewTab({ isDark }: { isDark: boolean }) {
           )}
         </ChartCard>
 
-        <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6'>
+        <div className='col-span-12 space-y-4 xl:col-span-7 md:space-y-6'>
           <ChartCard title='Returning Users' subtitle='Customers who came back'>
             {returning ? (
               <div className='flex items-center gap-4'>
@@ -2084,24 +2102,6 @@ function OverviewTab({ isDark }: { isDark: boolean }) {
               <Empty label='No returning user data yet' />
             )}
           </ChartCard>
-
-          {peakLabel && (
-            <ChartCard title={peakTitle} subtitle={peakSubtitle}>
-              <div className='text-center'>
-                <div className='type-h2 font-bold text-gray-800 dark:text-white/90'>
-                  {peakLabel}
-                </div>
-                <div className='mt-3 rounded-[10px] border border-gray-200 bg-gray-50 px-3 py-2 dark:border-gray-800 dark:bg-white/[0.03]'>
-                  <div className='type-caption uppercase tracking-wide text-gray-400 dark:text-gray-500'>
-                    Peak messages
-                  </div>
-                  <div className='type-body font-bold text-gray-800 dark:text-white/90'>
-                    {peakBucket?.messages ?? 0}
-                  </div>
-                </div>
-              </div>
-            </ChartCard>
-          )}
         </div>
       </div>
     </div>
