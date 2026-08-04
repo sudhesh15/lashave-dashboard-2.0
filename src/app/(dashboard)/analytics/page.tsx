@@ -9,6 +9,7 @@ import type { ApexOptions } from 'apexcharts';
 import {
   AlertTriangle,
   Check,
+  Clock,
   Copy,
   Eye,
   Globe,
@@ -182,7 +183,9 @@ const CHANNEL_CFG: Record<string, { color: string; logo: React.ReactNode }> = {
   },
   website: {
     color: '#465FFF',
-    logo: <img src='/globe.svg' width={16} height={16} alt='Google' />,
+    logo: (
+      <img src='/brand-logo/website.png' width={16} height={16} alt='Google' />
+    ),
   },
 };
 
@@ -420,6 +423,10 @@ function ChartCard({
 }
 
 // ─── Toolbar controls ────────────────────────────────────────────────────────
+type SortOption = 'name_asc' | 'name_desc' | 'updated';
+
+// type CustomerSortOption = 'name_asc' | 'name_desc' | 'score' | 'updated';
+
 function CustomerTabControls({
   sortOption,
   sortDropdownOpen,
@@ -427,27 +434,38 @@ function CustomerTabControls({
   onSortChange,
   onExport,
 }: {
-  sortOption: 'name' | 'score' | 'updated';
+  sortOption: CustomerSortOption;
   sortDropdownOpen: boolean;
-  setSortDropdownOpen: (v: boolean) => void;
-  onSortChange: (v: 'name' | 'score' | 'updated') => void;
+  setSortDropdownOpen: (value: boolean) => void;
+  onSortChange: (value: CustomerSortOption) => void;
   onExport: () => void;
 }) {
+  const sortLabel =
+    sortOption === 'name_asc'
+      ? 'A–Z'
+      : sortOption === 'name_desc'
+        ? 'Z–A'
+        : 'Last Updated';
+
+  const sortOptions: {
+    label: string;
+    value: CustomerSortOption;
+  }[] = [
+    { label: 'A–Z', value: 'name_asc' },
+    { label: 'Z–A', value: 'name_desc' },
+    { label: 'Last Updated', value: 'updated' },
+  ];
+
   return (
     <div className='flex flex-wrap items-center gap-2'>
       <div className='relative'>
         <button
+          type='button'
           onClick={() => setSortDropdownOpen(!sortDropdownOpen)}
           className='flex items-center gap-1.5 whitespace-nowrap rounded-[10px] border border-gray-200 bg-white px-3.5 py-2 type-caption font-semibold text-gray-600 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300'
         >
-          <span>
-            Sort:{' '}
-            {sortOption === 'name'
-              ? 'A–Z'
-              : sortOption === 'score'
-                ? 'Score'
-                : 'Last Updated'}
-          </span>
+          <span>Sort: {sortLabel}</span>
+
           <span
             className={cn(
               'type-caption transition-transform',
@@ -457,33 +475,30 @@ function CustomerTabControls({
             ▾
           </span>
         </button>
+
         {sortDropdownOpen && (
-          <div className='absolute right-0 top-[calc(100%+6px)] z-20 min-w-[150px] overflow-hidden rounded-[10px] border border-gray-200 bg-white shadow-theme-lg dark:border-gray-700 dark:bg-gray-900'>
-            {(
-              [
-                { label: 'A–Z', value: 'name' },
-                { label: 'Score', value: 'score' },
-                { label: 'Last Updated', value: 'updated' },
-              ] as const
-            ).map((opt) => {
-              const active = sortOption === opt.value;
+          <div className='absolute right-0 top-[calc(100%+6px)] z-30 min-w-[160px] overflow-hidden rounded-[10px] border border-gray-200 bg-white shadow-theme-lg dark:border-gray-700 dark:bg-gray-900'>
+            {sortOptions.map((option) => {
+              const active = sortOption === option.value;
+
               return (
-                <div
-                  key={opt.value}
+                <button
+                  key={option.value}
+                  type='button'
                   onClick={() => {
-                    onSortChange(opt.value);
+                    onSortChange(option.value);
                     setSortDropdownOpen(false);
                   }}
                   className={cn(
-                    'cursor-pointer px-3.5 py-2 type-caption font-medium transition',
+                    'flex w-full items-center justify-between px-3.5 py-2 text-left type-caption font-medium transition',
                     active
                       ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400'
                       : 'text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/[0.03]',
                   )}
                 >
-                  {opt.label}
-                  {active && <Check size={12} className='ml-1.5 inline' />}
-                </div>
+                  <span>{option.label}</span>
+                  {active && <Check size={12} />}
+                </button>
               );
             })}
           </div>
@@ -559,6 +574,14 @@ function EngagementBarChart({
     stroke: { show: true, width: 4, colors: ['transparent'] },
     xaxis: {
       categories: data.map((d) => d.label),
+      title: {
+        text: 'Messages',
+        style: {
+          color: isDark ? AXIS_LABEL.dark : AXIS_LABEL.light,
+          fontSize: '13px',
+          fontWeight: 500,
+        },
+      },
       axisBorder: { show: false },
       axisTicks: { show: false },
       labels: {
@@ -569,7 +592,16 @@ function EngagementBarChart({
       },
     },
     yaxis: {
+      title: {
+        text: 'Avg. Conversations per User',
+        style: {
+          color: isDark ? AXIS_LABEL.dark : AXIS_LABEL.light,
+          fontSize: '13px',
+          fontWeight: 500,
+        },
+      },
       labels: {
+        formatter: (val: number) => Math.round(val).toString(),
         style: {
           colors: isDark ? AXIS_LABEL.dark : AXIS_LABEL.light,
           fontSize: '12px',
@@ -586,7 +618,9 @@ function EngagementBarChart({
       y: { formatter: (val: number) => `${val} users` },
     },
   };
+
   const series = [{ name: 'Users', data: data.map((d) => d.value) }];
+
   return (
     <ReactApexChart options={options} series={series} type='bar' height={220} />
   );
@@ -959,6 +993,21 @@ function InfoItem({
 }
 
 // ─── Customer Modal ──────────────────────────────────────────────────────────
+function getMoodEmoji(label?: string) {
+  const mood = (label || '').toLowerCase();
+
+  if (mood.includes('happy') || mood.includes('positive')) return '😊';
+  if (mood.includes('excited')) return '🤩';
+  if (mood.includes('interested') || mood.includes('curious')) return '🤔';
+  if (mood.includes('neutral')) return '😐';
+  if (mood.includes('confused')) return '😕';
+  if (mood.includes('frustrated')) return '😣';
+  if (mood.includes('angry') || mood.includes('negative')) return '😠';
+  if (mood.includes('sad')) return '😔';
+
+  return '💬';
+}
+
 function CustomerModal({
   lead,
   onClose,
@@ -971,40 +1020,56 @@ function CustomerModal({
   const label = getLabel(lead);
   const ini = getInitials(label);
   const hue = getHue(lead.external_user_id || label);
+
   const profilePic =
     lead.profile_pic_url ||
     lead.meta?.instagram_profile?.profile_pic_url ||
     null;
-  const score = lead.meta?.score ?? 0;
+
   const seg = getSegment(lead);
   const segCfg = SEGMENT_CFG[seg];
   const pipeCfg = PIPE_CFG[lead.status] || PIPE_CFG.new;
+
   const urgency = lead.meta?.urgency || 'none';
   const urgCfg = URGENCY_CFG[urgency] || URGENCY_CFG.none;
+
   const emails = lead.contacts?.emails || [];
   const phones = lead.contacts?.phones || [];
   const lastText = getLeadLastText(lead, '');
+
   const mood = resolveMoodForLead({
     storedMood: lead.meta?.mood,
     text_preview: lastText,
     triggers: lead.meta?.triggers,
     intent: lead.intent,
   });
+
+  const moodEmoji = getMoodEmoji(mood.label);
+
   const objections = lead.meta?.objections || [];
+
   const customTriggers = (lead.meta?.triggers || [])
-    .filter((t) => t.startsWith('custom:'))
-    .map((t) => t.replace('custom:', ''));
+    .filter((trigger) => trigger.startsWith('custom:'))
+    .map((trigger) => trigger.replace('custom:', ''));
+
   const builtinTriggers = (lead.meta?.triggers || [])
-    .filter((t) => !t.startsWith('custom:') && !t.startsWith('contact:'))
-    .map((t) => t.replace(/^(intent|service):/, '').replace(/\(\d+\)$/, ''));
-  const scoreColor =
-    score >= 8 ? PALETTE.success : score >= 5 ? PALETTE.warning : PALETTE.brand;
+    .filter(
+      (trigger) =>
+        !trigger.startsWith('custom:') && !trigger.startsWith('contact:'),
+    )
+    .map((trigger) =>
+      trigger.replace(/^(intent|service):/, '').replace(/\(\d+\)$/, ''),
+    );
+
   const [copied, setCopied] = useState<string | null>(null);
 
   const copyText = (text: string, key: string) => {
     navigator.clipboard.writeText(text).then(() => {
       setCopied(key);
-      setTimeout(() => setCopied(null), 1800);
+
+      setTimeout(() => {
+        setCopied(null);
+      }, 1800);
     });
   };
 
@@ -1034,10 +1099,21 @@ function CustomerModal({
           )}
 
           <div className='min-w-0 flex-1'>
-            <h4 className='mb-2 truncate type-card-title font-semibold text-gray-800 dark:text-white/90'>
-              {label}
-            </h4>
             <div className='flex flex-wrap items-center justify-center gap-2 sm:justify-start'>
+              <h4 className='truncate type-card-title font-semibold text-gray-800 dark:text-white/90'>
+                {label}
+              </h4>
+
+              <span
+                className='inline-flex h-8 min-w-8 items-center justify-center rounded-full border border-gray-200 bg-gray-50 px-2 text-lg dark:border-gray-700 dark:bg-gray-800'
+                title={mood.label}
+                aria-label={`Mood: ${mood.label}`}
+              >
+                {moodEmoji}
+              </span>
+            </div>
+
+            <div className='mt-2 flex flex-wrap items-center justify-center gap-2 sm:justify-start'>
               <span className='inline-flex h-7 w-7 items-center justify-center rounded-full border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800'>
                 {CHANNEL_CFG[(lead.channel || '').toLowerCase()]?.logo || (
                   <Globe
@@ -1046,25 +1122,36 @@ function CustomerModal({
                   />
                 )}
               </span>
+
               <span
                 className='w-fit rounded-full px-3 py-0.5 type-caption font-medium capitalize'
-                style={{ color: pipeCfg.color, background: pipeCfg.bg }}
+                style={{
+                  color: pipeCfg.color,
+                  background: pipeCfg.bg,
+                }}
               >
-                {lead.status}
+                {lead.status || 'new'}
               </span>
+
               <Badge color={segCfg.badge}>{segCfg.label}</Badge>
             </div>
 
-            <div className='mt-3 flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 sm:justify-start'>
-              <div className='flex items-center gap-1.5'>
-                <Mail size={12} className='text-gray-400 dark:text-gray-500' />
-                <span className='type-caption text-gray-500 dark:text-gray-400'>
+            <div className='mt-3 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 sm:justify-start'>
+              <div className='flex min-w-0 items-center gap-1.5'>
+                <Mail
+                  size={12}
+                  className='shrink-0 text-gray-400 dark:text-gray-500'
+                />
+
+                <span className='max-w-[210px] truncate type-caption text-gray-500 dark:text-gray-400'>
                   {emails[0] || 'No email'}
                 </span>
+
                 {emails[0] && (
                   <button
+                    type='button'
                     onClick={() => copyText(emails[0], 'email')}
-                    className='text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300'
+                    className='shrink-0 text-gray-400 transition hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300'
                   >
                     {copied === 'email' ? (
                       <Check size={12} />
@@ -1074,14 +1161,17 @@ function CustomerModal({
                   </button>
                 )}
               </div>
-              <div className='flex items-center gap-1.5'>
-                <span className='type-caption text-gray-500 dark:text-gray-400'>
+
+              <div className='flex min-w-0 items-center gap-1.5'>
+                <span className='max-w-[180px] truncate type-caption text-gray-500 dark:text-gray-400'>
                   {phones[0] || 'No phone'}
                 </span>
+
                 {phones[0] && (
                   <button
+                    type='button'
                     onClick={() => copyText(phones[0], 'phone')}
-                    className='text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300'
+                    className='shrink-0 text-gray-400 transition hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300'
                   >
                     {copied === 'phone' ? (
                       <Check size={12} />
@@ -1090,6 +1180,17 @@ function CustomerModal({
                     )}
                   </button>
                 )}
+              </div>
+
+              <div className='flex items-center gap-1.5'>
+                <Clock
+                  size={12}
+                  className='shrink-0 text-gray-400 dark:text-gray-500'
+                />
+
+                <span className='type-caption text-gray-500 dark:text-gray-400'>
+                  Last active {ago(lead.updated_at)}
+                </span>
               </div>
             </div>
           </div>
@@ -1102,6 +1203,7 @@ function CustomerModal({
               <p className='mb-1 type-caption text-gray-500 dark:text-gray-400'>
                 Last message
               </p>
+
               <p className='type-small italic leading-relaxed text-gray-700 dark:text-gray-300'>
                 &ldquo;{lastText}&rdquo;
               </p>
@@ -1111,37 +1213,58 @@ function CustomerModal({
           <h5 className='mb-4 type-body font-medium text-gray-800 dark:text-white/90'>
             Engagement
           </h5>
+
           <div className='grid grid-cols-2 gap-x-6 gap-y-5 lg:grid-cols-3'>
-            <InfoItem label='Source' value={lead.source || '—'} />
+            <InfoItem
+              label='Source'
+              value={(lead.source || '—').replace(/_/g, ' ')}
+            />
+
             <InfoItem
               label='Service'
               value={(lead.service || '—').replace(/_/g, ' ')}
             />
+
             <InfoItem
               label='Intent'
               value={(lead.intent || '—').replace(/_/g, ' ')}
             />
-            <InfoItem
-              label='Score'
-              value={`${score} / 12`}
-              color={scoreColor}
-            />
-            <InfoItem label='Conversation' value={`#${lead.conversation_id}`} />
-            <InfoItem label='Last Active' value={ago(lead.updated_at)} />
           </div>
 
           <div className='my-6 h-px bg-gray-100 dark:bg-gray-800' />
+
           <h5 className='mb-4 type-body font-medium text-gray-800 dark:text-white/90'>
             Signals
           </h5>
+
           <div className='grid grid-cols-2 gap-x-6 gap-y-5 lg:grid-cols-3'>
-            <InfoItem label='Mood' value={mood.label} color={mood.color} />
+            <div className='min-w-0'>
+              <p className='mb-1.5 type-caption leading-normal text-gray-500 dark:text-gray-400'>
+                Mood
+              </p>
+
+              <div className='flex items-center gap-2'>
+                <span className='text-xl leading-none' aria-hidden='true'>
+                  {moodEmoji}
+                </span>
+
+                <span
+                  className='truncate type-small font-medium'
+                  style={{ color: mood.color }}
+                >
+                  {mood.label}
+                </span>
+              </div>
+            </div>
+
             <div>
               <p className='mb-1.5 type-caption leading-normal text-gray-500 dark:text-gray-400'>
                 Urgency
               </p>
+
               <Badge color={urgCfg.color}>{urgCfg.label}</Badge>
             </div>
+
             <InfoItem
               label='Objections'
               value={
@@ -1156,17 +1279,19 @@ function CustomerModal({
               <p className='mb-2.5 type-caption leading-normal text-gray-500 dark:text-gray-400'>
                 Keywords &amp; Triggers
               </p>
+
               <div className='flex flex-wrap gap-2'>
-                {customTriggers.map((kw) => (
-                  <Badge key={kw} color='warning'>
-                    {kw}
+                {customTriggers.map((keyword) => (
+                  <Badge key={keyword} color='warning'>
+                    {keyword}
                   </Badge>
                 ))}
+
                 {Array.from(new Set(builtinTriggers))
                   .slice(0, 8)
-                  .map((t) => (
-                    <Badge key={`builtin-${t}`} color='light'>
-                      {t.replace(/_/g, ' ')}
+                  .map((trigger) => (
+                    <Badge key={`builtin-${trigger}`} color='light'>
+                      {trigger.replace(/_/g, ' ')}
                     </Badge>
                   ))}
               </div>
@@ -1178,10 +1303,11 @@ function CustomerModal({
               <p className='mb-2.5 type-caption leading-normal text-gray-500 dark:text-gray-400'>
                 Sales Objections
               </p>
+
               <div className='flex flex-wrap gap-2'>
-                {objections.map((o) => (
-                  <Badge key={o} color='error'>
-                    {o}
+                {objections.map((objection) => (
+                  <Badge key={objection} color='error'>
+                    {objection}
                   </Badge>
                 ))}
               </div>
@@ -1192,28 +1318,38 @@ function CustomerModal({
             <p className='mb-3 type-caption leading-normal text-gray-500 dark:text-gray-400'>
               Pipeline Progress
             </p>
+
             <div className='flex gap-1.5'>
               {['new', 'contacted', 'qualified', 'won'].map((stage) => {
-                const sc = PIPE_CFG[stage] || PIPE_CFG.new;
+                const stageConfig = PIPE_CFG[stage] || PIPE_CFG.new;
+
                 const order = ['new', 'contacted', 'qualified', 'won'];
-                const done = order.indexOf(stage) <= order.indexOf(lead.status);
+
+                const currentStageIndex = order.indexOf(lead.status);
+
+                const stageIndex = order.indexOf(stage);
+
+                const done =
+                  currentStageIndex >= 0 && stageIndex <= currentStageIndex;
+
                 return (
                   <div key={stage} className='flex-1'>
                     <div
                       className='mb-1.5 h-1.5 rounded-full'
                       style={{
                         background: done
-                          ? sc.color
+                          ? stageConfig.color
                           : isDark
                             ? 'rgba(255,255,255,.08)'
                             : 'rgba(15,23,42,.08)',
                       }}
                     />
+
                     <div
                       className='type-caption font-medium capitalize'
                       style={{
                         color: done
-                          ? sc.color
+                          ? stageConfig.color
                           : isDark
                             ? 'rgba(255,255,255,.28)'
                             : 'rgba(15,23,42,.32)',
@@ -1233,6 +1369,7 @@ function CustomerModal({
           <Button variant='outline' onClick={onClose}>
             Close
           </Button>
+
           <Link
             href={`/conversations/${lead.conversation_id}`}
             onClick={onClose}
@@ -1246,101 +1383,151 @@ function CustomerModal({
 }
 
 function ChannelDropdown({
-  chanFilter,
-  setChanFilter,
+  channels,
+  selectedChannels,
+  setSelectedChannels,
 }: {
   channels: string[];
-  chanFilter: string;
-  setChanFilter: (v: string) => void;
+  selectedChannels: string[];
+  setSelectedChannels: (channels: string[]) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const cfg = CHANNEL_CFG[chanFilter];
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) return;
-    const fn = () => setOpen(false);
-    document.addEventListener('click', fn);
-    return () => document.removeEventListener('click', fn);
+
+    const handleOutsideClick = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleOutsideClick);
+
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+    };
   }, [open]);
 
+  const availableChannels = channels.length
+    ? channels
+    : ['instagram', 'facebook', 'whatsapp', 'telegram', 'youtube'];
+
+  const allSelected =
+    availableChannels.length > 0 &&
+    availableChannels.every((channel) => selectedChannels.includes(channel));
+
+  const buttonLabel =
+    selectedChannels.length === 0
+      ? 'All Channels'
+      : selectedChannels.length === 1
+        ? selectedChannels[0].charAt(0).toUpperCase() +
+          selectedChannels[0].slice(1)
+        : `${selectedChannels.length} Channels`;
+
+  const toggleChannel = (channel: string) => {
+    setSelectedChannels(
+      selectedChannels.includes(channel)
+        ? selectedChannels.filter((item) => item !== channel)
+        : [...selectedChannels, channel],
+    );
+  };
+
+  const toggleAll = () => {
+    setSelectedChannels(allSelected ? [] : availableChannels);
+  };
+
   return (
-    <div
-      className='relative min-w-[160px]'
-      onClick={(e) => e.stopPropagation()}
-    >
+    <div ref={dropdownRef} className='relative min-w-[180px]'>
       <button
-        onClick={() => setOpen((o) => !o)}
-        className='flex w-full items-center gap-1.5 rounded-[10px] border border-gray-200 bg-white px-3.5 py-2 text-left type-caption font-semibold text-gray-700 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300'
+        type='button'
+        onClick={() => setOpen((current) => !current)}
+        className='flex w-full items-center gap-2 rounded-[10px] border border-gray-200 bg-white px-3.5 py-2 text-left type-caption font-semibold text-gray-700 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300'
       >
-        {chanFilter ? (
-          <>
-            {cfg?.logo}
-            <span>
-              {chanFilter.charAt(0).toUpperCase() + chanFilter.slice(1)}
-            </span>
-          </>
-        ) : (
-          <>
+        {selectedChannels.length === 1 ? (
+          CHANNEL_CFG[selectedChannels[0]]?.logo || (
             <Globe size={14} className='text-gray-400 dark:text-gray-500' />
-            <span>All Channels</span>
-          </>
+          )
+        ) : (
+          <Globe size={14} className='text-gray-400 dark:text-gray-500' />
         )}
-        <span
+
+        <span className='truncate'>{buttonLabel}</span>
+
+        <ChevronDown
+          size={14}
           className={cn(
-            'ml-auto type-caption text-gray-400 transition-transform dark:text-gray-500',
+            'ml-auto shrink-0 text-gray-400 transition-transform dark:text-gray-500',
             open && 'rotate-180',
           )}
-        >
-          ▾
-        </span>
+        />
       </button>
 
       {open && (
-        <div className='absolute inset-x-0 top-[calc(100%+6px)] z-20 overflow-hidden rounded-[10px] border border-gray-200 bg-white shadow-theme-lg dark:border-gray-700 dark:bg-gray-900'>
-          {[
-            {
-              value: '',
-              label: 'All Channels',
-              logo: (
-                <Globe size={15} className='text-gray-400 dark:text-gray-500' />
-              ),
-              color: PALETTE.brand,
-            },
-            ...['instagram', 'facebook', 'whatsapp', 'telegram', 'youtube'].map(
-              (ch) => ({
-                value: ch,
-                label: ch.charAt(0).toUpperCase() + ch.slice(1),
-                logo: CHANNEL_CFG[ch]?.logo,
-                color: CHANNEL_CFG[ch]?.color || PALETTE.brand,
-              }),
-            ),
-          ].map((opt, i, arr) => {
-            const isActive = chanFilter === opt.value;
+        <div className='absolute inset-x-0 top-[calc(100%+6px)] z-30 overflow-hidden rounded-[10px] border border-gray-200 bg-white p-1 shadow-theme-lg dark:border-gray-700 dark:bg-gray-900'>
+          <button
+            type='button'
+            onClick={toggleAll}
+            className='flex w-full items-center gap-2 rounded-[8px] px-3 py-2 text-left type-caption font-medium text-gray-600 transition hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/[0.03]'
+          >
+            <span
+              className={cn(
+                'flex h-4 w-4 shrink-0 items-center justify-center rounded border',
+                allSelected
+                  ? 'border-brand-500 bg-brand-500 text-white'
+                  : 'border-gray-300 bg-white dark:border-gray-600 dark:bg-gray-900',
+              )}
+            >
+              {allSelected && <Check size={11} strokeWidth={3} />}
+            </span>
+
+            <Globe size={15} className='text-gray-400 dark:text-gray-500' />
+
+            <span>All Channels</span>
+          </button>
+
+          <div className='my-1 border-t border-gray-100 dark:border-gray-800' />
+
+          {availableChannels.map((channel) => {
+            const selected = selectedChannels.includes(channel);
+            const cfg = CHANNEL_CFG[channel];
+
             return (
-              <div
-                key={opt.value || 'all'}
-                onClick={() => {
-                  setChanFilter(opt.value);
-                  setOpen(false);
-                }}
+              <button
+                key={channel}
+                type='button'
+                onClick={() => toggleChannel(channel)}
                 className={cn(
-                  'flex cursor-pointer items-center gap-2 px-3.5 py-2 type-caption transition',
-                  i < arr.length - 1 &&
-                    'border-b border-gray-100 dark:border-gray-800',
-                  isActive
-                    ? 'font-bold'
-                    : 'font-medium text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-white/[0.03]',
+                  'flex w-full items-center gap-2 rounded-[8px] px-3 py-2 text-left type-caption font-medium transition',
+                  selected
+                    ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400'
+                    : 'text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/[0.03]',
                 )}
-                style={
-                  isActive
-                    ? { color: opt.color, background: `${opt.color}14` }
-                    : undefined
-                }
               >
-                {opt.logo}
-                <span>{opt.label}</span>
-                {isActive && <Check size={12} className='ml-auto' />}
-              </div>
+                <span
+                  className={cn(
+                    'flex h-4 w-4 shrink-0 items-center justify-center rounded border',
+                    selected
+                      ? 'border-brand-500 bg-brand-500 text-white'
+                      : 'border-gray-300 bg-white dark:border-gray-600 dark:bg-gray-900',
+                  )}
+                >
+                  {selected && <Check size={11} strokeWidth={3} />}
+                </span>
+
+                {cfg?.logo || (
+                  <Globe
+                    size={15}
+                    className='text-gray-400 dark:text-gray-500'
+                  />
+                )}
+
+                <span className='capitalize'>{channel}</span>
+              </button>
             );
           })}
         </div>
@@ -1366,12 +1553,18 @@ function CustomersTab({
     CustomerSegment,
     { label: string; description: string }
   > = {
-    total: { label: 'Total Contacts', description: 'All captured contacts' },
+    total: {
+      label: 'Total Contacts',
+      description: 'All captured contacts',
+    },
     active: {
       label: 'Active Conversations',
       description: 'Updated in the last 7 days',
     },
-    trending: { label: 'Trending Contacts', description: 'Score 7 or higher' },
+    trending: {
+      label: 'Trending Contacts',
+      description: 'Score 7 or higher',
+    },
     dormant: {
       label: 'Dormant Leads',
       description: 'Inactive for more than 7 days',
@@ -1382,15 +1575,19 @@ function CustomersTab({
   const [loading, setLoading] = useState(false);
   const [modal, setModal] = useState<LeadItem | null>(null);
   const [segFilter, setSegFilter] = useState<CustomerSegment>('total');
-  const [chanFilter, setChanFilter] = useState('');
+
+  // Empty array means all channels.
+  const [chanFilter, setChanFilter] = useState<string[]>([]);
+
   const [search, setSearch] = useState('');
   const [debQ, setDebQ] = useState('');
   const [customersPage, setCustomersPage] = useState(1);
   const [openFilter, setOpenFilter] = useState<CustomerFilterKey | null>(null);
+
   const channelFilterRef = useRef<HTMLDivElement>(null);
   const contactFilterRef = useRef<HTMLDivElement>(null);
-  const LIMIT = 30;
 
+  const LIMIT = 30;
   const now = Date.now();
   const ACTIVE_DAYS = 7;
   const TRENDING_SCORE = 7;
@@ -1400,6 +1597,7 @@ function CustomersTab({
     () => setOpenFilter(null),
     openFilter === 'channel',
   );
+
   useOutsideClick(
     contactFilterRef,
     () => setOpenFilter(null),
@@ -1425,8 +1623,11 @@ function CustomersTab({
     (lead: LeadItem) => {
       if (segFilter === 'total') return true;
       if (segFilter === 'active') return isActiveLead(lead);
-      if (segFilter === 'trending')
+
+      if (segFilter === 'trending') {
         return (lead.meta?.score ?? 0) >= TRENDING_SCORE;
+      }
+
       return isDormantLead(lead);
     },
     [isActiveLead, isDormantLead, segFilter],
@@ -1445,55 +1646,49 @@ function CustomersTab({
   );
 
   useEffect(() => {
-    const t = setTimeout(() => setDebQ(search), 320);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => {
+      setDebQ(search);
+    }, 320);
+
+    return () => clearTimeout(timer);
   }, [search]);
 
   const load = useCallback(
     async (off = 0) => {
       setLoading(true);
+
       try {
         const qs = new URLSearchParams();
+
         qs.set('limit', String(LIMIT));
         qs.set('offset', String(off));
-        if (debQ.trim()) qs.set('q', debQ.trim());
-        if (chanFilter) qs.set('channel', chanFilter);
 
-        const data = await apiFetch<{ items: LeadItem[]; total: number }>(
-          `/admin/leads?${qs}`,
-          { auth: true },
-        );
+        if (debQ.trim()) {
+          qs.set('q', debQ.trim());
+        }
+
+        /*
+         * Do not send one channel to the backend because the UI now supports
+         * multiple selected channels. The loaded results are filtered below.
+         */
+        const data = await apiFetch<{
+          items: LeadItem[];
+          total: number;
+        }>(`/admin/leads?${qs}`, {
+          auth: true,
+        });
+
         setLeads(data.items || []);
       } finally {
         setLoading(false);
       }
     },
-    [debQ, chanFilter],
+    [debQ],
   );
 
   useEffect(() => {
     load(0);
   }, [load]);
-
-  const displayed = useMemo(() => {
-    let list = leads.filter(segmentMatches);
-    if (sortOption === 'name') {
-      list = [...list].sort((a, b) =>
-        (a.display_name ?? '').localeCompare(b.display_name ?? ''),
-      );
-    } else if (sortOption === 'score') {
-      list = [...list].sort(
-        (a, b) => (b.meta?.score ?? 0) - (a.meta?.score ?? 0),
-      );
-    } else {
-      list = [...list].sort(
-        (a, b) =>
-          new Date(b.updated_at ?? 0).getTime() -
-          new Date(a.updated_at ?? 0).getTime(),
-      );
-    }
-    return list;
-  }, [leads, segmentMatches, sortOption]);
 
   const knownChannels = [
     'instagram',
@@ -1504,39 +1699,96 @@ function CustomersTab({
     'website',
     'google',
   ];
+
   const channels = useMemo(
     () =>
       Array.from(
         new Set([
           ...knownChannels,
-          ...leads.map((lead) => lead.channel).filter(Boolean),
+          ...leads.map((lead) => lead.channel?.toLowerCase()).filter(Boolean),
         ]),
-      ).sort(),
+      ).sort() as string[],
     [leads],
   );
+
   const channelCounts = useMemo(
     () =>
       leads.reduce<Record<string, number>>((acc, lead) => {
-        const key = lead.channel || 'unknown';
-        acc[key] = (acc[key] || 0) + 1;
+        const channel = (lead.channel || 'unknown').toLowerCase();
+
+        acc[channel] = (acc[channel] || 0) + 1;
+
         return acc;
       }, {}),
     [leads],
   );
+
+  const toggleChannel = (channel: string) => {
+    setChanFilter((current) =>
+      current.includes(channel)
+        ? current.filter((item) => item !== channel)
+        : [...current, channel],
+    );
+  };
+
+ const displayed = useMemo(() => {
+   let list = leads.filter(segmentMatches);
+
+   if (chanFilter.length > 0) {
+     list = list.filter((lead) =>
+       chanFilter.includes((lead.channel || '').toLowerCase()),
+     );
+   }
+
+   list = [...list];
+
+   if (sortOption === 'name_asc') {
+     list.sort((a, b) =>
+       getLabel(a).localeCompare(getLabel(b), undefined, {
+         sensitivity: 'base',
+         numeric: true,
+       }),
+     );
+   } else if (sortOption === 'name_desc') {
+     list.sort((a, b) =>
+       getLabel(b).localeCompare(getLabel(a), undefined, {
+         sensitivity: 'base',
+         numeric: true,
+       }),
+     );
+   } else {
+     list.sort(
+       (a, b) =>
+         new Date(b.updated_at || 0).getTime() -
+         new Date(a.updated_at || 0).getTime(),
+     );
+   }
+
+   return list;
+ }, [leads, segmentMatches, chanFilter, sortOption]);
+
   const pagedDisplayed = getPageItems(displayed, customersPage);
+
   const activeContactFilter = SEGMENT_CFG_TAB[segFilter];
-  const activeChannelLabel = chanFilter
-    ? chanFilter.charAt(0).toUpperCase() + chanFilter.slice(1)
-    : 'All Channels';
+
+  const activeChannelLabel =
+    chanFilter.length === 0
+      ? 'All Channels'
+      : chanFilter.length === 1
+        ? chanFilter[0].charAt(0).toUpperCase() + chanFilter[0].slice(1)
+        : `${chanFilter.length} Channels`;
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setCustomersPage(1), 0);
+    const timer = window.setTimeout(() => {
+      setCustomersPage(1);
+    }, 0);
+
     return () => window.clearTimeout(timer);
   }, [chanFilter, debQ, displayed.length, segFilter, sortOption]);
 
   useEffect(() => {
-    if (exportTrigger === 0) return;
-    if (!displayed.length) return;
+    if (exportTrigger === 0 || !displayed.length) return;
+
     const headers = [
       'Name',
       'Channel',
@@ -1545,6 +1797,7 @@ function CustomersTab({
       'Intent',
       'Last Updated',
     ];
+
     const rows = displayed.map((lead) => [
       `"${lead.display_name || lead.external_user_id}"`,
       lead.channel,
@@ -1553,18 +1806,27 @@ function CustomersTab({
       lead.intent || '',
       lead.updated_at || 'N/A',
     ]);
+
     const csvContent = [
       headers.join(','),
       ...rows.map((row) => row.join(',')),
     ].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+
+    const blob = new Blob([csvContent], {
+      type: 'text/csv;charset=utf-8;',
+    });
+
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
+
     link.href = url;
     link.setAttribute('download', `customers_export_${Date.now()}.csv`);
+
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
   }, [displayed, exportTrigger]);
 
   return (
@@ -1576,11 +1838,13 @@ function CustomersTab({
           isDark={isDark}
         />
       )}
+
       <div className='min-w-0 max-w-full overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]'>
         <div className='flex flex-col gap-2 border-b border-gray-100 px-5 py-5 dark:border-white/[0.05] sm:flex-row sm:items-center sm:justify-between sm:px-6'>
           <h3 className='type-body font-semibold text-gray-800 dark:text-white/90'>
             Customers
           </h3>
+
           <div className='type-small font-medium text-gray-500 dark:text-gray-400'>
             {displayed.length} contacts
           </div>
@@ -1592,6 +1856,7 @@ function CustomersTab({
               <h4 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
                 {activeContactFilter.label}
               </h4>
+
               <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>
                 {activeContactFilter.description}
               </p>
@@ -1600,6 +1865,7 @@ function CustomersTab({
             <div className='flex min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end'>
               <div className='relative w-full sm:w-[260px]'>
                 <Search className='pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400' />
+
                 <input
                   type='search'
                   value={search}
@@ -1609,51 +1875,74 @@ function CustomersTab({
                 />
               </div>
 
+              {/* Multi-channel filter */}
               <div ref={channelFilterRef} className='relative'>
                 <Button
                   variant='outline'
                   onClick={() =>
                     setOpenFilter(openFilter === 'channel' ? null : 'channel')
                   }
-                  className='min-w-0'
+                  className='min-w-[165px]'
                 >
-                  <Radio size={14} className='shrink-0' />
+                  {chanFilter.length === 1 ? (
+                    CHANNEL_CFG[chanFilter[0]]?.logo || (
+                      <Globe size={14} className='shrink-0' />
+                    )
+                  ) : (
+                    <Radio size={14} className='shrink-0' />
+                  )}
+
                   <span className='truncate'>{activeChannelLabel}</span>
                 </Button>
+
                 {openFilter === 'channel' && (
-                  <div className='absolute right-0 z-20 mt-2 w-64 overflow-hidden rounded-xl border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-800 dark:bg-gray-900'>
+                  <div className='absolute right-0 z-30 mt-2 w-64 overflow-hidden rounded-xl border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-800 dark:bg-gray-900'>
                     <button
                       type='button'
-                      onClick={() => {
-                        setChanFilter('');
-                        setOpenFilter(null);
-                      }}
+                      onClick={() => setChanFilter([])}
                       className={cn(
                         'flex w-full items-center justify-between rounded-[10px] px-3 py-2 text-left type-small font-medium transition',
-                        !chanFilter
+                        chanFilter.length === 0
                           ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'
                           : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/[0.04]',
                       )}
                     >
                       <span className='inline-flex items-center gap-2'>
+                        <span
+                          className={cn(
+                            'flex h-4 w-4 shrink-0 items-center justify-center rounded border',
+                            chanFilter.length === 0
+                              ? 'border-brand-500 bg-brand-500 text-white'
+                              : 'border-gray-300 bg-white dark:border-gray-600 dark:bg-gray-900',
+                          )}
+                        >
+                          {chanFilter.length === 0 && (
+                            <Check size={11} strokeWidth={3} />
+                          )}
+                        </span>
+
                         <Globe size={14} />
-                        All Channels
+
+                        <span>All Channels</span>
                       </span>
+
                       <span className='type-caption text-gray-400 dark:text-gray-500'>
                         {leads.length}
                       </span>
                     </button>
+
+                    <div className='my-1 border-t border-gray-100 dark:border-gray-800' />
+
                     {channels.map((channel) => {
-                      const active = chanFilter === channel;
+                      const active = chanFilter.includes(channel);
+
                       const logo = CHANNEL_CFG[channel]?.logo;
+
                       return (
                         <button
                           key={channel}
                           type='button'
-                          onClick={() => {
-                            setChanFilter(channel);
-                            setOpenFilter(null);
-                          }}
+                          onClick={() => toggleChannel(channel)}
                           className={cn(
                             'flex w-full items-center justify-between rounded-[10px] px-3 py-2 text-left type-small font-medium capitalize transition',
                             active
@@ -1661,10 +1950,23 @@ function CustomersTab({
                               : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/[0.04]',
                           )}
                         >
-                          <span className='inline-flex items-center gap-2'>
-                            {logo || <Globe size={14} />}
-                            {channel}
+                          <span className='inline-flex min-w-0 items-center gap-2'>
+                            <span
+                              className={cn(
+                                'flex h-4 w-4 shrink-0 items-center justify-center rounded border',
+                                active
+                                  ? 'border-brand-500 bg-brand-500 text-white'
+                                  : 'border-gray-300 bg-white dark:border-gray-600 dark:bg-gray-900',
+                              )}
+                            >
+                              {active && <Check size={11} strokeWidth={3} />}
+                            </span>
+
+                            {logo || <Globe size={14} className='shrink-0' />}
+
+                            <span className='truncate'>{channel}</span>
                           </span>
+
                           <span className='type-caption text-gray-400 dark:text-gray-500'>
                             {channelCounts[channel] || 0}
                           </span>
@@ -1675,6 +1977,7 @@ function CustomersTab({
                 )}
               </div>
 
+              {/* Contact segment filter */}
               <div ref={contactFilterRef} className='relative'>
                 <Button
                   variant='outline'
@@ -1685,6 +1988,7 @@ function CustomersTab({
                   <SlidersHorizontal size={14} />
                   {activeContactFilter.label}
                 </Button>
+
                 {openFilter === 'contact' && (
                   <div className='absolute right-0 z-20 mt-2 w-64 overflow-hidden rounded-xl border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-800 dark:bg-gray-900'>
                     {(
@@ -1696,7 +2000,9 @@ function CustomersTab({
                       ] as CustomerSegment[]
                     ).map((segment) => {
                       const active = segFilter === segment;
+
                       const cfg = SEGMENT_CFG_TAB[segment];
+
                       return (
                         <button
                           key={segment}
@@ -1713,6 +2019,7 @@ function CustomersTab({
                           )}
                         >
                           <span>{cfg.label}</span>
+
                           <span className='type-caption text-gray-400 dark:text-gray-500'>
                             {segCounts[segment] || 0}
                           </span>
@@ -1738,6 +2045,7 @@ function CustomersTab({
                   <col className='w-[145px]' />
                   <col className='w-[220px]' />
                 </colgroup>
+
                 <thead className='border-b border-gray-100 dark:border-white/[0.05]'>
                   <tr>
                     {[
@@ -1759,6 +2067,7 @@ function CustomersTab({
                     ))}
                   </tr>
                 </thead>
+
                 <tbody className='divide-y divide-gray-100 dark:divide-white/[0.05]'>
                   {loading && (
                     <tr>
@@ -1796,6 +2105,7 @@ function CustomersTab({
                 </tbody>
               </table>
             </div>
+
             <TablePagination
               page={customersPage}
               totalItems={displayed.length}
@@ -2111,13 +2421,15 @@ function OverviewTab({ isDark }: { isDark: boolean }) {
 // ─── Main Page ───────────────────────────────────────────────────────────────
 type Tab = 'overview' | 'customers';
 
+type CustomerSortOption = 'name_asc' | 'name_desc' | 'updated';
+
 export default function AnalyticsPage() {
   const { isDark } = useTheme();
 
   const [tab, setTab] = useState<Tab>('overview');
-  const [sortOption, setSortOption] = useState<'name' | 'score' | 'updated'>(
-    'updated',
-  );
+
+  const [sortOption, setSortOption] = useState<CustomerSortOption>('updated');
+
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
   const [exportTrigger, setExportTrigger] = useState(0);
 
@@ -2132,6 +2444,7 @@ export default function AnalyticsPage() {
 
       <div className='mb-6 flex flex-wrap items-start justify-end gap-4'>
         {tab === 'overview' && <WeeklyReportButton />}
+
         {tab === 'customers' && (
           <CustomerTabControls
             sortOption={sortOption}
@@ -2146,9 +2459,11 @@ export default function AnalyticsPage() {
       <div className='mb-6 inline-flex gap-1 rounded-xl border border-gray-200 bg-gray-100 p-1 dark:border-gray-800 dark:bg-white/[0.03]'>
         {TABS.map((t) => {
           const active = tab === t.id;
+
           return (
             <button
               key={t.id}
+              type='button'
               onClick={() => setTab(t.id)}
               className={cn(
                 'rounded-[10px] px-4 py-2 type-small font-semibold transition',
@@ -2165,6 +2480,7 @@ export default function AnalyticsPage() {
 
       <div key={tab}>
         {tab === 'overview' && <OverviewTab isDark={isDark} />}
+
         {tab === 'customers' && (
           <CustomersTab
             isDark={isDark}
