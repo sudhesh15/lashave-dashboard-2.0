@@ -1,13 +1,20 @@
 'use client';
 
-import { ChannelFilter, useChannelFilter, type ChannelFilterValue } from '@/components/channel-filter';
+import {
+  ChannelFilter,
+  ChannelFilterValueLabel,
+  useChannelFilter,
+} from '@/components/channel-filter';
 import PageBreadcrumb from '@/components/common/PageBreadcrumb';
 import { DateFilter } from '@/components/date-filter';
 import { RequireAuth } from '@/components/require-auth';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { getPageItems, TablePagination } from '@/components/ui/table-pagination';
+import {
+  getPageItems,
+  TablePagination,
+} from '@/components/ui/table-pagination';
 import { useOutsideClick } from '@/hooks/useOutsideClick';
 import { apiFetch } from '@/lib/api';
 import { type Mood } from '@/lib/chat-classifiers';
@@ -97,7 +104,10 @@ const CHANNEL_LOGOS: Record<string, string> = {
 const QUICK_KW = [
   { label: 'Pricing', kws: ['price', 'cost', 'budget', 'quote', 'fee'] },
   { label: 'Intent', kws: ['urgent', 'asap', 'demo', 'call', 'book'] },
-  { label: 'Services', kws: ['whatsapp', 'instagram', 'automation', 'website', 'chatbot'] },
+  {
+    label: 'Services',
+    kws: ['whatsapp', 'instagram', 'automation', 'website', 'chatbot'],
+  },
 ];
 
 function getErrorMessage(error: unknown, fallback: string) {
@@ -163,7 +173,7 @@ function Highlight({ text, query }: { text: string; query: string }) {
   return (
     <>
       {text.slice(0, idx)}
-      <mark className="rounded bg-brand-50 px-1 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400">
+      <mark className='rounded bg-brand-50 px-1 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'>
         {text.slice(idx, idx + query.length)}
       </mark>
       {text.slice(idx + query.length)}
@@ -172,7 +182,10 @@ function Highlight({ text, query }: { text: string; query: string }) {
 }
 
 function LeadAvatar({ lead, label }: { lead: LeadItem; label: string }) {
-  const src = lead.profile_pic_url || lead.meta?.instagram_profile?.profile_pic_url || null;
+  const src =
+    lead.profile_pic_url ||
+    lead.meta?.instagram_profile?.profile_pic_url ||
+    null;
   const initials = label
     .split(' ')
     .map((part) => part[0])
@@ -188,13 +201,13 @@ function LeadAvatar({ lead, label }: { lead: LeadItem; label: string }) {
         width={40}
         height={40}
         unoptimized
-        className="h-10 w-10 shrink-0 rounded-full object-cover"
+        className='h-10 w-10 shrink-0 rounded-full object-cover'
       />
     );
   }
 
   return (
-    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 type-caption font-medium text-gray-600 dark:bg-white/5 dark:text-gray-300">
+    <span className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 type-caption font-medium text-gray-600 dark:bg-white/5 dark:text-gray-300'>
       {initials || 'LD'}
     </span>
   );
@@ -277,27 +290,34 @@ function StageSelect({
   const toneClass = STAGE_TONE[status] || 'text-gray-700 dark:text-gray-300';
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className='relative'>
       <button
-        type="button"
+        type='button'
         disabled={disabled}
         onClick={() => setOpen((value) => !value)}
-        className="flex h-10 w-full items-center justify-between gap-2 rounded-[10px] border border-gray-200 bg-white px-3 type-small font-medium outline-none transition hover:bg-gray-50 disabled:opacity-60 dark:border-gray-800 dark:bg-gray-900 dark:hover:bg-white/[0.03]"
+        className='flex h-10 w-full items-center justify-between gap-2 rounded-[10px] border border-gray-200 bg-white px-3 type-small font-medium outline-none transition hover:bg-gray-50 disabled:opacity-60 dark:border-gray-800 dark:bg-gray-900 dark:hover:bg-white/[0.03]'
         aria-label={`Change stage for ${label}`}
       >
-        <span className={cn('inline-flex items-center gap-2 truncate', toneClass)}>
+        <span
+          className={cn('inline-flex items-center gap-2 truncate', toneClass)}
+        >
           {current.icon}
           {current.label}
         </span>
         {disabled ? (
-          <Loader2 className="icon-small shrink-0 animate-spin text-gray-400" />
+          <Loader2 className='icon-small shrink-0 animate-spin text-gray-400' />
         ) : (
-          <ChevronDown className={cn('icon-small shrink-0 text-gray-400 transition-transform', open && 'rotate-180')} />
+          <ChevronDown
+            className={cn(
+              'icon-small shrink-0 text-gray-400 transition-transform',
+              open && 'rotate-180',
+            )}
+          />
         )}
       </button>
 
       {open && (
-        <div className="absolute left-0 top-[calc(100%+6px)] z-30 w-48 overflow-hidden rounded-xl border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-800 dark:bg-gray-900">
+        <div className='absolute left-0 top-[calc(100%+6px)] z-30 w-48 overflow-hidden rounded-xl border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-800 dark:bg-gray-900'>
           {PIPELINE.map((stage) => {
             const tab = STAGE_TABS.find((item) => item.key === stage);
             if (!tab) return null;
@@ -305,7 +325,7 @@ function StageSelect({
             return (
               <button
                 key={stage}
-                type="button"
+                type='button'
                 onClick={() => {
                   onChange(stage);
                   setOpen(false);
@@ -342,36 +362,45 @@ function LeadWorklist({
   onStatusChange: (leadId: number, status: string) => void;
 }) {
   return (
-    <div className="min-w-0 max-w-full overflow-hidden rounded-b-xl border border-gray-200 dark:border-white/[0.05]">
-      <div className="w-full overflow-x-auto">
-        <table className="lashvae-column-dividers min-w-[1360px] table-fixed">
+    <div className='min-w-0 max-w-full overflow-hidden rounded-b-xl border border-gray-200 dark:border-white/[0.05]'>
+      <div className='w-full overflow-x-auto'>
+        <table className='lashvae-column-dividers min-w-[1360px] table-fixed'>
           <colgroup>
-            <col className="w-[280px]" />
-            <col className="w-[170px]" />
-            <col className="w-[160px]" />
-            <col className="w-[240px]" />
-            <col className="w-[200px]" />
-            <col className="w-[120px]" />
-            <col className="w-[190px]" />
+            <col className='w-[280px]' />
+            <col className='w-[170px]' />
+            <col className='w-[160px]' />
+            <col className='w-[240px]' />
+            <col className='w-[200px]' />
+            <col className='w-[120px]' />
+            <col className='w-[190px]' />
           </colgroup>
-          <thead className="border-b border-gray-100 dark:border-white/[0.05]">
+          <thead className='border-b border-gray-100 dark:border-white/[0.05]'>
             <tr>
-              {['Lead', 'Stage', 'Channel', 'Email', 'Phone', 'Activity', 'Actions'].map(
-                (header) => (
-                  <th
-                    key={header}
-                    className="px-5 py-3 text-left type-body font-medium text-gray-500 dark:text-gray-400"
-                  >
-                    {header}
-                  </th>
-                ),
-              )}
+              {[
+                'Lead',
+                'Stage',
+                'Channel',
+                'Email',
+                'Phone',
+                'Activity',
+                'Actions',
+              ].map((header) => (
+                <th
+                  key={header}
+                  className='px-5 py-3 text-left type-body font-medium text-gray-500 dark:text-gray-400'
+                >
+                  {header}
+                </th>
+              ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+          <tbody className='divide-y divide-gray-100 dark:divide-white/[0.05]'>
             {loading && items.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-5 py-14 text-center type-small text-gray-500 dark:text-gray-400">
+                <td
+                  colSpan={7}
+                  className='px-5 py-14 text-center type-small text-gray-500 dark:text-gray-400'
+                >
                   Loading leads
                 </td>
               </tr>
@@ -379,7 +408,10 @@ function LeadWorklist({
 
             {!loading && items.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-5 py-14 text-center type-small text-gray-500 dark:text-gray-400">
+                <td
+                  colSpan={7}
+                  className='px-5 py-14 text-center type-small text-gray-500 dark:text-gray-400'
+                >
                   {searchQ ? 'No leads match this search' : 'No leads found'}
                 </td>
               </tr>
@@ -390,21 +422,24 @@ function LeadWorklist({
               const email = lead.contacts?.emails?.[0] || '';
               const phone = lead.contacts?.phones?.[0] || '';
               return (
-                <tr key={lead.id} className="transition hover:bg-gray-50 dark:hover:bg-white/[0.02]">
-                  <td className="px-5 py-3 sm:px-6">
-                    <div className="flex items-center gap-3">
+                <tr
+                  key={lead.id}
+                  className='transition hover:bg-gray-50 dark:hover:bg-white/[0.02]'
+                >
+                  <td className='px-5 py-3 sm:px-6'>
+                    <div className='flex items-center gap-3'>
                       <LeadAvatar lead={lead} label={display.label} />
-                      <div className="min-w-0">
-                        <span className="group relative block max-w-full type-small font-medium text-gray-800 dark:text-white/90">
+                      <div className='min-w-0'>
+                        <span className='group relative block max-w-full type-small font-medium text-gray-800 dark:text-white/90'>
                           <Link
                             href={`/conversations/${lead.conversation_id}`}
-                            className="block truncate hover:text-brand-500 dark:hover:text-brand-400"
+                            className='block truncate hover:text-brand-500 dark:hover:text-brand-400'
                           >
                             <Highlight text={display.label} query={searchQ} />
                           </Link>
-                          <span className="pointer-events-none absolute left-0 top-full z-50 mt-1 hidden max-w-[280px] group-hover:block">
-                            <span className="absolute -top-1 left-3 h-2 w-2 rotate-45 rounded-[2px] bg-gray-900" />
-                            <span className="relative block rounded-[10px] bg-gray-900 px-3 py-1.5 type-caption font-medium text-white shadow-lg">
+                          <span className='pointer-events-none absolute left-0 top-full z-50 mt-1 hidden max-w-[280px] group-hover:block'>
+                            <span className='absolute -top-1 left-3 h-2 w-2 rotate-45 rounded-[2px] bg-gray-900' />
+                            <span className='relative block rounded-[10px] bg-gray-900 px-3 py-1.5 type-caption font-medium text-white shadow-lg'>
                               {display.label}
                             </span>
                           </span>
@@ -412,7 +447,7 @@ function LeadWorklist({
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-3">
+                  <td className='px-6 py-3'>
                     <StageSelect
                       status={lead.status}
                       disabled={updatingId === lead.id}
@@ -420,35 +455,40 @@ function LeadWorklist({
                       label={display.label}
                     />
                   </td>
-                  <td className="px-6 py-3">
-                    <span className="inline-flex items-center gap-2 type-small text-gray-700 dark:text-gray-300">
+                  <td className='px-6 py-3'>
+                    <span className='inline-flex items-center gap-2 type-small text-gray-700 dark:text-gray-300'>
                       <Image
-                        src={CHANNEL_LOGOS[(lead.channel || '').toLowerCase()] || '/brand-logo/website.png'}
+                        src={
+                          CHANNEL_LOGOS[(lead.channel || '').toLowerCase()] ||
+                          '/brand-logo/website.png'
+                        }
                         alt={titleCase(lead.channel || 'Channel')}
                         width={18}
                         height={18}
-                        className="h-[18px] w-[18px] shrink-0 object-contain"
+                        className='h-[18px] w-[18px] shrink-0 object-contain'
                       />
-                      <span className="truncate">{titleCase(lead.channel || 'Channel')}</span>
+                      <span className='truncate'>
+                        {titleCase(lead.channel || 'Channel')}
+                      </span>
                     </span>
                   </td>
-                  <td className="px-6 py-3 type-small text-gray-500 dark:text-gray-400">
-                    <span className="block truncate" title={email || undefined}>
+                  <td className='px-6 py-3 type-small text-gray-500 dark:text-gray-400'>
+                    <span className='block truncate' title={email || undefined}>
                       {email || 'No email saved'}
                     </span>
                   </td>
-                  <td className="px-6 py-3 type-small text-gray-500 dark:text-gray-400">
-                    <span className="block truncate" title={phone || undefined}>
+                  <td className='px-6 py-3 type-small text-gray-500 dark:text-gray-400'>
+                    <span className='block truncate' title={phone || undefined}>
                       {phone || 'No phone saved'}
                     </span>
                   </td>
-                  <td className="px-6 py-3 type-small tabular-nums text-gray-500 dark:text-gray-400">
+                  <td className='px-6 py-3 type-small tabular-nums text-gray-500 dark:text-gray-400'>
                     {timeAgo(lead.updated_at)}
                   </td>
-                  <td className="px-6 py-3">
+                  <td className='px-6 py-3'>
                     <Link
                       href={`/conversations/${lead.conversation_id}`}
-                      className="inline-flex h-8 items-center gap-2 whitespace-nowrap rounded-[10px] bg-brand-500 px-3 type-small font-medium text-white shadow-theme-xs hover:bg-brand-600"
+                      className='inline-flex h-8 items-center gap-2 whitespace-nowrap rounded-[10px] bg-brand-500 px-3 type-small font-medium text-white shadow-theme-xs hover:bg-brand-600'
                     >
                       <Eye size={14} />
                       View conversation
@@ -477,22 +517,44 @@ export default function LeadsPage() {
   const [err, setErr] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [updatingId, setUpdatingId] = useState<number | null>(null);
-  const { filter: channelFilter, setFilter: setChannelFilter } = useChannelFilter();
+  const {
+    filter: channelFilter,
+    setFilter: setChannelFilter,
+    channels,
+    loading: channelsLoading,
+    selectedChannels,
+    clear: clearChannels,
+  } = useChannelFilter();
   const [keywords, setKeywords] = useState<string[]>([]);
   const [voiceFollowUps, setVoiceFollowUps] = useState<FollowUpItem[]>([]);
   const [kwInput, setKwInput] = useState('');
   const [savingKW, setSavingKW] = useState(false);
   const [savedKW, setSavedKW] = useState(false);
-  const [dateRange, setDateRange] = useState<{ from: string; to: string } | null>(null);
+  const [dateRange, setDateRange] = useState<{
+    from: string;
+    to: string;
+  } | null>(null);
   const [activePreset, setActivePreset] = useState<number | null>(null);
   const [openFilter, setOpenFilter] = useState<LeadFilterKey | null>(null);
 
   const channelFilterRef = useRef<HTMLDivElement>(null);
   const stageFilterRef = useRef<HTMLDivElement>(null);
   const dateFilterRef = useRef<HTMLDivElement>(null);
-  useOutsideClick(channelFilterRef, () => setOpenFilter(null), openFilter === 'channel');
-  useOutsideClick(stageFilterRef, () => setOpenFilter(null), openFilter === 'stage');
-  useOutsideClick(dateFilterRef, () => setOpenFilter(null), openFilter === 'date');
+  useOutsideClick(
+    channelFilterRef,
+    () => setOpenFilter(null),
+    openFilter === 'channel',
+  );
+  useOutsideClick(
+    stageFilterRef,
+    () => setOpenFilter(null),
+    openFilter === 'stage',
+  );
+  useOutsideClick(
+    dateFilterRef,
+    () => setOpenFilter(null),
+    openFilter === 'date',
+  );
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -508,7 +570,10 @@ export default function LeadsPage() {
       .then((data) => setKeywords(data.lead_keywords ?? []))
       .catch(() => {});
 
-    apiFetch<{ ok: boolean; followups: FollowUpItem[]; count: number }>('/admin/growth/followups', { auth: true })
+    apiFetch<{ ok: boolean; followups: FollowUpItem[]; count: number }>(
+      '/admin/growth/followups',
+      { auth: true },
+    )
       .then((data) => setVoiceFollowUps(data.followups ?? []))
       .catch(() => {});
   }, []);
@@ -551,18 +616,22 @@ export default function LeadsPage() {
         qs.set('limit', String(LIMIT));
         qs.set('offset', '0');
         if (q.trim()) qs.set('q', q.trim());
-        if (channelFilter.channel) qs.set('channel', channelFilter.channel);
-        if (channelFilter.channel_id !== null) qs.set('channel_id', String(channelFilter.channel_id));
-        if (dateRange?.from) qs.set('from_ts', new Date(dateRange.from).toISOString());
+        // Channel filter is applied CLIENT-SIDE (see visibleItems / channelCounts).
+        // Do NOT send channel here — it narrows `items` and breaks the counts.
+        if (dateRange?.from)
+          qs.set('from_ts', new Date(dateRange.from).toISOString());
         if (dateRange?.to) {
           const to = new Date(dateRange.to);
           to.setHours(23, 59, 59, 999);
           qs.set('to_ts', to.toISOString());
         }
 
-        const data = await apiFetch<{ items: LeadItem[]; total: number }>(`/admin/leads?${qs}`, {
-          auth: true,
-        });
+        const data = await apiFetch<{ items: LeadItem[]; total: number }>(
+          `/admin/leads?${qs}`,
+          {
+            auth: true,
+          },
+        );
 
         setItems(data.items || []);
         setTotal(data.total ?? data.items?.length ?? 0);
@@ -572,7 +641,7 @@ export default function LeadsPage() {
         setLoading(false);
       }
     },
-    [debouncedQ, channelFilter, dateRange],
+    [debouncedQ, dateRange],
   );
 
   useEffect(() => {
@@ -581,7 +650,7 @@ export default function LeadsPage() {
     }, 0);
 
     return () => clearTimeout(timeout);
-  }, [debouncedQ, channelFilter, dateRange]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [debouncedQ, dateRange]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const timeout = setTimeout(() => setPage(1), 0);
@@ -597,7 +666,11 @@ export default function LeadsPage() {
         body: { status: newStatus },
       });
 
-      setItems((prev) => prev.map((lead) => (lead.id === leadId ? { ...lead, status: newStatus } : lead)));
+      setItems((prev) =>
+        prev.map((lead) =>
+          lead.id === leadId ? { ...lead, status: newStatus } : lead,
+        ),
+      );
     } catch (error: unknown) {
       setErr(getErrorMessage(error, 'Failed to update status'));
     } finally {
@@ -614,10 +687,13 @@ export default function LeadsPage() {
     [items],
   );
 
+  // Keyed by channel_id, reduced over the UNfiltered items so every channel
+  // keeps its real total whether or not it's currently selected.
   const channelCounts = useMemo(
     () =>
       items.reduce<Record<number, number>>((acc, lead) => {
-        if (lead.channel_id != null) acc[lead.channel_id] = (acc[lead.channel_id] || 0) + 1;
+        if (lead.channel_id != null)
+          acc[lead.channel_id] = (acc[lead.channel_id] || 0) + 1;
         return acc;
       }, {}),
     [items],
@@ -632,15 +708,32 @@ export default function LeadsPage() {
     lost: counts.lost || 0,
   };
 
-  const visibleItems = useMemo(
-    () => (filterStatus === 'all' ? items : items.filter((lead) => lead.status === filterStatus)),
-    [items, filterStatus],
-  );
+  // Status filter + channel filter, both applied client-side.
+  const visibleItems = useMemo(() => {
+    let list =
+      filterStatus === 'all'
+        ? items
+        : items.filter((lead) => lead.status === filterStatus);
+
+    if (channelFilter.channel_ids.length > 0) {
+      list = list.filter(
+        (lead) =>
+          lead.channel_id != null &&
+          channelFilter.channel_ids.includes(lead.channel_id),
+      );
+    }
+
+    return list;
+  }, [items, filterStatus, channelFilter]);
 
   const pageItems = getPageItems(visibleItems, page, PAGE_SIZE);
-  const activeStageTab = STAGE_TABS.find((tab) => tab.key === filterStatus) ?? STAGE_TABS[0];
+  const activeStageTab =
+    STAGE_TABS.find((tab) => tab.key === filterStatus) ?? STAGE_TABS[0];
 
-  const pipelineTotal = useMemo(() => Object.values(counts).reduce((sum, value) => sum + value, 0), [counts]);
+  const pipelineTotal = useMemo(
+    () => Object.values(counts).reduce((sum, value) => sum + value, 0),
+    [counts],
+  );
   const qualifiedTotal = (counts.qualified || 0) + (counts.won || 0);
 
   const handleSeeAllLeads = useCallback(() => {
@@ -648,9 +741,9 @@ export default function LeadsPage() {
     setSearchQ('');
     setDateRange(null);
     setActivePreset(null);
-    setChannelFilter({ channel: null, channel_id: null });
+    clearChannels();
     setOpenFilter(null);
-  }, [setChannelFilter]);
+  }, [clearChannels]);
 
   return (
     <RequireAuth>
@@ -675,7 +768,9 @@ export default function LeadsPage() {
               onClick={() => load()}
               disabled={loading}
             >
-              <RefreshCw className={cn('icon-small', loading && 'animate-spin')} />
+              <RefreshCw
+                className={cn('icon-small', loading && 'animate-spin')}
+              />
               Refresh
             </Button>
           </div>
@@ -779,16 +874,15 @@ export default function LeadsPage() {
                         }
                       >
                         <Radio size={14} />
-                        Channel
+                        <ChannelFilterValueLabel selected={selectedChannels} />
                       </Button>
                       {openFilter === 'channel' && (
                         <div className='absolute right-0 z-20 mt-2 w-64 overflow-hidden rounded-xl border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-800 dark:bg-gray-900'>
                           <ChannelFilter
                             value={channelFilter}
-                            onChange={(value) => {
-                              setChannelFilter(value);
-                              setOpenFilter(null);
-                            }}
+                            onChange={setChannelFilter}
+                            channels={channels}
+                            loading={channelsLoading}
                             counts={channelCounts}
                             totalCount={items.length}
                           />
