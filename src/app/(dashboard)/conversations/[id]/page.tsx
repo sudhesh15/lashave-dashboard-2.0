@@ -99,11 +99,11 @@ const CHANNEL_THEME: Record<string, ChannelTheme> = {
   },
   instagram: {
     logo: '/brand-logo/instagram.png',
-    accent: 'bg-gradient-to-r from-[#833AB4] via-[#E1306C] to-[#F77737]',
-    accentHover: 'hover:opacity-90',
-    bubble: 'bg-gradient-to-r from-[#833AB4] via-[#E1306C] to-[#F77737]',
+    accent: 'bg-gradient-to-br from-[#515BD4] via-[#DD2A7B] to-[#F58529]',
+    accentHover: 'hover:brightness-95',
+    bubble: 'bg-gradient-to-br from-[#515BD4] via-[#DD2A7B] to-[#F58529]',
     bubbleText: 'text-white',
-    ring: 'focus:border-[#E1306C] focus:ring-[#E1306C]/10',
+    ring: 'focus:border-[#DD2A7B] focus:ring-[#DD2A7B]/20',
   },
   facebook: {
     logo: '/brand-logo/facebook.png',
@@ -291,7 +291,7 @@ function MessageMixChart({
         Message Mix
       </h3>
       <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>
-        Customer, AI, and agent messages
+        Manual, AI, and agent messages
       </p>
       <ReactApexChart
         options={options}
@@ -433,6 +433,14 @@ export default function ConversationDetailPage() {
   const rawId = params?.id;
   const id = Number(Array.isArray(rawId) ? rawId[0] : rawId);
 
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'instant',
+    });
+  }, [id]);
+
   const [data, setData] = useState<ConvoResp | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [leadStatus, setLeadStatus] = useState('new');
@@ -455,10 +463,10 @@ export default function ConversationDetailPage() {
         method: 'POST',
         auth: true,
       }).catch(() => {});
-      window.setTimeout(
-        () => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }),
-        50,
-      );
+      // window.setTimeout(
+      //   () => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }),
+      //   50,
+      // );
     } catch (error) {
       setErr(errorMessage(error, 'Failed to load conversation'));
     } finally {
@@ -764,7 +772,7 @@ export default function ConversationDetailPage() {
               />
             </div>
 
-            <Card className='p-6'>
+            {/* <Card className='p-6'>
               <h3 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
                 Customer Context
               </h3>
@@ -792,32 +800,14 @@ export default function ConversationDetailPage() {
                   </p>
                 </div>
               )}
-            </Card>
+            </Card> */}
 
             <Card className='p-6'>
               <h3 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
-                Lead Details
+                Pipeline Stage
               </h3>
               {lead ? (
                 <>
-                  <div className='mt-4'>
-                    <InfoRow
-                      label='Intent'
-                      value={lead.intent || 'Not available'}
-                    />
-                    <InfoRow
-                      label='Service'
-                      value={lead.service || 'Not available'}
-                    />
-                    <InfoRow
-                      label='Source'
-                      value={lead.source || 'Not available'}
-                    />
-                    <InfoRow
-                      label='Score'
-                      value={String(lead.meta?.score ?? 0)}
-                    />
-                  </div>
                   <div className='mt-4'>
                     <label className='mb-1.5 block type-small font-medium text-gray-700 dark:text-gray-400'>
                       Pipeline stage
