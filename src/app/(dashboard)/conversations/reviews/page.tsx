@@ -254,9 +254,7 @@ function MetricCard({
       <h3 className='mt-5 text-title-sm font-bold text-gray-800 dark:text-white/90'>
         {value}
       </h3>
-      <p className='mt-2 type-small text-gray-500 dark:text-gray-400'>
-        {sub}
-      </p>
+      <p className='mt-2 type-small text-gray-500 dark:text-gray-400'>{sub}</p>
     </Card>
   );
 }
@@ -301,8 +299,8 @@ function RatingDistributionChart({
   isDark: boolean;
 }) {
   const RATING_COLORS: Record<number, string> = {
-    5: '#E6EEFF',
-    4: '#9DB9FF',
+    5: '#12B76A', // green — strongest
+    4: '#6CE9A6', // less green
     3: '#FFE29A',
     2: '#F59E0B',
     1: '#F87171', // error-300
@@ -923,12 +921,17 @@ function ReviewsInner() {
 
   const filteredReviews = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
-    const source = filter === 'critical' ? criticalReviews : reviews;
+    // When a keyword signal is active, search across ALL reviews (ignore the
+    // status tab) so results aren't narrowed to the current status subset.
+    const keywordActive = selectedKeyword !== 'all';
+    const source =
+      filter === 'critical' && !keywordActive ? criticalReviews : reviews;
     return source.filter((review) => {
       const rating = getRating(review);
       const replied = review.status === 'replied';
-      const matchesFilter =
-        filter === 'critical'
+      const matchesFilter = keywordActive
+        ? true
+        : filter === 'critical'
           ? true
           : filter === 'needs_reply'
             ? !replied
@@ -1025,9 +1028,7 @@ function ReviewsInner() {
                     className='h-4 w-4 shrink-0 object-contain'
                   />
 
-                  <span className='truncate'>
-                    {'Google Reviews'}
-                  </span>
+                  <span className='truncate'>{'Google Reviews'}</span>
 
                   <span className='shrink-0 rounded-full bg-brand-50 px-2 py-0.5 type-caption font-medium text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'>
                     Google Reviews
@@ -1196,7 +1197,9 @@ function ReviewsInner() {
                       onClick={() => setStatusFilterOpen((value) => !value)}
                     >
                       <SlidersHorizontal size={14} />
-                      Status
+                      {filter === 'needs_reply'
+                        ? 'Status'
+                        : activeStatusTab.label}
                     </Button>
                     {statusFilterOpen && (
                       <div className='absolute right-0 z-20 mt-2 w-56 overflow-hidden rounded-xl border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-800 dark:bg-gray-900'>
