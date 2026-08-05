@@ -9,6 +9,7 @@ import type { ApexOptions } from 'apexcharts';
 import {
   AlertTriangle,
   Check,
+  ChevronDown,
   Clock,
   Copy,
   Eye,
@@ -1539,14 +1540,22 @@ function ChannelDropdown({
   );
 }
 
-// ─── Customers Tab ───────────────────────────────────────────────────────────
+// ─── Customers Tab
+// type CustomerSortOption =
+//   | 'name_asc'
+//   | 'name_desc'
+//   | 'score_asc'
+//   | 'score_desc'
+//   | 'updated_asc'
+//   | 'updated_desc';
+// ───────────────────────────────────────────────────────────
 function CustomersTab({
   isDark,
   sortOption,
   exportTrigger,
 }: {
   isDark: boolean;
-  sortOption: 'name' | 'score' | 'updated';
+  sortOption: CustomerSortOption;
   exportTrigger: number;
 }) {
   type CustomerSegment = 'total' | 'active' | 'trending' | 'dormant';
@@ -1693,7 +1702,7 @@ function CustomersTab({
     load(0);
   }, [load]);
 
-  const knownChannels = [
+  const KnownChannels = [
     'instagram',
     'facebook',
     'whatsapp',
@@ -1701,18 +1710,17 @@ function CustomersTab({
     'youtube',
     'website',
     'google',
-  ];
+  ] as const;
 
-  const channels = useMemo(
-    () =>
-      Array.from(
-        new Set([
-          ...knownChannels,
-          ...leads.map((lead) => lead.channel?.toLowerCase()).filter(Boolean),
-        ]),
-      ).sort() as string[],
-    [leads],
-  );
+  const channels = useMemo<string[]>(() => {
+    const leadChannels = leads
+      .map((lead) => lead.channel?.trim().toLowerCase())
+      .filter((channel): channel is string => Boolean(channel));
+
+    return Array.from(
+      new Set<string>([...KnownChannels, ...leadChannels]),
+    ).sort((a, b) => a.localeCompare(b));
+  }, [leads]);
 
   const channelCounts = useMemo(
     () =>
@@ -1735,51 +1743,58 @@ function CustomersTab({
   };
 
   const displayed = useMemo(() => {
-    let list = leads.filter(segmentMatches);
+    const list = leads.filter(segmentMatches).filter((lead) => {
+      if (chanFilter.length === 0) return true;
 
-    if (chanFilter.length > 0) {
-      list = list.filter((lead) =>
-        chanFilter.includes((lead.channel || '').toLowerCase()),
-      );
-    }
+      return chanFilter.includes((lead.channel || '').toLowerCase());
+    });
 
-    list = [...list];
+    return [...list].sort((a, b) => {
+      switch (sortOption) {
+        case 'name_asc':
+          return getLabel(a).localeCompare(getLabel(b), undefined, {
+            sensitivity: 'base',
+            numeric: true,
+          });
 
-    if (sortOption === 'name_asc') {
-      list.sort((a, b) =>
-        getLabel(a).localeCompare(getLabel(b), undefined, {
-          sensitivity: 'base',
-          numeric: true,
-        }),
-      );
-    } else if (sortOption === 'name_desc') {
-      list.sort((a, b) =>
-        getLabel(b).localeCompare(getLabel(a), undefined, {
-          sensitivity: 'base',
-          numeric: true,
-        }),
-      );
-    } else {
-      list.sort(
-        (a, b) =>
-          new Date(b.updated_at || 0).getTime() -
-          new Date(a.updated_at || 0).getTime(),
-      );
-    }
+        case 'name_desc':
+          return getLabel(b).localeCompare(getLabel(a), undefined, {
+            sensitivity: 'base',
+            numeric: true,
+          });
 
-    return list;
+        case 'score_asc':
+          return (a.meta?.score ?? 0) - (b.meta?.score ?? 0);
+
+        case 'score_desc':
+          return (b.meta?.score ?? 0) - (a.meta?.score ?? 0);
+
+        // case 'updated_asc':
+        //   return (
+        //     new Date(a.updated_at || 0).getTime() -
+        //     new Date(b.updated_at || 0).getTime()
+        //   );
+
+        // case 'updated_desc':
+        default:
+          return (
+            new Date(b.updated_at || 0).getTime() -
+            new Date(a.updated_at || 0).getTime()
+          );
+      }
+    });
   }, [leads, segmentMatches, chanFilter, sortOption]);
 
   const pagedDisplayed = getPageItems(displayed, customersPage);
 
   const activeContactFilter = SEGMENT_CFG_TAB[segFilter];
 
- const activeChannelLabel =
-   chanFilter.length === 0
-     ? 'All channels'
-     : chanFilter.length === 1
-       ? chanFilter[0].charAt(0).toUpperCase() + chanFilter[0].slice(1)
-       : `${chanFilter.length} channels`;
+  const activeChannelLabel =
+    chanFilter.length === 0
+      ? 'All channels'
+      : chanFilter.length === 1
+        ? chanFilter[0].charAt(0).toUpperCase() + chanFilter[0].slice(1)
+        : `${chanFilter.length} channels`;
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -2147,7 +2162,7 @@ function formatActivityBucket(bucket?: string | null) {
 // ─── Overview Tab ────────────────────────────────────────────────────────────
 function OverviewTab({
   isDark,
-  dateRange
+  dateRange,
 }: {
   isDark: boolean;
   dateRange: { from: string; to: string } | null;
@@ -2164,55 +2179,55 @@ function OverviewTab({
   const [timeseries, setTimeseries] = useState<TimeseriesPoint[]>([]);
   const [pipeline, setPipeline] = useState<Record<string, number>>({});
 
-useEffect(() => {
-  // Build ?from_ts&to_ts from the selected range (same convention as Leads).
-  const params = new URLSearchParams();
-  if (dateRange?.from) {
-    params.set('from_ts', new Date(dateRange.from).toISOString());
-  }
-  if (dateRange?.to) {
-    const to = new Date(dateRange.to);
-    to.setHours(23, 59, 59, 999);
-    params.set('to_ts', to.toISOString());
-  }
-  const q = params.toString();
-  const suffix = q ? `?${q}` : '';
-  const withRange = (base: string) =>
-    base.includes('?') ? `${base}&${q}` : `${base}${suffix}`;
-
-  (async () => {
-    const [ov, dp, rt, tp, pipe] = await Promise.allSettled([
-      apiFetch<any>(withRange('/admin/stats/overview'), { auth: true }),
-      apiFetch<any>(withRange('/admin/stats/depth'), { auth: true }),
-      apiFetch<any>(withRange('/admin/stats/returning-users'), {
-        auth: true,
-      }),
-      apiFetch<any>(withRange('/admin/stats/topics'), { auth: true }),
-      apiFetch<any>('/admin/leads/pipeline', { auth: true }),
-    ]);
-
-    if (ov.status === 'fulfilled') setOverview(adaptOverview(ov.value));
-    if (dp.status === 'fulfilled') setDepth(adaptDepth(dp.value));
-    if (rt.status === 'fulfilled') setReturning(adaptReturning(rt.value));
-    if (tp.status === 'fulfilled') setTopics(adaptTopics(tp.value));
-    if (pipe.status === 'fulfilled') {
-      const raw = pipe.value as any;
-      let flat: Record<string, number> = {};
-      if (Array.isArray(raw?.by_status)) {
-        for (const item of raw.by_status) flat[item.status] = item.count ?? 0;
-      } else if (raw?.pipeline && typeof raw.pipeline === 'object') {
-        flat = raw.pipeline;
-      } else if (typeof raw === 'object' && raw !== null) {
-        for (const [k, v] of Object.entries(raw))
-          if (typeof v === 'number') flat[k] = v as number;
-      }
-      setPipeline(flat);
+  useEffect(() => {
+    // Build ?from_ts&to_ts from the selected range (same convention as Leads).
+    const params = new URLSearchParams();
+    if (dateRange?.from) {
+      params.set('from_ts', new Date(dateRange.from).toISOString());
     }
+    if (dateRange?.to) {
+      const to = new Date(dateRange.to);
+      to.setHours(23, 59, 59, 999);
+      params.set('to_ts', to.toISOString());
+    }
+    const q = params.toString();
+    const suffix = q ? `?${q}` : '';
+    const withRange = (base: string) =>
+      base.includes('?') ? `${base}&${q}` : `${base}${suffix}`;
 
-    const ts = await fetchTimeseries(true, q).catch(() => []);
-    setTimeseries(ts);
-  })();
-}, [dateRange]);
+    (async () => {
+      const [ov, dp, rt, tp, pipe] = await Promise.allSettled([
+        apiFetch<any>(withRange('/admin/stats/overview'), { auth: true }),
+        apiFetch<any>(withRange('/admin/stats/depth'), { auth: true }),
+        apiFetch<any>(withRange('/admin/stats/returning-users'), {
+          auth: true,
+        }),
+        apiFetch<any>(withRange('/admin/stats/topics'), { auth: true }),
+        apiFetch<any>('/admin/leads/pipeline', { auth: true }),
+      ]);
+
+      if (ov.status === 'fulfilled') setOverview(adaptOverview(ov.value));
+      if (dp.status === 'fulfilled') setDepth(adaptDepth(dp.value));
+      if (rt.status === 'fulfilled') setReturning(adaptReturning(rt.value));
+      if (tp.status === 'fulfilled') setTopics(adaptTopics(tp.value));
+      if (pipe.status === 'fulfilled') {
+        const raw = pipe.value as any;
+        let flat: Record<string, number> = {};
+        if (Array.isArray(raw?.by_status)) {
+          for (const item of raw.by_status) flat[item.status] = item.count ?? 0;
+        } else if (raw?.pipeline && typeof raw.pipeline === 'object') {
+          flat = raw.pipeline;
+        } else if (typeof raw === 'object' && raw !== null) {
+          for (const [k, v] of Object.entries(raw))
+            if (typeof v === 'number') flat[k] = v as number;
+        }
+        setPipeline(flat);
+      }
+
+      const ts = await fetchTimeseries(true, q).catch(() => []);
+      setTimeseries(ts);
+    })();
+  }, [dateRange]);
 
   const depthBars = DEPTH_BUCKETS.map((d) => ({
     label: d.label,
@@ -2444,14 +2459,20 @@ useEffect(() => {
 // ─── Main Page ───────────────────────────────────────────────────────────────
 type Tab = 'overview' | 'customers';
 
-type CustomerSortOption = 'name_asc' | 'name_desc' | 'updated';
+type CustomerSortOption =
+  | 'name_asc'
+  | 'name_desc'
+  | 'score_asc'
+  | 'score_desc'
+  | 'updated'
 
 export default function AnalyticsPage() {
   const { isDark } = useTheme();
 
   const [tab, setTab] = useState<Tab>('overview');
 
-  const [sortOption, setSortOption] = useState<CustomerSortOption>('updated');
+  const [sortOption, setSortOption] =
+    useState<CustomerSortOption>('updated');
 
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
   const [exportTrigger, setExportTrigger] = useState(0);

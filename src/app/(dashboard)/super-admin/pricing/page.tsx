@@ -1,16 +1,16 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
 import { RequireAuth } from '@/components/require-auth';
-import { apiFetch } from '@/lib/api';
-import { useAuth } from '@/lib/auth';
-import { isSuperAdmin } from '@/lib/roles';
+import { Alert } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
-import { Alert } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
+import { apiFetch } from '@/lib/api';
+import { useAuth } from '@/lib/auth';
+import { isSuperAdmin } from '@/lib/roles';
+import { useEffect, useRef, useState } from 'react';
 
 type Override = {
   conversations_per_month: number | null;
@@ -436,16 +436,9 @@ function PricingForm() {
         trial.
       </div>
 
-      {toast && (
-        <Alert
-          variant='success'
-          title='Done'
-          message={toast}
-          className='mb-4'
-        />
-      )}
+      {toast && <Alert variant='success' title='Done' message={toast} />}
       {error && (
-        <Alert variant='error' title='Error' message={error} className='mb-4' />
+        <Alert variant='error' title='Error' message={error} />
       )}
 
       {/* Tenant lookup — search by email / name, or load by exact ID */}
@@ -483,7 +476,7 @@ function PricingForm() {
                   </span>
                   <Badge
                     variant='light'
-                    color={STATUS_COLOR[r.status] ?? 'gray'}
+                    // color={STATUS_COLOR[r.status] ?? 'gray'}
                   >
                     {r.status}
                   </Badge>
