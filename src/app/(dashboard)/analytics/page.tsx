@@ -1,5 +1,5 @@
 'use client';
-
+import { DateFilter } from '@/components/date-filter';
 import { RequireAuth } from '@/components/require-auth';
 import { apiFetch } from '@/lib/api';
 import { resolveMoodForLead, type Mood } from '@/lib/chat-classifiers';
@@ -309,14 +309,18 @@ function adaptDepth(raw: any): DepthItem[] {
   ];
 }
 
-async function fetchTimeseries(auth: boolean): Promise<TimeseriesPoint[]> {
+async function fetchTimeseries(
+  auth: boolean,
+  rangeQuery = '',
+): Promise<TimeseriesPoint[]> {
   const base = '/admin/stats/timeseries';
   const opts = { auth };
+  const extra = rangeQuery ? `&${rangeQuery}` : '';
   const [msgs, convs, leads, errs] = await Promise.allSettled([
-    apiFetch<any>(`${base}?metric=messages&interval=hour`, opts),
-    apiFetch<any>(`${base}?metric=conversations&interval=hour`, opts),
-    apiFetch<any>(`${base}?metric=leads&interval=hour`, opts),
-    apiFetch<any>(`${base}?metric=errors&interval=hour`, opts),
+    apiFetch<any>(`${base}?metric=messages&interval=hour${extra}`, opts),
+    apiFetch<any>(`${base}?metric=conversations&interval=hour${extra}`, opts),
+    apiFetch<any>(`${base}?metric=leads&interval=hour${extra}`, opts),
+    apiFetch<any>(`${base}?metric=errors&interval=hour${extra}`, opts),
   ]);
 
   const pts = (res: PromiseSettledResult<any>): { t: string; v: number }[] => {
@@ -355,7 +359,6 @@ async function fetchTimeseries(auth: boolean): Promise<TimeseriesPoint[]> {
     errors: eMap[t] ?? 0,
   }));
 }
-
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const num = (n: number | null | undefined, d = 0) =>
   n == null ? '—' : n.toLocaleString('en-GB', { maximumFractionDigits: d });
@@ -2142,7 +2145,13 @@ function formatActivityBucket(bucket?: string | null) {
 }
 
 // ─── Overview Tab ────────────────────────────────────────────────────────────
-function OverviewTab({ isDark }: { isDark: boolean }) {
+function OverviewTab({
+  isDark,
+  dateRange
+}: {
+  isDark: boolean;
+  dateRange: { from: string; to: string } | null;
+}) {
   const [overview, setOverview] = useState<ReturnType<
     typeof adaptOverview
   > | null>(null);
@@ -2151,41 +2160,59 @@ function OverviewTab({ isDark }: { isDark: boolean }) {
     typeof adaptReturning
   > | null>(null);
   const [topics, setTopics] = useState<TopicItem[]>([]);
+
   const [timeseries, setTimeseries] = useState<TimeseriesPoint[]>([]);
   const [pipeline, setPipeline] = useState<Record<string, number>>({});
 
-  useEffect(() => {
-    (async () => {
-      const [ov, dp, rt, tp, pipe] = await Promise.allSettled([
-        apiFetch<any>('/admin/stats/overview', { auth: true }),
-        apiFetch<any>('/admin/stats/depth', { auth: true }),
-        apiFetch<any>('/admin/stats/returning-users', { auth: true }),
-        apiFetch<any>('/admin/stats/topics', { auth: true }),
-        apiFetch<any>('/admin/leads/pipeline', { auth: true }),
-      ]);
+useEffect(() => {
+  // Build ?from_ts&to_ts from the selected range (same convention as Leads).
+  const params = new URLSearchParams();
+  if (dateRange?.from) {
+    params.set('from_ts', new Date(dateRange.from).toISOString());
+  }
+  if (dateRange?.to) {
+    const to = new Date(dateRange.to);
+    to.setHours(23, 59, 59, 999);
+    params.set('to_ts', to.toISOString());
+  }
+  const q = params.toString();
+  const suffix = q ? `?${q}` : '';
+  const withRange = (base: string) =>
+    base.includes('?') ? `${base}&${q}` : `${base}${suffix}`;
 
-      if (ov.status === 'fulfilled') setOverview(adaptOverview(ov.value));
-      if (dp.status === 'fulfilled') setDepth(adaptDepth(dp.value));
-      if (rt.status === 'fulfilled') setReturning(adaptReturning(rt.value));
-      if (tp.status === 'fulfilled') setTopics(adaptTopics(tp.value));
-      if (pipe.status === 'fulfilled') {
-        const raw = pipe.value as any;
-        let flat: Record<string, number> = {};
-        if (Array.isArray(raw?.by_status)) {
-          for (const item of raw.by_status) flat[item.status] = item.count ?? 0;
-        } else if (raw?.pipeline && typeof raw.pipeline === 'object') {
-          flat = raw.pipeline;
-        } else if (typeof raw === 'object' && raw !== null) {
-          for (const [k, v] of Object.entries(raw))
-            if (typeof v === 'number') flat[k] = v as number;
-        }
-        setPipeline(flat);
+  (async () => {
+    const [ov, dp, rt, tp, pipe] = await Promise.allSettled([
+      apiFetch<any>(withRange('/admin/stats/overview'), { auth: true }),
+      apiFetch<any>(withRange('/admin/stats/depth'), { auth: true }),
+      apiFetch<any>(withRange('/admin/stats/returning-users'), {
+        auth: true,
+      }),
+      apiFetch<any>(withRange('/admin/stats/topics'), { auth: true }),
+      apiFetch<any>('/admin/leads/pipeline', { auth: true }),
+    ]);
+
+    if (ov.status === 'fulfilled') setOverview(adaptOverview(ov.value));
+    if (dp.status === 'fulfilled') setDepth(adaptDepth(dp.value));
+    if (rt.status === 'fulfilled') setReturning(adaptReturning(rt.value));
+    if (tp.status === 'fulfilled') setTopics(adaptTopics(tp.value));
+    if (pipe.status === 'fulfilled') {
+      const raw = pipe.value as any;
+      let flat: Record<string, number> = {};
+      if (Array.isArray(raw?.by_status)) {
+        for (const item of raw.by_status) flat[item.status] = item.count ?? 0;
+      } else if (raw?.pipeline && typeof raw.pipeline === 'object') {
+        flat = raw.pipeline;
+      } else if (typeof raw === 'object' && raw !== null) {
+        for (const [k, v] of Object.entries(raw))
+          if (typeof v === 'number') flat[k] = v as number;
       }
+      setPipeline(flat);
+    }
 
-      const ts = await fetchTimeseries(true).catch(() => []);
-      setTimeseries(ts);
-    })();
-  }, []);
+    const ts = await fetchTimeseries(true, q).catch(() => []);
+    setTimeseries(ts);
+  })();
+}, [dateRange]);
 
   const depthBars = DEPTH_BUCKETS.map((d) => ({
     label: d.label,
@@ -2202,7 +2229,7 @@ function OverviewTab({ isDark }: { isDark: boolean }) {
       : 0;
 
   const peakBucket =
-    timeseries.length > 0
+    timeseries && timeseries.length > 0
       ? timeseries.reduce(
           (a, b) => (b.messages > a.messages ? b : a),
           timeseries[0],
@@ -2314,7 +2341,7 @@ function OverviewTab({ isDark }: { isDark: boolean }) {
           title='Activity Over Time'
           subtitle='Messages, conversations, leads and knowledge gap'
         >
-          {timeseries.length > 1 ? (
+          {timeseries && timeseries.length > 1 ? (
             <div className='max-w-full overflow-x-auto custom-scrollbar'>
               <div className='min-w-[720px] xl:min-w-full'>
                 <ActivityAreaChart data={timeseries} isDark={isDark} />
@@ -2428,6 +2455,14 @@ export default function AnalyticsPage() {
 
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
   const [exportTrigger, setExportTrigger] = useState(0);
+  const [dateRange, setDateRange] = useState<{
+    from: string;
+    to: string;
+  } | null>(null);
+  const [activePreset, setActivePreset] = useState<number | null>(null);
+  const [dateOpen, setDateOpen] = useState(false);
+  const dateFilterRef = useRef<HTMLDivElement>(null);
+  useOutsideClick(dateFilterRef, () => setDateOpen(false), dateOpen);
 
   const TABS = [
     { id: 'overview' as Tab, label: 'Overview' },
@@ -2438,8 +2473,23 @@ export default function AnalyticsPage() {
     <RequireAuth>
       <PageBreadcrumb pageTitle='Analytics' />
 
-      <div className='mb-6 flex flex-wrap items-start justify-end gap-4'>
-        {tab === 'overview' && <WeeklyReportButton />}
+      <div className='mb-6 flex flex-wrap items-start justify-end gap-3'>
+        {tab === 'overview' && (
+          <>
+            <div ref={dateFilterRef} className='relative'>
+              <DateFilter
+                dateRange={dateRange}
+                activePreset={activePreset}
+                setDateRange={setDateRange}
+                setActivePreset={setActivePreset}
+                open={dateOpen}
+                onToggle={() => setDateOpen((v) => !v)}
+                onClose={() => setDateOpen(false)}
+              />
+            </div>
+            <WeeklyReportButton />
+          </>
+        )}
 
         {tab === 'customers' && (
           <CustomerTabControls
@@ -2475,7 +2525,9 @@ export default function AnalyticsPage() {
       </div>
 
       <div key={tab}>
-        {tab === 'overview' && <OverviewTab isDark={isDark} />}
+        {tab === 'overview' && (
+          <OverviewTab isDark={isDark} dateRange={dateRange} />
+        )}
 
         {tab === 'customers' && (
           <CustomersTab
