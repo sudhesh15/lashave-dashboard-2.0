@@ -3,21 +3,26 @@
 import {
   ChannelFilter,
   ChannelFilterValue,
+  ChannelFilterValueLabel,
+  ChannelItem,
   useChannelFilter,
 } from '@/components/channel-filter';
 import { DateFilter } from '@/components/date-filter';
 import { RequireAuth } from '@/components/require-auth';
 import { Button } from '@/components/ui/button';
-import { getPageItems, TablePagination } from '@/components/ui/table-pagination';
+import {
+  getPageItems,
+  TablePagination,
+} from '@/components/ui/table-pagination';
 import { useOutsideClick } from '@/hooks/useOutsideClick';
 import { apiFetch } from '@/lib/api';
-import { cn } from '@/lib/utils';
 import {
   Category,
   detectCategory,
   Mood,
   resolveMoodForLead,
 } from '@/lib/chat-classifiers';
+import { cn } from '@/lib/utils';
 import {
   AlertTriangle,
   ArrowRightLeft,
@@ -120,7 +125,10 @@ function platformLabel(channel?: string) {
     website: 'Website',
     test: 'Test',
   };
-  return map[channel.toLowerCase()] || channel.charAt(0).toUpperCase() + channel.slice(1);
+  return (
+    map[channel.toLowerCase()] ||
+    channel.charAt(0).toUpperCase() + channel.slice(1)
+  );
 }
 
 function displayName(c: ConvoItem) {
@@ -159,6 +167,81 @@ function isRealLead(lead?: ConvoItem['lead']) {
   return ['qualified', 'won', 'hot', 'warm'].includes(
     String(lead.status || '').toLowerCase(),
   );
+}
+
+const STAT_FILTERS: {
+  key: string;
+  label: string;
+  tone: keyof typeof STAT_TONE;
+  icon: React.ReactNode;
+}[] = [
+  {
+    key: 'all',
+    label: 'Total',
+    tone: 'gray',
+    icon: <List className='h-5 w-5' />,
+  },
+  {
+    key: 'complaint',
+    label: 'Complaint',
+    tone: 'error',
+    icon: <AlertTriangle className='h-5 w-5' />,
+  },
+  {
+    key: 'feedback',
+    label: 'Feedback',
+    tone: 'brand',
+    icon: <MessageCircle className='h-5 w-5' />,
+  },
+  {
+    key: 'order',
+    label: 'Order',
+    tone: 'warning',
+    icon: <Package className='h-5 w-5' />,
+  },
+  {
+    key: 'enquiry',
+    label: 'Enquiry',
+    tone: 'brand',
+    icon: <HelpCircle className='h-5 w-5' />,
+  },
+  {
+    key: 'open',
+    label: 'Open',
+    tone: 'success',
+    icon: <CheckCircle2 className='h-5 w-5' />,
+  },
+  {
+    key: 'handoff',
+    label: 'Handoff',
+    tone: 'warning',
+    icon: <ArrowRightLeft className='h-5 w-5' />,
+  },
+  {
+    key: 'lead',
+    label: 'With lead',
+    tone: 'success',
+    icon: <Target className='h-5 w-5' />,
+  },
+];
+
+function matchesStatFilter(item: ConvoItem, statFilter: string) {
+  switch (statFilter) {
+    case 'all':
+      return true;
+    case 'open':
+    case 'handoff':
+      return (item.status || '').toLowerCase() === statFilter;
+    case 'lead':
+      return isRealLead(item.lead);
+    case 'complaint':
+    case 'feedback':
+    case 'order':
+    case 'enquiry':
+      return getCategory(item) === statFilter;
+    default:
+      return true;
+  }
 }
 
 function badgeClass(status: string) {
@@ -203,14 +286,27 @@ function StatTile({
   value,
   icon,
   tone = 'gray',
+  onClick,
+  active = false,
 }: {
   label: string;
   value: number;
   icon: React.ReactNode;
   tone?: keyof typeof STAT_TONE;
+  onClick?: () => void;
+  active?: boolean;
 }) {
   return (
-    <div className='flex min-w-0 items-center gap-2 rounded-2xl border border-gray-200 bg-white p-3 dark:border-gray-800 dark:bg-gray-900/60 sm:gap-3 xl:p-3'>
+    <button
+      type='button'
+      onClick={onClick}
+      className={cn(
+        'flex min-w-0 items-center gap-2 rounded-2xl border bg-white p-3 text-left transition dark:bg-gray-900/60 sm:gap-3 xl:p-3',
+        active
+          ? 'border-brand-500 ring-1 ring-brand-500/30 dark:border-brand-400'
+          : 'border-gray-200 hover:border-gray-300 dark:border-gray-800 dark:hover:border-gray-700',
+      )}
+    >
       <span
         className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${STAT_TONE[tone]}`}
       >
@@ -224,7 +320,7 @@ function StatTile({
           {label}
         </div>
       </div>
-    </div>
+    </button>
   );
 }
 
@@ -272,8 +368,9 @@ const INBOX_TABS: { key: string; label: string; icon: React.ReactNode }[] = [
   { key: 'closed', label: 'Closed', icon: <XCircle size={13} /> },
 ];
 
-type InboxFilterKey = 'conversation' | 'channel' | 'date';
+type InboxFilterKey = 'conversation' | 'channel' | 'date' | 'category';
 
+// ── Table ────────────────────────────────────────────────────────────────────────
 function ConversationTable({
   items,
   loading,
@@ -288,12 +385,20 @@ function ConversationTable({
   onSeeAll,
   channelFilter,
   setChannelFilter,
+  channels,
+  channelsLoading,
+  selectedChannels,
+  channelCounts,
+  channelTotal,
   dateRange,
   setDateRange,
   activePreset,
   setActivePreset,
   filterLead,
   setFilterLead,
+  statFilter,
+  setStatFilter,
+  statCounts,
 }: {
   items: ConvoItem[];
   loading: boolean;
@@ -308,12 +413,20 @@ function ConversationTable({
   onSeeAll: () => void;
   channelFilter: ChannelFilterValue;
   setChannelFilter: (value: ChannelFilterValue) => void;
+  channels: ChannelItem[];
+  channelsLoading: boolean;
+  selectedChannels: ChannelItem[];
+  channelCounts: Record<number, number>;
+  channelTotal: number;
   dateRange: { from: string; to: string } | null;
   setDateRange: (range: { from: string; to: string } | null) => void;
   activePreset: number | null;
   setActivePreset: (preset: number | null) => void;
   filterLead: boolean;
   setFilterLead: (updater: (value: boolean) => boolean) => void;
+  statFilter: string;
+  setStatFilter: (value: string) => void;
+  statCounts: Record<string, number>;
 }) {
   const [page, setPage] = useState(1);
   const pageItems = getPageItems(items, page);
@@ -321,30 +434,40 @@ function ConversationTable({
   const channelFilterRef = useRef<HTMLDivElement>(null);
   const conversationFilterRef = useRef<HTMLDivElement>(null);
   const dateFilterRef = useRef<HTMLDivElement>(null);
+  const categoryFilterRef = useRef<HTMLDivElement>(null);
 
-  useOutsideClick(channelFilterRef, () => setOpenFilter(null), openFilter === 'channel');
-  useOutsideClick(conversationFilterRef, () => setOpenFilter(null), openFilter === 'conversation');
-  useOutsideClick(dateFilterRef, () => setOpenFilter(null), openFilter === 'date');
+  useOutsideClick(
+    channelFilterRef,
+    () => setOpenFilter(null),
+    openFilter === 'channel',
+  );
+  useOutsideClick(
+    conversationFilterRef,
+    () => setOpenFilter(null),
+    openFilter === 'conversation',
+  );
+  useOutsideClick(
+    dateFilterRef,
+    () => setOpenFilter(null),
+    openFilter === 'date',
+  );
+  useOutsideClick(
+    categoryFilterRef,
+    () => setOpenFilter(null),
+    openFilter === 'category',
+  );
 
   useEffect(() => {
     const timer = window.setTimeout(() => setPage(1), 0);
     return () => window.clearTimeout(timer);
   }, [status, items.length]);
 
-  const activeTab = INBOX_TABS.find((tab) => tab.key === status) ?? INBOX_TABS[0];
-
-  const channelCounts = useMemo(
-    () =>
-      items.reduce<Record<number, number>>((acc, item) => {
-        if (item.channel_id != null) acc[item.channel_id] = (acc[item.channel_id] || 0) + 1;
-        return acc;
-      }, {}),
-    [items],
-  );
+  const activeTab =
+    INBOX_TABS.find((tab) => tab.key === status) ?? INBOX_TABS[0];
 
   return (
     <div className='min-w-0 max-w-full overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]'>
-      <div className='flex flex-col gap-2 border-b border-gray-100 px-5 py-5 dark:border-white/[0.05] sm:flex-row sm:items-center sm:justify-between sm:px-6'>
+      <div className='flex flex-col gap-2 border-b border-gray-100 px-5 py-5 dark:border-white/[0.05] sm:flex-row sm:items-center sm:justify-between sm:px-6 '>
         <h3 className='type-body font-semibold text-gray-800 dark:text-white/90'>
           Inbox
         </h3>
@@ -353,8 +476,8 @@ function ConversationTable({
         </div>
       </div>
 
-      <div className='min-w-0 px-5 py-5 sm:px-6'>
-        <div className='flex flex-col gap-4 rounded-t-xl border border-b-0 border-gray-200 bg-white px-5 py-4 dark:border-white/[0.05] dark:bg-white/[0.01] lg:flex-row lg:items-center lg:justify-between'>
+      <div className='min-w-0 px-5 py-5 sm:px-6 '>
+        <div className='flex flex-col gap-4 rounded-t-xl border border-b-0 border-gray-200 bg-white px-5 py-4 dark:border-white/[0.05] dark:bg-white/[0.01] lg:flex-row lg:items-center lg:justify-between '>
           <h4 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
             {activeTab.label} conversations
           </h4>
@@ -375,21 +498,22 @@ function ConversationTable({
             <div ref={channelFilterRef} className='relative'>
               <Button
                 variant='outline'
-                onClick={() => setOpenFilter(openFilter === 'channel' ? null : 'channel')}
+                onClick={() =>
+                  setOpenFilter(openFilter === 'channel' ? null : 'channel')
+                }
               >
                 <Radio size={14} />
-                Channel
+                <ChannelFilterValueLabel selected={selectedChannels} />
               </Button>
               {openFilter === 'channel' && (
                 <div className='absolute right-0 z-20 mt-2 w-64 overflow-hidden rounded-xl border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-800 dark:bg-gray-900'>
                   <ChannelFilter
                     value={channelFilter}
-                    onChange={(value) => {
-                      setChannelFilter(value);
-                      setOpenFilter(null);
-                    }}
+                    onChange={setChannelFilter}
+                    channels={channels}
+                    loading={channelsLoading}
                     counts={channelCounts}
-                    totalCount={items.length}
+                    totalCount={channelTotal}
                   />
                 </div>
               )}
@@ -399,10 +523,16 @@ function ConversationTable({
             <div ref={conversationFilterRef} className='relative'>
               <Button
                 variant='outline'
-                onClick={() => setOpenFilter(openFilter === 'conversation' ? null : 'conversation')}
+                onClick={() =>
+                  setOpenFilter(
+                    openFilter === 'conversation' ? null : 'conversation',
+                  )
+                }
               >
                 <SlidersHorizontal size={14} />
-                Conversation
+                {status === 'all'
+                  ? 'Conversation'
+                  : `${INBOX_TABS.find((t) => t.key === status)?.label ?? ''} conversations`}
               </Button>
               {openFilter === 'conversation' && (
                 <div className='absolute right-0 z-20 mt-2 w-56 overflow-hidden rounded-xl border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-800 dark:bg-gray-900'>
@@ -438,6 +568,54 @@ function ConversationTable({
               )}
             </div>
 
+            {/* Inbox stats filter */}
+            <div ref={categoryFilterRef} className='relative'>
+              <Button
+                variant='outline'
+                onClick={() =>
+                  setOpenFilter(openFilter === 'category' ? null : 'category')
+                }
+              >
+                <List size={14} />
+                {statFilter === 'all'
+                  ? 'Inbox filter'
+                  : STAT_FILTERS.find((s) => s.key === statFilter)?.label}
+              </Button>
+              {openFilter === 'category' && (
+                <div className='absolute right-0 z-20 mt-2 w-56 overflow-hidden rounded-xl border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-800 dark:bg-gray-900'>
+                  {STAT_FILTERS.map((stat) => {
+                    const isActive = statFilter === stat.key;
+                    return (
+                      <button
+                        key={stat.key}
+                        type='button'
+                        onClick={() => {
+                          setStatFilter(stat.key);
+                          setOpenFilter(null);
+                        }}
+                        className={cn(
+                          'flex w-full items-center justify-between rounded-[10px] px-3 py-2 text-left type-small font-medium transition',
+                          isActive
+                            ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'
+                            : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/[0.04]',
+                        )}
+                      >
+                        <span className='inline-flex items-center gap-2'>
+                          <span className='[&>svg]:h-4 [&>svg]:w-4'>
+                            {stat.icon}
+                          </span>
+                          {stat.label}
+                        </span>
+                        <span className='type-caption text-gray-400 dark:text-gray-500'>
+                          {statCounts[stat.key] || 0}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
             {/* Date filter */}
             <div ref={dateFilterRef}>
               <DateFilter
@@ -446,7 +624,9 @@ function ConversationTable({
                 setDateRange={setDateRange}
                 setActivePreset={setActivePreset}
                 open={openFilter === 'date'}
-                onToggle={() => setOpenFilter(openFilter === 'date' ? null : 'date')}
+                onToggle={() =>
+                  setOpenFilter(openFilter === 'date' ? null : 'date')
+                }
                 onClose={() => setOpenFilter(null)}
               />
             </div>
@@ -473,7 +653,7 @@ function ConversationTable({
 
         <div className='min-w-0 max-w-full overflow-hidden rounded-b-xl border border-gray-200 dark:border-white/[0.05]'>
           <div className='w-full overflow-x-auto'>
-            <table className='lashvae-column-dividers min-w-[1300px] table-fixed'>
+            <table className='lashvae-column-dividers min-w-[1300px] table-fixed min-h-80'>
               <colgroup>
                 <col className='w-[340px]' />
                 <col className='w-[140px]' />
@@ -485,7 +665,15 @@ function ConversationTable({
               </colgroup>
               <thead className='border-b border-gray-100 dark:border-white/[0.05]'>
                 <tr>
-                  {['Customer', 'Channel', 'Intent', 'Status', 'Lead', 'Last active', 'Actions'].map((header) => (
+                  {[
+                    'Customer',
+                    'Channel',
+                    'Intent',
+                    'Status',
+                    'Lead',
+                    'Last active',
+                    'Actions',
+                  ].map((header) => (
                     <th
                       key={header}
                       className='px-5 py-3 text-left type-body font-medium text-gray-500 dark:text-gray-400'
@@ -498,7 +686,10 @@ function ConversationTable({
               <tbody className='divide-y divide-gray-100 dark:divide-white/[0.05]'>
                 {loading && (
                   <tr>
-                    <td colSpan={7} className='px-5 py-14 text-center type-small text-gray-500 dark:text-gray-400'>
+                    <td
+                      colSpan={7}
+                      className='px-5 py-14 text-center type-small text-gray-500 dark:text-gray-400'
+                    >
                       Loading conversations
                     </td>
                   </tr>
@@ -506,8 +697,13 @@ function ConversationTable({
 
                 {!loading && items.length === 0 && (
                   <tr>
-                    <td colSpan={7} className='px-5 py-14 text-center type-small text-gray-500 dark:text-gray-400'>
-                      {q.trim() ? 'No conversations match this search' : 'No conversations found'}
+                    <td
+                      colSpan={7}
+                      className='px-5 py-14 text-center type-small text-gray-500 dark:text-gray-400'
+                    >
+                      {q.trim()
+                        ? 'No conversations match this search'
+                        : 'No conversations found'}
                     </td>
                   </tr>
                 )}
@@ -515,14 +711,26 @@ function ConversationTable({
                 {!loading &&
                   pageItems.map((item) => {
                     const category = getCategory(item);
-                    const preview = item.lead?.meta?.text_preview || item.preview || 'No preview available';
+                    const preview =
+                      item.lead?.meta?.text_preview ||
+                      item.preview ||
+                      'No preview available';
                     const name = displayName(item);
                     return (
-                      <tr key={item.id} className='transition hover:bg-gray-50 dark:hover:bg-white/[0.02]'>
+                      <tr
+                        key={item.id}
+                        className='transition hover:bg-gray-50 dark:hover:bg-white/[0.02]'
+                      >
                         <td className='px-5 py-3 sm:px-6'>
-                          <Link href={`/conversations/${item.id}`} className='flex items-center gap-3'>
+                          <Link
+                            href={`/conversations/${item.id}`}
+                            className='flex items-center gap-3'
+                          >
                             <div className='relative shrink-0'>
-                              <ConversationAvatar conversation={item} size={34} />
+                              <ConversationAvatar
+                                conversation={item}
+                                size={34}
+                              />
                             </div>
                             <div className='min-w-0'>
                               <div className='flex items-center gap-2'>
@@ -535,11 +743,12 @@ function ConversationTable({
                                     </span>
                                   </span>
                                 </span>
-                                {item.unread_count != null && item.unread_count > 0 && (
-                                  <span className='shrink-0 rounded-full bg-brand-50 px-2 py-0.5 type-caption font-medium text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'>
-                                    {item.unread_count}
-                                  </span>
-                                )}
+                                {item.unread_count != null &&
+                                  item.unread_count > 0 && (
+                                    <span className='shrink-0 rounded-full bg-brand-50 px-2 py-0.5 type-caption font-medium text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'>
+                                      {item.unread_count}
+                                    </span>
+                                  )}
                               </div>
                               <span className='mt-1 block max-w-[260px] truncate type-caption text-gray-500 dark:text-gray-400'>
                                 {preview}
@@ -550,13 +759,19 @@ function ConversationTable({
                         <td className='px-6 py-3 type-small text-gray-500 dark:text-gray-400'>
                           <span className='inline-flex items-center gap-2'>
                             <Image
-                              src={CHANNEL_LOGOS[(item.channel || '').toLowerCase()] || '/brand-logo/website.png'}
+                              src={
+                                CHANNEL_LOGOS[
+                                  (item.channel || '').toLowerCase()
+                                ] || '/brand-logo/website.png'
+                              }
                               alt={platformLabel(item.channel)}
                               width={18}
                               height={18}
                               className='h-[18px] w-[18px] shrink-0 object-contain'
                             />
-                            <span className='truncate'>{platformLabel(item.channel)}</span>
+                            <span className='truncate'>
+                              {platformLabel(item.channel)}
+                            </span>
                           </span>
                         </td>
                         <td className='px-6 py-3'>
@@ -565,13 +780,17 @@ function ConversationTable({
                           </span>
                         </td>
                         <td className='px-6 py-3'>
-                          <span className={`inline-flex items-center rounded-full px-3 py-1 type-caption font-medium capitalize ${badgeClass(item.status)}`}>
+                          <span
+                            className={`inline-flex items-center rounded-full px-3 py-1 type-caption font-medium capitalize ${badgeClass(item.status)}`}
+                          >
                             {item.status || 'unknown'}
                           </span>
                         </td>
                         <td className='px-6 py-3'>
                           {item.lead ? (
-                            <span className={`inline-flex items-center rounded-full px-3 py-1 type-caption font-medium capitalize ${leadBadgeClass(item.lead.status)}`}>
+                            <span
+                              className={`inline-flex items-center rounded-full px-3 py-1 type-caption font-medium capitalize ${leadBadgeClass(item.lead.status)}`}
+                            >
                               {item.lead.status || 'new'}
                             </span>
                           ) : (
@@ -599,15 +818,26 @@ function ConversationTable({
             </table>
           </div>
         </div>
-        <TablePagination page={page} totalItems={items.length} onPageChange={setPage} />
+        <TablePagination
+          page={page}
+          totalItems={items.length}
+          onPageChange={setPage}
+        />
       </div>
     </div>
   );
 }
 
+// ── Page ─────────────────────────────────────────────────────────────────────────
 export default function ConversationsPage() {
-  const { filter: channelFilter, setFilter: setChannelFilter } =
-    useChannelFilter();
+  const {
+    filter: channelFilter,
+    setFilter: setChannelFilter,
+    channels,
+    loading: channelsLoading,
+    selectedChannels,
+    clear: clearChannels,
+  } = useChannelFilter();
 
   const [items, setItems] = useState<ConvoItem[]>([]);
   const [filterLead, setFilterLead] = useState(false);
@@ -617,10 +847,12 @@ export default function ConversationsPage() {
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
-  const [dateRange, setDateRange] = useState<{ from: string; to: string } | null>(
-    null,
-  );
+  const [dateRange, setDateRange] = useState<{
+    from: string;
+    to: string;
+  } | null>(null);
   const [activePreset, setActivePreset] = useState<number | null>(null);
+  const [statFilter, setStatFilter] = useState('all');
 
   const load = useCallback(
     async (opts?: { silent?: boolean }) => {
@@ -633,10 +865,10 @@ export default function ConversationsPage() {
         qs.set('offset', '0');
         if (q.trim()) qs.set('q', q.trim());
         if (status !== 'all') qs.set('status', status);
-        if (channelFilter.channel) qs.set('channel', channelFilter.channel);
-        if (channelFilter.channel_id !== null) {
-          qs.set('channel_id', String(channelFilter.channel_id));
-        }
+
+        // NOTE: channel filter is applied CLIENT-SIDE (see visibleItems / channelCounts).
+        // Do NOT send channel_id here — doing so narrows `items` and breaks the counts.
+
         if (dateRange?.from) {
           qs.set('from_ts', new Date(dateRange.from).toISOString());
         }
@@ -661,7 +893,7 @@ export default function ConversationsPage() {
         if (!opts?.silent) setLoading(false);
       }
     },
-    [channelFilter, dateRange, q, status],
+    [dateRange, q, status], // channelFilter intentionally NOT here — no refetch on channel select
   );
 
   useEffect(() => {
@@ -674,11 +906,39 @@ export default function ConversationsPage() {
     return () => clearInterval(timer);
   }, [load]);
 
-  const visibleItems = useMemo(
+  // Lead-filtered but NOT channel-filtered — the source of truth for channel counts.
+  const leadFilteredItems = useMemo(
     () => items.filter((item) => !filterLead || isRealLead(item.lead)),
     [filterLead, items],
   );
 
+  // Channel counts computed BEFORE the channel filter, so every channel keeps its
+  // real total whether or not it's selected.
+  const channelCounts = useMemo(
+    () =>
+      leadFilteredItems.reduce<Record<number, number>>((acc, item) => {
+        if (item.channel_id != null)
+          acc[item.channel_id] = (acc[item.channel_id] || 0) + 1;
+        return acc;
+      }, {}),
+    [leadFilteredItems],
+  );
+
+  // What the table actually renders — channel filter applied here on top.
+  const visibleItems = useMemo(() => {
+    let list = leadFilteredItems;
+    if (channelFilter.channel_ids.length > 0) {
+      list = list.filter(
+        (item) =>
+          item.channel_id != null &&
+          channelFilter.channel_ids.includes(item.channel_id),
+      );
+    }
+    if (statFilter !== 'all') {
+      list = list.filter((item) => matchesStatFilter(item, statFilter));
+    }
+    return list;
+  }, [leadFilteredItems, channelFilter, statFilter]);
   const statusCounts = useMemo(
     () =>
       items.reduce<Record<string, number>>((acc, item) => {
@@ -713,15 +973,27 @@ export default function ConversationsPage() {
   const handoffCount = statusCounts.handoff || 0;
   const leadCount = items.filter((item) => isRealLead(item.lead)).length;
 
+  const statValues: Record<string, number> = {
+    all: items.length,
+    complaint: categoryCounts.complaint || 0,
+    feedback: categoryCounts.feedback || 0,
+    order: categoryCounts.order || 0,
+    enquiry: categoryCounts.enquiry || 0,
+    open: openCount,
+    handoff: handoffCount,
+    lead: leadCount,
+  };
+
   const handleSeeAll = useCallback(() => {
     setStatus('all');
     setQ('');
     setFilterLead(false);
-    setChannelFilter({ channel: null, channel_id: null });
+    clearChannels();
+    setStatFilter('all');
     setDateRange(null);
     setActivePreset(null);
     setOpenFilter(null);
-  }, [setChannelFilter]);
+  }, [clearChannels]);
 
   return (
     <RequireAuth>
@@ -757,54 +1029,19 @@ export default function ConversationsPage() {
           </div>
 
           <div className='mt-8 grid grid-cols-2 gap-3 lg:grid-cols-4 3xl:grid-cols-8'>
-            <StatTile
-              label='Total'
-              value={items.length}
-              icon={<List className='h-5 w-5' />}
-              tone='gray'
-            />
-            <StatTile
-              label='Complaint'
-              value={categoryCounts.complaint || 0}
-              icon={<AlertTriangle className='h-5 w-5' />}
-              tone='error'
-            />
-            <StatTile
-              label='Feedback'
-              value={categoryCounts.feedback || 0}
-              icon={<MessageCircle className='h-5 w-5' />}
-              tone='brand'
-            />
-            <StatTile
-              label='Order'
-              value={categoryCounts.order || 0}
-              icon={<Package className='h-5 w-5' />}
-              tone='warning'
-            />
-            <StatTile
-              label='Enquiry'
-              value={categoryCounts.enquiry || 0}
-              icon={<HelpCircle className='h-5 w-5' />}
-              tone='brand'
-            />
-            <StatTile
-              label='Open'
-              value={openCount}
-              icon={<CheckCircle2 className='h-5 w-5' />}
-              tone='success'
-            />
-            <StatTile
-              label='Handoff'
-              value={handoffCount}
-              icon={<ArrowRightLeft className='h-5 w-5' />}
-              tone='warning'
-            />
-            <StatTile
-              label='With lead'
-              value={leadCount}
-              icon={<Target className='h-5 w-5' />}
-              tone='success'
-            />
+            {STAT_FILTERS.map((stat) => (
+              <StatTile
+                key={stat.key}
+                label={stat.label}
+                value={statValues[stat.key] || 0}
+                icon={stat.icon}
+                tone={stat.tone}
+                active={statFilter === stat.key}
+                onClick={() =>
+                  setStatFilter(statFilter === stat.key ? 'all' : stat.key)
+                }
+              />
+            ))}
           </div>
         </div>
 
@@ -829,12 +1066,20 @@ export default function ConversationsPage() {
             onSeeAll={handleSeeAll}
             channelFilter={channelFilter}
             setChannelFilter={setChannelFilter}
+            channels={channels}
+            channelsLoading={channelsLoading}
+            selectedChannels={selectedChannels}
+            channelCounts={channelCounts}
+            channelTotal={leadFilteredItems.length}
             dateRange={dateRange}
             setDateRange={setDateRange}
             activePreset={activePreset}
             setActivePreset={setActivePreset}
             filterLead={filterLead}
             setFilterLead={setFilterLead}
+            statFilter={statFilter}
+            setStatFilter={setStatFilter}
+            statCounts={statValues}
           />
 
           {dateRange && (
@@ -848,4 +1093,3 @@ export default function ConversationsPage() {
     </RequireAuth>
   );
 }
-

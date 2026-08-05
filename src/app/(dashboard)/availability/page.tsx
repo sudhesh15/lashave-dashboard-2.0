@@ -11,6 +11,7 @@ import {
   CalendarClock,
   CalendarDays,
   CalendarX,
+  Check,
   CheckCircle2,
   ChevronsUpDown,
   Clock,
@@ -21,6 +22,7 @@ import {
   MessageSquare,
   Phone,
   Plus,
+  Radio,
   RefreshCw,
   RotateCcw,
   Save,
@@ -123,7 +125,13 @@ type Booking = {
   } | null;
 };
 
-type TabKey = 'all' | 'today' | 'upcoming' | 'confirmed' | 'cancelled';
+type TabKey =
+  | 'all'
+  | 'today'
+  | 'upcoming'
+  | 'confirmed'
+  | 'completed'
+  | 'cancelled';
 type BookingSortKey =
   | 'created'
   | 'customer'
@@ -204,7 +212,6 @@ const getTimeMinutes = (value: string) => {
 const getDateKey = (value: string) => {
   return value.slice(0, 10); // "2026-06-15"
 };
-
 
 const getTodayLocalKey = () => {
   const now = new Date();
@@ -380,6 +387,7 @@ const TABS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
   { key: 'today', label: 'Today', icon: <CalendarDays size={13} /> },
   { key: 'upcoming', label: 'Upcoming', icon: <CalendarCheck size={13} /> },
   { key: 'confirmed', label: 'Confirmed', icon: <CheckCircle2 size={13} /> },
+  { key: 'completed', label: 'Completed', icon: <CheckCircle2 size={13} /> },
   { key: 'cancelled', label: 'Cancelled', icon: <CalendarX size={13} /> },
 ];
 
@@ -408,9 +416,14 @@ function AvailabilityContent() {
   const [activeTab, setActiveTab] = useState<TabKey>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [bookingSearch, setBookingSearch] = useState('');
-  const [openBookingFilter, setOpenBookingFilter] = useState<
-    'status' | 'date' | null
-  >(null);
+
+const [openBookingFilter, setOpenBookingFilter] = useState<
+  'status' | 'date' | 'channel' | null
+>(null);
+
+const [bookingChannelFilter, setBookingChannelFilter] = useState<string[]>([]);
+const bookingChannelFilterRef = useRef<HTMLDivElement>(null);
+
   const [bookingDateRange, setBookingDateRange] = useState<{
     from: string;
     to: string;
@@ -431,6 +444,12 @@ function AvailabilityContent() {
     () => setOpenBookingFilter(null),
     openBookingFilter === 'date',
   );
+  useOutsideClick(
+    bookingChannelFilterRef,
+    () => setOpenBookingFilter(null),
+    openBookingFilter === 'channel',
+  );
+
   const [bookingSort, setBookingSort] = useState<{
     key: BookingSortKey;
     direction: SortDirection;
@@ -471,71 +490,144 @@ function AvailabilityContent() {
       all: bookings.filter((b) => b.status !== 'cancelled').length,
       today: bookings.filter((b) => isToday(b.start_time)).length,
       upcoming: bookings.filter(
-        (b) => isUpcoming(b.start_time) && !['cancelled'].includes(b.status),
+        (b) => isUpcoming(b.start_time) && b.status !== 'cancelled',
       ).length,
-      confirmed: bookings.filter((b) =>
-        ['confirmed', 'rescheduled'].includes(b.status),
+      confirmed: bookings.filter(
+        (b) =>
+          ['confirmed', 'rescheduled'].includes(b.status) &&
+          !isBookingCompleted(b),
       ).length,
+      completed: bookings.filter((b) => isBookingCompleted(b)).length,
       cancelled: bookings.filter((b) => b.status === 'cancelled').length,
     }),
     [bookings],
   );
 
-  /* Filtered list */
-  const filteredBookings = useMemo(() => {
-    const byTab = (() => {
-      switch (activeTab) {
-        case 'today':
-          return bookings.filter((b) => isToday(b.start_time));
-        case 'upcoming':
-          return bookings.filter(
-            (b) => isUpcoming(b.start_time) && b.status !== 'cancelled',
-          );
-        case 'confirmed':
-          return bookings.filter((b) =>
-            ['confirmed', 'rescheduled'].includes(b.status),
-          );
-        case 'cancelled':
-          return bookings.filter((b) => b.status === 'cancelled');
-        default:
-          return bookings.filter((b) => b.status !== 'cancelled');
-      }
-    })();
+  const bookingKnownChannels = [
+    'instagram',
+    'facebook',
+    'whatsapp',
+    'telegram',
+    'youtube',
+    'website',
+    'google',
+  ];
 
-    const byDate = bookingDateRange
-      ? byTab.filter((booking) => {
-          const key = (booking.start_time || booking.booking_date || '').slice(
-            0,
-            10,
-          );
-          if (!key) return false;
-          return key >= bookingDateRange.from && key <= bookingDateRange.to;
-        })
-      : byTab;
+  const bookingChannels = useMemo(
+    () =>
+      Array.from(
+        new Set([
+          ...bookingKnownChannels,
+          ...bookings
+            .map((b) => (b.channel || '').toLowerCase())
+            .filter(Boolean),
+        ]),
+      ).sort(),
+    [bookings],
+  );
 
-    const query = bookingSearch.trim().toLowerCase();
-    if (!query) return byDate;
+  const bookingChannelCounts = useMemo(
+    () =>
+      bookings.reduce<Record<string, number>>((acc, b) => {
+        const channel = (b.channel || 'direct').toLowerCase();
+        acc[channel] = (acc[channel] || 0) + 1;
+        return acc;
+      }, {}),
+    [bookings],
+  );
 
-    return byDate.filter((booking) =>
-      [
-        booking.customer_name,
-        booking.customer_phone,
-        booking.customer_details?.phone,
-        booking.customer_details?.email,
-        booking.channel,
-        booking.status,
-        booking.booking_date,
-        booking.start_time,
-        booking.end_time,
-        booking.instagram_profile?.username,
-      ]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase()
-        .includes(query),
+  const toggleBookingChannel = (channel: string) => {
+    setBookingChannelFilter((current) =>
+      current.includes(channel)
+        ? current.filter((c) => c !== channel)
+        : [...current, channel],
     );
-  }, [bookings, activeTab, bookingSearch, bookingDateRange]);
+  };
 
+  const activeBookingChannelLabel =
+    bookingChannelFilter.length === 0
+      ? 'All channels'
+      : bookingChannelFilter.length === 1
+        ? bookingChannelFilter[0].charAt(0).toUpperCase() +
+          bookingChannelFilter[0].slice(1)
+        : `${bookingChannelFilter.length} channels`;
+
+  /* Filtered list */
+ const filteredBookings = useMemo(() => {
+   const byTab = (() => {
+     switch (activeTab) {
+       case 'today':
+         return bookings.filter((b) => isToday(b.start_time));
+
+       case 'upcoming':
+         return bookings.filter(
+           (b) => isUpcoming(b.start_time) && b.status !== 'cancelled',
+         );
+
+       case 'confirmed':
+         return bookings.filter(
+           (b) =>
+             ['confirmed', 'rescheduled'].includes(b.status) &&
+             !isBookingCompleted(b),
+         );
+
+       case 'completed':
+         return bookings.filter((b) => isBookingCompleted(b));
+
+       case 'cancelled':
+         return bookings.filter((b) => b.status === 'cancelled');
+
+       default:
+         return bookings.filter((b) => b.status !== 'cancelled');
+     }
+   })();
+
+   const byDate = bookingDateRange
+     ? byTab.filter((booking) => {
+         const key = (booking.start_time || booking.booking_date || '').slice(
+           0,
+           10,
+         );
+         if (!key) return false;
+         return key >= bookingDateRange.from && key <= bookingDateRange.to;
+       })
+     : byTab;
+
+   const byChannel =
+     bookingChannelFilter.length === 0
+       ? byDate
+       : byDate.filter((booking) =>
+           bookingChannelFilter.includes((booking.channel || '').toLowerCase()),
+         );
+
+   const query = bookingSearch.trim().toLowerCase();
+   if (!query) return byChannel;
+
+   return byChannel.filter((booking) =>
+     [
+       booking.customer_name,
+       booking.customer_phone,
+       booking.customer_details?.phone,
+       booking.customer_details?.email,
+       booking.channel,
+       booking.status,
+       booking.booking_date,
+       booking.start_time,
+       booking.end_time,
+       booking.instagram_profile?.username,
+     ]
+       .filter(Boolean)
+       .join(' ')
+       .toLowerCase()
+       .includes(query),
+   );
+ }, [
+   bookings,
+   activeTab,
+   bookingSearch,
+   bookingDateRange,
+   bookingChannelFilter,
+ ]);
   const sortedBookings = useMemo(() => {
     const getSortValue = (booking: Booking) => {
       const displayName =
@@ -1142,6 +1234,118 @@ function AvailabilityContent() {
                   className='h-10 w-full rounded-[10px] border border-gray-300 bg-white py-2 pl-11 pr-4 type-small text-gray-800 shadow-theme-xs outline-none placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-gray-500'
                 />
               </div>
+              {/* Channel filter */}
+              <div ref={bookingChannelFilterRef} className='relative'>
+                <Button
+                  variant='outline'
+                  onClick={() =>
+                    setOpenBookingFilter(
+                      openBookingFilter === 'channel' ? null : 'channel',
+                    )
+                  }
+                  className='min-w-[165px]'
+                >
+                  <Radio size={14} className='shrink-0' />
+                  {bookingChannelFilter.length > 0 && (
+                    <span className='flex shrink-0 items-center'>
+                      {bookingChannelFilter.slice(0, 3).map((channel, i) => {
+                        const logo = CHANNEL_LOGOS[channel];
+                        return (
+                          <span
+                            key={channel}
+                            className={cn(
+                              'flex h-[18px] w-[18px] items-center justify-center rounded-full bg-white dark:bg-gray-900',
+                              i > 0 && '-ml-1.5',
+                            )}
+                          >
+                            {logo ? (
+                              <Image
+                                src={logo}
+                                alt={channel}
+                                width={16}
+                                height={16}
+                                className='h-4 w-4 object-contain'
+                              />
+                            ) : null}
+                          </span>
+                        );
+                      })}
+                    </span>
+                  )}
+                  <span className='truncate'>{activeBookingChannelLabel}</span>
+                </Button>
+
+                {openBookingFilter === 'channel' && (
+                  <div className='absolute right-0 z-20 mt-2 w-64 overflow-hidden rounded-xl border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-800 dark:bg-gray-900'>
+                    <button
+                      type='button'
+                      onClick={() => setBookingChannelFilter([])}
+                      className={cn(
+                        'flex w-full items-center justify-between rounded-[10px] px-3 py-2 text-left type-small font-medium transition',
+                        bookingChannelFilter.length === 0
+                          ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'
+                          : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/[0.04]',
+                      )}
+                    >
+                      <span className='inline-flex items-center gap-2'>
+                        <Radio size={14} className='shrink-0' />
+                        <span>All channels</span>
+                      </span>
+                      <span className='type-caption text-gray-400 dark:text-gray-500'>
+                        {bookings.length}
+                      </span>
+                    </button>
+
+                    <div className='my-1 border-t border-gray-100 dark:border-gray-800' />
+
+                    {bookingChannels.map((channel) => {
+                      const active = bookingChannelFilter.includes(channel);
+                      const logo = CHANNEL_LOGOS[channel];
+                      return (
+                        <button
+                          key={channel}
+                          type='button'
+                          onClick={() => toggleBookingChannel(channel)}
+                          className={cn(
+                            'flex w-full items-center justify-between rounded-[10px] px-3 py-2 text-left type-small font-medium capitalize transition',
+                            active
+                              ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'
+                              : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/[0.04]',
+                          )}
+                        >
+                          <span className='inline-flex min-w-0 items-center gap-2'>
+                            <span
+                              className={cn(
+                                'flex h-4 w-4 shrink-0 items-center justify-center rounded border',
+                                active
+                                  ? 'border-brand-500 bg-brand-500 text-white'
+                                  : 'border-gray-300 bg-white dark:border-gray-600 dark:bg-gray-900',
+                              )}
+                            >
+                              {active && <Check size={11} strokeWidth={3} />}
+                            </span>
+                            {logo ? (
+                              <Image
+                                src={logo}
+                                alt={channel}
+                                width={16}
+                                height={16}
+                                className='h-4 w-4 shrink-0 object-contain'
+                              />
+                            ) : (
+                              <Radio size={14} className='shrink-0' />
+                            )}
+                            <span className='truncate'>{channel}</span>
+                          </span>
+                          <span className='type-caption text-gray-400 dark:text-gray-500'>
+                            {bookingChannelCounts[channel] || 0}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
               <div ref={bookingFilterRef} className='relative'>
                 <Button
                   variant='outline'
@@ -1152,7 +1356,9 @@ function AvailabilityContent() {
                   }
                 >
                   <SlidersHorizontal size={14} />
-                  Filter
+                  {activeTab === 'all'
+                    ? 'Filter'
+                    : `${TABS.find((t) => t.key === activeTab)?.label ?? ''} bookings`}
                 </Button>
                 {openBookingFilter === 'status' && (
                   <div className='absolute right-0 z-20 mt-2 w-56 overflow-hidden rounded-xl border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-800 dark:bg-gray-900'>
@@ -1165,6 +1371,9 @@ function AvailabilityContent() {
                           type='button'
                           onClick={() => {
                             setActiveTab(tab.key);
+                            setBookingDateRange(null);
+                            setBookingDatePreset(null);
+                            setBookingSearch('');
                             setCurrentPage(1);
                             setOpenBookingFilter(null);
                           }}
@@ -1179,6 +1388,7 @@ function AvailabilityContent() {
                             {tab.icon}
                             {tab.label} bookings
                           </span>
+
                           <span className='type-caption text-gray-400 dark:text-gray-500'>
                             {count}
                           </span>
@@ -1211,6 +1421,7 @@ function AvailabilityContent() {
                   setCurrentPage(1);
                   setBookingDateRange(null);
                   setBookingDatePreset(null);
+                  setBookingChannelFilter([]);
                   setOpenBookingFilter(null);
                 }}
               >
@@ -1363,16 +1574,25 @@ function AvailabilityContent() {
                           </td>
                           <td className='px-6 py-3 type-small capitalize text-gray-500 dark:text-gray-400'>
                             <span className='inline-flex items-center gap-2'>
-                              {booking.channel && CHANNEL_LOGOS[booking.channel.toLowerCase()] && (
-                                <Image
-                                  src={CHANNEL_LOGOS[booking.channel.toLowerCase()]}
-                                  alt={booking.channel}
-                                  width={16}
-                                  height={16}
-                                  className='h-4 w-4 shrink-0 object-contain'
-                                />
-                              )}
-                              <span className='truncate'>{booking.channel || 'Direct'}</span>
+                              {booking.channel &&
+                                CHANNEL_LOGOS[
+                                  booking.channel.toLowerCase()
+                                ] && (
+                                  <Image
+                                    src={
+                                      CHANNEL_LOGOS[
+                                        booking.channel.toLowerCase()
+                                      ]
+                                    }
+                                    alt={booking.channel}
+                                    width={16}
+                                    height={16}
+                                    className='h-4 w-4 shrink-0 object-contain'
+                                  />
+                                )}
+                              <span className='truncate'>
+                                {booking.channel || 'Direct'}
+                              </span>
                             </span>
                           </td>
                           <td className='px-6 py-3 type-small text-gray-500 dark:text-gray-400'>
