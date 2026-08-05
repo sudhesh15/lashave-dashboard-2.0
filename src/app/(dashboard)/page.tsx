@@ -8,6 +8,7 @@ import {
   type FaqGap,
   type TopicItem,
 } from '@/components/dashboard/DashboardPanels';
+import { adaptFaqGaps, adaptTopics } from '@/components/overview/adapters';
 import { OnboardingCard } from '@/components/overview/onboarding/OnboardingCard';
 import { OnboardingDrawer } from '@/components/overview/onboarding/OnboardingDrawer';
 import { BIZ_QUESTIONS } from '@/components/overview/onboarding/data';
@@ -21,7 +22,6 @@ import type {
   TS,
 } from '@/components/overview/types';
 import { RequireAuth } from '@/components/require-auth';
-import { adaptFaqGaps, adaptTopics } from '@/components/overview/adapters';
 import { apiFetch } from '@/lib/api';
 import {
   analyzeKnowledgeWebsite,
@@ -32,25 +32,22 @@ import {
 import { DARK } from '@/lib/theme';
 import { useTheme } from '@/lib/theme-context';
 import type { ApexOptions } from 'apexcharts';
-import Image from 'next/image';
 import {
   AlertTriangle,
   ArrowUp,
-  Bot,
   Calendar,
   CheckCircle2,
-  CircleHelp,
   Clock3,
   MessageSquare,
   Plus,
-  RefreshCw,
   Send,
   Target,
   Users,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useMemo, useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 const ReactApexChart = dynamic(() => import('react-apexcharts'), {
   ssr: false,
@@ -126,7 +123,10 @@ function normalizeMetricValue(item: UnknownRecord) {
 }
 
 function normalizePlatformKey(platform: string) {
-  const key = platform.toLowerCase().trim().replace(/[\s-]+/g, '_');
+  const key = platform
+    .toLowerCase()
+    .trim()
+    .replace(/[\s-]+/g, '_');
   const aliases: Record<string, string> = {
     fb: 'facebook',
     google_reviews: 'google',
@@ -691,13 +691,7 @@ function TopicsCard({
   );
 }
 
-function FaqGapsCard({
-  gaps,
-  loading,
-}: {
-  gaps: FaqGap[];
-  loading: boolean;
-}) {
+function FaqGapsCard({ gaps, loading }: { gaps: FaqGap[]; loading: boolean }) {
   return (
     <Card className='p-6 sm:p-6'>
       <ChartHeader
@@ -738,45 +732,45 @@ function ActiveChannelsCard({
   channels,
   messagesTodayByChannel,
   onConnectNow,
+  loading,
 }: {
   channels: ChannelInfo[];
   messagesTodayByChannel: Record<string, number>;
   onConnectNow: () => void;
+  loading: boolean;
 }) {
-  const active = channels.filter((channel) => channel.is_active);
-  const requiredPlatforms = [
+  const COMING_SOON = new Set(['youtube', 'whatsapp']);
+
+  const ALL_PLATFORMS = [
     { platform: 'google', label: 'Google Map' },
     { platform: 'facebook', label: 'Facebook' },
+    { platform: 'instagram', label: 'Instagram' },
+    { platform: 'telegram', label: 'Telegram' },
+    { platform: 'website', label: 'Website' },
     { platform: 'youtube', label: 'YouTube' },
     { platform: 'whatsapp', label: 'WhatsApp' },
   ];
-  const displayChannels = [
-    ...channels.map((channel) => ({
-      channel,
-      platform: channel.platform,
-      label:
-        channel.display_name ||
-        channel.account_name ||
-        channel.username ||
-        channel.platform,
-      connected: true,
-    })),
-    ...requiredPlatforms
-      .filter(
-        (item) =>
-          !channels.some(
-            (channel) =>
-              normalizePlatformKey(channel.platform) === item.platform,
-          ),
-      )
-      .map((item) => ({
-        channel: null,
-        platform: item.platform,
-        label: item.label,
-        connected: false,
-      })),
-  ];
-  const visibleChannels = displayChannels;
+
+  const active = channels.filter((channel) => channel.is_active);
+
+  const displayChannels = ALL_PLATFORMS.map((item) => {
+    const match = channels.find(
+      (channel) => normalizePlatformKey(channel.platform) === item.platform,
+    );
+    return {
+      channel: match ?? null,
+      platform: item.platform,
+      label: match
+        ? match.display_name ||
+          match.account_name ||
+          match.username ||
+          match.platform
+        : item.label,
+      connected: Boolean(match),
+      comingSoon: COMING_SOON.has(item.platform),
+    };
+  });
+
   const logoForPlatform = (platform?: string | null) => {
     const key = (platform || '').toLowerCase().trim();
     const logos: Record<string, string> = {
@@ -824,7 +818,7 @@ function ActiveChannelsCard({
             Connected Channels
           </h3>
           <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>
-            {active.length} active channels
+            {loading ? 'Loading channels…' : `${active.length} active channels`}
           </p>
         </div>
         <button
@@ -837,78 +831,85 @@ function ActiveChannelsCard({
         </button>
       </div>
 
-      {visibleChannels.length === 0 ? (
-        <EmptyBlock label='No channels connected yet' />
-      ) : (
-        <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4'>
-          {visibleChannels.map((item) => {
-            const messagesToday = messagesForPlatform(item.platform);
-            const isActive = Boolean(item.channel?.is_active);
+      <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4'>
+        {displayChannels.map((item) => {
+          const messagesToday = messagesForPlatform(item.platform);
+          const isActive = Boolean(item.channel?.is_active);
 
-            return (
-              <div
-                key={item.channel?.id || item.platform}
-                className='min-h-[140px] rounded-2xl border border-gray-200 bg-white p-6 shadow-theme-xs dark:border-gray-800 dark:bg-white/[0.03]'
-              >
-                <div className='flex items-start gap-4'>
-                  <div className='flex h-12 w-12 shrink-0 items-center justify-center'>
-                    <Image
-                      src={logoForPlatform(item.platform)}
-                      alt={`${item.label} logo`}
-                      width={42}
-                      height={42}
-                      className='h-10 w-10 object-contain'
-                    />
-                  </div>
-                  <div className='min-w-0'>
-                    <p className='truncate type-body font-semibold capitalize text-gray-800 dark:text-white/90'>
-                      {item.label}
-                    </p>
-                    <p className='mt-1 truncate type-small capitalize text-gray-500 dark:text-gray-400'>
-                      {labelForPlatform(item.platform)}
-                    </p>
-                  </div>
+          return (
+            <div
+              key={item.channel?.id || item.platform}
+              className={`min-h-[140px] rounded-2xl border border-gray-200 bg-white p-6 shadow-theme-xs dark:border-gray-800 dark:bg-white/[0.03] ${
+                item.comingSoon ? 'opacity-75' : ''
+              }`}
+            >
+              <div className='flex items-start gap-4'>
+                <div className='flex h-12 w-12 shrink-0 items-center justify-center'>
+                  <Image
+                    src={logoForPlatform(item.platform)}
+                    alt={`${item.label} logo`}
+                    width={42}
+                    height={42}
+                    className={`h-10 w-10 object-contain ${
+                      item.comingSoon ? 'grayscale' : ''
+                    }`}
+                  />
                 </div>
-
-                <div className='mt-7 flex items-end justify-between gap-4'>
-                  <div className='min-w-0'>
-                    <p className='type-h4 font-bold text-gray-800 dark:text-white/90'>
-                      {item.connected
-                        ? messagesToday.toLocaleString()
-                        : '0'}
-                    </p>
-                    <p className='mt-1 type-caption text-gray-500 dark:text-gray-400'>
-                      Messages Today
-                    </p>
-                  </div>
-
-                  {item.connected ? (
-                    <span
-                      className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1 type-caption font-medium ${
-                        isActive
-                          ? 'bg-success-50 text-success-600 dark:bg-success-500/15 dark:text-success-500'
-                          : 'bg-gray-100 text-gray-700 dark:bg-white/5 dark:text-white/80'
-                      }`}
-                    >
-                      {isActive && <ArrowUp className='h-3 w-3' />}
-                      {isActive ? 'Active' : 'Paused'}
-                    </span>
-                  ) : (
-                    <button
-                      type='button'
-                      onClick={onConnectNow}
-                      className='inline-flex shrink-0 items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 type-caption font-medium text-brand-500 hover:bg-brand-100 dark:bg-brand-500/15 dark:text-brand-400'
-                    >
-                      <Plus className='h-3 w-3' />
-                      Connect Now
-                    </button>
-                  )}
+                <div className='min-w-0'>
+                  <p className='truncate type-body font-semibold capitalize text-gray-800 dark:text-white/90'>
+                    {item.label}
+                  </p>
+                  <p className='mt-1 truncate type-small capitalize text-gray-500 dark:text-gray-400'>
+                    {labelForPlatform(item.platform)}
+                  </p>
                 </div>
               </div>
-            );
-          })}
-        </div>
-      )}
+
+              <div className='mt-7 flex items-end justify-between gap-4'>
+                <div className='min-w-0'>
+                  <p className='type-h4 font-bold text-gray-800 dark:text-white/90'>
+                    {loading || !item.connected
+                      ? '0'
+                      : messagesToday.toLocaleString()}
+                  </p>
+                  <p className='mt-1 type-caption text-gray-500 dark:text-gray-400'>
+                    Messages Today
+                  </p>
+                </div>
+
+                {loading ? (
+                  <span className='h-6 w-20 shrink-0 animate-pulse rounded-full bg-gray-100 dark:bg-white/5' />
+                ) : item.comingSoon ? (
+                  <span className='inline-flex shrink-0 items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1 type-caption font-medium text-gray-500 dark:bg-white/5 dark:text-gray-400'>
+                    <Clock3 className='h-3 w-3' />
+                    Coming soon
+                  </span>
+                ) : item.connected ? (
+                  <span
+                    className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1 type-caption font-medium ${
+                      isActive
+                        ? 'bg-success-50 text-success-600 dark:bg-success-500/15 dark:text-success-500'
+                        : 'bg-gray-100 text-gray-700 dark:bg-white/5 dark:text-white/80'
+                    }`}
+                  >
+                    {isActive && <ArrowUp className='h-3 w-3' />}
+                    {isActive ? 'Active' : 'Paused'}
+                  </span>
+                ) : (
+                  <button
+                    type='button'
+                    onClick={onConnectNow}
+                    className='inline-flex shrink-0 items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 type-caption font-medium text-brand-500 hover:bg-brand-100 dark:bg-brand-500/15 dark:text-brand-400'
+                  >
+                    <Plus className='h-3 w-3' />
+                    Connect Now
+                  </button>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -1028,9 +1029,10 @@ export default function OverviewPage() {
   const [faqLoading, setFaqLoading] = useState(true);
   const [dropoffTotal, setDropoffTotal] = useState(0);
   const [returningTotal, setReturningTotal] = useState(0);
-  const [dateRange, setDateRange] = useState<{ from: string; to: string } | null>(
-    null,
-  );
+  const [dateRange, setDateRange] = useState<{
+    from: string;
+    to: string;
+  } | null>(null);
   const [activePreset, setActivePreset] = useState<number | null>(null);
 
   useEffect(() => {
@@ -1081,10 +1083,7 @@ export default function OverviewPage() {
           apiFetch<ItemsResponse>('/admin/faq?limit=1', {
             auth: true,
           }),
-          apiFetch<AuthMeResponse>(
-            '/admin/auth/me',
-            { auth: true },
-          ).catch(
+          apiFetch<AuthMeResponse>('/admin/auth/me', { auth: true }).catch(
             (): AuthMeResponse => ({ user: { id: 'default' } }),
           ),
         ]);
@@ -1121,10 +1120,7 @@ export default function OverviewPage() {
 
   useEffect(() => {
     const { dq, dqOnly } = buildDateQuery(dateRange);
-    apiFetch<ItemsResponse>(
-      `/admin/attention?limit=8${dq}`,
-      { auth: true },
-    )
+    apiFetch<ItemsResponse>(`/admin/attention?limit=8${dq}`, { auth: true })
       .then((res) =>
         setAttentionItems(
           (res.items || []).map((item) => ({
@@ -1166,7 +1162,8 @@ export default function OverviewPage() {
 
     apiFetch<UnknownRecord>(`/admin/stats/dropoffs${dqOnly}`, { auth: true })
       .then((res) => {
-        const total = numberValue(res.total_dropoffs) ?? numberValue(res.total) ?? 0;
+        const total =
+          numberValue(res.total_dropoffs) ?? numberValue(res.total) ?? 0;
         const recovered = numberValue(res.recovered) ?? 0;
         setDropoffTotal(total - recovered);
       })
@@ -1259,8 +1256,7 @@ export default function OverviewPage() {
       const list = Array.isArray(docs) ? docs : (docs.items ?? []);
       const name = filename.toLowerCase();
       return list.some(
-        (d) =>
-          (d.filename || d.original_filename || '').toLowerCase() === name,
+        (d) => (d.filename || d.original_filename || '').toLowerCase() === name,
       );
     } catch {
       return false;
@@ -1302,7 +1298,7 @@ export default function OverviewPage() {
         const currentSettings = await apiFetch<{ system_prompt?: string }>(
           '/admin/settings',
           {
-          auth: true,
+            auth: true,
           },
         );
         const existingPrompt = currentSettings?.system_prompt || '';
@@ -1324,10 +1320,9 @@ ${about}`.trim();
     }
 
     try {
-      const faqs = await apiFetch<ItemsResponse>(
-        '/admin/faq?limit=1',
-        { auth: true },
-      );
+      const faqs = await apiFetch<ItemsResponse>('/admin/faq?limit=1', {
+        auth: true,
+      });
       setHasFaqs((faqs.items?.length || faqs.total || 0) > 0);
     } catch {
       setHasFaqs(true);
@@ -1492,6 +1487,7 @@ ${about}`.trim();
             channels={channels}
             messagesTodayByChannel={messagesTodayByChannel}
             onConnectNow={() => router.push('/channels')}
+            loading={!loaded}
           />
         </div>
 
@@ -1534,23 +1530,22 @@ ${about}`.trim();
             />
           </div>
           <div className='xl:col-span-4'>
-            <PipelineChart pipeline={pipeline} pipeMap={pipeMap} isDark={isDark} />
+            <PipelineChart
+              pipeline={pipeline}
+              pipeMap={pipeMap}
+              isDark={isDark}
+            />
           </div>
         </div>
 
         <div className='mt-6 grid grid-cols-1 gap-6 xl:grid-cols-12'>
           <div className='xl:col-span-5'>
-            <AttentionCard
-              items={attentionItems}
-              loading={attentionLoading}
-            />
+            <AttentionCard items={attentionItems} loading={attentionLoading} />
           </div>
           <div className='xl:col-span-7'>
             <TopicsCard topics={topics} loading={topicsLoading} />
           </div>
         </div>
-
-        
 
         <div className='mt-6 grid grid-cols-1 gap-6 xl:grid-cols-12'>
           <div className='xl:col-span-7'>
@@ -1583,7 +1578,8 @@ ${about}`.trim();
                   },
                   {
                     label: 'Active channels',
-                    value: channels.filter((channel) => channel.is_active).length,
+                    value: channels.filter((channel) => channel.is_active)
+                      .length,
                     icon: <CheckCircle2 className='h-5 w-5' />,
                   },
                   {
