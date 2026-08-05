@@ -1,5 +1,7 @@
 'use client';
 
+import { DateFilter } from '@/components/date-filter';
+
 import { RequireAuth } from '@/components/require-auth';
 import { Button } from '@/components/ui/button';
 import {
@@ -648,6 +650,14 @@ function ReviewsInner() {
   );
   const [channelMenuOpen, setChannelMenuOpen] = useState(false);
   const [statusFilterOpen, setStatusFilterOpen] = useState(false);
+  const [dateRange, setDateRange] = useState<{
+    from: string;
+    to: string;
+  } | null>(null);
+  const [datePreset, setDatePreset] = useState<number | null>(null);
+  const [dateOpen, setDateOpen] = useState(false);
+  const dateFilterRef = useRef<HTMLDivElement>(null);
+  useOutsideClick(dateFilterRef, () => setDateOpen(false), dateOpen);
   const channelMenuRef = useRef<HTMLDivElement>(null);
   const statusFilterRef = useRef<HTMLDivElement>(null);
   useOutsideClick(
@@ -872,74 +882,108 @@ function ReviewsInner() {
     return () => window.clearTimeout(timer);
   }, [filter, loadCriticalReviews]);
 
-  const stats = useMemo(() => {
-    const total = reviews.length;
-    const replied = reviews.filter(
-      (review) => review.status === 'replied',
-    ).length;
-    const needsReply = total - replied;
-    const ratingOnly = reviews.filter(
-      (review) => !review.comment?.trim(),
-    ).length;
-    const lowRating = reviews.filter((review) => {
-      const rating = getRating(review);
-      return rating === 1 || rating === 2;
-    }).length;
-    const ratingTotal = reviews.reduce(
-      (sum, review) => sum + getRating(review),
-      0,
-    );
-    const average = total > 0 ? ratingTotal / total : 0;
-    const replyRate = total > 0 ? Math.round((replied / total) * 100) : 0;
-    const distribution = [5, 4, 3, 2, 1].map((rating) => ({
-      rating,
-      count: reviews.filter((review) => review.rating === RATING_LABEL[rating])
-        .length,
-    }));
-    return {
-      total,
-      replied,
-      needsReply,
-      ratingOnly,
-      lowRating,
-      average,
-      replyRate,
-      distribution,
-    };
-  }, [reviews]);
+  const dateScopedReviews = useMemo(() => {
+    if (!dateRange) return reviews;
+    return reviews.filter((review) => {
+      const raw = review.review_created_at;
+      if (!raw) return false;
+      const d = new Date(raw);
+      if (Number.isNaN(d.getTime())) return false;
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      return key >= dateRange.from && key <= dateRange.to;
+    });
+  }, [reviews, dateRange]);
 
-  const keywordStats = useMemo(
-    () =>
-      REVIEW_KEYWORDS.map((keyword) => ({
-        key: keyword.key,
-        label: keyword.label,
-        count: reviews.filter((review) => reviewMatchesKeyword(review, keyword))
-          .length,
-      })).filter((keyword) => keyword.count > 0),
-    [reviews],
-  );
+    const stats = useMemo(() => {
+      const total = dateScopedReviews.length;
+      const replied = dateScopedReviews.filter(
+        (review) => review.status === 'replied',
+      ).length;
+      const needsReply = total - replied;
+      const ratingOnly = dateScopedReviews.filter(
+        (review) => !review.comment?.trim(),
+      ).length;
+      const lowRating = dateScopedReviews.filter((review) => {
+        const rating = getRating(review);
+        return rating === 1 || rating === 2;
+      }).length;
+      const ratingTotal = dateScopedReviews.reduce(
+        (sum, review) => sum + getRating(review),
+        0,
+      );
+      const average = total > 0 ? ratingTotal / total : 0;
+      const replyRate = total > 0 ? Math.round((replied / total) * 100) : 0;
+      const distribution = [5, 4, 3, 2, 1].map((rating) => ({
+        rating,
+        count: dateScopedReviews.filter(
+          (review) => review.rating === RATING_LABEL[rating],
+        ).length,
+      }));
+      return {
+        total,
+        replied,
+        needsReply,
+        ratingOnly,
+        lowRating,
+        average,
+        replyRate,
+        distribution,
+      };
+    }, [dateScopedReviews]);
+
+   const keywordStats = useMemo(
+     () =>
+       REVIEW_KEYWORDS.map((keyword) => ({
+         key: keyword.key,
+         label: keyword.label,
+         count: dateScopedReviews.filter((review) =>
+           reviewMatchesKeyword(review, keyword),
+         ).length,
+       })).filter((keyword) => keyword.count > 0),
+     [dateScopedReviews],
+   );
+
+ 
+
+ 
 
   const filteredReviews = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
-    // When a keyword signal is active, search across ALL reviews (ignore the
-    // status tab) so results aren't narrowed to the current status subset.
+    // When a keyword signal or date range is active, search across ALL reviews
+    // (ignore the status tab) so results aren't narrowed to the current subset.
     const keywordActive = selectedKeyword !== 'all';
+    const dateActive = dateRange !== null;
     const source =
-      filter === 'critical' && !keywordActive ? criticalReviews : reviews;
+      filter === 'critical' && !keywordActive && !dateActive
+        ? criticalReviews
+        : reviews;
+
     return source.filter((review) => {
       const rating = getRating(review);
       const replied = review.status === 'replied';
-      const matchesFilter = keywordActive
-        ? true
-        : filter === 'critical'
+
+      // Client-side date filter on the review's creation date.
+      if (dateRange) {
+        const raw = review.review_created_at;
+        if (!raw) return false;
+        const d = new Date(raw);
+        if (Number.isNaN(d.getTime())) return false;
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        if (key < dateRange.from || key > dateRange.to) return false;
+      }
+
+      const matchesFilter =
+        keywordActive || dateActive
           ? true
-          : filter === 'needs_reply'
-            ? !replied
-            : filter === 'replied'
-              ? replied
-              : filter === 'rating_only'
-                ? !review.comment?.trim()
-                : rating === 1 || rating === 2;
+          : filter === 'critical'
+            ? true
+            : filter === 'needs_reply'
+              ? !replied
+              : filter === 'replied'
+                ? replied
+                : filter === 'rating_only'
+                  ? !review.comment?.trim()
+                  : rating === 1 || rating === 2;
 
       if (!matchesFilter) return false;
 
@@ -964,14 +1008,13 @@ function ReviewsInner() {
         )
       );
     });
-  }, [criticalReviews, filter, reviews, search, selectedKeyword]);
-
+  }, [criticalReviews, filter, reviews, search, selectedKeyword, dateRange]);
   const pagedReviews = getPageItems(filteredReviews, reviewsPage);
 
   useEffect(() => {
     const timer = window.setTimeout(() => setReviewsPage(1), 0);
     return () => window.clearTimeout(timer);
-  }, [filter, filteredReviews.length, search, selectedKeyword]);
+  }, [filter, filteredReviews.length, search, selectedKeyword, dateRange]);
 
   const filterCounts: Record<FilterKey, number> = {
     needs_reply: stats.needsReply,
@@ -989,6 +1032,8 @@ function ReviewsInner() {
     setFilter('needs_reply');
     setSelectedKeyword('all');
     setSearch('');
+    setDateRange(null);
+    setDatePreset(null);
     setStatusFilterOpen(false);
   };
 
@@ -1083,6 +1128,18 @@ function ReviewsInner() {
                 })}
               </div>
             )}
+          </div>
+
+          <div ref={dateFilterRef} className='relative'>
+            <DateFilter
+              dateRange={dateRange}
+              activePreset={datePreset}
+              setDateRange={setDateRange}
+              setActivePreset={setDatePreset}
+              open={dateOpen}
+              onToggle={() => setDateOpen((v) => !v)}
+              onClose={() => setDateOpen(false)}
+            />
           </div>
 
           <button
