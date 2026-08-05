@@ -16,13 +16,13 @@ import {
 } from '@/components/ui/table-pagination';
 import { useOutsideClick } from '@/hooks/useOutsideClick';
 import { apiFetch } from '@/lib/api';
-import { cn } from '@/lib/utils';
 import {
   Category,
   detectCategory,
   Mood,
   resolveMoodForLead,
 } from '@/lib/chat-classifiers';
+import { cn } from '@/lib/utils';
 import {
   AlertTriangle,
   ArrowRightLeft,
@@ -169,6 +169,81 @@ function isRealLead(lead?: ConvoItem['lead']) {
   );
 }
 
+const STAT_FILTERS: {
+  key: string;
+  label: string;
+  tone: keyof typeof STAT_TONE;
+  icon: React.ReactNode;
+}[] = [
+  {
+    key: 'all',
+    label: 'Total',
+    tone: 'gray',
+    icon: <List className='h-5 w-5' />,
+  },
+  {
+    key: 'complaint',
+    label: 'Complaint',
+    tone: 'error',
+    icon: <AlertTriangle className='h-5 w-5' />,
+  },
+  {
+    key: 'feedback',
+    label: 'Feedback',
+    tone: 'brand',
+    icon: <MessageCircle className='h-5 w-5' />,
+  },
+  {
+    key: 'order',
+    label: 'Order',
+    tone: 'warning',
+    icon: <Package className='h-5 w-5' />,
+  },
+  {
+    key: 'enquiry',
+    label: 'Enquiry',
+    tone: 'brand',
+    icon: <HelpCircle className='h-5 w-5' />,
+  },
+  {
+    key: 'open',
+    label: 'Open',
+    tone: 'success',
+    icon: <CheckCircle2 className='h-5 w-5' />,
+  },
+  {
+    key: 'handoff',
+    label: 'Handoff',
+    tone: 'warning',
+    icon: <ArrowRightLeft className='h-5 w-5' />,
+  },
+  {
+    key: 'lead',
+    label: 'With lead',
+    tone: 'success',
+    icon: <Target className='h-5 w-5' />,
+  },
+];
+
+function matchesStatFilter(item: ConvoItem, statFilter: string) {
+  switch (statFilter) {
+    case 'all':
+      return true;
+    case 'open':
+    case 'handoff':
+      return (item.status || '').toLowerCase() === statFilter;
+    case 'lead':
+      return isRealLead(item.lead);
+    case 'complaint':
+    case 'feedback':
+    case 'order':
+    case 'enquiry':
+      return getCategory(item) === statFilter;
+    default:
+      return true;
+  }
+}
+
 function badgeClass(status: string) {
   switch (status.toLowerCase()) {
     case 'open':
@@ -211,14 +286,27 @@ function StatTile({
   value,
   icon,
   tone = 'gray',
+  onClick,
+  active = false,
 }: {
   label: string;
   value: number;
   icon: React.ReactNode;
   tone?: keyof typeof STAT_TONE;
+  onClick?: () => void;
+  active?: boolean;
 }) {
   return (
-    <div className='flex min-w-0 items-center gap-2 rounded-2xl border border-gray-200 bg-white p-3 dark:border-gray-800 dark:bg-gray-900/60 sm:gap-3 xl:p-3'>
+    <button
+      type='button'
+      onClick={onClick}
+      className={cn(
+        'flex min-w-0 items-center gap-2 rounded-2xl border bg-white p-3 text-left transition dark:bg-gray-900/60 sm:gap-3 xl:p-3',
+        active
+          ? 'border-brand-500 ring-1 ring-brand-500/30 dark:border-brand-400'
+          : 'border-gray-200 hover:border-gray-300 dark:border-gray-800 dark:hover:border-gray-700',
+      )}
+    >
       <span
         className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${STAT_TONE[tone]}`}
       >
@@ -232,7 +320,7 @@ function StatTile({
           {label}
         </div>
       </div>
-    </div>
+    </button>
   );
 }
 
@@ -280,7 +368,7 @@ const INBOX_TABS: { key: string; label: string; icon: React.ReactNode }[] = [
   { key: 'closed', label: 'Closed', icon: <XCircle size={13} /> },
 ];
 
-type InboxFilterKey = 'conversation' | 'channel' | 'date';
+type InboxFilterKey = 'conversation' | 'channel' | 'date' | 'category';
 
 // ── Table ────────────────────────────────────────────────────────────────────────
 function ConversationTable({
@@ -308,6 +396,9 @@ function ConversationTable({
   setActivePreset,
   filterLead,
   setFilterLead,
+  statFilter,
+  setStatFilter,
+  statCounts,
 }: {
   items: ConvoItem[];
   loading: boolean;
@@ -333,6 +424,9 @@ function ConversationTable({
   setActivePreset: (preset: number | null) => void;
   filterLead: boolean;
   setFilterLead: (updater: (value: boolean) => boolean) => void;
+  statFilter: string;
+  setStatFilter: (value: string) => void;
+  statCounts: Record<string, number>;
 }) {
   const [page, setPage] = useState(1);
   const pageItems = getPageItems(items, page);
@@ -340,6 +434,7 @@ function ConversationTable({
   const channelFilterRef = useRef<HTMLDivElement>(null);
   const conversationFilterRef = useRef<HTMLDivElement>(null);
   const dateFilterRef = useRef<HTMLDivElement>(null);
+  const categoryFilterRef = useRef<HTMLDivElement>(null);
 
   useOutsideClick(
     channelFilterRef,
@@ -356,6 +451,11 @@ function ConversationTable({
     () => setOpenFilter(null),
     openFilter === 'date',
   );
+  useOutsideClick(
+    categoryFilterRef,
+    () => setOpenFilter(null),
+    openFilter === 'category',
+  );
 
   useEffect(() => {
     const timer = window.setTimeout(() => setPage(1), 0);
@@ -367,7 +467,7 @@ function ConversationTable({
 
   return (
     <div className='min-w-0 max-w-full overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]'>
-      <div className='flex flex-col gap-2 border-b border-gray-100 px-5 py-5 dark:border-white/[0.05] sm:flex-row sm:items-center sm:justify-between sm:px-6'>
+      <div className='flex flex-col gap-2 border-b border-gray-100 px-5 py-5 dark:border-white/[0.05] sm:flex-row sm:items-center sm:justify-between sm:px-6 '>
         <h3 className='type-body font-semibold text-gray-800 dark:text-white/90'>
           Inbox
         </h3>
@@ -376,8 +476,8 @@ function ConversationTable({
         </div>
       </div>
 
-      <div className='min-w-0 px-5 py-5 sm:px-6'>
-        <div className='flex flex-col gap-4 rounded-t-xl border border-b-0 border-gray-200 bg-white px-5 py-4 dark:border-white/[0.05] dark:bg-white/[0.01] lg:flex-row lg:items-center lg:justify-between'>
+      <div className='min-w-0 px-5 py-5 sm:px-6 '>
+        <div className='flex flex-col gap-4 rounded-t-xl border border-b-0 border-gray-200 bg-white px-5 py-4 dark:border-white/[0.05] dark:bg-white/[0.01] lg:flex-row lg:items-center lg:justify-between '>
           <h4 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
             {activeTab.label} conversations
           </h4>
@@ -430,7 +530,9 @@ function ConversationTable({
                 }
               >
                 <SlidersHorizontal size={14} />
-                Conversation
+                {status === 'all'
+                  ? 'Conversation'
+                  : `${INBOX_TABS.find((t) => t.key === status)?.label ?? ''} conversations`}
               </Button>
               {openFilter === 'conversation' && (
                 <div className='absolute right-0 z-20 mt-2 w-56 overflow-hidden rounded-xl border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-800 dark:bg-gray-900'>
@@ -458,6 +560,54 @@ function ConversationTable({
                         </span>
                         <span className='type-caption text-gray-400 dark:text-gray-500'>
                           {count}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Inbox stats filter */}
+            <div ref={categoryFilterRef} className='relative'>
+              <Button
+                variant='outline'
+                onClick={() =>
+                  setOpenFilter(openFilter === 'category' ? null : 'category')
+                }
+              >
+                <List size={14} />
+                {statFilter === 'all'
+                  ? 'Inbox filter'
+                  : STAT_FILTERS.find((s) => s.key === statFilter)?.label}
+              </Button>
+              {openFilter === 'category' && (
+                <div className='absolute right-0 z-20 mt-2 w-56 overflow-hidden rounded-xl border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-800 dark:bg-gray-900'>
+                  {STAT_FILTERS.map((stat) => {
+                    const isActive = statFilter === stat.key;
+                    return (
+                      <button
+                        key={stat.key}
+                        type='button'
+                        onClick={() => {
+                          setStatFilter(stat.key);
+                          setOpenFilter(null);
+                        }}
+                        className={cn(
+                          'flex w-full items-center justify-between rounded-[10px] px-3 py-2 text-left type-small font-medium transition',
+                          isActive
+                            ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'
+                            : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/[0.04]',
+                        )}
+                      >
+                        <span className='inline-flex items-center gap-2'>
+                          <span className='[&>svg]:h-4 [&>svg]:w-4'>
+                            {stat.icon}
+                          </span>
+                          {stat.label}
+                        </span>
+                        <span className='type-caption text-gray-400 dark:text-gray-500'>
+                          {statCounts[stat.key] || 0}
                         </span>
                       </button>
                     );
@@ -503,7 +653,7 @@ function ConversationTable({
 
         <div className='min-w-0 max-w-full overflow-hidden rounded-b-xl border border-gray-200 dark:border-white/[0.05]'>
           <div className='w-full overflow-x-auto'>
-            <table className='lashvae-column-dividers min-w-[1300px] table-fixed'>
+            <table className='lashvae-column-dividers min-w-[1300px] table-fixed min-h-80'>
               <colgroup>
                 <col className='w-[340px]' />
                 <col className='w-[140px]' />
@@ -702,6 +852,7 @@ export default function ConversationsPage() {
     to: string;
   } | null>(null);
   const [activePreset, setActivePreset] = useState<number | null>(null);
+  const [statFilter, setStatFilter] = useState('all');
 
   const load = useCallback(
     async (opts?: { silent?: boolean }) => {
@@ -774,18 +925,20 @@ export default function ConversationsPage() {
   );
 
   // What the table actually renders — channel filter applied here on top.
-  const visibleItems = useMemo(
-    () =>
-      channelFilter.channel_ids.length === 0
-        ? leadFilteredItems
-        : leadFilteredItems.filter(
-            (item) =>
-              item.channel_id != null &&
-              channelFilter.channel_ids.includes(item.channel_id),
-          ),
-    [leadFilteredItems, channelFilter],
-  );
-
+  const visibleItems = useMemo(() => {
+    let list = leadFilteredItems;
+    if (channelFilter.channel_ids.length > 0) {
+      list = list.filter(
+        (item) =>
+          item.channel_id != null &&
+          channelFilter.channel_ids.includes(item.channel_id),
+      );
+    }
+    if (statFilter !== 'all') {
+      list = list.filter((item) => matchesStatFilter(item, statFilter));
+    }
+    return list;
+  }, [leadFilteredItems, channelFilter, statFilter]);
   const statusCounts = useMemo(
     () =>
       items.reduce<Record<string, number>>((acc, item) => {
@@ -820,11 +973,23 @@ export default function ConversationsPage() {
   const handoffCount = statusCounts.handoff || 0;
   const leadCount = items.filter((item) => isRealLead(item.lead)).length;
 
+  const statValues: Record<string, number> = {
+    all: items.length,
+    complaint: categoryCounts.complaint || 0,
+    feedback: categoryCounts.feedback || 0,
+    order: categoryCounts.order || 0,
+    enquiry: categoryCounts.enquiry || 0,
+    open: openCount,
+    handoff: handoffCount,
+    lead: leadCount,
+  };
+
   const handleSeeAll = useCallback(() => {
     setStatus('all');
     setQ('');
     setFilterLead(false);
     clearChannels();
+    setStatFilter('all');
     setDateRange(null);
     setActivePreset(null);
     setOpenFilter(null);
@@ -864,54 +1029,19 @@ export default function ConversationsPage() {
           </div>
 
           <div className='mt-8 grid grid-cols-2 gap-3 lg:grid-cols-4 3xl:grid-cols-8'>
-            <StatTile
-              label='Total'
-              value={items.length}
-              icon={<List className='h-5 w-5' />}
-              tone='gray'
-            />
-            <StatTile
-              label='Complaint'
-              value={categoryCounts.complaint || 0}
-              icon={<AlertTriangle className='h-5 w-5' />}
-              tone='error'
-            />
-            <StatTile
-              label='Feedback'
-              value={categoryCounts.feedback || 0}
-              icon={<MessageCircle className='h-5 w-5' />}
-              tone='brand'
-            />
-            <StatTile
-              label='Order'
-              value={categoryCounts.order || 0}
-              icon={<Package className='h-5 w-5' />}
-              tone='warning'
-            />
-            <StatTile
-              label='Enquiry'
-              value={categoryCounts.enquiry || 0}
-              icon={<HelpCircle className='h-5 w-5' />}
-              tone='brand'
-            />
-            <StatTile
-              label='Open'
-              value={openCount}
-              icon={<CheckCircle2 className='h-5 w-5' />}
-              tone='success'
-            />
-            <StatTile
-              label='Handoff'
-              value={handoffCount}
-              icon={<ArrowRightLeft className='h-5 w-5' />}
-              tone='warning'
-            />
-            <StatTile
-              label='With lead'
-              value={leadCount}
-              icon={<Target className='h-5 w-5' />}
-              tone='success'
-            />
+            {STAT_FILTERS.map((stat) => (
+              <StatTile
+                key={stat.key}
+                label={stat.label}
+                value={statValues[stat.key] || 0}
+                icon={stat.icon}
+                tone={stat.tone}
+                active={statFilter === stat.key}
+                onClick={() =>
+                  setStatFilter(statFilter === stat.key ? 'all' : stat.key)
+                }
+              />
+            ))}
           </div>
         </div>
 
@@ -947,6 +1077,9 @@ export default function ConversationsPage() {
             setActivePreset={setActivePreset}
             filterLead={filterLead}
             setFilterLead={setFilterLead}
+            statFilter={statFilter}
+            setStatFilter={setStatFilter}
+            statCounts={statValues}
           />
 
           {dateRange && (
