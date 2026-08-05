@@ -364,7 +364,7 @@ function LeadWorklist({
   return (
     <div className='min-w-0 max-w-full overflow-hidden rounded-b-xl border border-gray-200 dark:border-white/[0.05]'>
       <div className='w-full overflow-x-auto'>
-        <table className='lashvae-column-dividers min-w-[1360px] table-fixed'>
+        <table className='lashvae-column-dividers min-w-[1360px] table-fixed min-h-80'>
           <colgroup>
             <col className='w-[280px]' />
             <col className='w-[170px]' />
@@ -536,7 +536,7 @@ export default function LeadsPage() {
   const [searching, setSearching] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [page, setPage] = useState(1);
-  
+
   const [updatingId, setUpdatingId] = useState<number | null>(null);
   const {
     filter: channelFilter,
@@ -555,7 +555,7 @@ export default function LeadsPage() {
     from: string;
     to: string;
   } | null>(() => getLast7DaysRange());
- const [activePreset, setActivePreset] = useState<number | null>(7);
+  const [activePreset, setActivePreset] = useState<number | null>(7);
   const [openFilter, setOpenFilter] = useState<LeadFilterKey | null>(null);
 
   const channelFilterRef = useRef<HTMLDivElement>(null);
@@ -915,7 +915,10 @@ export default function LeadsPage() {
                         }
                       >
                         <SlidersHorizontal size={14} />
-                        Stage
+                        {filterStatus === 'all'
+                          ? 'Stage'
+                          : (STAGE_TABS.find((t) => t.key === filterStatus)
+                              ?.label ?? 'Stage')}
                       </Button>
                       {openFilter === 'stage' && (
                         <div className='absolute right-0 z-20 mt-2 w-56 overflow-hidden rounded-xl border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-800 dark:bg-gray-900'>
