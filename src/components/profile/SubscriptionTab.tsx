@@ -1,38 +1,15 @@
 'use client';
 
-// ─────────────────────────────────────────────────────────
-// Subscription Tab — drop-in replacement for
-//   {activeNav === "subscription" && <EmptyPanel .../>}
-//
-// Wire it into src/app/profile/page.tsx like:
-//   {activeNav === "subscription" && <SubscriptionTab me={me} />}
-//
-// Backend contract (already live and tested on staging):
-//   GET  /admin/billing/status      — plan, cycle, status, period dates, Stripe flags
-//   GET  /admin/me/usage            — usage counters + limits per plan
-//   POST /admin/billing/checkout    — {plan_id, billing_cycle} -> {url}
-//   POST /admin/billing/portal      — {} -> {url}
-//
-// Redirect targets Stripe drops the user at after Checkout / Portal:
-//   /profile?activeNav=subscription&status=success&session_id=cs_...
-//   /profile?activeNav=subscription&status=cancelled
-// ─────────────────────────────────────────────────────────
-
 import { apiFetch } from '@/lib/api';
 import { useTheme } from '@/lib/theme-context';
-import { useEffect, useState, useCallback } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-
-// ─────────────────────────────────────────────────────────
-// Types — match backend response shapes exactly
-// ─────────────────────────────────────────────────────────
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 type BillingStatus = {
   tenant_id: string;
   plan_id: 'starter' | 'pro' | 'business';
   billing_cycle: 'monthly' | 'annual' | null;
-  subscription_status:
-    | 'none' | 'trialing' | 'active' | 'past_due' | 'canceled';
+  subscription_status: 'none' | 'trialing' | 'active' | 'past_due' | 'canceled';
   trial_ends_at: string | null;
   current_period_start: string | null;
   current_period_end: string | null;
@@ -59,69 +36,144 @@ type UsageSummary = {
   };
 };
 
-// Static plan display data — matches PLANS in backend/plans.py
-// Keep prices in sync with Stripe dashboard (they're display-only here).
-const PLAN_INFO = {
-  starter: {
-    name: 'Starter',
-    priceMonthly: 19,
-    priceAnnual: 190,
-    tagline: 'For solo founders getting started',
-    features: [
-      '1,000 AI messages / month',
-      '2 connected channels',
-      '1 team member',
-      '10 knowledge documents',
-      'Website chat widget',
-      'Booking system',
-    ],
-  },
-  pro: {
-    name: 'Pro',
-    priceMonthly: 59,
-    priceAnnual: 590,
-    tagline: 'For growing businesses',
-    features: [
-      '5,000 AI messages / month',
-      '5 connected channels',
-      '3 team members',
-      '50 knowledge documents',
-      'Growth reports & AI consultant',
-      'Priority support',
-    ],
-    highlighted: true,
-  },
-  business: {
-    name: 'Business',
-    priceMonthly: 149,
-    priceAnnual: 1490,
-    tagline: 'For serious operators',
-    features: [
-      '25,000 AI messages / month',
-      'Unlimited channels',
-      '10 team members',
-      'Unlimited knowledge docs',
-      'Everything in Pro',
-      'Dedicated support',
-    ],
-  },
-} as const;
+type CurrencyCode = 'INR' | 'GBP' | 'USD';
+type BillingCycle = 'monthly' | 'annual';
+type PaidPlanId = 'starter' | 'pro' | 'business';
 
-// ─────────────────────────────────────────────────────────
-// Small utilities
-// ─────────────────────────────────────────────────────────
+type PlanDisplay = {
+  id: 'trial' | PaidPlanId;
+  backendPlanId: PaidPlanId | null;
+  name: string;
+  tagline: string;
+  conversations: string;
+  channels: string;
+  knowledgeDocs: string;
+  priceMonthly: Record<CurrencyCode, number | null>;
+  priceAnnual: Record<CurrencyCode, number | null>;
+  features: string[];
+  highlighted?: boolean;
+};
+
+const PLANS: PlanDisplay[] = [
+  {
+    id: 'trial',
+    backendPlanId: null,
+    name: 'Free Trial',
+    tagline: 'Explore Lashvae AI for 14 days',
+    conversations: '150 conversations',
+    channels: 'Connect all available channels',
+    knowledgeDocs: 'Unlimited knowledge documents',
+    priceMonthly: { INR: 0, GBP: 0, USD: 0 },
+    priceAnnual: { INR: 0, GBP: 0, USD: 0 },
+    features: [
+      '14-day free trial',
+      '150 conversations',
+      'Connect all available channels',
+      'Unlimited knowledge documents',
+      'AI website chat widget',
+      'Auto appointment booking',
+      'Conversation analytics',
+      'AI chat summaries',
+      'Mood detection',
+      'Smart conversation categorization',
+      'Lead detection',
+    ],
+  },
+  {
+    id: 'starter',
+    backendPlanId: 'starter',
+    name: 'Basic',
+    tagline: 'For small businesses',
+    conversations: '300 conversations / month',
+    channels: 'Connect all available channels',
+    knowledgeDocs: 'Unlimited knowledge documents',
+    priceMonthly: { INR: 999, GBP: 49, USD: 49 },
+    priceAnnual: { INR: 9990, GBP: 490, USD: 490 },
+    features: [
+      '300 conversations / month',
+      'Connect all available channels',
+      'Unlimited knowledge documents',
+      'AI website chat widget',
+      'Auto appointment booking',
+      'Conversation analytics',
+      'AI chat summaries',
+      'Mood detection',
+      'Smart conversation categorization',
+      'Lead detection',
+    ],
+  },
+  {
+    id: 'pro',
+    backendPlanId: 'pro',
+    name: 'Growth',
+    tagline: 'For growing businesses',
+    conversations: '1,500 conversations / month',
+    channels: 'Connect all available channels',
+    knowledgeDocs: 'Unlimited knowledge documents',
+    priceMonthly: { INR: 1999, GBP: 149, USD: 149 },
+    priceAnnual: { INR: 19990, GBP: 1490, USD: 1490 },
+    highlighted: true,
+    features: [
+      '1,500 conversations / month',
+      'Connect all available channels',
+      'Unlimited knowledge documents',
+      'Everything in Basic',
+      'Content ideas from customer conversations',
+      'Competitor analysis',
+      'Industry watch',
+      'Growth reports and AI consultant',
+    ],
+  },
+  {
+    id: 'business',
+    backendPlanId: 'business',
+    name: 'Enterprise',
+    tagline: 'For large teams and enterprises',
+    conversations: 'Custom conversation volume',
+    channels: 'Connect all available channels',
+    knowledgeDocs: 'Unlimited knowledge documents',
+    priceMonthly: { INR: null, GBP: null, USD: null },
+    priceAnnual: { INR: null, GBP: null, USD: null },
+    features: [
+      'Custom conversation volume',
+      'Connect all available channels',
+      'Unlimited knowledge documents',
+      'Everything in Growth',
+      'Priority support',
+      'Custom AI workflows',
+      'Custom integrations',
+      'Dedicated account manager',
+    ],
+  },
+];
+
+const PLAN_NAMES: Record<PaidPlanId, string> = {
+  starter: 'Basic',
+  pro: 'Growth',
+  business: 'Enterprise',
+};
+
+const DISPLAY_CONVERSATION_LIMITS: Record<PaidPlanId, number> = {
+  starter: 300,
+  pro: 1500,
+  business: 10000,
+};
 
 function fmtDate(iso: string | null) {
   if (!iso) return '—';
+
   return new Date(iso).toLocaleDateString(undefined, {
-    year: 'numeric', month: 'short', day: 'numeric',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
   });
 }
 
 function daysUntil(iso: string | null): number | null {
   if (!iso) return null;
-  const diff = new Date(iso).getTime() - Date.now();
-  return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+
+  const difference = new Date(iso).getTime() - Date.now();
+  return Math.max(0, Math.ceil(difference / 86_400_000));
 }
 
 function pct(used: number, limit: number): number {
@@ -135,15 +187,71 @@ function usageMetric(
   fallbackLimit: number,
 ) {
   const metric = usage?.usage?.[key];
+
   return {
     used: metric?.used ?? 0,
     limit: metric?.limit ?? fallbackLimit,
   };
 }
 
-// ─────────────────────────────────────────────────────────
-// Main tab component
-// ─────────────────────────────────────────────────────────
+function normalizeCountryCode(value: unknown): string {
+  return typeof value === 'string' ? value.trim().toUpperCase() : '';
+}
+
+function detectCurrency(me: any): CurrencyCode {
+  const countryCode = normalizeCountryCode(
+    me?.country_code ?? me?.countryCode ?? me?.billing_country ?? me?.country,
+  );
+
+  if (
+    countryCode === 'IN' ||
+    countryCode === 'IND' ||
+    countryCode === 'INDIA'
+  ) {
+    return 'INR';
+  }
+
+  if (
+    countryCode === 'GB' ||
+    countryCode === 'GBR' ||
+    countryCode === 'UK' ||
+    countryCode === 'UNITED KINGDOM'
+  ) {
+    return 'GBP';
+  }
+
+  if (typeof window !== 'undefined') {
+    const locale = navigator.language?.toLowerCase() ?? '';
+    const timezone =
+      Intl.DateTimeFormat().resolvedOptions().timeZone?.toLowerCase() ?? '';
+
+    if (
+      locale.endsWith('-in') ||
+      timezone.includes('kolkata') ||
+      timezone.includes('calcutta')
+    ) {
+      return 'INR';
+    }
+
+    if (
+      locale.endsWith('-gb') ||
+      timezone.includes('london') ||
+      timezone.includes('belfast')
+    ) {
+      return 'GBP';
+    }
+  }
+
+  return 'USD';
+}
+
+function formatPrice(amount: number, currency: CurrencyCode): string {
+  return new Intl.NumberFormat(undefined, {
+    style: 'currency',
+    currency,
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
 
 export default function SubscriptionTab({ me }: { me: any }) {
   const searchParams = useSearchParams();
@@ -156,56 +264,78 @@ export default function SubscriptionTab({ me }: { me: any }) {
   const [error, setError] = useState('');
   const [toast, setToast] = useState('');
   const [busy, setBusy] = useState<'checkout' | 'portal' | null>(null);
-  const [cycle, setCycle] = useState<'monthly' | 'annual'>('monthly');
+  const [cycle, setCycle] = useState<BillingCycle>('monthly');
+  const [currency, setCurrency] = useState<CurrencyCode>('USD');
 
-  // Load current state
+  useEffect(() => {
+    setCurrency(detectCurrency(me));
+  }, [me]);
+
   const refresh = useCallback(async () => {
     try {
-      const [s, u] = await Promise.all([
+      setError('');
+
+      const [billingStatus, usageSummary] = await Promise.all([
         apiFetch<BillingStatus>('/admin/billing/status', { auth: true }),
         apiFetch<UsageSummary>('/admin/me/usage', { auth: true }),
       ]);
-      setStatus(s);
-      setUsage(u);
-      if (s.billing_cycle) setCycle(s.billing_cycle);
-    } catch (e: any) {
-      setError(e?.message ?? 'Failed to load billing info');
+
+      setStatus(billingStatus);
+      setUsage(usageSummary);
+
+      if (billingStatus.billing_cycle) {
+        setCycle(billingStatus.billing_cycle);
+      }
+    } catch (caughtError: any) {
+      setError(caughtError?.message ?? 'Failed to load billing information');
     } finally {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => { refresh(); }, [refresh]);
-
-  // Handle Stripe redirects — Stripe drops the user back here
-  // with ?status=success or ?status=cancelled after Checkout / Portal
   useEffect(() => {
-    const st = searchParams.get('status');
-    if (st === 'success') {
+    void refresh();
+  }, [refresh]);
+
+  useEffect(() => {
+    const redirectStatus = searchParams.get('status');
+
+    if (redirectStatus === 'success') {
       setToast('Payment successful — updating your plan…');
-      // Webhooks take 1–3 seconds to land — poll for the change
+
       let attempts = 0;
-      const poll = setInterval(async () => {
+      const poll = window.setInterval(async () => {
         attempts += 1;
         await refresh();
+
         if (attempts >= 10) {
-          clearInterval(poll);
+          window.clearInterval(poll);
           setToast('');
-          // Clear the query param
-          router.replace('/profile');
+          router.replace('/profile?activeNav=subscription');
         }
       }, 1000);
-      return () => clearInterval(poll);
+
+      return () => window.clearInterval(poll);
     }
-    if (st === 'cancelled') {
+
+    if (redirectStatus === 'cancelled') {
       setToast('Checkout cancelled — no charge was made.');
-      setTimeout(() => setToast(''), 4000);
-      router.replace('/profile');
+
+      const timeout = window.setTimeout(() => {
+        setToast('');
+        router.replace('/profile?activeNav=subscription');
+      }, 4000);
+
+      return () => window.clearTimeout(timeout);
     }
+
+    return undefined;
   }, [searchParams, refresh, router]);
 
-  async function startCheckout(planId: string, billingCycle: string) {
+  async function startCheckout(planId: PaidPlanId, billingCycle: BillingCycle) {
     setBusy('checkout');
+    setError('');
+
     try {
       const { url } = await apiFetch<{ url: string; session_id: string }>(
         '/admin/billing/checkout',
@@ -213,29 +343,87 @@ export default function SubscriptionTab({ me }: { me: any }) {
           auth: true,
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ plan_id: planId, billing_cycle: billingCycle }),
-        }
+          body: JSON.stringify({
+            plan_id: planId,
+            billing_cycle: billingCycle,
+            currency: currency.toLowerCase(),
+          }),
+        },
       );
-      window.location.href = url;
-    } catch (e: any) {
-      setError(e?.message ?? 'Failed to start checkout');
+
+      window.location.assign(url);
+    } catch (caughtError: any) {
+      setError(caughtError?.message ?? 'Failed to start checkout');
       setBusy(null);
     }
   }
 
   async function openPortal() {
     setBusy('portal');
+    setError('');
+
     try {
-      const { url } = await apiFetch<{ url: string }>(
-        '/admin/billing/portal',
-        { auth: true, method: 'POST' }
-      );
-      window.location.href = url;
-    } catch (e: any) {
-      setError(e?.message ?? 'Failed to open billing portal');
+      const { url } = await apiFetch<{ url: string }>('/admin/billing/portal', {
+        auth: true,
+        method: 'POST',
+      });
+
+      window.location.assign(url);
+    } catch (caughtError: any) {
+      setError(caughtError?.message ?? 'Failed to open billing portal');
       setBusy(null);
     }
   }
+
+  function contactSales() {
+    const subject = encodeURIComponent('Lashvae Enterprise plan enquiry');
+    const body = encodeURIComponent(
+      `Hello,\n\nI would like to discuss a custom Enterprise plan for ${me?.business_name ?? me?.tenant_name ?? 'my business'}.\n`,
+    );
+
+    window.location.href = `mailto:sales@lashvae.com?subject=${subject}&body=${body}`;
+  }
+
+  const isTrialing = status?.subscription_status === 'trialing';
+  const isPastDue = status?.subscription_status === 'past_due';
+  const isCanceled = status?.subscription_status === 'canceled';
+  const isNoSubscription =
+    status?.subscription_status === 'none' || !status?.has_active_subscription;
+
+  const trialDaysLeft = daysUntil(status?.trial_ends_at ?? null);
+  const currentPlan = (usage?.plan_id ??
+    status?.plan_id ??
+    'starter') as PaidPlanId;
+  const currentPlanName = isTrialing ? 'Free Trial' : PLAN_NAMES[currentPlan];
+
+  const conversations = useMemo(() => {
+    const used = usage?.usage?.ai_messages?.used ?? 0;
+
+    if (isTrialing) {
+      return { used, limit: 150 };
+    }
+
+    return {
+      used,
+      limit:
+        currentPlan === 'business'
+          ? (usage?.usage?.ai_messages?.limit ??
+            DISPLAY_CONVERSATION_LIMITS.business)
+          : DISPLAY_CONVERSATION_LIMITS[currentPlan],
+    };
+  }, [usage, isTrialing, currentPlan]);
+
+  const channels = usageMetric(
+    usage,
+    'channels',
+    currentPlan === 'starter' ? 1 : currentPlan === 'pro' ? 4 : 6,
+  );
+
+  const knowledgeDocs = usageMetric(
+    usage,
+    'knowledge_docs',
+    currentPlan === 'business' ? 10 : 10,
+  );
 
   if (loading) {
     return (
@@ -246,6 +434,7 @@ export default function SubscriptionTab({ me }: { me: any }) {
             <div className='panel-sub'>Loading your plan…</div>
           </div>
         </div>
+
         <div className='panel-body'>
           <div style={{ opacity: 0.4, padding: 24, textAlign: 'center' }}>
             Loading…
@@ -264,26 +453,13 @@ export default function SubscriptionTab({ me }: { me: any }) {
             <div className='panel-sub'>Something went wrong</div>
           </div>
         </div>
+
         <div className='panel-body'>
           <div className='form-error'>{error}</div>
         </div>
       </>
     );
   }
-
-  const isTrialing = status?.subscription_status === 'trialing';
-  const isPastDue = status?.subscription_status === 'past_due';
-  const isCanceled = status?.subscription_status === 'canceled';
-  const isNoSub =
-    status?.subscription_status === 'none' ||
-    !status?.has_active_subscription;
-
-  const trialDaysLeft = daysUntil(status?.trial_ends_at ?? null);
-  const currentPlan = usage?.plan_id ?? 'starter';
-  const currentPlanInfo = PLAN_INFO[currentPlan as keyof typeof PLAN_INFO];
-  const aiMessages = usageMetric(usage, 'ai_messages', 1000);
-  const channels = usageMetric(usage, 'channels', 2);
-  const knowledgeDocs = usageMetric(usage, 'knowledge_docs', 10);
 
   return (
     <>
@@ -292,25 +468,26 @@ export default function SubscriptionTab({ me }: { me: any }) {
           <div className='panel-title'>Subscription</div>
           <div className='panel-sub'>
             {isTrialing
-              ? `Free trial · ${trialDaysLeft} days remaining`
-              : isNoSub
+              ? `14-day free trial · ${trialDaysLeft ?? 0} days remaining`
+              : isNoSubscription
                 ? 'Choose a plan to unlock full access'
-                : `${currentPlanInfo?.name ?? 'Plan'} · ${status?.billing_cycle ?? 'monthly'}`}
+                : `${currentPlanName} · ${status?.billing_cycle ?? 'monthly'}`}
           </div>
         </div>
+
+        <div className='sub-location-price'>Pricing shown in {currency}</div>
       </div>
 
       <div className='panel-body'>
         {toast && <div className='sub-toast'>{toast}</div>}
         {error && status && <div className='form-error'>{error}</div>}
 
-        {/* ─── Status banners ─────────────────────────────────────── */}
         {isPastDue && (
           <div className='sub-banner sub-banner-error'>
             <div className='sub-banner-title'>Payment failed</div>
             <div className='sub-banner-body'>
-              We couldn't charge your card. Please update your payment method
-              to keep your subscription active.
+              We could not charge your card. Update your payment method to keep
+              your subscription active.
             </div>
             <button
               className='sub-btn-primary'
@@ -328,27 +505,36 @@ export default function SubscriptionTab({ me }: { me: any }) {
               Trial ends in {trialDaysLeft} day{trialDaysLeft === 1 ? '' : 's'}
             </div>
             <div className='sub-banner-body'>
-              Add a payment method to keep your Pro features when the trial ends.
+              Select Basic, Growth, or Enterprise to continue after the trial.
             </div>
           </div>
         )}
 
-        {/* ─── Current plan card ──────────────────────────────────── */}
         {usage && (
           <div className='sub-current-card'>
             <div className='sub-current-head'>
               <div>
                 <div className='sub-current-plan-name'>
-                  {currentPlanInfo?.name ?? 'Unknown'} Plan
-                  {isTrialing && <span className='sub-badge'>Trial</span>}
-                  {isPastDue && <span className='sub-badge sub-badge-error'>Past due</span>}
-                  {isCanceled && <span className='sub-badge sub-badge-muted'>Canceled</span>}
+                  {currentPlanName}
+                  {isTrialing && (
+                    <span className='sub-badge'>14-day trial</span>
+                  )}
+                  {isPastDue && (
+                    <span className='sub-badge sub-badge-error'>Past due</span>
+                  )}
+                  {isCanceled && (
+                    <span className='sub-badge sub-badge-muted'>Canceled</span>
+                  )}
                 </div>
+
                 <div className='sub-current-tagline'>
-                  {currentPlanInfo?.tagline}
+                  {isTrialing
+                    ? '150 conversations included during your trial'
+                    : PLANS.find((plan) => plan.id === currentPlan)?.tagline}
                 </div>
               </div>
-              {status?.has_active_subscription && (
+
+              {status?.has_stripe_customer && (
                 <button
                   className='sub-btn-ghost'
                   onClick={openPortal}
@@ -369,9 +555,13 @@ export default function SubscriptionTab({ me }: { me: any }) {
 
             <div className='sub-usage-grid'>
               <UsageBar
-                label='AI messages this month'
-                used={aiMessages.used}
-                limit={aiMessages.limit}
+                label={
+                  isTrialing
+                    ? 'Trial conversations'
+                    : 'Conversations this month'
+                }
+                used={conversations.used}
+                limit={conversations.limit}
               />
               <UsageBar
                 label='Connected channels'
@@ -387,93 +577,153 @@ export default function SubscriptionTab({ me }: { me: any }) {
           </div>
         )}
 
-        {/* ─── Plans grid (show for none / canceled / trialing / upgrade path) ─── */}
-        {(isNoSub || isTrialing || isCanceled || currentPlan !== 'business') && (
-          <>
-            <div className='sub-plans-head'>
-              <div>
-                <div className='sub-section-title'>
-                  {isNoSub || isCanceled ? 'Choose your plan' : 'Upgrade your plan'}
-                </div>
-                <div className='sub-section-sub'>
-                  {cycle === 'annual'
-                    ? 'Save ~17% with annual billing'
-                    : 'Switch to annual to save ~17%'}
-                </div>
-              </div>
-              <div className='sub-cycle-toggle'>
-                <button
-                  className={cycle === 'monthly' ? 'active' : ''}
-                  onClick={() => setCycle('monthly')}
-                >
-                  Monthly
-                </button>
-                <button
-                  className={cycle === 'annual' ? 'active' : ''}
-                  onClick={() => setCycle('annual')}
-                >
-                  Annual
-                </button>
-              </div>
+        <div className='sub-plans-head'>
+          <div>
+            <div className='sub-section-title'>Choose your plan</div>
+            <div className='sub-section-sub'>
+              Prices are selected automatically using your country.
             </div>
+          </div>
 
-            <div className='sub-plans-grid'>
-              {(['starter', 'pro', 'business'] as const).map((pid) => {
-                const info = PLAN_INFO[pid];
-                const price = cycle === 'monthly' ? info.priceMonthly : info.priceAnnual;
-                const perMonthAnnual = Math.round(info.priceAnnual / 12);
-                const isCurrent = currentPlan === pid && !isTrialing && !isNoSub && !isCanceled;
-                const isHighlighted = 'highlighted' in info && info.highlighted;
+          <div className='sub-cycle-toggle'>
+            <button
+              className={cycle === 'monthly' ? 'active' : ''}
+              onClick={() => setCycle('monthly')}
+            >
+              Monthly
+            </button>
+            <button
+              className={cycle === 'annual' ? 'active' : ''}
+              onClick={() => setCycle('annual')}
+            >
+              Annual
+            </button>
+          </div>
+        </div>
 
-                return (
-                  <div
-                    key={pid}
-                    className={`sub-plan-card ${isHighlighted ? 'sub-plan-highlight' : ''} ${isCurrent ? 'sub-plan-current' : ''}`}
-                  >
-                    {isHighlighted && <div className='sub-plan-tag'>Most popular</div>}
-                    <div className='sub-plan-name'>{info.name}</div>
-                    <div className='sub-plan-tagline'>{info.tagline}</div>
-                    <div className='sub-plan-price'>
-                      <span className='sub-plan-price-num'>${price}</span>
-                      <span className='sub-plan-price-per'>
-                        /{cycle === 'monthly' ? 'mo' : 'yr'}
+        <div className='sub-plans-grid'>
+          {PLANS.map((plan) => {
+            const amount =
+              cycle === 'monthly'
+                ? plan.priceMonthly[currency]
+                : plan.priceAnnual[currency];
+
+            const isCurrent =
+              plan.id !== 'trial' &&
+              currentPlan === plan.id &&
+              !isTrialing &&
+              !isNoSubscription &&
+              !isCanceled;
+
+            const trialIsCurrent = plan.id === 'trial' && isTrialing;
+            const isEnterprise = plan.id === 'business';
+            const annualMonthlyEquivalent =
+              amount !== null && cycle === 'annual'
+                ? Math.round(amount / 12)
+                : null;
+
+            return (
+              <div
+                key={plan.id}
+                className={[
+                  'sub-plan-card',
+                  plan.highlighted ? 'sub-plan-highlight' : '',
+                  isCurrent || trialIsCurrent ? 'sub-plan-current' : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+              >
+                {plan.highlighted && (
+                  <div className='sub-plan-tag'>Most popular</div>
+                )}
+
+                <div className='sub-plan-name'>{plan.name}</div>
+                <div className='sub-plan-tagline'>{plan.tagline}</div>
+
+                <div className='sub-plan-price'>
+                  {plan.id === 'trial' ? (
+                    <>
+                      <span className='sub-plan-price-num'>Free</span>
+                      <span className='sub-plan-price-per'>for 14 days</span>
+                    </>
+                  ) : isEnterprise ? (
+                    <span className='sub-plan-price-num sub-plan-price-custom'>
+                      Custom
+                    </span>
+                  ) : (
+                    <>
+                      <span className='sub-plan-price-num'>
+                        {formatPrice(amount ?? 0, currency)}
                       </span>
+                      <span className='sub-plan-price-per'>
+                        /{cycle === 'monthly' ? 'month' : 'year'}
+                      </span>
+                    </>
+                  )}
+                </div>
+
+                {annualMonthlyEquivalent !== null &&
+                  plan.id !== 'trial' &&
+                  !isEnterprise && (
+                    <div className='sub-plan-annual-hint'>
+                      {formatPrice(annualMonthlyEquivalent, currency)}/month,
+                      billed annually
                     </div>
-                    {cycle === 'annual' && (
-                      <div className='sub-plan-annual-hint'>
-                        ${perMonthAnnual}/month billed annually
-                      </div>
-                    )}
-                    <ul className='sub-plan-features'>
-                      {info.features.map((f) => (
-                        <li key={f}>
-                          <span className='sub-plan-check'>✓</span> {f}
-                        </li>
-                      ))}
-                    </ul>
-                    <button
-                      className={isCurrent ? 'sub-btn-ghost' : 'sub-btn-primary'}
-                      disabled={isCurrent || busy !== null}
-                      onClick={() => startCheckout(pid, cycle)}
-                    >
-                      {isCurrent
-                        ? 'Current plan'
-                        : busy === 'checkout'
-                          ? 'Opening checkout…'
-                          : status?.has_active_subscription
-                            ? `Switch to ${info.name}`
-                            : `Subscribe to ${info.name}`}
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-          </>
-        )}
+                  )}
+
+                <ul className='sub-plan-features'>
+                  {plan.features.map((feature) => (
+                    <li key={feature}>
+                      <span className='sub-plan-check'>✓</span>
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                {plan.id === 'trial' ? (
+                  <button className='sub-btn-ghost' disabled>
+                    {trialIsCurrent
+                      ? 'Current plan'
+                      : 'Included for new accounts'}
+                  </button>
+                ) : isEnterprise ? (
+                  <button
+                    className={isCurrent ? 'sub-btn-ghost' : 'sub-btn-primary'}
+                    disabled={isCurrent || busy !== null}
+                    onClick={contactSales}
+                  >
+                    {isCurrent ? 'Current plan' : 'Contact sales'}
+                  </button>
+                ) : (
+                  <button
+                    className={isCurrent ? 'sub-btn-ghost' : 'sub-btn-primary'}
+                    disabled={isCurrent || busy !== null}
+                    onClick={() =>
+                      void startCheckout(plan.backendPlanId!, cycle)
+                    }
+                  >
+                    {isCurrent
+                      ? 'Current plan'
+                      : busy === 'checkout'
+                        ? 'Opening checkout…'
+                        : status?.has_active_subscription
+                          ? `Switch to ${plan.name}`
+                          : `Subscribe to ${plan.name}`}
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
-      {/* ─── Styles ─────────────────────────────────────────────── */}
       <style jsx>{`
+        .sub-location-price {
+          font-size: 12px;
+          font-weight: 600;
+          color: ${isDark ? 'rgba(248,250,252,0.58)' : 'rgba(15,23,42,0.58)'};
+        }
+
         .sub-toast {
           padding: 10px 14px;
           background: rgba(245, 158, 11, 0.14);
@@ -484,39 +734,47 @@ export default function SubscriptionTab({ me }: { me: any }) {
           font-weight: 500;
           margin-bottom: 16px;
         }
+
         .sub-banner {
           padding: 16px 18px;
           border-radius: 12px;
           margin-bottom: 20px;
           border: 1px solid;
         }
+
         .sub-banner-error {
           background: rgba(239, 68, 68, 0.08);
           border-color: rgba(239, 68, 68, 0.32);
           color: ${isDark ? '#fecaca' : '#7f1d1d'};
         }
+
         .sub-banner-warning {
           background: rgba(245, 158, 11, 0.08);
           border-color: rgba(245, 158, 11, 0.32);
           color: ${isDark ? '#fbbf24' : '#78350f'};
         }
+
         .sub-banner-title {
           font-size: 14px;
           font-weight: 700;
           margin-bottom: 4px;
         }
+
         .sub-banner-body {
           font-size: 13px;
           opacity: 0.85;
           margin-bottom: 12px;
         }
+
         .sub-current-card {
           padding: 20px 22px;
           border-radius: 14px;
           background: ${isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)'};
-          border: 1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'};
+          border: 1px solid
+            ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'};
           margin-bottom: 28px;
         }
+
         .sub-current-head {
           display: flex;
           justify-content: space-between;
@@ -524,19 +782,23 @@ export default function SubscriptionTab({ me }: { me: any }) {
           gap: 16px;
           margin-bottom: 6px;
         }
+
         .sub-current-plan-name {
           font-size: 18px;
           font-weight: 700;
           color: ${isDark ? '#f8fafc' : '#0f172a'};
           display: flex;
           align-items: center;
+          flex-wrap: wrap;
           gap: 10px;
         }
+
         .sub-current-tagline {
           font-size: 13px;
           color: ${isDark ? 'rgba(248,250,252,0.55)' : 'rgba(15,23,42,0.55)'};
           margin-top: 2px;
         }
+
         .sub-badge {
           font-size: 10px;
           font-weight: 700;
@@ -547,24 +809,29 @@ export default function SubscriptionTab({ me }: { me: any }) {
           text-transform: uppercase;
           letter-spacing: 0.5px;
         }
+
         .sub-badge-error {
           background: rgba(239, 68, 68, 0.18);
           color: #fca5a5;
         }
+
         .sub-badge-muted {
           background: rgba(148, 163, 184, 0.18);
           color: #94a3b8;
         }
+
         .sub-renewal {
           font-size: 12px;
           color: ${isDark ? 'rgba(248,250,252,0.55)' : 'rgba(15,23,42,0.55)'};
           margin-bottom: 20px;
         }
+
         .sub-usage-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
           gap: 16px;
         }
+
         .sub-plans-head {
           display: flex;
           justify-content: space-between;
@@ -572,16 +839,19 @@ export default function SubscriptionTab({ me }: { me: any }) {
           gap: 16px;
           margin-bottom: 20px;
         }
+
         .sub-section-title {
           font-size: 16px;
           font-weight: 700;
           color: var(--app-primary);
         }
+
         .sub-section-sub {
           font-size: 13px;
           color: ${isDark ? 'rgba(248,250,252,0.55)' : 'rgba(15,23,42,0.55)'};
           margin-top: 2px;
         }
+
         .sub-cycle-toggle {
           display: inline-flex;
           padding: 4px;
@@ -589,6 +859,7 @@ export default function SubscriptionTab({ me }: { me: any }) {
           border-radius: 10px;
           gap: 2px;
         }
+
         .sub-cycle-toggle button {
           padding: 6px 14px;
           border: none;
@@ -600,38 +871,59 @@ export default function SubscriptionTab({ me }: { me: any }) {
           cursor: pointer;
           transition: all 0.15s;
         }
+
         .sub-cycle-toggle button.active {
-          background: ${isDark ? 'color-mix(in oklab, var(--app-primary) 18%, transparent)' : '#fff'};
+          background: ${isDark
+            ? 'color-mix(in oklab, var(--app-primary) 18%, transparent)'
+            : '#fff'};
           color: var(--app-primary);
           box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
         }
+
         .sub-plans-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-          gap: 16px;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 14px;
         }
+
         .sub-plan-card {
           position: relative;
-          padding: 22px 20px;
+          padding: 22px 18px;
           border-radius: 14px;
-          background: ${isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.015)'};
-          border: 1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'};
+          background: ${isDark
+            ? 'rgba(255,255,255,0.03)'
+            : 'rgba(0,0,0,0.015)'};
+          border: 1px solid
+            ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'};
           display: flex;
           flex-direction: column;
+          min-width: 0;
         }
+
         .sub-plan-highlight {
-          border-color: color-mix(in oklab, var(--app-primary) 50%, transparent);
-          box-shadow: 0 0 0 3px color-mix(in oklab, var(--app-primary) 12%, transparent);
+          border-color: color-mix(
+            in oklab,
+            var(--app-primary) 50%,
+            transparent
+          );
+          box-shadow: 0 0 0 3px
+            color-mix(in oklab, var(--app-primary) 12%, transparent);
         }
+
         .sub-plan-current {
           border-color: rgba(34, 197, 94, 0.4);
         }
+
         .sub-plan-tag {
           position: absolute;
           top: -10px;
           right: 16px;
           padding: 3px 10px;
-          background: linear-gradient(135deg, var(--app-primary), var(--app-primary-hover));
+          background: linear-gradient(
+            135deg,
+            var(--app-primary),
+            var(--app-primary-hover)
+          );
           color: white;
           font-size: 10px;
           font-weight: 700;
@@ -639,116 +931,174 @@ export default function SubscriptionTab({ me }: { me: any }) {
           text-transform: uppercase;
           letter-spacing: 0.5px;
         }
+
         .sub-plan-name {
           font-size: 16px;
           font-weight: 700;
           color: ${isDark ? '#f8fafc' : '#0f172a'};
         }
+
         .sub-plan-tagline {
+          min-height: 34px;
           font-size: 12px;
           color: ${isDark ? 'rgba(248,250,252,0.55)' : 'rgba(15,23,42,0.55)'};
           margin-top: 4px;
           margin-bottom: 16px;
         }
+
         .sub-plan-price {
           display: flex;
           align-items: baseline;
+          flex-wrap: wrap;
           gap: 4px;
+          min-height: 46px;
           margin-bottom: 4px;
         }
+
         .sub-plan-price-num {
-          font-size: 32px;
+          font-size: 30px;
           font-weight: 800;
           color: ${isDark ? '#f8fafc' : '#0f172a'};
         }
+
+        .sub-plan-price-custom {
+          font-size: 27px;
+        }
+
         .sub-plan-price-per {
-          font-size: 14px;
+          font-size: 13px;
           color: ${isDark ? 'rgba(248,250,252,0.55)' : 'rgba(15,23,42,0.55)'};
         }
+
         .sub-plan-annual-hint {
+          min-height: 16px;
           font-size: 11px;
           color: ${isDark ? 'rgba(248,250,252,0.42)' : 'rgba(15,23,42,0.42)'};
-          margin-bottom: 12px;
+          margin-bottom: 8px;
         }
+
         .sub-plan-features {
           list-style: none;
           padding: 0;
-          margin: 12px 0 22px 0;
+          margin: 12px 0 22px;
           flex: 1;
         }
+
         .sub-plan-features li {
-          font-size: 13px;
+          font-size: 12.5px;
           color: ${isDark ? 'rgba(248,250,252,0.75)' : 'rgba(15,23,42,0.75)'};
           padding: 5px 0;
           display: flex;
           align-items: flex-start;
           gap: 8px;
         }
+
         .sub-plan-check {
           color: #10b981;
           font-weight: 700;
         }
-        .sub-btn-primary {
-          padding: 10px 18px;
+
+        .sub-btn-primary,
+        .sub-btn-ghost {
+          width: 100%;
+          padding: 10px 16px;
           border-radius: 10px;
-          border: none;
-          background: linear-gradient(135deg, var(--app-primary), var(--app-primary-hover));
-          color: white;
           font-size: 13px;
           font-weight: 600;
           cursor: pointer;
           transition: all 0.15s;
-          box-shadow: 0 2px 8px color-mix(in oklab, var(--app-primary) 28%, transparent);
         }
+
+        .sub-btn-primary {
+          border: none;
+          background: linear-gradient(
+            135deg,
+            var(--app-primary),
+            var(--app-primary-hover)
+          );
+          color: white;
+          box-shadow: 0 2px 8px
+            color-mix(in oklab, var(--app-primary) 28%, transparent);
+        }
+
         .sub-btn-primary:hover:not(:disabled) {
           transform: translateY(-1px);
-          box-shadow: 0 4px 12px color-mix(in oklab, var(--app-primary) 40%, transparent);
+          box-shadow: 0 4px 12px
+            color-mix(in oklab, var(--app-primary) 40%, transparent);
         }
-        .sub-btn-primary:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
+
         .sub-btn-ghost {
-          padding: 10px 18px;
-          border-radius: 10px;
-          border: 1px solid ${isDark ? 'rgba(255,255,255,0.16)' : 'rgba(0,0,0,0.14)'};
+          border: 1px solid
+            ${isDark ? 'rgba(255,255,255,0.16)' : 'rgba(0,0,0,0.14)'};
           background: transparent;
           color: ${isDark ? 'rgba(248,250,252,0.85)' : 'rgba(15,23,42,0.85)'};
-          font-size: 13px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.15s;
         }
+
         .sub-btn-ghost:hover:not(:disabled) {
           background: ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'};
         }
+
+        .sub-btn-primary:disabled,
         .sub-btn-ghost:disabled {
           opacity: 0.5;
           cursor: not-allowed;
+        }
+
+        @media (max-width: 1250px) {
+          .sub-plans-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+        }
+
+        @media (max-width: 720px) {
+          .sub-plans-head,
+          .sub-current-head {
+            flex-direction: column;
+          }
+
+          .sub-cycle-toggle {
+            width: 100%;
+          }
+
+          .sub-cycle-toggle button {
+            flex: 1;
+          }
+
+          .sub-plans-grid {
+            grid-template-columns: 1fr;
+          }
         }
       `}</style>
     </>
   );
 }
 
-// ─────────────────────────────────────────────────────────
-// Usage bar sub-component
-// ─────────────────────────────────────────────────────────
-
 function UsageBar({
-  label, used, limit,
+  label,
+  used,
+  limit,
 }: {
-  label: string; used: number; limit: number;
+  label: string;
+  used?: number | null;
+  limit?: number | null;
 }) {
   const { isDark } = useTheme();
-  const percentage = pct(used, limit);
-  const isOver = used >= limit;
+
+  const safeUsed =
+    typeof used === 'number' && Number.isFinite(used) ? Math.max(0, used) : 0;
+
+  const safeLimit =
+    typeof limit === 'number' && Number.isFinite(limit) && limit > 0
+      ? limit
+      : 0;
+
+  const percentage =
+    safeLimit > 0 ? Math.min(100, Math.round((safeUsed / safeLimit) * 100)) : 0;
+
+  const isOver = safeLimit > 0 && safeUsed >= safeLimit;
   const isNear = percentage >= 80 && !isOver;
-  const barColor = isOver
-    ? '#ef4444'
-    : isNear
-      ? '#10b981'
-      : '#38bdf8';
+
+  const barColor = isOver ? '#ef4444' : isNear ? '#10b981' : '#38bdf8';
 
   const size = 96;
   const strokeWidth = 10;
@@ -767,24 +1117,31 @@ function UsageBar({
         gap: 10,
       }}
     >
-      <div style={{ position: 'relative', width: size, height: size }}>
+      <div
+        style={{
+          position: 'relative',
+          width: size,
+          height: size,
+        }}
+      >
         <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
           <circle
             cx={size / 2}
             cy={size / 2}
             r={radius}
-            fill="none"
+            fill='none'
             stroke={trackColor}
             strokeWidth={strokeWidth}
           />
+
           <circle
             cx={size / 2}
             cy={size / 2}
             r={radius}
-            fill="none"
+            fill='none'
             stroke={barColor}
             strokeWidth={strokeWidth}
-            strokeLinecap="round"
+            strokeLinecap='round'
             strokeDasharray={circumference}
             strokeDashoffset={dashOffset}
             style={{
@@ -792,6 +1149,7 @@ function UsageBar({
             }}
           />
         </svg>
+
         <div
           style={{
             position: 'absolute',
@@ -812,6 +1170,7 @@ function UsageBar({
           >
             {percentage}%
           </span>
+
           <span
             style={{
               fontSize: 10,
@@ -820,10 +1179,12 @@ function UsageBar({
               color: isDark ? 'rgba(248,250,252,0.6)' : 'rgba(15,23,42,0.6)',
             }}
           >
-            {used.toLocaleString()}/{limit >= 9999 ? '∞' : limit.toLocaleString()}
+            {safeUsed.toLocaleString()}/
+            {safeLimit > 0 ? safeLimit.toLocaleString() : 'Custom'}
           </span>
         </div>
       </div>
+
       <span
         style={{
           fontSize: 12,
