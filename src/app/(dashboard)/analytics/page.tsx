@@ -1731,52 +1731,52 @@ function CustomersTab({
     );
   };
 
- const displayed = useMemo(() => {
-   let list = leads.filter(segmentMatches);
+  const displayed = useMemo(() => {
+    let list = leads.filter(segmentMatches);
 
-   if (chanFilter.length > 0) {
-     list = list.filter((lead) =>
-       chanFilter.includes((lead.channel || '').toLowerCase()),
-     );
-   }
+    if (chanFilter.length > 0) {
+      list = list.filter((lead) =>
+        chanFilter.includes((lead.channel || '').toLowerCase()),
+      );
+    }
 
-   list = [...list];
+    list = [...list];
 
-   if (sortOption === 'name_asc') {
-     list.sort((a, b) =>
-       getLabel(a).localeCompare(getLabel(b), undefined, {
-         sensitivity: 'base',
-         numeric: true,
-       }),
-     );
-   } else if (sortOption === 'name_desc') {
-     list.sort((a, b) =>
-       getLabel(b).localeCompare(getLabel(a), undefined, {
-         sensitivity: 'base',
-         numeric: true,
-       }),
-     );
-   } else {
-     list.sort(
-       (a, b) =>
-         new Date(b.updated_at || 0).getTime() -
-         new Date(a.updated_at || 0).getTime(),
-     );
-   }
+    if (sortOption === 'name_asc') {
+      list.sort((a, b) =>
+        getLabel(a).localeCompare(getLabel(b), undefined, {
+          sensitivity: 'base',
+          numeric: true,
+        }),
+      );
+    } else if (sortOption === 'name_desc') {
+      list.sort((a, b) =>
+        getLabel(b).localeCompare(getLabel(a), undefined, {
+          sensitivity: 'base',
+          numeric: true,
+        }),
+      );
+    } else {
+      list.sort(
+        (a, b) =>
+          new Date(b.updated_at || 0).getTime() -
+          new Date(a.updated_at || 0).getTime(),
+      );
+    }
 
-   return list;
- }, [leads, segmentMatches, chanFilter, sortOption]);
+    return list;
+  }, [leads, segmentMatches, chanFilter, sortOption]);
 
   const pagedDisplayed = getPageItems(displayed, customersPage);
 
   const activeContactFilter = SEGMENT_CFG_TAB[segFilter];
 
-  const activeChannelLabel =
-    chanFilter.length === 0
-      ? 'All Channels'
-      : chanFilter.length === 1
-        ? chanFilter[0].charAt(0).toUpperCase() + chanFilter[0].slice(1)
-        : `${chanFilter.length} Channels`;
+ const activeChannelLabel =
+   chanFilter.length === 0
+     ? 'All channels'
+     : chanFilter.length === 1
+       ? chanFilter[0].charAt(0).toUpperCase() + chanFilter[0].slice(1)
+       : `${chanFilter.length} channels`;
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -1884,12 +1884,22 @@ function CustomersTab({
                   }
                   className='min-w-[165px]'
                 >
-                  {chanFilter.length === 1 ? (
-                    CHANNEL_CFG[chanFilter[0]]?.logo || (
-                      <Globe size={14} className='shrink-0' />
-                    )
-                  ) : (
-                    <Radio size={14} className='shrink-0' />
+                  <Radio size={14} className='shrink-0' />
+
+                  {chanFilter.length > 0 && (
+                    <span className='flex shrink-0 items-center'>
+                      {chanFilter.slice(0, 3).map((channel, i) => (
+                        <span
+                          key={channel}
+                          className={cn(
+                            'flex h-[18px] w-[18px] items-center justify-center rounded-full bg-white dark:bg-gray-900',
+                            i > 0 && '-ml-1.5',
+                          )}
+                        >
+                          {CHANNEL_CFG[channel]?.logo || <Globe size={14} />}
+                        </span>
+                      ))}
+                    </span>
                   )}
 
                   <span className='truncate'>{activeChannelLabel}</span>
@@ -1908,22 +1918,8 @@ function CustomersTab({
                       )}
                     >
                       <span className='inline-flex items-center gap-2'>
-                        <span
-                          className={cn(
-                            'flex h-4 w-4 shrink-0 items-center justify-center rounded border',
-                            chanFilter.length === 0
-                              ? 'border-brand-500 bg-brand-500 text-white'
-                              : 'border-gray-300 bg-white dark:border-gray-600 dark:bg-gray-900',
-                          )}
-                        >
-                          {chanFilter.length === 0 && (
-                            <Check size={11} strokeWidth={3} />
-                          )}
-                        </span>
-
-                        <Globe size={14} />
-
-                        <span>All Channels</span>
+                        <Radio size={14} className='shrink-0' />
+                        <span>All channels</span>
                       </span>
 
                       <span className='type-caption text-gray-400 dark:text-gray-500'>
