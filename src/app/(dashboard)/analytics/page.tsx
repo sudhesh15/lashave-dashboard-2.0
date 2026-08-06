@@ -702,17 +702,56 @@ function ActivityAreaChart({
   );
 }
 
+const DEFAULT_DONUT_COLORS = [
+  '#465FFF', // brand
+  '#12B76A', // green
+  '#F79009', // orange
+  '#F04438', // red
+  '#7A5AF8', // purple
+  '#0BA5EC', // blue
+  '#EE46BC', // pink
+  '#F7B027', // amber
+  '#2ED3B7', // teal
+  '#875BF7', // violet
+  '#FB6514', // deep orange
+  '#36BFFA', // sky
+];
+
+const TOPIC_FALLBACK_COLORS = [
+  '#12B76A', // green
+  '#F79009', // orange
+  '#7A5AF8', // purple
+  '#0BA5EC', // blue
+  '#EE46BC', // pink
+  '#F7B027', // amber
+  '#2ED3B7', // teal
+  '#875BF7', // violet
+  '#FB6514', // deep orange
+  '#36BFFA', // sky
+  '#667085', // gray (last resort)
+];
+
+function fallbackColorForTopic(topic: string) {
+  // stable hash so the same topic always gets the same color
+  const hash = topic.split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+  return TOPIC_FALLBACK_COLORS[hash % TOPIC_FALLBACK_COLORS.length];
+}
+
 function TopicDonutChart({
   data,
   isDark,
 }: {
-  data: { label: string; value: number; color: string }[];
+  data: { label: string; value: number; color?: string }[];
   isDark: boolean;
 }) {
+  const colors = data.map(
+    (d, i) => d.color ?? DEFAULT_DONUT_COLORS[i % DEFAULT_DONUT_COLORS.length],
+  );
+
   const options: ApexOptions = {
     chart: { type: 'donut', fontFamily: 'Outfit, sans-serif' },
     labels: data.map((d) => d.label),
-    colors: data.map((d) => d.color),
+    colors,
     legend: {
       position: 'bottom',
       fontFamily: 'Outfit',
@@ -737,7 +776,9 @@ function TopicDonutChart({
       },
     },
   };
+
   const series = data.map((d) => d.value);
+
   return (
     <ReactApexChart
       options={options}
@@ -2233,11 +2274,11 @@ function OverviewTab({
     label: d.label,
     value: depth.find((x) => x.bucket === d.key)?.count ?? 0,
   }));
-  const topicDonut = topics.map((t) => ({
-    label: TOPIC_CFG[t.topic]?.label ?? t.topic,
-    value: t.count,
-    color: TOPIC_CFG[t.topic]?.color ?? PALETTE.gray,
-  }));
+const topicDonut = topics.map((t) => ({
+  label: TOPIC_CFG[t.topic]?.label ?? t.topic,
+  value: t.count,
+  color: TOPIC_CFG[t.topic]?.color ?? fallbackColorForTopic(t.topic),
+}));
   const convRate =
     overview && overview.conversations > 0
       ? Math.round((overview.leads / overview.conversations) * 100)

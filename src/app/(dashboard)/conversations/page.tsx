@@ -481,16 +481,16 @@ function ConversationTable({
           <h4 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
             {activeTab.label} conversations
           </h4>
-          <div className='flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end'>
-            <div className='relative w-full sm:w-[240px]'>
-              <Search className='pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400' />
+          <div className='flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end '>
+            <div className='relative w-full sm:w-[280px]'>
+              <Search className='pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400' />
               <input
                 type='search'
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && onSearchSubmit()}
                 placeholder='Search by username or ID'
-                className='h-10 w-full rounded-[10px] border border-gray-300 bg-white py-2 pl-11 pr-4 type-small text-gray-800 shadow-theme-xs outline-none placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-gray-500'
+                className='h-10 w-full rounded-[10px] border border-gray-300 bg-white py-2 pl-10 pr-4 type-small text-gray-800 shadow-theme-xs outline-none placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-gray-500'
               />
             </div>
 
