@@ -1371,8 +1371,8 @@ const bookingChannelFilterRef = useRef<HTMLDivElement>(null);
                           type='button'
                           onClick={() => {
                             setActiveTab(tab.key);
-                            setBookingDateRange(null);
-                            setBookingDatePreset(null);
+                            // setBookingDateRange(null);
+                            // setBookingDatePreset(null);
                             setBookingSearch('');
                             setCurrentPage(1);
                             setOpenBookingFilter(null);
