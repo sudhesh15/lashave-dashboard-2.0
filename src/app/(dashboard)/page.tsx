@@ -1542,70 +1542,74 @@ ${about}`.trim();
           <div className='xl:col-span-5'>
             <AttentionCard items={attentionItems} loading={attentionLoading} />
           </div>
+
           <div className='xl:col-span-7'>
             <TopicsCard topics={topics} loading={topicsLoading} />
+
+            <div className='mt-6'>
+              <Card className='p-6 sm:p-6'>
+                <ChartHeader
+                  title='Operational Summary'
+                  subtitle={
+                    dateRange
+                      ? `${formatDate(dateRange.from)} to ${formatDate(dateRange.to)}`
+                      : 'All available data'
+                  }
+                />
+
+                <div className='grid grid-cols-1 gap-3 sm:grid-cols-2'>
+                  {[
+                    {
+                      label: 'Open conversations',
+                      value: overview?.open_conversations ?? 0,
+                      icon: <Users className='h-5 w-5' />,
+                    },
+                    {
+                      label: 'Average latency',
+                      value:
+                        overview?.avg_latency_ms != null
+                          ? `${overview.avg_latency_ms}ms`
+                          : '0ms',
+                      icon: <Clock3 className='h-5 w-5' />,
+                    },
+                    {
+                      label: 'Active channels',
+                      value: channels.filter((channel) => channel.is_active)
+                        .length,
+                      icon: <CheckCircle2 className='h-5 w-5' />,
+                    },
+                    {
+                      label: 'Date range',
+                      value:
+                        activePreset != null ? `${activePreset}d` : 'Custom',
+                      icon: <Calendar className='h-5 w-5' />,
+                    },
+                  ].map((item) => (
+                    <div
+                      key={item.label}
+                      className='rounded-xl border border-gray-200 p-4 dark:border-gray-800'
+                    >
+                      <div className='mb-4 flex h-10 w-10 items-center justify-center rounded-[10px] bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'>
+                        {item.icon}
+                      </div>
+
+                      <p className='type-caption text-gray-500 dark:text-gray-400'>
+                        {item.label}
+                      </p>
+
+                      <p className='mt-1 type-card-title font-semibold text-gray-800 dark:text-white/90'>
+                        {item.value}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </div>
           </div>
         </div>
 
-        <div className='mt-6 grid grid-cols-1 gap-6 xl:grid-cols-12'>
-          <div className='xl:col-span-7'>
-            <FaqGapsCard gaps={faqGaps} loading={faqLoading} />
-          </div>
-          <div className='xl:col-span-5'>
-            <Card className='p-6 sm:p-6'>
-              <ChartHeader
-                title='Operational Summary'
-                subtitle={
-                  dateRange
-                    ? `${formatDate(dateRange.from)} to ${formatDate(dateRange.to)}`
-                    : 'All available data'
-                }
-              />
-              <div className='grid grid-cols-1 gap-3 sm:grid-cols-2'>
-                {[
-                  {
-                    label: 'Open conversations',
-                    value: overview?.open_conversations ?? 0,
-                    icon: <Users className='h-5 w-5' />,
-                  },
-                  {
-                    label: 'Average latency',
-                    value:
-                      overview?.avg_latency_ms != null
-                        ? `${overview.avg_latency_ms}ms`
-                        : '0ms',
-                    icon: <Clock3 className='h-5 w-5' />,
-                  },
-                  {
-                    label: 'Active channels',
-                    value: channels.filter((channel) => channel.is_active)
-                      .length,
-                    icon: <CheckCircle2 className='h-5 w-5' />,
-                  },
-                  {
-                    label: 'Date range',
-                    value: activePreset != null ? `${activePreset}d` : 'Custom',
-                    icon: <Calendar className='h-5 w-5' />,
-                  },
-                ].map((item) => (
-                  <div
-                    key={item.label}
-                    className='rounded-xl border border-gray-200 p-4 dark:border-gray-800'
-                  >
-                    <div className='mb-4 flex h-10 w-10 items-center justify-center rounded-[10px] bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'>
-                      {item.icon}
-                    </div>
-                    <p className='type-caption text-gray-500 dark:text-gray-400'>
-                      {item.label}
-                    </p>
-                    <p className='mt-1 type-card-title font-semibold text-gray-800 dark:text-white/90'>
-                      {item.value}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          </div>
+        <div className='mt-6'>
+          <FaqGapsCard gaps={faqGaps} loading={faqLoading} />
         </div>
       </div>
     </RequireAuth>

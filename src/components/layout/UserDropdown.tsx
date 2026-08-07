@@ -23,6 +23,9 @@ export function UserDropdown() {
   const { logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [me, setMe] = useState<MeResp | null>(null);
+  const [avatarFailed, setAvatarFailed] = useState(false);
+
+ 
 
   useEffect(() => {
     const fetchMe = () =>
@@ -33,6 +36,10 @@ export function UserDropdown() {
     window.addEventListener('avatar-updated', fetchMe);
     return () => window.removeEventListener('avatar-updated', fetchMe);
   }, []);
+
+   useEffect(() => {
+     setAvatarFailed(false);
+   }, [me?.user.avatar_url]);
 
   function toggleDropdown(e: React.MouseEvent<HTMLButtonElement>) {
     e.stopPropagation();
@@ -51,16 +58,20 @@ export function UserDropdown() {
         onClick={toggleDropdown}
         className='dropdown-toggle flex items-center gap-2 text-gray-700 dark:text-gray-400'
       >
-        {me?.user.avatar_url ? (
-          <Avatar src={me.user.avatar_url} alt={email} size='small' />
+        {me?.user.avatar_url && !avatarFailed ? (
+          <Avatar
+            src={me.user.avatar_url}
+            alt={email}
+            size='small'
+            onError={() => setAvatarFailed(true)}
+          />
         ) : (
-          <AvatarText name={email || '?'} className='h-9 w-9' />
+          <AvatarText name={email.split('@')[0]} className='h-9 w-9' />
         )}
         <ChevronDown
           className={`icon-small stroke-gray-500 transition-transform duration-200 dark:stroke-gray-400 ${isOpen ? 'rotate-180' : ''}`}
         />
       </button>
-
       <Dropdown
         isOpen={isOpen}
         onClose={closeDropdown}

@@ -7,8 +7,9 @@ interface AvatarProps {
   src: string;
   alt?: string;
   size?: AvatarSize;
-  status?: "online" | "offline" | "busy" | "none";
+  status?: 'online' | 'offline' | 'busy' | 'none';
   className?: string;
+  onError?: () => void;
 }
 
 const sizeClasses: Record<AvatarSize, string> = {
@@ -35,25 +36,29 @@ const statusColorClasses = {
   busy: "bg-warning-500",
 };
 
+
 export function Avatar({
   src,
-  alt = "User Avatar",
-  size = "medium",
-  status = "none",
+  alt = 'User Avatar',
+  size = 'medium',
+  status = 'none',
   className,
+  onError,
 }: AvatarProps) {
   return (
-    <div className={cn("relative rounded-full", sizeClasses[size], className)}>
-      {/* eslint-disable-next-line @next/next/no-img-element -- avatar src comes from a
-          dynamic, environment-dependent backend host; next/image would require every
-          such host allowlisted in next.config.ts */}
-      <img src={src} alt={alt} className="h-full w-full rounded-full object-cover" />
-      {status !== "none" && (
+    <div className={cn('relative rounded-full', sizeClasses[size], className)}>
+      <img
+        src={src}
+        alt={alt}
+        className='h-full w-full rounded-full object-cover'
+        onError={onError}
+      />
+      {status !== 'none' && (
         <span
           className={cn(
-            "absolute bottom-0 right-0 rounded-full border-[1.5px] border-white dark:border-gray-900",
+            'absolute bottom-0 right-0 rounded-full border-[1.5px] border-white dark:border-gray-900',
             statusSizeClasses[size],
-            statusColorClasses[status]
+            statusColorClasses[status],
           )}
         />
       )}
