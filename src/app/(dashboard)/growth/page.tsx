@@ -1303,7 +1303,7 @@ export default function GrowthPage() {
 
                           <span className='flex shrink-0 items-center gap-2'>
                             {typeof item.count === 'number' && (
-                              <span className='rounded-full bg-gray-100 px-1.5 py-0.5 type-caption font-semibold text-gray-500 dark:bg-white/[0.06] dark:text-gray-400'>
+                              <span className='rounded-full bg-brand-50 px-1.5 py-0.5 type-caption font-semibold text-brand-600 dark:bg-brand-500/15 dark:text-brand-400'>
                                 {item.count}
                               </span>
                             )}

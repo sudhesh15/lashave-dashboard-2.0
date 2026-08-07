@@ -655,13 +655,13 @@ function ConversationTable({
           <div className='w-full overflow-x-auto'>
             <table className='lashvae-column-dividers min-w-[930px] table-fixed min-h-80'>
               <colgroup>
-                <col className='w-[320px]' /> {/* Customer */}
-                <col className='w-[130px]' /> {/* Channel */}
+                <col className='w-[400px]' /> {/* Customer */}
+                <col className='w-[150px]' /> {/* Channel */}
                 <col className='w-[140px]' /> {/* Intent */}
                 <col className='w-[130px]' /> {/* Status */}
                 <col className='w-[130px]' /> {/* Lead */}
-                <col className='w-[120px]' /> {/* Last seen */}
-                <col className='w-[100px]' /> {/* Actions */}
+                <col className='w-[140px]' /> {/* Last seen */}
+                <col className='w-[180px]' /> {/* Actions */}
               </colgroup>
 
               <thead className='border-b border-gray-100 dark:border-white/[0.05]'>
@@ -826,8 +826,6 @@ function ConversationTable({
                             </span>
                           )}
                         </td>
-                          
-
 
                         <td className='px-4 py-3 type-small text-gray-500 dark:text-gray-400'>
                           <span className='whitespace-nowrap'>
@@ -836,13 +834,13 @@ function ConversationTable({
                         </td>
 
                         {/* Actions */}
-                        <td className='w-[100px] min-w-[100px] max-w-[100px] px-2 py-3 text-center'>
+                        <td className='px-4 py-3 text-center'>
                           <Link
                             href={`/conversations/${item.id}`}
-                            className='inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-[10px] bg-brand-500 px-3 type-small font-medium text-white shadow-theme-xs hover:bg-brand-600'
+                            className='inline-flex h-9 w-full items-center justify-center gap-2 whitespace-nowrap rounded-[10px] bg-brand-500 px-4 type-small font-medium text-white shadow-theme-xs hover:bg-brand-600'
                           >
-                            <Eye size={13} />
-                            View
+                            <Eye size={14} />
+                            View Conversation
                           </Link>
                         </td>
                       </tr>

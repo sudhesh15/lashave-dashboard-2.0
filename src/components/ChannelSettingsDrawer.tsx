@@ -1,5 +1,7 @@
 "use client";
 
+import { createPortal } from 'react-dom';
+
 import { apiFetch } from "@/lib/api";
 import {
   Bot,
@@ -346,6 +348,7 @@ export function ChannelSettingsDrawer({
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [err, setErr] = useState("");
+  const [mounted, setMounted] = useState(false);
   const drawerRef = useRef<HTMLDivElement>(null);
 
   const loadSettings = useCallback(async () => {
@@ -370,6 +373,13 @@ export function ChannelSettingsDrawer({
     }, 0);
     return () => window.clearTimeout(timer);
   }, [loadSettings]);
+
+  
+
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
 
   useEffect(() => {
     function handleClick(event: MouseEvent) {
@@ -418,134 +428,164 @@ export function ChannelSettingsDrawer({
     setSaved(false);
   }
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <>
+      {/* BACKDROP */}
       <div
-        className="fixed inset-0 z-[10000] bg-gray-400/50 backdrop-blur-[12px]"
-        aria-hidden="true"
+        className='fixed inset-0 z-[10000] bg-black/25 backdrop-blur-[2px] dark:bg-black/40'
+        aria-hidden='true'
+        onClick={onClose}
       />
 
+      {/* DRAWER */}
       <aside
         ref={drawerRef}
-        aria-label="Connected channel settings"
-        className="fixed bottom-0 right-0 top-0 z-[10001] flex w-full max-w-[620px] flex-col border-l border-gray-200 bg-white shadow-theme-lg dark:border-gray-800 dark:bg-gray-900"
+        aria-label='Connected channel settings'
+        className='fixed bottom-0 right-0 top-0 z-[10001] flex w-full max-w-[520px]
+                 flex-col border-l border-gray-200 bg-white shadow-2xl
+                 dark:border-white/[0.08] dark:bg-gray-900'
       >
-        <div className="flex items-start justify-between gap-4 border-b border-gray-200 px-5 py-5 dark:border-gray-800 sm:px-6">
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400">
-              <Settings2 className="h-5 w-5" />
+        {/* HEADER */}
+        <div className='flex shrink-0 items-start justify-between gap-4 border-b border-gray-200 px-5 py-5 dark:border-gray-800 sm:px-6'>
+          <div className='flex min-w-0 items-start gap-3'>
+            <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400'>
+              <Settings2 className='h-5 w-5' />
             </div>
-            <div>
-              <h2 className="type-card-title font-semibold text-gray-800 dark:text-white/90">
-                Channel Settings
+
+            <div className='min-w-0'>
+              <p className='type-caption font-medium text-brand-500 dark:text-brand-400'>
+                Customize AI
+              </p>
+
+              <h2 className='mt-0.5 truncate type-card-title font-semibold text-gray-800 dark:text-white/90'>
+                {channelName}
               </h2>
-              <p className="mt-1 type-small text-gray-500 dark:text-gray-400">
-                {channelName} per-channel AI behaviour
+
+              <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>
+                Configure how AI responds on this channel.
               </p>
             </div>
           </div>
+
           <button
-            type="button"
+            type='button'
             onClick={onClose}
-            className="flex h-10 w-10 items-center justify-center rounded-[10px] border border-gray-200 bg-white text-gray-500 transition hover:bg-gray-50 hover:text-gray-700 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400 dark:hover:bg-white/[0.05] dark:hover:text-white/90"
-            aria-label="Close settings"
+            className='flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px]
+                     border border-gray-200 bg-white text-gray-500 transition
+                     hover:bg-gray-50 hover:text-gray-700
+                     dark:border-gray-800 dark:bg-white/[0.03]
+                     dark:text-gray-400 dark:hover:bg-white/[0.05]
+                     dark:hover:text-white/90'
+            aria-label='Close settings'
           >
-            <X className="h-5 w-5" />
+            <X className='h-4 w-4' />
           </button>
         </div>
 
-        <div className="custom-scrollbar flex-1 overflow-y-auto px-5 py-5 sm:px-6">
+        {/* CONTENT */}
+        <div className='custom-scrollbar min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6'>
           {loading ? (
             <LoadingState />
           ) : (
-            <div className="space-y-5">
+            <div className='space-y-4'>
               <PreviewCard settings={settings} />
 
               <Section
-                title="Mode"
-                description="Choose the primary objective for replies on this connected channel."
+                title='Mode'
+                description='Choose the primary objective for replies on this connected channel.'
               >
                 <OptionGrid
                   options={MODE_OPTIONS}
                   value={settings.mode}
-                  onChange={(value) => patch("mode", value)}
+                  onChange={(value) => patch('mode', value)}
                 />
               </Section>
 
               <Section
-                title="Tone"
-                description="Set the voice customers should hear in this channel."
+                title='Tone'
+                description='Set the voice customers should hear in this channel.'
               >
                 <OptionGrid
                   options={TONE_OPTIONS}
                   value={settings.tone}
-                  onChange={(value) => patch("tone", value)}
-                  columns="sm:grid-cols-2"
+                  onChange={(value) => patch('tone', value)}
+                  columns='grid-cols-2'
                 />
               </Section>
 
               <Section
-                title="Response Length"
-                description="Control how much detail the assistant includes by default."
+                title='Response Length'
+                description='Control how much detail the assistant includes by default.'
               >
                 <OptionGrid
                   options={LENGTH_OPTIONS}
                   value={settings.response_length}
-                  onChange={(value) => patch("response_length", value)}
+                  onChange={(value) => patch('response_length', value)}
                 />
               </Section>
 
               <Section
-                title="Formatting Policy"
-                description="Keep customer-facing messages consistent with the brand style."
+                title='Formatting Policy'
+                description='Keep customer-facing messages consistent with the brand style.'
               >
                 <OptionGrid
                   options={EMOJI_OPTIONS}
                   value={settings.emoji_usage}
-                  onChange={(value) => patch("emoji_usage", value)}
+                  onChange={(value) => patch('emoji_usage', value)}
                 />
               </Section>
 
               <Section
-                title="Behaviour"
-                description="Enable workflow rules that affect qualification and follow-up."
+                title='Behaviour'
+                description='Enable workflow rules that affect qualification and follow-up.'
               >
-                <div className="space-y-3">
+                <div className='space-y-3'>
                   <ToggleRow
                     checked={settings.upsell_enabled}
-                    onChange={(value) => patch("upsell_enabled", value)}
-                    label="Upsell suggestions"
-                    description="Mention related products or services only when relevant."
+                    onChange={(value) => patch('upsell_enabled', value)}
+                    label='Upsell suggestions'
+                    description='Mention related products or services only when relevant.'
                   />
+
                   <ToggleRow
                     checked={settings.collect_contact_info}
-                    onChange={(value) => patch("collect_contact_info", value)}
-                    label="Collect contact information"
-                    description="Ask for name and contact details when the conversation is qualified."
+                    onChange={(value) => patch('collect_contact_info', value)}
+                    label='Collect contact information'
+                    description='Ask for name and contact details when the conversation is qualified.'
                   />
                 </div>
               </Section>
 
               <Section
-                title="Channel Context"
-                description="Add instructions that apply only to this connected account."
+                title='Channel Context'
+                description='Add instructions that apply only to this connected account.'
               >
                 <textarea
-                  value={settings.channel_context || ""}
+                  value={settings.channel_context || ''}
                   onChange={(event) =>
-                    patch("channel_context", event.target.value || null)
+                    patch('channel_context', event.target.value || null)
                   }
-                  placeholder="Example: This channel is for existing customers. Prioritize order support and keep replies concise."
+                  placeholder='Example: This channel is for existing customers. Prioritize order support and keep replies concise.'
                   rows={5}
-                  className="h-auto w-full resize-y rounded-[10px] border border-gray-300 bg-transparent px-4 py-3 type-small leading-6 text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                  className='h-auto w-full resize-y rounded-[10px] border border-gray-300
+                           bg-transparent px-4 py-3 type-small leading-6 text-gray-800
+                           shadow-theme-xs placeholder:text-gray-400
+                           focus:border-brand-300 focus:outline-hidden
+                           focus:ring-3 focus:ring-brand-500/10
+                           dark:border-gray-700 dark:bg-gray-900
+                           dark:text-white/90 dark:placeholder:text-white/30
+                           dark:focus:border-brand-800'
                 />
-                <p className="mt-2 type-caption text-gray-500 dark:text-gray-400">
+
+                <p className='mt-2 type-caption text-gray-500 dark:text-gray-400'>
                   This context is sent with the prompt for this channel only.
                 </p>
               </Section>
 
               {err && (
-                <div className="rounded-xl border border-error-500/20 bg-error-50 px-4 py-3 type-small text-error-600 dark:bg-error-500/10 dark:text-error-500">
+                <div className='rounded-xl border border-error-500/20 bg-error-50 px-4 py-3 type-small text-error-600 dark:bg-error-500/10 dark:text-error-500'>
                   {err}
                 </div>
               )}
@@ -553,34 +593,43 @@ export function ChannelSettingsDrawer({
           )}
         </div>
 
-        <div className="border-t border-gray-200 bg-white px-5 py-4 dark:border-gray-800 dark:bg-gray-900 sm:px-6">
-          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+        {/* FOOTER */}
+        <div className='shrink-0 border-t border-gray-200 bg-white px-5 py-4 dark:border-gray-800 dark:bg-gray-900 sm:px-6'>
+          <div className='flex justify-end gap-3'>
             <button
-              type="button"
+              type='button'
               onClick={onClose}
-              className="inline-flex h-10 items-center justify-center rounded-[10px] border border-gray-200 bg-white px-5 type-small font-medium text-gray-700 shadow-theme-xs transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-white/[0.03]"
+              className='inline-flex h-10 items-center justify-center rounded-[10px]
+                       border border-gray-200 bg-white px-5 type-small font-medium
+                       text-gray-700 shadow-theme-xs transition hover:bg-gray-50
+                       dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300
+                       dark:hover:bg-white/[0.03]'
             >
               Cancel
             </button>
+
             <button
-              type="button"
+              type='button'
               onClick={() => void save()}
               disabled={saving || loading}
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-[10px] bg-brand-500 px-5 type-small font-medium text-white shadow-theme-xs transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-60"
+              className='inline-flex h-10 items-center justify-center gap-2
+                       rounded-[10px] bg-brand-500 px-5 type-small font-medium
+                       text-white shadow-theme-xs transition hover:bg-brand-600
+                       disabled:cursor-not-allowed disabled:opacity-60'
             >
               {saving ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 className='h-4 w-4 animate-spin' />
                   Saving
                 </>
               ) : saved ? (
                 <>
-                  <CheckCircle2 className="h-4 w-4" />
+                  <CheckCircle2 className='h-4 w-4' />
                   Saved
                 </>
               ) : (
                 <>
-                  <Save className="h-4 w-4" />
+                  <Save className='h-4 w-4' />
                   Save Settings
                 </>
               )}
@@ -588,6 +637,7 @@ export function ChannelSettingsDrawer({
           </div>
         </div>
       </aside>
-    </>
+    </>,
+    document.body,
   );
 }
