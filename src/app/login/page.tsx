@@ -603,21 +603,30 @@ function AuthPageInner() {
                     <span>
                       I agree to the{' '}
                       <a
-                        href='https://lashvae.com/terms'
+                        href='https://lashvae.com/legal/terms'
                         target='_blank'
                         rel='noopener noreferrer'
                         className='text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300'
                       >
                         Terms and Conditions
                       </a>{' '}
-                      and{' '}
+                      ,{' '}
                       <a
-                        href='https://lashvae.com/privacy-policy'
+                        href='https://lashvae.com/legal/privacy'
                         target='_blank'
                         rel='noopener noreferrer'
                         className='text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300'
                       >
                         Privacy Policy
+                      </a>
+                     , and {' '}
+                      <a
+                        href='https://lashvae.com/legal/dpa'
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        className='text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300'
+                      >
+                        Data Processing Agreement
                       </a>
                       .
                     </span>
