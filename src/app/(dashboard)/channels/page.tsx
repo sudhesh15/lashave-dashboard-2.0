@@ -5,25 +5,28 @@ import DataProcessingAgreementModal, {
 } from '@/components/DataProcessingAgreementModal';
 import GoogleLocationModal from '@/components/GoogleLocationModal';
 import { RequireAuth } from '@/components/require-auth';
+import {
+  getPageItems,
+  TablePagination,
+} from '@/components/ui/table-pagination';
 import WebsiteWidgetModal from '@/components/Websitewidgetmodal ';
-import { getPageItems, TablePagination } from '@/components/ui/table-pagination';
 import { apiFetch } from '@/lib/api';
 import { useTheme } from '@/lib/theme-context';
 import {
   AlertTriangle,
   Check,
-  CheckCircle2,
   Globe2,
   Loader2,
-  MessageCircle,
+  MapPin,
   MoreVertical,
   PauseCircle,
   Plug,
   Power,
   RefreshCw,
   Settings,
+  ShieldCheck,
+  Sparkles,
   Trash2,
-  WifiOff,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
@@ -85,24 +88,24 @@ const TOKEN_LIFETIME_DAYS = 60;
 const WARN_AFTER_DAYS = 50;
 
 const PLATFORM_LABELS: Record<string, string> = {
-  instagram: 'Instagram',
-  telegram: 'Telegram',
-  facebook: 'Facebook',
-  google: 'Google Reviews',
+  'instagram': 'Instagram',
+  'telegram': 'Telegram',
+  'facebook': 'Facebook',
+  'google': 'Google Reviews',
   'google reviews': 'Google Reviews',
-  website: 'Website',
+  'website': 'Website',
 };
 
 const PLATFORM_LOGOS: Record<string, string> = {
-  instagram: '/brand-logo/instagram.png',
-  telegram: '/brand-logo/telegram.png',
-  facebook: '/brand-logo/facebook.png',
-  google: '/brand-logo/google-map.png',
+  'instagram': '/brand-logo/instagram.png',
+  'telegram': '/brand-logo/telegram.png',
+  'facebook': '/brand-logo/facebook.png',
+  'google': '/brand-logo/google-map.png',
   'google reviews': '/brand-logo/google-map.png',
-  website: '/brand-logo/website.png',
-  whatsapp: '/brand-logo/whatsapp.png',
-  youtube: '/brand-logo/youtube.png',
-  meta: '/brand-logo/meta.png',
+  'website': '/brand-logo/website.png',
+  'whatsapp': '/brand-logo/whatsapp.png',
+  'youtube': '/brand-logo/youtube.png',
+  'meta': '/brand-logo/meta.png',
 };
 
 function errorMessage(error: unknown, fallback: string) {
@@ -112,7 +115,9 @@ function errorMessage(error: unknown, fallback: string) {
 function platformLabel(platform?: string) {
   if (!platform) return 'Channel';
   const key = platform.toLowerCase().trim();
-  return PLATFORM_LABELS[key] || platform.charAt(0).toUpperCase() + platform.slice(1);
+  return (
+    PLATFORM_LABELS[key] || platform.charAt(0).toUpperCase() + platform.slice(1)
+  );
 }
 
 function platformLogo(platform?: string) {
@@ -138,7 +143,8 @@ function formatDate(value?: string | null) {
   return new Intl.DateTimeFormat('en-IN', {
     day: 'numeric',
     month: 'short',
-    year: date.getFullYear() === new Date().getFullYear() ? undefined : 'numeric',
+    year:
+      date.getFullYear() === new Date().getFullYear() ? undefined : 'numeric',
   }).format(date);
 }
 
@@ -152,7 +158,8 @@ function getTokenStatus(
 ): { status: 'ok' | 'expiring' | 'expired'; daysLeft: number } | null {
   const platform = channel.platform?.toLowerCase();
   if (!platform || !META_PLATFORMS.includes(platform)) return null;
-  const issued = channel.token_issued_at ?? channel.updated_at ?? channel.created_at;
+  const issued =
+    channel.token_issued_at ?? channel.updated_at ?? channel.created_at;
   if (!issued) return null;
   const issuedMs = new Date(issued).getTime();
   if (Number.isNaN(issuedMs)) return null;
@@ -208,12 +215,16 @@ function MetricCard({
       </div>
       <div className='mt-5 flex items-end justify-between gap-4'>
         <div>
-          <span className='type-small text-gray-500 dark:text-gray-400'>{label}</span>
+          <span className='type-small text-gray-500 dark:text-gray-400'>
+            {label}
+          </span>
           <h3 className='mt-2 text-title-sm font-bold text-gray-800 dark:text-white/90'>
             {value}
           </h3>
         </div>
-        <span className={`shrink-0 rounded-full px-3 py-1 type-caption font-medium ${badge}`}>
+        <span
+          className={`shrink-0 rounded-full px-3 py-1 type-caption font-medium ${badge}`}
+        >
           {sub}
         </span>
       </div>
@@ -224,8 +235,12 @@ function MetricCard({
 function ChartHeader({ title, subtitle }: { title: string; subtitle: string }) {
   return (
     <div className='mb-6'>
-      <h3 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>{title}</h3>
-      <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>{subtitle}</p>
+      <h3 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
+        {title}
+      </h3>
+      <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>
+        {subtitle}
+      </p>
     </div>
   );
 }
@@ -255,7 +270,8 @@ function ConnectModal({
           Connect {platformLabel(platform)}
         </h2>
         <p className='mt-2 type-small text-gray-500 dark:text-gray-400'>
-          Authorize this channel so Lashvae can manage customer messages from the dashboard.
+          Authorize this channel so Lashvae can manage customer messages from
+          the dashboard.
         </p>
         {isTelegram && (
           <input
@@ -321,8 +337,12 @@ function ConfirmModal({
         >
           <AlertTriangle className='h-5 w-5' />
         </div>
-        <h2 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>{title}</h2>
-        <p className='mt-2 type-small text-gray-500 dark:text-gray-400'>{description}</p>
+        <h2 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
+          {title}
+        </h2>
+        <p className='mt-2 type-small text-gray-500 dark:text-gray-400'>
+          {description}
+        </p>
         <div className='mt-6 flex justify-end gap-3'>
           <button
             type='button'
@@ -370,20 +390,28 @@ function ChannelsInner() {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState('');
   const [success, setSuccess] = useState('');
-  const [processingAccepted, setProcessingAccepted] = useState<boolean | null>(null);
-  const [agreementPlatform, setAgreementPlatform] = useState<SocialChannel | null>(null);
+  const [processingAccepted, setProcessingAccepted] = useState<boolean | null>(
+    null,
+  );
+  const [agreementPlatform, setAgreementPlatform] =
+    useState<SocialChannel | null>(null);
   const [connectPlatform, setConnectPlatform] = useState<string | null>(null);
   const [connectToken, setConnectToken] = useState('');
   const [connectError, setConnectError] = useState('');
   const [connecting, setConnecting] = useState(false);
-  const [disconnectTarget, setDisconnectTarget] = useState<Channel | null>(null);
+  const [disconnectTarget, setDisconnectTarget] = useState<Channel | null>(
+    null,
+  );
   const [pauseTarget, setPauseTarget] = useState<Channel | null>(null);
   const [settingsTarget, setSettingsTarget] = useState<Channel | null>(null);
   const [locationTarget, setLocationTarget] = useState<Channel | null>(null);
-  const [pendingLocationChannelId, setPendingLocationChannelId] = useState<number | null>(null);
+  const [pendingLocationChannelId, setPendingLocationChannelId] = useState<
+    number | null
+  >(null);
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const [websiteModalOpen, setWebsiteModalOpen] = useState(false);
-  const [websiteWidget, setWebsiteWidget] = useState<WebsiteWidgetResponse | null>(null);
+  const [websiteWidget, setWebsiteWidget] =
+    useState<WebsiteWidgetResponse | null>(null);
   const [websiteLoading, setWebsiteLoading] = useState(false);
   const [websiteSaving, setWebsiteSaving] = useState(false);
   const [channelsPage, setChannelsPage] = useState(1);
@@ -391,7 +419,9 @@ function ChannelsInner() {
   const load = useCallback(async () => {
     setErr('');
     try {
-      const data = await apiFetch<{ items: Channel[] }>('/admin/channels', { auth: true });
+      const data = await apiFetch<{ items: Channel[] }>('/admin/channels', {
+        auth: true,
+      });
       setChannels(data.items || []);
     } catch (error: unknown) {
       setErr(errorMessage(error, 'Failed to load channels.'));
@@ -422,9 +452,12 @@ function ChannelsInner() {
       void apiFetch<Overview>('/admin/stats/overview', { auth: true })
         .then(setOverview)
         .catch(() => undefined);
-      void apiFetch<{ accepted: boolean }>('/admin/processing-acceptance/status', {
-        auth: true,
-      })
+      void apiFetch<{ accepted: boolean }>(
+        '/admin/processing-acceptance/status',
+        {
+          auth: true,
+        },
+      )
         .then((res) => setProcessingAccepted(res.accepted))
         .catch(() => setProcessingAccepted(false));
     }, 0);
@@ -445,7 +478,9 @@ function ChannelsInner() {
         if (!status) continue;
         router.replace('/channels', { scroll: false });
         if (status === 'success') {
-          setSuccess(name ? `${name} connected on ${label}.` : `${label} connected.`);
+          setSuccess(
+            name ? `${name} connected on ${label}.` : `${label} connected.`,
+          );
           void load();
         } else {
           setErr(msg || `${label} connection failed.`);
@@ -455,7 +490,9 @@ function ChannelsInner() {
       if (googleStatus) {
         router.replace('/channels', { scroll: false });
         if (googleStatus === 'success') {
-          setSuccess('Google connected. Select the business profile to manage.');
+          setSuccess(
+            'Google connected. Select the business profile to manage.',
+          );
           const channelId = searchParams.get('channel_id');
           if (channelId) setPendingLocationChannelId(Number(channelId));
           void load();
@@ -469,7 +506,9 @@ function ChannelsInner() {
 
   useEffect(() => {
     if (pendingLocationChannelId == null) return;
-    const target = channels.find((channel) => channel.id === pendingLocationChannelId);
+    const target = channels.find(
+      (channel) => channel.id === pendingLocationChannelId,
+    );
     if (!target) return;
     const timer = window.setTimeout(() => {
       setLocationTarget(target);
@@ -479,9 +518,15 @@ function ChannelsInner() {
   }, [channels, pendingLocationChannelId]);
 
   const pagedChannels = getPageItems(channels, channelsPage);
-  const websiteChannel = channels.find((channel) => channel.platform?.toLowerCase?.().trim() === 'website');
+  const websiteChannel = channels.find(
+    (channel) => channel.platform?.toLowerCase?.().trim() === 'website',
+  );
   const websiteIsConnected = Boolean(websiteChannel);
-  const taken = new Set(channels.map((channel) => channel.platform?.toLowerCase?.().trim()).filter(Boolean));
+  const taken = new Set(
+    channels
+      .map((channel) => channel.platform?.toLowerCase?.().trim())
+      .filter(Boolean),
+  );
   const available = ALL_PLATFORMS.filter((platform) => {
     const key = platform.toLowerCase().trim();
     if (key === 'google reviews') return !taken.has('google');
@@ -547,27 +592,41 @@ function ChannelsInner() {
 
   async function handleConnect(platform: string, token?: string) {
     if (platform === 'instagram') {
-      const response = await apiFetch<{ auth_url: string }>('/admin/channels/instagram/connect', { auth: true });
+      const response = await apiFetch<{ auth_url: string }>(
+        '/admin/channels/instagram/connect',
+        { auth: true },
+      );
       if (response.auth_url) window.location.assign(response.auth_url);
       return;
     }
     if (platform === 'facebook') {
-      const response = await apiFetch<{ auth_url: string }>('/admin/channels/facebook/connect', { auth: true });
+      const response = await apiFetch<{ auth_url: string }>(
+        '/admin/channels/facebook/connect',
+        { auth: true },
+      );
       if (response.auth_url) window.location.assign(response.auth_url);
       return;
     }
     if (platform === 'google reviews') {
-      const response = await apiFetch<{ auth_url: string }>('/admin/channels/google/connect', { auth: true });
+      const response = await apiFetch<{ auth_url: string }>(
+        '/admin/channels/google/connect',
+        { auth: true },
+      );
       if (response.auth_url) window.location.assign(response.auth_url);
       return;
     }
     if (platform === 'telegram') {
-      const response = await apiFetch<{ display_name?: string; username?: string }>('/admin/channels/telegram/connect', {
+      const response = await apiFetch<{
+        display_name?: string;
+        username?: string;
+      }>('/admin/channels/telegram/connect', {
         method: 'POST',
         auth: true,
         body: { token },
       });
-      setSuccess(`${response.display_name || response.username || 'Telegram bot'} connected.`);
+      setSuccess(
+        `${response.display_name || response.username || 'Telegram bot'} connected.`,
+      );
       await load();
     }
   }
@@ -608,10 +667,13 @@ function ChannelsInner() {
   async function enableWebsiteWidget() {
     setWebsiteSaving(true);
     try {
-      const data = await apiFetch<WebsiteWidgetResponse>('/admin/widget/enable', {
-        method: 'POST',
-        auth: true,
-      });
+      const data = await apiFetch<WebsiteWidgetResponse>(
+        '/admin/widget/enable',
+        {
+          method: 'POST',
+          auth: true,
+        },
+      );
       setWebsiteWidget(data);
       await loadWebsiteWidget();
       await load();
@@ -943,9 +1005,12 @@ function ChannelsInner() {
                               )}
                             </td>
                             <td className='px-6 py-3'>
-                              <div className='flex items-center gap-2'>
+                              <div className='flex items-center gap-2 whitespace-nowrap'>
+                                {/* VERIFY */}
                                 <button
                                   type='button'
+                                  title='Verify'
+                                  aria-label='Verify channel'
                                   onClick={() => {
                                     void handleVerify(channel.id).then(
                                       (result) => {
@@ -958,6 +1023,7 @@ function ChannelsInner() {
                                           );
                                           return;
                                         }
+
                                         setSuccess('');
                                         setErr(
                                           result.error ||
@@ -966,47 +1032,105 @@ function ChannelsInner() {
                                       },
                                     );
                                   }}
-                                  className='inline-flex h-8 items-center gap-2 whitespace-nowrap rounded-[10px] bg-brand-500 px-3 type-small font-medium text-white shadow-theme-xs hover:bg-brand-600'
+                                  className='flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px]
+        border border-brand-200 bg-brand-50 text-brand-500
+        transition hover:border-brand-300 hover:bg-brand-100
+        dark:border-brand-500/30 dark:bg-brand-500/10 dark:text-brand-400
+        dark:hover:border-brand-500/50 dark:hover:bg-brand-500/15'
                                 >
-                                  Verify
+                                  <ShieldCheck
+                                    className='h-[18px] w-[18px]'
+                                    strokeWidth={2}
+                                  />
                                 </button>
+
+                                {/* PAUSE */}
                                 <button
                                   type='button'
+                                  title={
+                                    channel.is_active ? 'Pause' : 'Activate'
+                                  }
+                                  aria-label={
+                                    channel.is_active
+                                      ? 'Pause channel'
+                                      : 'Activate channel'
+                                  }
                                   onClick={() =>
                                     channel.is_active
                                       ? setPauseTarget(channel)
                                       : void handleToggle(channel.id, true)
                                   }
-                                  className='inline-flex h-8 items-center gap-2 whitespace-nowrap rounded-[10px] border border-gray-200 bg-white px-3 type-small font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-white/[0.03]'
+                                  className='flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px]
+        border border-brand-200 bg-brand-50 text-brand-500
+        transition hover:border-brand-300 hover:bg-brand-100
+        dark:border-brand-500/30 dark:bg-brand-500/10 dark:text-brand-400
+        dark:hover:border-brand-500/50 dark:hover:bg-brand-500/15'
                                 >
                                   {channel.is_active ? (
-                                    <PauseCircle className='h-4 w-4' />
+                                    <PauseCircle
+                                      className='h-[18px] w-[18px]'
+                                      strokeWidth={2}
+                                    />
                                   ) : (
-                                    <Power className='h-4 w-4' />
+                                    <Power
+                                      className='h-[18px] w-[18px]'
+                                      strokeWidth={2}
+                                    />
                                   )}
-                                  {channel.is_active ? 'Pause' : 'Activate'}
                                 </button>
+
+                                {/* CUSTOMIZE AI */}
+                                {!isGoogle && !isWebsite && (
+                                  <button
+                                    type='button'
+                                    onClick={() => setSettingsTarget(channel)}
+                                    className='inline-flex h-9 shrink-0 items-center justify-center gap-2
+          whitespace-nowrap rounded-[10px] bg-brand-500 px-3.5
+          type-small font-medium text-white shadow-theme-xs
+          transition hover:bg-brand-600'
+                                  >
+                                    <Sparkles
+                                      className='h-4 w-4 shrink-0'
+                                      strokeWidth={2}
+                                    />
+                                    <span className='whitespace-nowrap'>
+                                      Customize AI
+                                    </span>
+                                  </button>
+                                )}
+
+                                {/* GOOGLE */}
                                 {isGoogle && (
                                   <button
                                     type='button'
                                     onClick={() => setLocationTarget(channel)}
-                                    className='inline-flex h-8 items-center gap-2 whitespace-nowrap rounded-[10px] bg-brand-500 px-3 type-small font-medium text-white shadow-theme-xs hover:bg-brand-600'
+                                    className='inline-flex h-9 shrink-0 items-center gap-2 whitespace-nowrap
+          rounded-[10px] bg-brand-500 px-3.5 type-small
+          font-medium text-white shadow-theme-xs hover:bg-brand-600'
                                   >
-                                    Location
+                                    <MapPin className='h-4 w-4 shrink-0' />
+                                    <span>Location</span>
                                   </button>
                                 )}
+
+                                {/* WEBSITE */}
                                 {isWebsite && (
                                   <button
                                     type='button'
                                     onClick={() =>
                                       router.push('/customize-chat')
                                     }
-                                    className='inline-flex h-8 items-center gap-2 whitespace-nowrap rounded-[10px] bg-brand-500 px-3 type-small font-medium text-white shadow-theme-xs hover:bg-brand-600'
+                                    className='inline-flex h-9 shrink-0 items-center gap-2 whitespace-nowrap
+          rounded-[10px] bg-brand-500 px-3.5 type-small
+          font-medium text-white shadow-theme-xs hover:bg-brand-600'
                                   >
-                                    Manage
+                                    <Settings className='h-4 w-4 shrink-0' />
+                                    <span>Manage</span>
                                   </button>
                                 )}
-                                <div className='relative'>
+
+                                {/* MORE MENU */}
+                                <div className='relative shrink-0'>
                                   <button
                                     type='button'
                                     onClick={() =>
@@ -1016,10 +1140,16 @@ function ChannelsInner() {
                                           : channel.id,
                                       )
                                     }
-                                    className='flex h-8 w-8 items-center justify-center rounded-[10px] border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03]'
+                                    className='flex h-9 w-9 items-center justify-center rounded-[10px]
+          border border-gray-200 bg-white text-gray-500
+          hover:border-brand-300 hover:bg-brand-50 hover:text-brand-500
+          dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400
+          dark:hover:border-brand-500/40 dark:hover:bg-brand-500/10
+          dark:hover:text-brand-400'
                                   >
-                                    <MoreVertical className='h-4 w-4' />
+                                    <MoreVertical className='h-[18px] w-[18px]' />
                                   </button>
+
                                   {openMenuId === channel.id && (
                                     <div className='absolute right-0 top-[calc(100%+8px)] z-20 w-44 rounded-xl border border-gray-200 bg-white p-2 shadow-theme-lg dark:border-gray-800 dark:bg-gray-900'>
                                       <button
@@ -1033,6 +1163,7 @@ function ChannelsInner() {
                                         <Settings className='h-4 w-4' />
                                         Settings
                                       </button>
+
                                       <button
                                         type='button'
                                         onClick={() => {
