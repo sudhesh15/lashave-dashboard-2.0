@@ -708,7 +708,8 @@ export default function GrowthPage() {
   const [err, setErr] = useState<string | null>(null);
   const [latest, setLatest] = useState<LatestGrowthResponse | null>(null);
   const [overview, setOverview] = useState<GrowthOverviewResponse | null>(null);
-  const [activeSection, setActiveSection] = useState<GrowthSectionKey>('report-history');
+  const [activeSection, setActiveSection] =
+    useState<GrowthSectionKey>('growth-consultant');
   const [isMobile, setIsMobile] = useState(false);
   const [growthMenuOpen, setGrowthMenuOpen] = useState(false);
 
@@ -1002,13 +1003,6 @@ export default function GrowthPage() {
     count?: number;
   }[] = [
     {
-      key: 'report-history',
-      title: 'Report History',
-      subtitle: 'Previous weekly reports',
-      icon: <CalendarDays size={20} />,
-      count: history.length,
-    },
-    {
       key: 'growth-consultant',
       title: 'Growth Consultant',
       subtitle: 'Strategic growth ideas',
@@ -1062,6 +1056,15 @@ export default function GrowthPage() {
       subtitle: 'Competitive activity',
       icon: <Target size={20} />,
       count: radarTrends.filter((tr) => tr.category === 'competitor').length,
+    },
+
+    // Keep history last
+    {
+      key: 'report-history',
+      title: 'Report History',
+      subtitle: 'Previous weekly reports',
+      icon: <CalendarDays size={20} />,
+      count: history.length,
     },
   ];
 
@@ -1223,17 +1226,26 @@ export default function GrowthPage() {
               )}
 
               {(!isMobile || growthMenuOpen) && (
-                <div className='rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]'>
-                  <div className='border-b border-gray-100 px-5 py-4 dark:border-gray-800'>
-                    <h3 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
-                      Growth
-                    </h3>
-                    <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>
-                      Plan, content, and market signals
-                    </p>
+                <div className='overflow-hidden rounded-2xl border border-brand-200 bg-brand-50/40 shadow-theme-xs dark:border-brand-500/20 dark:bg-brand-500/[0.05]'>
+                  <div className='border-b border-brand-100 bg-white/70 px-5 py-4 dark:border-brand-500/15 dark:bg-white/[0.02]'>
+                    <div className='flex items-center gap-2'>
+                      <div className='flex h-8 w-8 items-center justify-center rounded-[10px] bg-brand-100 text-brand-600 dark:bg-brand-500/15 dark:text-brand-400'>
+                        <Menu size={16} />
+                      </div>
+
+                      <div>
+                        <h3 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
+                          Growth Menu
+                        </h3>
+
+                        <p className='mt-0.5 type-caption text-gray-500 dark:text-gray-400'>
+                          Explore your growth tools
+                        </p>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className='flex flex-col gap-1 p-3'>
+                  <div className='flex flex-col gap-1.5 p-3'>
                     {GROWTH_NAV.map((item) => {
                       const active = activeSection === item.key;
 
@@ -1254,10 +1266,10 @@ export default function GrowthPage() {
                             setGrowthMenuOpen(false);
                           }}
                           className={cn(
-                            'flex w-full items-center justify-between gap-3 rounded-[10px] px-3 py-3 text-left transition',
+                            'group flex w-full items-center justify-between gap-3 rounded-xl border px-3 py-3 text-left transition-all',
                             active
-                              ? 'bg-brand-50 dark:bg-brand-500/[0.12]'
-                              : 'hover:bg-gray-50 dark:hover:bg-white/[0.03]',
+                              ? 'border-brand-200 bg-white shadow-theme-xs dark:border-brand-500/25 dark:bg-brand-500/[0.12]'
+                              : 'border-transparent bg-white/40 hover:border-brand-100 hover:bg-white dark:bg-white/[0.02] dark:hover:border-brand-500/15 dark:hover:bg-white/[0.05]',
                           )}
                         >
                           <span className='flex min-w-0 items-center gap-3'>

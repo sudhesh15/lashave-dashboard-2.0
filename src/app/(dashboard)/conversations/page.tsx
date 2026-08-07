@@ -653,16 +653,17 @@ function ConversationTable({
 
         <div className='min-w-0 max-w-full overflow-hidden rounded-b-xl border border-gray-200 dark:border-white/[0.05]'>
           <div className='w-full overflow-x-auto'>
-            <table className='lashvae-column-dividers min-w-[1300px] table-fixed min-h-80'>
+            <table className='lashvae-column-dividers min-w-[930px] table-fixed min-h-80'>
               <colgroup>
-                <col className='w-[340px]' />
-                <col className='w-[140px]' />
-                <col className='w-[150px]' />
-                <col className='w-[150px]' />
-                <col className='w-[150px]' />
-                <col className='w-[140px]' />
-                <col className='w-[230px]' />
+                <col className='w-[320px]' /> {/* Customer */}
+                <col className='w-[130px]' /> {/* Channel */}
+                <col className='w-[140px]' /> {/* Intent */}
+                <col className='w-[130px]' /> {/* Status */}
+                <col className='w-[130px]' /> {/* Lead */}
+                <col className='w-[120px]' /> {/* Last seen */}
+                <col className='w-[100px]' /> {/* Actions */}
               </colgroup>
+
               <thead className='border-b border-gray-100 dark:border-white/[0.05]'>
                 <tr>
                   {[
@@ -671,23 +672,27 @@ function ConversationTable({
                     'Intent',
                     'Status',
                     'Lead',
-                    'Last active',
+                    'Last seen',
                     'Actions',
                   ].map((header) => (
                     <th
                       key={header}
-                      className='px-5 py-3 text-left type-body font-medium text-gray-500 dark:text-gray-400'
+                      className={cn(
+                        'px-5 py-3 type-body font-medium text-gray-500 dark:text-gray-400',
+                        header === 'Actions' ? 'text-center' : 'text-left',
+                      )}
                     >
                       {header}
                     </th>
                   ))}
                 </tr>
               </thead>
+
               <tbody className='divide-y divide-gray-100 dark:divide-white/[0.05]'>
                 {loading && (
                   <tr>
                     <td
-                      colSpan={7}
+                      colSpan={6}
                       className='px-5 py-14 text-center type-small text-gray-500 dark:text-gray-400'
                     >
                       Loading conversations
@@ -698,7 +703,7 @@ function ConversationTable({
                 {!loading && items.length === 0 && (
                   <tr>
                     <td
-                      colSpan={7}
+                      colSpan={6}
                       className='px-5 py-14 text-center type-small text-gray-500 dark:text-gray-400'
                     >
                       {q.trim()
@@ -711,16 +716,20 @@ function ConversationTable({
                 {!loading &&
                   pageItems.map((item) => {
                     const category = getCategory(item);
+
                     const preview =
                       item.lead?.meta?.text_preview ||
                       item.preview ||
                       'No preview available';
+
                     const name = displayName(item);
+
                     return (
                       <tr
                         key={item.id}
                         className='transition hover:bg-gray-50 dark:hover:bg-white/[0.02]'
                       >
+                        {/* Customer */}
                         <td className='px-5 py-3 sm:px-6'>
                           <Link
                             href={`/conversations/${item.id}`}
@@ -732,17 +741,21 @@ function ConversationTable({
                                 size={34}
                               />
                             </div>
+
                             <div className='min-w-0'>
                               <div className='flex items-center gap-2'>
                                 <span className='group relative block max-w-[220px] type-small font-medium text-gray-800 dark:text-white/90'>
                                   <span className='block truncate'>{name}</span>
+
                                   <span className='pointer-events-none absolute left-0 top-full z-50 mt-1 hidden max-w-[280px] group-hover:block'>
                                     <span className='absolute -top-1 left-3 h-2 w-2 rotate-45 rounded-[2px] bg-gray-900' />
+
                                     <span className='relative block rounded-[10px] bg-gray-900 px-3 py-1.5 type-caption font-medium text-white shadow-lg'>
                                       {name}
                                     </span>
                                   </span>
                                 </span>
+
                                 {item.unread_count != null &&
                                   item.unread_count > 0 && (
                                     <span className='shrink-0 rounded-full bg-brand-50 px-2 py-0.5 type-caption font-medium text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'>
@@ -750,12 +763,15 @@ function ConversationTable({
                                     </span>
                                   )}
                               </div>
+
                               <span className='mt-1 block max-w-[260px] truncate type-caption text-gray-500 dark:text-gray-400'>
                                 {preview}
                               </span>
                             </div>
                           </Link>
                         </td>
+
+                        {/* Channel */}
                         <td className='px-6 py-3 type-small text-gray-500 dark:text-gray-400'>
                           <span className='inline-flex items-center gap-2'>
                             <Image
@@ -769,27 +785,38 @@ function ConversationTable({
                               height={18}
                               className='h-[18px] w-[18px] shrink-0 object-contain'
                             />
+
                             <span className='truncate'>
                               {platformLabel(item.channel)}
                             </span>
                           </span>
                         </td>
+
+                        {/* Intent */}
                         <td className='px-6 py-3'>
                           <span className='inline-flex items-center rounded-full bg-brand-50 px-3 py-1 type-caption font-medium capitalize text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'>
                             {category || 'Unclassified'}
                           </span>
                         </td>
+
+                        {/* Status */}
                         <td className='px-6 py-3'>
                           <span
-                            className={`inline-flex items-center rounded-full px-3 py-1 type-caption font-medium capitalize ${badgeClass(item.status)}`}
+                            className={`inline-flex items-center rounded-full px-3 py-1 type-caption font-medium capitalize ${badgeClass(
+                              item.status,
+                            )}`}
                           >
                             {item.status || 'unknown'}
                           </span>
                         </td>
+
+                        {/* Lead */}
                         <td className='px-6 py-3'>
                           {item.lead ? (
                             <span
-                              className={`inline-flex items-center rounded-full px-3 py-1 type-caption font-medium capitalize ${leadBadgeClass(item.lead.status)}`}
+                              className={`inline-flex items-center rounded-full px-3 py-1 type-caption font-medium capitalize ${leadBadgeClass(
+                                item.lead.status,
+                              )}`}
                             >
                               {item.lead.status || 'new'}
                             </span>
@@ -799,16 +826,23 @@ function ConversationTable({
                             </span>
                           )}
                         </td>
-                        <td className='px-6 py-3 type-small text-gray-500 dark:text-gray-400'>
-                          {timeAgo(item.last_message_at)}
+                          
+
+
+                        <td className='px-4 py-3 type-small text-gray-500 dark:text-gray-400'>
+                          <span className='whitespace-nowrap'>
+                            {timeAgo(item.last_message_at)}
+                          </span>
                         </td>
-                        <td className='px-6 py-3'>
+
+                        {/* Actions */}
+                        <td className='w-[100px] min-w-[100px] max-w-[100px] px-2 py-3 text-center'>
                           <Link
                             href={`/conversations/${item.id}`}
-                            className='inline-flex h-8 items-center gap-2 whitespace-nowrap rounded-[10px] bg-brand-500 px-3 type-small font-medium text-white shadow-theme-xs hover:bg-brand-600'
+                            className='inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-[10px] bg-brand-500 px-3 type-small font-medium text-white shadow-theme-xs hover:bg-brand-600'
                           >
-                            <Eye size={14} />
-                            View conversation
+                            <Eye size={13} />
+                            View
                           </Link>
                         </td>
                       </tr>

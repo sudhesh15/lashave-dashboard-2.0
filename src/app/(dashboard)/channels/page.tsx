@@ -899,10 +899,10 @@ function ChannelsInner() {
                                   <p className='truncate type-small font-medium text-gray-800 dark:text-white/90'>
                                     {channelName(channel)}
                                   </p>
-                                  <p className='mt-1 truncate type-caption text-gray-500 dark:text-gray-400'>
+                                  {/* <p className='mt-1 truncate type-caption text-gray-500 dark:text-gray-400'>
                                     {channel.location_name ||
                                       channel.platform_account_id}
-                                  </p>
+                                  </p> */}
                                 </div>
                               </div>
                             </td>
