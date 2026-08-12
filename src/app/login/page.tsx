@@ -2,7 +2,7 @@
 
 import { apiFetch } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
-import { Eye, EyeOff } from 'lucide-react';
+import { BadgeCheck, Eye, EyeOff, LockKeyhole, ShieldCheck } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FormEvent, Suspense, useCallback, useEffect, useState } from 'react';
@@ -290,7 +290,9 @@ function AuthPageInner() {
       return;
     }
     if (!agreeTerms) {
-      setErr('Please agree to the Terms and Privacy Policy.');
+      setErr(
+        'Please agree to the Terms and Conditions, Privacy Policy, and Data Processing Agreement.',
+      );
       return;
     }
 
@@ -549,7 +551,24 @@ function AuthPageInner() {
                       Forgot password?
                     </button>
                   </div>
+
                   <SubmitButton loading={busy}>Sign In</SubmitButton>
+                  <div className='flex flex-wrap items-center justify-center gap-x-5 gap-y-2 type-small text-blue-600 dark:text-blue-400'>
+                    <span className='flex items-center gap-1.5'>
+                      <LockKeyhole size={16} strokeWidth={2} />
+                      SSL Secured
+                    </span>
+
+                    <span className='flex items-center gap-1.5'>
+                      <BadgeCheck size={16} strokeWidth={2} />
+                      Meta Integration
+                    </span>
+
+                    <span className='flex items-center gap-1.5'>
+                      <ShieldCheck size={16} strokeWidth={2} />
+                      GDPR Safe
+                    </span>
+                  </div>
                 </form>
               )}
 
@@ -619,7 +638,7 @@ function AuthPageInner() {
                       >
                         Privacy Policy
                       </a>
-                     , and {' '}
+                      , and{' '}
                       <a
                         href='https://lashvae.com/legal/dpa'
                         target='_blank'
@@ -634,6 +653,22 @@ function AuthPageInner() {
                   <SubmitButton loading={busy} disabled={!agreeTerms}>
                     Sign Up
                   </SubmitButton>
+                  <div className='flex flex-wrap items-center justify-center gap-x-5 gap-y-2 type-small text-blue-600 dark:text-blue-400'>
+                    <span className='flex items-center gap-1.5'>
+                      <LockKeyhole size={16} strokeWidth={2} />
+                      SSL Secured
+                    </span>
+
+                    <span className='flex items-center gap-1.5'>
+                      <BadgeCheck size={16} strokeWidth={2} />
+                      Meta Integration
+                    </span>
+
+                    <span className='flex items-center gap-1.5'>
+                      <ShieldCheck size={16} strokeWidth={2} />
+                      GDPR Safe
+                    </span>
+                  </div>
                 </form>
               )}
 

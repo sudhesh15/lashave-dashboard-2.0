@@ -828,51 +828,88 @@ function SupportPanel() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
-  // Validation rules
+  const [dsarType, setDsarType] = useState('');
+  const [dsarChannel, setDsarChannel] = useState('');
+  const [identifierType, setIdentifierType] = useState('');
+  const [identifierValue, setIdentifierValue] = useState('');
+  const [dsarNotes, setDsarNotes] = useState('');
+  const [dsarConfirmed, setDsarConfirmed] = useState(false);
+  const [dsarSending, setDsarSending] = useState(false);
+  const [dsarStatus, setDsarStatus] = useState<'success' | 'error' | null>(
+    null,
+  );
+
   const validators = {
     fullname: (value: string) => {
       const trimmed = value.trim();
+
       if (!trimmed) return 'Full name is required.';
       if (trimmed.length < 2) return 'Name must be at least 2 characters.';
-      if (!/^[A-Za-z\s.'-]+$/.test(trimmed))
+      if (!/^[A-Za-z\s.'-]+$/.test(trimmed)) {
         return "Name can only contain letters, spaces, and . ' -";
+      }
+
       return '';
     },
+
     email: (value: string) => {
       const trimmed = value.trim();
+
       if (!trimmed) return 'Email is required.';
       if (!trimmed.includes('@')) return 'Email must contain an @ symbol.';
-      if (!trimmed.includes('.'))
+      if (!trimmed.includes('.')) {
         return 'Email must contain a domain (e.g. .com).';
-      if (!/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(trimmed))
+      }
+
+      if (!/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(trimmed)) {
         return 'Please enter a valid email (e.g. name@example.com).';
+      }
+
       return '';
     },
+
     phone: (value: string) => {
       const trimmed = value.trim();
-      if (!trimmed) return ''; // optional
+
+      if (!trimmed) return '';
+
       const digitsOnly = trimmed.replace(/[\s\-()+]/g, '');
-      if (!/^\d+$/.test(digitsOnly))
+
+      if (!/^\d+$/.test(digitsOnly)) {
         return 'Phone can only contain digits, spaces, +, -, (, ).';
+      }
+
       if (digitsOnly.length < 7) return 'Phone must be at least 7 digits.';
       if (digitsOnly.length > 15) return 'Phone must be at most 15 digits.';
+
       return '';
     },
+
     subject: (value: string) => {
       if (!value) return 'Please select a subject.';
       return '';
     },
+
     message: (value: string) => {
       const trimmed = value.trim();
+
       if (!trimmed) return 'Message is required.';
-      if (trimmed.length < 10) return 'Message must be at least 10 characters.';
+      if (trimmed.length < 10) {
+        return 'Message must be at least 10 characters.';
+      }
+
       return '';
     },
   };
 
   const validateField = (name: keyof typeof validators, value: string) => {
     const error = validators[name](value);
-    setErrors((prev) => ({ ...prev, [name]: error }));
+
+    setErrors((prev) => ({
+      ...prev,
+      [name]: error,
+    }));
+
     return error;
   };
 
@@ -884,7 +921,9 @@ function SupportPanel() {
       subject: validators.subject(subject),
       message: validators.message(message),
     };
+
     setErrors(newErrors);
+
     setTouched({
       fullname: true,
       email: true,
@@ -892,22 +931,31 @@ function SupportPanel() {
       subject: true,
       message: true,
     });
-    return Object.values(newErrors).every((e) => !e);
+
+    return Object.values(newErrors).every((error) => !error);
   };
 
   const handleBlur = (name: keyof typeof validators, value: string) => {
-    setTouched((prev) => ({ ...prev, [name]: true }));
+    setTouched((prev) => ({
+      ...prev,
+      [name]: true,
+    }));
+
     validateField(name, value);
   };
 
-  // Auto-touch on first keystroke + validate live
   const handleChange = (
     name: keyof typeof validators,
     value: string,
-    setter: (v: string) => void,
+    setter: (value: string) => void,
   ) => {
     setter(value);
-    setTouched((prev) => ({ ...prev, [name]: true }));
+
+    setTouched((prev) => ({
+      ...prev,
+      [name]: true,
+    }));
+
     validateField(name, value);
   };
 
@@ -915,10 +963,12 @@ function SupportPanel() {
 
   async function handleSubmit() {
     setStatus(null);
+
     if (!validateAll()) return;
     if (!agreed) return;
 
     setSending(true);
+
     try {
       await emailjs.send(
         process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
@@ -935,6 +985,7 @@ function SupportPanel() {
       );
 
       setStatus('success');
+
       setFullname('');
       setEmail('');
       setPhone('');
@@ -943,11 +994,71 @@ function SupportPanel() {
       setAgreed(false);
       setErrors({});
       setTouched({});
-    } catch (err) {
-      console.error('EMAILJS_ERROR:', err);
+    } catch (error) {
+      console.error('EMAILJS_ERROR:', error);
       setStatus('error');
     } finally {
       setSending(false);
+    }
+  }
+
+  const canSubmitDsar = Boolean(
+    dsarType &&
+    dsarChannel &&
+    identifierType &&
+    identifierValue.trim() &&
+    dsarConfirmed &&
+    !dsarSending,
+  );
+
+  async function handleDsarSubmit() {
+    if (!canSubmitDsar) return;
+
+    setDsarSending(true);
+    setDsarStatus(null);
+
+    try {
+      await emailjs.send(
+        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
+        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!,
+        {
+          fullname: 'Customer Data Request',
+          email: 'dpo@lashvae.com',
+          phone: '',
+
+          subject: `DSAR - ${dsarType.toUpperCase()} request`,
+
+          message: `
+Request Type: ${dsarType}
+Channel: ${dsarChannel}
+Identifier Type: ${identifierType}
+Identifier Value: ${identifierValue.trim()}
+
+Additional Notes:
+${dsarNotes.trim() || 'None'}
+
+Identity verified by controller: Yes
+Customer requested action: Yes
+          `.trim(),
+
+          to_email: 'dpo@lashvae.com',
+        },
+        process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!,
+      );
+
+      setDsarStatus('success');
+
+      setDsarType('');
+      setDsarChannel('');
+      setIdentifierType('');
+      setIdentifierValue('');
+      setDsarNotes('');
+      setDsarConfirmed(false);
+    } catch (error) {
+      console.error('DSAR_REQUEST_ERROR:', error);
+      setDsarStatus('error');
+    } finally {
+      setDsarSending(false);
     }
   }
 
@@ -957,10 +1068,12 @@ function SupportPanel() {
         title='Support'
         subtitle='Send a message to the Lashvae team'
       />
+
       <div className='space-y-5'>
         {status === 'success' && (
           <AlertBox tone='success'>Your message has been sent.</AlertBox>
         )}
+
         {status === 'error' && (
           <AlertBox>Unable to send your message. Please try again.</AlertBox>
         )}
@@ -969,7 +1082,7 @@ function SupportPanel() {
           <FormField
             label='Full Name'
             value={fullname}
-            onChange={(v) => handleChange('fullname', v, setFullname)}
+            onChange={(value) => handleChange('fullname', value, setFullname)}
             onBlur={() => handleBlur('fullname', fullname)}
             placeholder='Enter your full name'
             required
@@ -979,7 +1092,7 @@ function SupportPanel() {
           <FormField
             label='Email Address'
             value={email}
-            onChange={(v) => handleChange('email', v, setEmail)}
+            onChange={(value) => handleChange('email', value, setEmail)}
             onBlur={() => handleBlur('email', email)}
             type='email'
             placeholder='Enter your email address'
@@ -990,7 +1103,7 @@ function SupportPanel() {
           <FormField
             label='Phone Number'
             value={phone}
-            onChange={(v) => handleChange('phone', v, setPhone)}
+            onChange={(value) => handleChange('phone', value, setPhone)}
             onBlur={() => handleBlur('phone', phone)}
             type='tel'
             placeholder='Enter your phone number'
@@ -1001,6 +1114,7 @@ function SupportPanel() {
             <span className='mb-1.5 block type-small font-medium text-gray-700 dark:text-gray-400'>
               Subject <span className='text-error-500'>*</span>
             </span>
+
             <select
               value={subject}
               onChange={(event) =>
@@ -1017,14 +1131,18 @@ function SupportPanel() {
               <option value='' disabled>
                 Select a topic
               </option>
+
               {SUPPORT_SUBJECTS.map((item) => (
                 <option key={item} value={item}>
                   {item}
                 </option>
               ))}
             </select>
+
             {touched.subject && errors.subject && (
-              <p className='mt-1.5 type-caption text-error-500'>{errors.subject}</p>
+              <p className='mt-1.5 type-caption text-error-500'>
+                {errors.subject}
+              </p>
             )}
           </label>
         </div>
@@ -1033,6 +1151,7 @@ function SupportPanel() {
           <span className='mb-1.5 block type-small font-medium text-gray-700 dark:text-gray-400'>
             Your Message <span className='text-error-500'>*</span>
           </span>
+
           <Textarea
             value={message}
             onChange={(event) =>
@@ -1047,8 +1166,11 @@ function SupportPanel() {
                 : 'border-gray-300 focus-visible:border-brand-300 focus-visible:ring-brand-500/10 dark:border-gray-700',
             )}
           />
+
           {touched.message && errors.message && (
-            <p className='mt-1.5 type-caption text-error-500'>{errors.message}</p>
+            <p className='mt-1.5 type-caption text-error-500'>
+              {errors.message}
+            </p>
           )}
         </label>
 
@@ -1059,6 +1181,7 @@ function SupportPanel() {
             onChange={(event) => setAgreed(event.target.checked)}
             className='mt-0.5 h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500/20'
           />
+
           <span>
             I agree to the Privacy Policy and consent to being contacted
             regarding my inquiry.
@@ -1076,10 +1199,164 @@ function SupportPanel() {
             Send Message
           </Button>
         </div>
+
+        <div className='my-7 border-t border-gray-200 dark:border-gray-800' />
+
+        <div>
+          <SectionHeader
+            title='Customer Data Request'
+            subtitle="Export or delete an end-customer's data on their behalf"
+          />
+
+          <div className='rounded-2xl border border-gray-200 bg-gray-50 p-5 dark:border-gray-800 dark:bg-gray-900'>
+            <div className='grid grid-cols-1 gap-5 md:grid-cols-2'>
+              <label className='block'>
+                <span className='mb-1.5 block type-small font-medium text-gray-700 dark:text-gray-400'>
+                  Request Type <span className='text-error-500'>*</span>
+                </span>
+
+                <select
+                  value={dsarType}
+                  onChange={(event) => setDsarType(event.target.value)}
+                  className='h-10 w-full rounded-[10px] border border-gray-300 bg-transparent px-4 py-2 type-small text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90'
+                >
+                  <option value='' disabled>
+                    Select request type
+                  </option>
+
+                  <option value='export'>Export customer data</option>
+
+                  <option value='delete'>Delete customer data</option>
+                </select>
+              </label>
+
+              <label className='block'>
+                <span className='mb-1.5 block type-small font-medium text-gray-700 dark:text-gray-400'>
+                  Channel <span className='text-error-500'>*</span>
+                </span>
+
+                <select
+                  value={dsarChannel}
+                  onChange={(event) => setDsarChannel(event.target.value)}
+                  className='h-10 w-full rounded-[10px] border border-gray-300 bg-transparent px-4 py-2 type-small text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90'
+                >
+                  <option value='' disabled>
+                    Select channel
+                  </option>
+
+                  <option value='instagram'>Instagram</option>
+                  <option value='facebook'>Facebook</option>
+                  <option value='telegram'>Telegram</option>
+                  <option value='website'>Website Widget</option>
+                  <option value='youtube'>YouTube</option>
+                </select>
+              </label>
+
+              <label className='block'>
+                <span className='mb-1.5 block type-small font-medium text-gray-700 dark:text-gray-400'>
+                  Identifier Type <span className='text-error-500'>*</span>
+                </span>
+
+                <select
+                  value={identifierType}
+                  onChange={(event) => setIdentifierType(event.target.value)}
+                  className='h-10 w-full rounded-[10px] border border-gray-300 bg-transparent px-4 py-2 type-small text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90'
+                >
+                  <option value='' disabled>
+                    Select identifier type
+                  </option>
+
+                  <option value='email'>Email</option>
+                  <option value='username'>Username</option>
+                  <option value='phone'>Phone number</option>
+                  <option value='external_user_id'>External user ID</option>
+                </select>
+              </label>
+
+              <FormField
+                label='Identifier Value'
+                value={identifierValue}
+                onChange={setIdentifierValue}
+                placeholder='e.g. user@example.com'
+                required
+              />
+            </div>
+
+            <label className='mt-5 block'>
+              <span className='mb-1.5 block type-small font-medium text-gray-700 dark:text-gray-400'>
+                Additional Notes
+              </span>
+
+              <Textarea
+                value={dsarNotes}
+                onChange={(event) => setDsarNotes(event.target.value)}
+                placeholder='Any extra context for our team (optional)'
+                className='min-h-[110px] rounded-[10px] border-gray-300 shadow-theme-xs focus-visible:border-brand-300 focus-visible:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900'
+              />
+            </label>
+
+            <label className='mt-5 flex cursor-pointer items-start gap-3 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]'>
+              <input
+                type='checkbox'
+                checked={dsarConfirmed}
+                onChange={(event) => setDsarConfirmed(event.target.checked)}
+                className='mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 text-brand-500 focus:ring-brand-500/20'
+              />
+
+              <span className='type-small leading-5 text-gray-600 dark:text-gray-400'>
+                I confirm that the customer requested this action, we verified
+                the customer&apos;s identity, and we authorise Lashvae to{' '}
+                {dsarType === 'delete'
+                  ? 'delete'
+                  : dsarType === 'export'
+                    ? 'export'
+                    : 'process'}{' '}
+                the identified data.
+              </span>
+            </label>
+
+            <div className='mt-4 rounded-xl border border-brand-500/20 bg-brand-50 p-4 type-small text-brand-600 dark:bg-brand-500/10 dark:text-brand-400'>
+              As processor, Lashvae acts only on documented instructions from
+              you as the controller and will assist with data-subject requests
+              accordingly.
+            </div>
+
+            {dsarStatus === 'success' && (
+              <div className='mt-4'>
+                <AlertBox tone='success'>
+                  Customer data request submitted successfully.
+                </AlertBox>
+              </div>
+            )}
+
+            {dsarStatus === 'error' && (
+              <div className='mt-4'>
+                <AlertBox>
+                  Unable to submit the customer data request. Please try again.
+                </AlertBox>
+              </div>
+            )}
+
+            <div className='mt-5 flex justify-end'>
+              <Button
+                type='button'
+                disabled={!canSubmitDsar}
+                onClick={() => void handleDsarSubmit()}
+                className='h-10 px-5'
+              >
+                {dsarSending && <Loader2 className='h-4 w-4 animate-spin' />}
+                Submit Data Request
+                {!dsarSending && <ChevronRight className='h-4 w-4' />}
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
     </Card>
   );
 }
+
+
 function LoadingProfile() {
   return (
     <div className='mx-auto max-w-screen-2xl p-4 md:p-6'>
@@ -1104,6 +1381,9 @@ function ProfileContent() {
   const [fetchErr, setFetchErr] = useState('');
   const [isMobile, setIsMobile] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+
+
+
 
   const loadProfile = useCallback(async () => {
     setFetchErr('');

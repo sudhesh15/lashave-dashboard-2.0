@@ -153,6 +153,11 @@ type AdvancedConfig = {
   hide_on_mobile: boolean;
   gdpr_enabled: boolean;
   gdpr_privacy_url: string;
+  marketing_consent_enabled: boolean;
+  marketing_consent_text: string;
+  age_assurance_enabled: boolean;
+  activity_tracking_enabled: boolean;
+  lead_profiling_consent_enabled: boolean;
   business_hours_enabled: boolean;
   widget_language: string;
   proactive_rules: ProactiveRule[];
@@ -190,6 +195,12 @@ const DEFAULT_ADVANCED: AdvancedConfig = {
   hide_on_mobile: false,
   gdpr_enabled: false,
   gdpr_privacy_url: '',
+  marketing_consent_enabled: false,
+  marketing_consent_text:
+    'I would like to receive product updates and offers by email.',
+  age_assurance_enabled: false,
+  activity_tracking_enabled: false,
+  lead_profiling_consent_enabled: false,
   business_hours_enabled: false,
   widget_language: 'en',
   proactive_rules: [],
@@ -5777,50 +5788,121 @@ function CustomizeChatInner() {
         );
 
       /* ── LEAD CAPTURE ────────────────────────────────────────────────── */
+      /* ── LEAD CAPTURE ────────────────────────────────────────────────── */
       case 'leadcapture':
         return (
           <div className='flex flex-col gap-5'>
             <div className='rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]'>
               <SectionHeader title='Lead Capture' />
+
               <p className='-mt-2 mb-4.5 type-small text-gray-500 dark:text-gray-400'>
                 Ask visitors for a few details before they start chatting.
               </p>
-              <ToggleRow
-                title='Ask for name'
-                checked={collectName}
-                onChange={setCollectName}
-              />
-              <ToggleRow
-                title='Ask for email'
-                checked={collectEmail}
-                onChange={setCollectEmail}
-              />
-              <ToggleRow
-                title='GDPR consent checkbox'
-                desc='Require visitors to agree before chatting.'
-                checked={adv.gdpr_enabled}
-                onChange={(v) => patchAdv({ gdpr_enabled: v })}
-                mb={adv.gdpr_enabled ? 12 : 0}
-              />
-              {adv.gdpr_enabled && (
-                <TextField
-                  label='Privacy policy URL'
-                  value={adv.gdpr_privacy_url}
-                  onChange={(v) => patchAdv({ gdpr_privacy_url: v })}
-                  placeholder='https://yoursite.com/privacy'
+
+              <div className='space-y-1'>
+                <ToggleRow
+                  title='Ask for name'
+                  checked={collectName}
+                  onChange={setCollectName}
+                />
+
+                <ToggleRow
+                  title='Ask for email'
+                  checked={collectEmail}
+                  onChange={setCollectEmail}
+                />
+              </div>
+
+              <div className='mt-5 rounded-xl border border-gray-200 p-4 dark:border-gray-800'>
+                <div className='mb-5'>
+                  <h3 className='type-small font-semibold text-gray-800 dark:text-white/90'>
+                    Privacy & consent
+                  </h3>
+
+                  <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>
+                    Control how visitor consent is collected before tracking or
+                    profiling.
+                  </p>
+                </div>
+
+                <ToggleRow
+                  title='GDPR consent'
+                  desc='Require visitors to agree before chatting.'
+                  checked={adv.gdpr_enabled}
+                  onChange={(v) => patchAdv({ gdpr_enabled: v })}
+                  mb={16}
+                />
+
+                {adv.gdpr_enabled && (
+                  <div className='mb-4'>
+                    <TextField
+                      label='Privacy policy URL'
+                      value={adv.gdpr_privacy_url}
+                      onChange={(v) => patchAdv({ gdpr_privacy_url: v })}
+                      placeholder='https://yoursite.com/privacy'
+                      mb={0}
+                    />
+                  </div>
+                )}
+
+                <ToggleRow
+                  title='Marketing consent'
+                  desc='Ask before sending product updates or promotional emails.'
+                  checked={adv.marketing_consent_enabled}
+                  onChange={(v) => patchAdv({ marketing_consent_enabled: v })}
+                  mb={16}
+                />
+
+                {adv.marketing_consent_enabled && (
+                  <div className='mb-4'>
+                    <TextField
+                      label='Marketing consent text'
+                      value={adv.marketing_consent_text}
+                      onChange={(v) => patchAdv({ marketing_consent_text: v })}
+                      placeholder='I would like to receive product updates and offers by email.'
+                      mb={0}
+                    />
+                  </div>
+                )}
+
+                <ToggleRow
+                  title='Age verification'
+                  desc='Ask visitors to confirm they are 16+ before chatting.'
+                  checked={adv.age_assurance_enabled}
+                  onChange={(v) => patchAdv({ age_assurance_enabled: v })}
+                  mb={16}
+                />
+
+                <ToggleRow
+                  title='Activity tracking'
+                  desc='Ask before remembering pages viewed and time spent.'
+                  checked={adv.activity_tracking_enabled}
+                  onChange={(v) => patchAdv({ activity_tracking_enabled: v })}
+                  mb={16}
+                />
+
+                <ToggleRow
+                  title='Lead profiling consent'
+                  desc='Ask before automatically building visitor profiles or scoring leads.'
+                  checked={adv.lead_profiling_consent_enabled}
+                  onChange={(v) =>
+                    patchAdv({ lead_profiling_consent_enabled: v })
+                  }
                   mb={0}
                 />
-              )}
+              </div>
             </div>
 
             <div className='rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]'>
               <SectionHeader title='Custom Details' />
+
               <ToggleRow
                 title='Collect additional info'
                 desc='Add custom questions to the lead form.'
                 checked={customDetails}
                 onChange={setCustomDetails}
               />
+
               {customDetails && (
                 <>
                   <div className='mb-3 flex flex-col gap-3'>
@@ -5834,13 +5916,15 @@ function CustomizeChatInner() {
                       />
                     ))}
                   </div>
+
                   <Button
                     type='button'
                     variant='outline'
                     className='w-full border-dashed text-gray-500 dark:text-gray-400'
                     onClick={addCustomField}
                   >
-                    <Plus size={14} /> Add Custom Question
+                    <Plus size={14} />
+                    Add Custom Question
                   </Button>
                 </>
               )}

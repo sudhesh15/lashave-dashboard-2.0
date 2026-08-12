@@ -632,10 +632,13 @@ function ChannelsInner() {
   }
 
   function openConnect(platform: string) {
-    if (!processingAccepted) {
+    if (processingAccepted === null) return;
+
+    if (processingAccepted === false) {
       setAgreementPlatform(platform as SocialChannel);
       return;
     }
+
     setConnectToken('');
     setConnectError('');
     setConnectPlatform(platform);
@@ -656,13 +659,16 @@ function ChannelsInner() {
   }
 
   async function openWebsiteModal() {
-    if (!processingAccepted) {
-      setAgreementPlatform('website');
-      return;
-    }
-    setWebsiteModalOpen(true);
-    await loadWebsiteWidget();
+  if (processingAccepted === null) return;
+
+  if (processingAccepted === false) {
+    setAgreementPlatform('website');
+    return;
   }
+
+  setWebsiteModalOpen(true);
+  await loadWebsiteWidget();
+}
 
   async function enableWebsiteWidget() {
     setWebsiteSaving(true);
@@ -769,14 +775,19 @@ function ChannelsInner() {
           onClose={() => setAgreementPlatform(null)}
           onAccepted={() => {
             const platform = agreementPlatform;
+
             setProcessingAccepted(true);
             setAgreementPlatform(null);
+
             if (platform === 'website') {
               setWebsiteModalOpen(true);
               void loadWebsiteWidget();
-            } else {
-              setConnectPlatform(platform);
+              return;
             }
+
+            setConnectToken('');
+            setConnectError('');
+            setConnectPlatform(platform);
           }}
         />
       )}

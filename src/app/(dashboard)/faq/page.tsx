@@ -55,6 +55,7 @@ import {
   Plus,
   RefreshCw,
   Search,
+  ShieldAlert,
   SlidersHorizontal,
   Trash2,
   Upload,
@@ -69,7 +70,10 @@ import PageBreadcrumb from '@/components/common/PageBreadcrumb';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { getPageItems, TablePagination } from '@/components/ui/table-pagination';
+import {
+  getPageItems,
+  TablePagination,
+} from '@/components/ui/table-pagination';
 
 type FaqItem = {
   id: number;
@@ -1092,11 +1096,12 @@ function RagModalShell({
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 110,
+        zIndex: 9999,
         display: 'flex',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         justifyContent: 'center',
-        padding: 16,
+        padding: '96px 16px 24px',
+        overflowY: 'auto',
         background: isDark ? 'rgba(0,0,0,.72)' : 'rgba(15,23,42,.34)',
         backdropFilter: 'blur(12px)',
         animation: 'faq-fade .18s ease both',
@@ -1110,7 +1115,6 @@ function RagModalShell({
           border: `1px solid ${th.accentBorder}`,
           background: isDark ? 'rgba(18,22,44,0.96)' : '#ffffff',
           boxShadow: isDark ? '0 40px 90px rgba(0,0,0,.72)' : th.cardShadowHov,
-          overflow: 'hidden',
           animation: 'faq-pop .28s cubic-bezier(.34,1.35,.64,1) both',
         }}
       >
@@ -1215,6 +1219,7 @@ function CatalogueUploadModal({
   const [docCategory, setDocCategory] = useState('');
   const [dragging, setDragging] = useState(false);
   const [fileError, setFileError] = useState('');
+  const [sensitiveConfirmed, setSensitiveConfirmed] = useState(false);
 
   const acceptFile = (next: File) => {
     if (next.size > MAX_CATALOGUE_BYTES) {
@@ -1248,8 +1253,9 @@ function CatalogueUploadModal({
       : 'file';
 
   const submitUpload = () => {
-    if (!file) return;
-    onUpload(file, label, docCategory || undefined);
+    if (!file || !docCategory || !sensitiveConfirmed) return;
+
+    onUpload(file, label, docCategory);
   };
 
   return (
@@ -1336,6 +1342,16 @@ function CatalogueUploadModal({
               {file ? ` — this file is ${compactFileSize(file.size)}` : ''}
             </div>
           </div>
+        </div>
+
+        <div className='flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-3 dark:border-amber-500/20 dark:bg-amber-500/10'>
+          <ShieldAlert className='mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400' />
+
+          <p className='flex-1 type-small leading-5 text-left text-amber-700 dark:text-amber-300'>
+            Uploaded files may be scanned for personal information (names,
+            emails, or other identifying details) before they&apos;re added to
+            your knowledge base.
+          </p>
         </div>
 
         {fileError && (
@@ -1425,11 +1441,11 @@ function CatalogueUploadModal({
             </div>
             <div
               style={{
-                height: 180,
+                height: previewKind === 'pdf' ? 160 : 110,
                 display: 'grid',
                 placeItems: 'center',
-                overflow: 'auto',
-                padding: 10,
+                overflow: 'hidden',
+                padding: 8,
               }}
             >
               {previewKind === 'pdf' ? (
@@ -1450,9 +1466,9 @@ function CatalogueUploadModal({
                   alt={file.name}
                   style={{
                     maxWidth: '100%',
-                    maxHeight: 160,
+                    maxHeight: 90,
                     objectFit: 'contain',
-                    borderRadius: 10,
+                    borderRadius: 8,
                   }}
                 />
               ) : (
@@ -1504,6 +1520,19 @@ function CatalogueUploadModal({
             <option value='policy'>Policy</option>
           </select>
         </label>
+        <label className='flex cursor-pointer items-start gap-3 rounded-xl border border-gray-200 px-3.5 py-3 dark:border-gray-800'>
+          <input
+            type='checkbox'
+            checked={sensitiveConfirmed}
+            onChange={(e) => setSensitiveConfirmed(e.target.checked)}
+            className='mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-700'
+          />
+
+          <span className='flex-1 type-small leading-5 text-left text-gray-600 dark:text-gray-400'>
+            I confirm this file does not contain unauthorized sensitive or
+            confidential information and agree to upload.
+          </span>
+        </label>
       </div>
 
       <div
@@ -1531,8 +1560,9 @@ function CatalogueUploadModal({
           Cancel
         </button>
         <button
+          type='button'
           onClick={submitUpload}
-          disabled={!file || busy}
+          disabled={!file || !docCategory || !sensitiveConfirmed || busy}
           style={{
             padding: '10px 16px',
             borderRadius: 12,
@@ -1541,8 +1571,13 @@ function CatalogueUploadModal({
             color: isDark ? th.text : '#fff',
             fontSize: 12,
             fontWeight: 500,
-            cursor: file && !busy ? 'pointer' : 'not-allowed',
-            opacity: file && !busy ? 1 : 0.55,
+            cursor:
+              file && docCategory && sensitiveConfirmed && !busy
+                ? 'pointer'
+                : 'not-allowed',
+
+            opacity:
+              file && docCategory && sensitiveConfirmed && !busy ? 1 : 0.55,
             display: 'flex',
             alignItems: 'center',
             gap: 7,
@@ -7287,7 +7322,12 @@ function SavedKnowledgeLedger({
         </table>
       </div>
 
-      <TablePagination page={page} totalItems={rows.length} onPageChange={setPage} pageSize={8} />
+      <TablePagination
+        page={page}
+        totalItems={rows.length}
+        onPageChange={setPage}
+        pageSize={8}
+      />
     </div>
   );
 }
