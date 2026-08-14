@@ -11,7 +11,6 @@ import {
   ArrowLeft,
   CheckCircle2,
   Loader2,
-  MessageCircle,
   RefreshCw,
   Send,
   ShieldAlert,
@@ -91,43 +90,43 @@ type ChannelTheme = {
 const CHANNEL_THEME: Record<string, ChannelTheme> = {
   whatsapp: {
     logo: '/brand-logo/whatsapp.png',
-    accent: 'bg-[#25D366]',
-    accentHover: 'hover:bg-[#1DA851]',
-    bubble: 'bg-[#25D366]',
+    accent: 'bg-brand-500',
+    accentHover: 'hover:bg-brand-600',
+    bubble: 'bg-brand-500',
     bubbleText: 'text-white',
-    ring: 'focus:border-[#25D366] focus:ring-[#25D366]/10',
+    ring: 'focus:border-brand-300 focus:ring-brand-500/10',
   },
   instagram: {
     logo: '/brand-logo/instagram.png',
-    accent: 'bg-gradient-to-br from-[#515BD4] via-[#DD2A7B] to-[#F58529]',
-    accentHover: 'hover:brightness-95',
-    bubble: 'bg-gradient-to-br from-[#515BD4] via-[#DD2A7B] to-[#F58529]',
+    accent: 'bg-brand-500',
+    accentHover: 'hover:bg-brand-600',
+    bubble: 'bg-brand-500',
     bubbleText: 'text-white',
-    ring: 'focus:border-[#DD2A7B] focus:ring-[#DD2A7B]/20',
+    ring: 'focus:border-brand-300 focus:ring-brand-500/10',
   },
   facebook: {
     logo: '/brand-logo/facebook.png',
-    accent: 'bg-[#1877F2]',
-    accentHover: 'hover:bg-[#1461C7]',
-    bubble: 'bg-[#1877F2]',
+    accent: 'bg-brand-500',
+    accentHover: 'hover:bg-brand-600',
+    bubble: 'bg-brand-500',
     bubbleText: 'text-white',
-    ring: 'focus:border-[#1877F2] focus:ring-[#1877F2]/10',
+    ring: 'focus:border-brand-300 focus:ring-brand-500/10',
   },
   telegram: {
     logo: '/brand-logo/telegram.png',
-    accent: 'bg-[#26A5E4]',
-    accentHover: 'hover:bg-[#1E8AC0]',
-    bubble: 'bg-[#26A5E4]',
+    accent: 'bg-brand-500',
+    accentHover: 'hover:bg-brand-600',
+    bubble: 'bg-brand-500',
     bubbleText: 'text-white',
-    ring: 'focus:border-[#26A5E4] focus:ring-[#26A5E4]/10',
+    ring: 'focus:border-brand-300 focus:ring-brand-500/10',
   },
   youtube: {
     logo: '/brand-logo/youtube.png',
-    accent: 'bg-[#FF0000]',
-    accentHover: 'hover:bg-[#CC0000]',
-    bubble: 'bg-[#FF0000]',
+    accent: 'bg-brand-500',
+    accentHover: 'hover:bg-brand-600',
+    bubble: 'bg-brand-500',
     bubbleText: 'text-white',
-    ring: 'focus:border-[#FF0000] focus:ring-[#FF0000]/10',
+    ring: 'focus:border-brand-300 focus:ring-brand-500/10',
   },
   website: {
     logo: '/brand-logo/website.png',
@@ -226,34 +225,6 @@ function Card({
   );
 }
 
-function MetricCard({
-  label,
-  value,
-  icon,
-}: {
-  label: string;
-  value: string | number;
-  icon: React.ReactNode;
-}) {
-  return (
-    <Card className='p-4'>
-      <div className='flex items-center gap-3'>
-        <div className='flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'>
-          {icon}
-        </div>
-        <div>
-          <p className='type-caption text-gray-500 dark:text-gray-400'>
-            {label}
-          </p>
-          <p className='mt-1 type-small font-semibold text-gray-800 dark:text-white/90'>
-            {value}
-          </p>
-        </div>
-      </div>
-    </Card>
-  );
-}
-
 function MessageMixChart({
   data,
   isDark,
@@ -286,18 +257,18 @@ function MessageMixChart({
   };
 
   return (
-    <Card className='p-6'>
+    <Card className='px-4 py-4 sm:px-5'>
       <h3 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
         Message Mix
       </h3>
-      <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>
+      <p className='mt-0.5 type-caption text-gray-500 dark:text-gray-400'>
         Manual, AI, and agent messages
       </p>
       <ReactApexChart
         options={options}
         series={[user, assistant, human]}
         type='donut'
-        height={250}
+        height={210}
       />
     </Card>
   );
@@ -344,11 +315,11 @@ function LatencyChart({
   };
 
   return (
-    <Card className='p-6'>
+    <Card className='px-4 py-4 sm:px-5'>
       <h3 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
         Response Latency
       </h3>
-      <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>
+      <p className='mt-0.5 type-caption text-gray-500 dark:text-gray-400'>
         Recent AI response times
       </p>
       {rows.length > 0 ? (
@@ -356,10 +327,10 @@ function LatencyChart({
           options={options}
           series={[{ name: 'Latency', data: rows.map((row) => row.value) }]}
           type='bar'
-          height={240}
+          height={200}
         />
       ) : (
-        <div className='flex h-[240px] items-center justify-center type-small text-gray-500 dark:text-gray-400'>
+        <div className='flex h-[200px] items-center justify-center type-caption text-gray-500 dark:text-gray-400'>
           No latency data available
         </div>
       )}
@@ -400,19 +371,6 @@ function MessageBubble({
           )}
         </div>
       </div>
-    </div>
-  );
-}
-
-function InfoRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className='flex items-start justify-between gap-4 border-b border-gray-100 py-3 last:border-b-0 dark:border-gray-800'>
-      <span className='type-small text-gray-500 dark:text-gray-400'>
-        {label}
-      </span>
-      <span className='max-w-[55%] break-words text-right type-small font-medium text-gray-800 dark:text-white/90'>
-        {value}
-      </span>
     </div>
   );
 }
@@ -578,22 +536,22 @@ export default function ConversationDetailPage() {
 
   return (
     <RequireAuth>
-      <div className='mx-auto max-w-screen-2xl p-4 md:p-6'>
-        <div className='mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between'>
+      <div className='mx-auto w-full max-w-[1440px] px-4 py-5 sm:px-6 lg:px-8'>
+        <div className='mb-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between'>
           <div className='flex items-center gap-3'>
             <button
               type='button'
               onClick={() => router.push('/conversations')}
-              className='flex h-10 w-10 items-center justify-center rounded-[10px] border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400 dark:hover:bg-white/[0.05]'
+              className='flex h-9 w-9 items-center justify-center rounded-[10px] border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400 dark:hover:bg-white/[0.05]'
               aria-label='Back to conversations'
             >
-              <ArrowLeft className='h-5 w-5' />
+              <ArrowLeft className='h-4.5 w-4.5' />
             </button>
             <div>
               <h1 className='type-h3 font-semibold text-gray-800 dark:text-white/90'>
                 Conversation Detail
               </h1>
-              <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>
+              <p className='mt-1 type-caption text-gray-500 dark:text-gray-400'>
                 Review messages, customer context, and lead stage.
               </p>
             </div>
@@ -602,7 +560,7 @@ export default function ConversationDetailPage() {
             <button
               type='button'
               onClick={() => void load()}
-              className='inline-flex h-10 items-center gap-2 rounded-[10px] border border-gray-200 bg-white px-4 type-small font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300'
+              className='inline-flex h-9 items-center gap-1.5 rounded-[10px] border border-gray-200 bg-white px-3.5 type-small font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300'
             >
               <RefreshCw className='h-4 w-4' />
               Refresh
@@ -611,61 +569,143 @@ export default function ConversationDetailPage() {
         </div>
 
         {err && (
-          <div className='mb-6 flex items-start gap-3 rounded-xl border border-error-200 bg-error-50 px-4 py-3 type-small text-error-700 dark:border-error-500/20 dark:bg-error-500/10 dark:text-error-500'>
+          <div className='mb-5 flex items-start gap-3 rounded-xl border border-error-200 bg-error-50 px-4 py-2.5 type-small text-error-700 dark:border-error-500/20 dark:bg-error-500/10 dark:text-error-500'>
             <AlertTriangle className='mt-0.5 h-4 w-4 shrink-0' />
             {err}
           </div>
         )}
 
-        <div className='grid grid-cols-1 gap-6 xl:grid-cols-12'>
-          <div className='space-y-6 xl:col-span-8'>
-            <Card className='overflow-hidden'>
-              <div className='flex items-center justify-between border-b border-gray-200 px-5 py-4 dark:border-gray-800 sm:px-6'>
-                <div className='flex min-w-0 items-center gap-3'>
-                  <div className='relative h-10 w-10 shrink-0'>
-                    <div className='h-10 w-10 overflow-hidden rounded-full border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-gray-800'>
-                      {profilePic ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={profilePic}
-                          alt={customerName}
-                          className='h-full w-full object-cover'
-                        />
-                      ) : (
-                        <div className='flex h-full w-full items-center justify-center type-small font-semibold text-gray-700 dark:text-gray-300'>
-                          {initials(customerName)}
-                        </div>
-                      )}
-                    </div>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
+        {/* Customer header card (compact — aligned inline metrics row) */}
+        <Card className='mb-5 overflow-hidden px-5 py-4 sm:px-6'>
+          <div className='flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between'>
+            <div className='flex min-w-0 items-center gap-3.5'>
+              <div className='relative h-11 w-11 shrink-0'>
+                <div className='h-11 w-11 overflow-hidden rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-gray-800'>
+                  {profilePic ? (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img
-                      src={channelTheme.logo}
-                      alt={platformLabel(convo?.channel)}
-                      className='absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full border border-white bg-white object-contain dark:border-gray-900'
+                      src={profilePic}
+                      alt={customerName}
+                      className='h-full w-full object-cover'
                     />
-                  </div>
-                  <div className='min-w-0'>
-                    <h2 className='truncate type-card-title font-semibold text-gray-800 dark:text-white/90'>
-                      {customerName}
-                    </h2>
-                    <div className='mt-1 flex flex-wrap items-center gap-2'>
-                      <span className='type-small text-gray-500 dark:text-gray-400'>
-                        {platformLabel(convo?.channel)}
-                      </span>
-                      <span
-                        className={`rounded-full px-3 py-1 type-caption font-medium capitalize ${statusClass(convo?.status)}`}
-                      >
-                        {convo?.status || 'unknown'}
-                      </span>
+                  ) : (
+                    <div className='flex h-full w-full items-center justify-center type-small font-semibold text-gray-700 dark:text-gray-300'>
+                      {initials(customerName)}
                     </div>
-                  </div>
+                  )}
                 </div>
-                <p className='hidden type-small text-gray-500 dark:text-gray-400 sm:block'>
-                  Last activity {formatDate(convo?.last_message_at)}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={channelTheme.logo}
+                  alt={platformLabel(convo?.channel)}
+                  className='absolute -bottom-0.5 -right-0.5 h-4.5 w-4.5 rounded-lg border-2 border-white bg-white object-contain dark:border-gray-900'
+                />
+              </div>
+              <div className='min-w-0'>
+                <div className='flex items-center gap-1.5'>
+                  <h2 className='truncate type-card-title font-semibold text-gray-800 dark:text-white/90'>
+                    {customerName}
+                  </h2>
+                  {lead?.meta?.score != null && (
+                    <span className='shrink-0 rounded-full bg-brand-50 px-1.5 py-0 text-[10px] font-bold text-brand-600 dark:bg-brand-500/15 dark:text-brand-400'>
+                      {lead.meta.score}
+                    </span>
+                  )}
+                </div>
+                <div className='mt-1 flex flex-wrap items-center gap-1.5'>
+                  <span className='inline-flex items-center type-caption font-medium text-gray-500 dark:text-gray-400'>
+                    {platformLabel(convo?.channel)}
+                  </span>
+                  <span
+                    className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10.5px] font-semibold capitalize ${statusClass(convo?.status)}`}
+                  >
+                    {convo?.status || 'unknown'}
+                  </span>
+                  {lead && (
+                    <span className='inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-[10.5px] font-semibold capitalize text-gray-700 dark:bg-white/5 dark:text-gray-300'>
+                      {lead.intent || 'Unclassified'}
+                    </span>
+                  )}
+                  {lead && (
+                    <span className='inline-flex items-center rounded-full bg-success-50 px-2 py-0.5 text-[10.5px] font-semibold capitalize text-success-700 dark:bg-success-500/10 dark:text-success-400'>
+                      {lead.status}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Metric tiles — 4 in a row, compact */}
+            <div className='grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-2.5'>
+              <div className='rounded-xl border border-gray-100 bg-gray-50 px-2.5 py-2 dark:border-white/[0.05] dark:bg-white/[0.02]'>
+                <p className='type-caption font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500'>
+                  Msgs
+                </p>
+                <p className='mt-0.5 type-small font-semibold text-gray-800 dark:text-white/90'>
+                  {messages.length}
+                </p>
+              </div>
+              <div className='rounded-xl border border-gray-100 bg-gray-50 px-2.5 py-2 dark:border-white/[0.05] dark:bg-white/[0.02]'>
+                <p className='type-caption font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500'>
+                  Avg
+                </p>
+                <p className='mt-0.5 type-small font-semibold text-gray-800 dark:text-white/90'>
+                  {avgLatency != null ? formatLatency(avgLatency) : '—'}
+                </p>
+              </div>
+              <div className='rounded-xl border border-gray-100 bg-gray-50 px-2.5 py-2 dark:border-white/[0.05] dark:bg-white/[0.02]'>
+                <p className='type-caption font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500'>
+                  Mood
+                </p>
+                <p className='mt-0.5 flex items-center gap-1 type-small font-semibold text-gray-800 dark:text-white/90'>
+                  <span>{mood?.emoji || '🙂'}</span>
+                  <span className='truncate'>{mood?.label || '—'}</span>
+                </p>
+              </div>
+              <div className='rounded-xl border border-gray-100 bg-gray-50 px-2.5 py-2 dark:border-white/[0.05] dark:bg-white/[0.02]'>
+                <p className='type-caption font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500'>
+                  Opened
+                </p>
+                <p className='mt-0.5 type-small font-semibold text-gray-800 dark:text-white/90'>
+                  {formatDate(convo?.created_at)}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {convo?.summary && (
+            <div className='mt-4 rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 dark:border-white/[0.05] dark:bg-white/[0.02]'>
+              <p className='type-caption font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400'>
+                Conversation summary
+              </p>
+              <p className='mt-1 type-caption leading-5.5 text-gray-700 dark:text-gray-300'>
+                {convo.summary}
+              </p>
+            </div>
+          )}
+        </Card>
+
+        {/* Main 2-col content: Messages (col-8) | stacked sidebar (col-4) */}
+        <div className='grid grid-cols-1 gap-5 xl:grid-cols-12 xl:gap-5'>
+          <div className='xl:col-span-8'>
+            <Card className='overflow-hidden'>
+              {/* Messages header */}
+              <div className='flex items-center justify-between border-b border-gray-100 px-5 py-3 dark:border-white/[0.05] sm:px-6'>
+                <div className='flex items-center gap-1.5'>
+                  <h3 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
+                    Messages
+                  </h3>
+                  <span className='rounded-full bg-gray-100 px-1.5 py-0 type-caption font-semibold text-gray-600 dark:bg-white/5 dark:text-gray-400'>
+                    {messages.length}
+                  </span>
+                </div>
+                <p className='hidden type-caption text-gray-500 dark:text-gray-400 sm:block'>
+                  Last {formatDate(convo?.last_message_at)}
                 </p>
               </div>
 
-              <div className='h-[560px] space-y-5 overflow-y-auto bg-gray-50 px-5 py-6 custom-scrollbar dark:bg-gray-900 sm:px-6'>
+              {/* Messages body */}
+              <div className='h-[520px] space-y-3.5 overflow-y-auto bg-gray-50 px-5 py-4 custom-scrollbar dark:bg-gray-900 sm:px-6'>
                 {messages.length === 0 ? (
                   <div className='flex h-full items-center justify-center type-small text-gray-500 dark:text-gray-400'>
                     No messages found
@@ -682,8 +722,9 @@ export default function ConversationDetailPage() {
                 <div ref={bottomRef} />
               </div>
 
-              <div className='border-t border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03] sm:p-6'>
-                <div className='flex items-center gap-2 sm:gap-3'>
+              {/* Reply input + action buttons (compact inline) */}
+              <div className='border-t border-gray-100 bg-white px-5 py-3.5 dark:border-white/[0.05] dark:bg-white/[0.03] sm:px-6 sm:py-4'>
+                <div className='flex items-center gap-2 sm:gap-2.5'>
                   <input
                     type='text'
                     value={replyText}
@@ -697,176 +738,162 @@ export default function ConversationDetailPage() {
                       }
                     }}
                     placeholder='Message as agent…'
-                    className={`h-10 min-w-0 flex-1 rounded-full border border-gray-300 bg-transparent px-4 type-small text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 sm:h-12 sm:px-5 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 ${channelTheme.ring}`}
+                    className={`h-9 min-w-0 flex-1 rounded-full border border-gray-300 bg-transparent px-4 type-small text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 sm:h-10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 ${channelTheme.ring}`}
                   />
                   <button
                     type='button'
                     onClick={() => void sendReply()}
                     disabled={!replyText.trim() || sending}
-                    className={`inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-full px-4 type-small font-medium text-white disabled:opacity-60 sm:h-12 sm:px-6 ${channelTheme.accent} ${channelTheme.accentHover}`}
+                    className={`inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-full px-4 type-small font-semibold text-white disabled:opacity-60 sm:h-10 ${channelTheme.accent} ${channelTheme.accentHover}`}
                   >
                     {sending ? (
                       <Loader2 className='h-4 w-4 animate-spin' />
                     ) : (
                       <Send className='h-4 w-4' />
                     )}
-                    <span className='hidden sm:inline'>Send</span>
+                    <span>Send</span>
                   </button>
                 </div>
-                <p className='mt-1.5 hidden type-caption text-gray-400 sm:block dark:text-gray-500'>
+                <p className='mt-1 hidden type-caption text-gray-400 sm:block dark:text-gray-500'>
                   Cmd/Ctrl + Enter to send
                 </p>
 
-                <div className='mt-3 grid grid-cols-2 gap-2 sm:gap-3'>
+                <div className='mt-3 flex flex-wrap items-center gap-1.5'>
                   <button
                     type='button'
                     onClick={() => void act(isHandoff ? 'reopen' : 'handoff')}
                     disabled={Boolean(actionLoading)}
-                    className='inline-flex h-10 items-center justify-center gap-2 rounded-full border border-success-200 bg-success-50 px-2 type-caption font-medium text-success-600 disabled:opacity-60 sm:type-small dark:border-success-500/20 dark:bg-success-500/10 dark:text-success-400'
+                    className='inline-flex h-8 items-center gap-1.5 rounded-full border border-success-200 bg-success-50 px-3 type-caption font-semibold text-success-700 disabled:opacity-60 dark:border-success-500/20 dark:bg-success-500/10 dark:text-success-400'
                   >
                     {actionLoading === 'handoff' ||
                     actionLoading === 'reopen' ? (
-                      <Loader2 className='h-4 w-4 shrink-0 animate-spin' />
+                      <Loader2 className='h-3.5 w-3.5 shrink-0 animate-spin' />
                     ) : (
-                      <Users className='h-4 w-4 shrink-0' />
+                      <Users className='h-3.5 w-3.5 shrink-0' />
                     )}
-                    <span className='truncate'>
-                      {isHandoff ? 'Back to AI' : 'Handoff'}
+                    <span>
+                      {isHandoff ? 'Back to AI' : 'Handoff to agent'}
                     </span>
                   </button>
                   <button
                     type='button'
                     onClick={() => void act(isClosed ? 'reopen' : 'close')}
                     disabled={Boolean(actionLoading)}
-                    className='inline-flex h-10 items-center justify-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-2 type-caption font-medium text-gray-700 disabled:opacity-60 sm:type-small dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300'
+                    className='inline-flex h-8 items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 px-3 type-caption font-semibold text-gray-700 disabled:opacity-60 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300'
                   >
-                    {actionLoading === 'close' || actionLoading === 'reopen' ? (
-                      <Loader2 className='h-4 w-4 shrink-0 animate-spin' />
+                    {actionLoading === 'close' ||
+                    actionLoading === 'reopen' ? (
+                      <Loader2 className='h-3.5 w-3.5 shrink-0 animate-spin' />
                     ) : (
-                      <CheckCircle2 className='h-4 w-4 shrink-0' />
+                      <CheckCircle2 className='h-3.5 w-3.5 shrink-0' />
                     )}
-                    <span className='truncate'>
-                      {isClosed ? 'Reopen' : 'Close'}
-                    </span>
+                    <span>{isClosed ? 'Reopen' : 'Close conversation'}</span>
                   </button>
                 </div>
               </div>
             </Card>
           </div>
 
-          <div className='space-y-6 xl:col-span-4'>
-            <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-1'>
-              <MetricCard
-                label='Messages'
-                value={messages.length}
-                icon={<MessageCircle className='h-5 w-5' />}
-              />
-              <MetricCard
-                label='Mood'
-                value={mood?.label || 'Neutral'}
-                icon={
-                  <span className='type-card-title leading-none'>
-                    {mood?.emoji || '🙂'}
-                  </span>
-                }
-              />
-            </div>
+          {/* Right sidebar: Message Mix + Pipeline (with Contacts inside) + Response Latency — fills column top-to-bottom */}
+          <div className='grid grid-cols-1 content-start gap-5 xl:col-span-4'>
+            <MessageMixChart data={data} isDark={isDark} />
 
-            {/* <Card className='p-6'>
+            {/* Pipeline stage + Contacts inside (matching original: Contacts nested, not standalone) */}
+            <Card className='px-4 py-4 sm:px-5'>
               <h3 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
-                Customer Context
-              </h3>
-              <div className='mt-4'>
-                <InfoRow
-                  label='Channel'
-                  value={platformLabel(convo?.channel)}
-                />
-                <InfoRow
-                  label='External ID'
-                  value={convo?.external_user_id || 'Not available'}
-                />
-                <InfoRow
-                  label='Created'
-                  value={formatDate(convo?.created_at)}
-                />
-              </div>
-              {convo?.summary && (
-                <div className='mt-4 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-900'>
-                  <p className='type-small font-medium text-gray-800 dark:text-white/90'>
-                    Summary
-                  </p>
-                  <p className='mt-2 type-small leading-6 text-gray-500 dark:text-gray-400'>
-                    {convo.summary}
-                  </p>
-                </div>
-              )}
-            </Card> */}
-
-            <Card className='p-6'>
-              <h3 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
-                Pipeline Stage
+                Pipeline stage
               </h3>
               {lead ? (
                 <>
-                  <div className='mt-4'>
-                    <label className='mb-1.5 block type-small font-medium text-gray-700 dark:text-gray-400'>
-                      Pipeline stage
-                    </label>
-                    <select
-                      value={leadStatus}
-                      onChange={(event) => setLeadStatus(event.target.value)}
-                      className='h-10 w-full rounded-[10px] border border-gray-300 bg-transparent px-4 type-small text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90'
-                    >
-                      {PIPELINE.map((stage) => (
-                        <option key={stage} value={stage}>
-                          {stage}
-                        </option>
-                      ))}
-                    </select>
+                  <p className='mt-0.5 type-caption text-gray-500 dark:text-gray-400'>
+                    Update the lead lifecycle.
+                  </p>
+                  <div className='mt-3 space-y-2.5'>
+                    <div>
+                      <label className='mb-1 block type-caption font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400'>
+                        Stage
+                      </label>
+                      <select
+                        value={leadStatus}
+                        onChange={(event) => setLeadStatus(event.target.value)}
+                        className='h-9 w-full rounded-[10px] border border-gray-300 bg-transparent px-3.5 type-small font-medium text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90'
+                      >
+                        {PIPELINE.map((stage) => (
+                          <option key={stage} value={stage}>
+                            {stage.charAt(0).toUpperCase() + stage.slice(1)}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                     <button
                       type='button'
                       onClick={() => void saveStage()}
                       disabled={savingStage || leadStatus === lead.status}
-                      className='mt-3 inline-flex h-10 w-full items-center justify-center gap-2 rounded-[10px] bg-brand-500 px-4 type-small font-medium text-white disabled:opacity-60'
+                      className='inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-[10px] bg-brand-500 px-3.5 type-small font-semibold text-white shadow-theme-xs hover:bg-brand-600 disabled:opacity-60'
                     >
                       {savingStage && (
-                        <Loader2 className='h-4 w-4 animate-spin' />
+                        <Loader2 className='h-3.5 w-3.5 animate-spin' />
                       )}
-                      Save Stage
+                      Save stage
                     </button>
                   </div>
                   {lead.contacts.emails?.length ||
                   lead.contacts.phones?.length ? (
-                    <div className='mt-4 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-900'>
-                      <p className='type-small font-medium text-gray-800 dark:text-white/90'>
+                    <div className='mt-3.5 rounded-xl border border-gray-100 bg-gray-50 px-3.5 py-3 dark:border-white/[0.05] dark:bg-white/[0.02]'>
+                      <p className='type-caption font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400'>
                         Contacts
                       </p>
-                      <div className='mt-2 space-y-1 type-small text-gray-500 dark:text-gray-400'>
-                        {(lead.contacts.emails || []).map((email) => (
-                          <p key={email}>{email}</p>
-                        ))}
-                        {(lead.contacts.phones || []).map((phone) => (
-                          <p key={phone}>{phone}</p>
-                        ))}
+                      <div className='mt-2 space-y-2 type-caption'>
+                        {lead.contacts.emails?.length ? (
+                          <div>
+                            <p className='mb-0.5 text-[10.5px] font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500'>
+                              Email
+                            </p>
+                            <div className='space-y-1'>
+                              {(lead.contacts.emails || []).map((email) => (
+                                <p
+                                  key={email}
+                                  className='truncate font-medium text-gray-700 dark:text-gray-300'
+                                >
+                                  {email}
+                                </p>
+                              ))}
+                            </div>
+                          </div>
+                        ) : null}
+                        {lead.contacts.phones?.length ? (
+                          <div>
+                            <p className='mb-0.5 text-[10.5px] font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500'>
+                              Phone
+                            </p>
+                            <div className='space-y-1'>
+                              {(lead.contacts.phones || []).map((phone) => (
+                                <p
+                                  key={phone}
+                                  className='truncate font-medium text-gray-700 dark:text-gray-300'
+                                >
+                                  {phone}
+                                </p>
+                              ))}
+                            </div>
+                          </div>
+                        ) : null}
                       </div>
                     </div>
                   ) : null}
                 </>
               ) : (
-                <div className='mt-4 flex items-start gap-3 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-900'>
+                <div className='mt-3 flex items-start gap-2.5 rounded-xl border border-gray-100 bg-gray-50 p-3 dark:border-white/[0.05] dark:bg-white/[0.02]'>
                   <ShieldAlert className='mt-0.5 h-4 w-4 text-gray-500 dark:text-gray-400' />
-                  <p className='type-small text-gray-500 dark:text-gray-400'>
-                    No lead has been created for this conversation yet.
+                  <p className='type-caption text-gray-500 dark:text-gray-400'>
+                    No lead has been created.
                   </p>
                 </div>
               )}
             </Card>
-          </div>
-        </div>
 
-        <div className='mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2'>
-          <MessageMixChart data={data} isDark={isDark} />
-          <LatencyChart data={data} isDark={isDark} />
+            <LatencyChart data={data} isDark={isDark} />
+          </div>
         </div>
 
         {convo?.channel === 'website' && (
