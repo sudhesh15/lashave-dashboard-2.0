@@ -182,18 +182,40 @@ function Highlight({ text, query }: { text: string; query: string }) {
 }
 
 function LeadAvatar({ lead, label }: { lead: LeadItem; label: string }) {
+  const [imgFailed, setImgFailed] = useState(false);
+
   const src =
     lead.profile_pic_url ||
     lead.meta?.instagram_profile?.profile_pic_url ||
     null;
-  const initials = label
-    .split(' ')
-    .map((part) => part[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase();
 
-  if (src) {
+  useEffect(() => {
+    setImgFailed(false);
+  }, [src]);
+
+  const initials = (() => {
+    const raw = (label || '').replace(/^@+/, '').trim();
+
+    const words = raw.split(/\s+/).filter(Boolean);
+
+    // Only use two initials when the name has real spaces between words.
+    // Example: "Sajeed Balluru" -> "SB", "Website visitor 6460" -> "WV"
+    if (words.length >= 2) {
+      const first = words[0].match(/[A-Za-z0-9]/)?.[0] || '';
+      const second = words[1].match(/[A-Za-z0-9]/)?.[0] || '';
+
+      return `${first}${second}`.toUpperCase() || 'LD';
+    }
+
+    // If it is one username/string, even with underscores/dots/dashes,
+    // use only the first actual letter/number.
+    // Example: "sonam_testacc" -> "S", "_sxjeed_" -> "S"
+    const firstChar = raw.match(/[A-Za-z0-9]/)?.[0];
+
+    return firstChar ? firstChar.toUpperCase() : 'LD';
+  })();
+
+  if (src && !imgFailed) {
     return (
       <Image
         src={src}
@@ -201,6 +223,7 @@ function LeadAvatar({ lead, label }: { lead: LeadItem; label: string }) {
         width={40}
         height={40}
         unoptimized
+        onError={() => setImgFailed(true)}
         className='h-10 w-10 shrink-0 rounded-full object-cover'
       />
     );
@@ -208,7 +231,7 @@ function LeadAvatar({ lead, label }: { lead: LeadItem; label: string }) {
 
   return (
     <span className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 type-caption font-medium text-gray-600 dark:bg-white/5 dark:text-gray-300'>
-      {initials || 'LD'}
+      {initials}
     </span>
   );
 }
@@ -770,18 +793,13 @@ export default function LeadsPage() {
     <RequireAuth>
       <div className='mx-auto max-w-360 px-4 py-8'>
         <PageBreadcrumb pageTitle='Leads' />
-
-        <div className='mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
-          <div>
-            <h1 className='text-title-sm font-semibold text-gray-800 dark:text-white/90'>
-              Leads
-            </h1>
-            <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>
-              Manage lead qualification, follow-ups, and pipeline movement from
-              one focused workspace.
-            </p>
-          </div>
-
+          <div className='mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
+            <div>
+              <p className='type-small text-gray-500 dark:text-gray-400'>
+                Manage lead qualification, follow-ups, and pipeline movement from
+                one focused workspace.
+              </p>
+            </div>
           <div className='flex items-center gap-2'>
             <Button
               variant='outline'
@@ -854,7 +872,7 @@ export default function LeadsPage() {
                     {activeStageTab.label} leads
                   </h4>
                   <div className='flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end'>
-                    <div className='relative w-full sm:w-[240px]'>
+                    <div className='relative w-full sm:w-[369px]'>
                       <Search className='pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400' />
                       <input
                         type='search'

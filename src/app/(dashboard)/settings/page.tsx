@@ -331,6 +331,11 @@ export default function SettingsPage() {
           ? data.verified_ig_handoff_message
           : '';
 
+      data.system_prompt =
+        typeof data.system_prompt === 'string'
+          ? data.system_prompt.slice(0, 1000)
+          : '';
+
       setS(data);
       setTenantId(me.user.tenant_id);
       setLoaded(true);
