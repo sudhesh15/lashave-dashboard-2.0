@@ -1922,7 +1922,7 @@ function CustomersTab({
             </div>
 
             <div className='flex min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end'>
-              <div className='relative w-full sm:w-[260px]'>
+              <div className='relative w-full sm:w-[270px]'>
                 <Search className='pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400' />
 
                 <input
