@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Calendar } from 'lucide-react';
+import { Calendar, X } from 'lucide-react';
 
 export type DateRangeValue = { from: string; to: string } | null;
 
@@ -52,14 +52,33 @@ export function DateFilter({
             'border-brand-300 bg-brand-50 text-brand-500 dark:border-brand-500/30 dark:bg-brand-500/15 dark:text-brand-400',
         )}
       >
-        <Calendar className='icon-small' />
-        {dateRange
-          ? `${formatDate(dateRange.from)} to ${formatDate(dateRange.to)}`
-          : 'Date'}
+        <Calendar className='icon-small shrink-0' />
+        {dateRange ? (
+          <span className='truncate'>
+            {formatDate(dateRange.from)} to {formatDate(dateRange.to)}
+          </span>
+        ) : (
+          'Date'
+        )}
       </Button>
 
       {open && (
         <div className='absolute right-0 top-[calc(100%+8px)] z-50 w-72 rounded-xl border border-gray-200 bg-white p-4 shadow-theme-lg dark:border-gray-800 dark:bg-gray-900'>
+          <div className='mb-3 flex items-center justify-between'>
+            <span className='type-small font-semibold text-gray-700 dark:text-gray-200'>
+              Filter by date
+            </span>
+            <button
+              type='button'
+              aria-label='Close date filter'
+              title='Close'
+              onClick={onClose}
+              className='inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-gray-700 focus:border-brand-300 focus:ring-[3px] focus:ring-brand-500/10 dark:text-gray-400 dark:hover:bg-white/[0.06] dark:hover:text-gray-200'
+            >
+              <X className='h-4 w-4' />
+            </button>
+          </div>
+
           <div className='grid grid-cols-3 gap-2'>
             {[
               { label: 'Today', days: 0 },
