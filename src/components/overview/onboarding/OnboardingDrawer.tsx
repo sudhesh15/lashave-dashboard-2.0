@@ -11,6 +11,7 @@ import {
   Globe,
   Loader2,
   PencilLine,
+  ShieldAlert,
   Sparkles,
   Upload,
   X,
@@ -589,6 +590,15 @@ export function OnboardingDrawer({
                 create a duplicate document.
               </div>
             )}
+
+            <div className='mt-4 flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-3 dark:border-amber-500/20 dark:bg-amber-500/10'>
+              <ShieldAlert className='mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400' />
+              <p className='flex-1 type-small leading-5 text-left text-amber-700 dark:text-amber-300'>
+                Uploaded files may be scanned for personal information (names,
+                emails, or other identifying details) before they&apos;re added
+                to your knowledge base.
+              </p>
+            </div>
 
             {uploadFile && (
               <label
