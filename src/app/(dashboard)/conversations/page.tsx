@@ -11,7 +11,6 @@ import { DateFilter } from '@/components/date-filter';
 import { RequireAuth } from '@/components/require-auth';
 import { Button } from '@/components/ui/button';
 import {
-  getPageItems,
   TablePagination,
 } from '@/components/ui/table-pagination';
 import { useOutsideClick } from '@/hooks/useOutsideClick';
@@ -74,7 +73,7 @@ type ConvoItem = {
   } | null;
 };
 
-const LIMIT = 200;
+const PAGE_SIZE = 25;
 
 function errorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
@@ -374,6 +373,9 @@ type InboxFilterKey = 'conversation' | 'channel' | 'date' | 'category';
 function ConversationTable({
   items,
   loading,
+  page,
+  setPage,
+  totalItems,
   status,
   setStatus,
   tabCounts,
@@ -402,6 +404,9 @@ function ConversationTable({
 }: {
   items: ConvoItem[];
   loading: boolean;
+  page: number;
+  setPage: (page: number) => void;
+  totalItems: number;
   status: string;
   setStatus: (status: string) => void;
   tabCounts: Record<string, number>;
@@ -428,8 +433,7 @@ function ConversationTable({
   setStatFilter: (value: string) => void;
   statCounts: Record<string, number>;
 }) {
-  const [page, setPage] = useState(1);
-  const pageItems = getPageItems(items, page);
+  const pageItems = items;
 
   const channelFilterRef = useRef<HTMLDivElement>(null);
   const conversationFilterRef = useRef<HTMLDivElement>(null);
@@ -460,7 +464,7 @@ function ConversationTable({
   useEffect(() => {
     const timer = window.setTimeout(() => setPage(1), 0);
     return () => window.clearTimeout(timer);
-  }, [status, items.length]);
+  }, [status, q, dateRange, activePreset, statFilter]);
 
   const activeTab =
     INBOX_TABS.find((tab) => tab.key === status) ?? INBOX_TABS[0];
@@ -856,8 +860,9 @@ function ConversationTable({
         </div>
         <TablePagination
           page={page}
-          totalItems={items.length}
+          totalItems={totalItems}
           onPageChange={setPage}
+          pageSize={PAGE_SIZE}
         />
       </div>
     </div>
@@ -876,6 +881,8 @@ export default function ConversationsPage() {
   } = useChannelFilter();
 
   const [items, setItems] = useState<ConvoItem[]>([]);
+  const [countsAll, setCountsAll] = useState<ConvoItem[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [filterLead, setFilterLead] = useState(false);
   const [openFilter, setOpenFilter] = useState<InboxFilterKey | null>(null);
   const [q, setQ] = useState('');
@@ -889,6 +896,7 @@ export default function ConversationsPage() {
   } | null>(null);
   const [activePreset, setActivePreset] = useState<number | null>(null);
   const [statFilter, setStatFilter] = useState('all');
+  const [page, setPage] = useState(1);
 
   const load = useCallback(
     async (opts?: { silent?: boolean }) => {
@@ -896,32 +904,59 @@ export default function ConversationsPage() {
       setErr(null);
 
       try {
-        const qs = new URLSearchParams();
-        qs.set('limit', String(LIMIT));
-        qs.set('offset', '0');
-        if (q.trim()) qs.set('q', q.trim());
-        if (status !== 'all') qs.set('status', status);
+        const pageQ = new URLSearchParams();
+        pageQ.set('limit', String(PAGE_SIZE));
+        pageQ.set('offset', String((Math.max(1, page) - 1) * PAGE_SIZE));
+        if (q.trim()) pageQ.set('q', q.trim());
+        if (status !== 'all') pageQ.set('status', status);
 
         // NOTE: channel filter is applied CLIENT-SIDE (see visibleItems / channelCounts).
         // Do NOT send channel_id here — doing so narrows `items` and breaks the counts.
 
         if (dateRange?.from) {
-          qs.set('from_ts', new Date(dateRange.from).toISOString());
+          pageQ.set('from_ts', new Date(dateRange.from).toISOString());
         }
         if (dateRange?.to) {
           const to = new Date(dateRange.to);
           to.setHours(23, 59, 59, 999);
-          qs.set('to_ts', to.toISOString());
+          pageQ.set('to_ts', to.toISOString());
         }
 
-        const data = await apiFetch<{ items: ConvoItem[] }>(
-          `/admin/conversations?${qs.toString()}`,
-          { auth: true },
-        );
-        const filtered = (data.items || []).filter(
+        const countsQ = new URLSearchParams(pageQ.toString());
+        countsQ.set('offset', '0');
+        countsQ.set('limit', String(1000));
+
+        const [pageData, countsData] = await Promise.all([
+          apiFetch<{
+            items: ConvoItem[];
+            total_count?: number;
+            count?: number;
+            total?: number;
+          }>(`/admin/conversations?${pageQ.toString()}`, { auth: true }),
+          apiFetch<{
+            items: ConvoItem[];
+          }>(`/admin/conversations?${countsQ.toString()}`, { auth: true }),
+        ]);
+
+        const pageItems = (pageData.items || []).filter(
           (item) => item.channel?.toLowerCase() !== 'google',
         );
-        setItems(filtered);
+        const countsItems = (countsData.items || []).filter(
+          (item) => item.channel?.toLowerCase() !== 'google',
+        );
+        setItems(pageItems);
+        const receivedTotal =
+          typeof pageData.total_count === 'number'
+            ? pageData.total_count
+            : typeof pageData.count === 'number'
+              ? pageData.count
+              : typeof pageData.total === 'number'
+                ? pageData.total
+                : countsItems.length < 1000
+                  ? countsItems.length
+                  : Math.max(totalCount, countsItems.length * 2);
+        setTotalCount(receivedTotal);
+        setCountsAll(countsItems);
         setLastRefresh(new Date());
       } catch (error: unknown) {
         setErr(errorMessage(error, 'Failed to load conversations'));
@@ -929,7 +964,7 @@ export default function ConversationsPage() {
         if (!opts?.silent) setLoading(false);
       }
     },
-    [dateRange, q, status], // channelFilter intentionally NOT here — no refetch on channel select
+    [dateRange, page, q, status, totalCount], // channelFilter intentionally NOT here — no refetch on channel select
   );
 
   useEffect(() => {
@@ -944,8 +979,8 @@ export default function ConversationsPage() {
 
   // Lead-filtered but NOT channel-filtered — the source of truth for channel counts.
   const leadFilteredItems = useMemo(
-    () => items.filter((item) => !filterLead || isRealLead(item.lead)),
-    [filterLead, items],
+    () => countsAll.filter((item) => !filterLead || isRealLead(item.lead)),
+    [filterLead, countsAll],
   );
 
   // Channel counts computed BEFORE the channel filter, so every channel keeps its
@@ -962,7 +997,7 @@ export default function ConversationsPage() {
 
   // What the table actually renders — channel filter applied here on top.
   const visibleItems = useMemo(() => {
-    let list = leadFilteredItems;
+    let list = items;
     if (channelFilter.channel_ids.length > 0) {
       list = list.filter(
         (item) =>
@@ -974,43 +1009,44 @@ export default function ConversationsPage() {
       list = list.filter((item) => matchesStatFilter(item, statFilter));
     }
     return list;
-  }, [leadFilteredItems, channelFilter, statFilter]);
+  }, [items, channelFilter, statFilter]);
+
   const statusCounts = useMemo(
     () =>
-      items.reduce<Record<string, number>>((acc, item) => {
+      countsAll.reduce<Record<string, number>>((acc, item) => {
         const key = item.status || 'unknown';
         acc[key] = (acc[key] || 0) + 1;
         return acc;
       }, {}),
-    [items],
+    [countsAll],
   );
 
   const categoryCounts = useMemo(
     () =>
-      items.reduce<Record<string, number>>((acc, item) => {
+      countsAll.reduce<Record<string, number>>((acc, item) => {
         const category = getCategory(item);
         if (category) acc[category] = (acc[category] || 0) + 1;
         return acc;
       }, {}),
-    [items],
+    [countsAll],
   );
 
   const tabCounts = useMemo(
     () => ({
-      all: items.length,
+      all: countsAll.length,
       open: statusCounts.open || 0,
       handoff: statusCounts.handoff || 0,
       closed: statusCounts.closed || 0,
     }),
-    [items.length, statusCounts],
+    [countsAll.length, statusCounts],
   );
 
   const openCount = statusCounts.open || 0;
   const handoffCount = statusCounts.handoff || 0;
-  const leadCount = items.filter((item) => isRealLead(item.lead)).length;
+  const leadCount = countsAll.filter((item) => isRealLead(item.lead)).length;
 
   const statValues: Record<string, number> = {
-    all: items.length,
+    all: countsAll.length,
     complaint: categoryCounts.complaint || 0,
     feedback: categoryCounts.feedback || 0,
     order: categoryCounts.order || 0,
@@ -1029,6 +1065,7 @@ export default function ConversationsPage() {
     setDateRange(null);
     setActivePreset(null);
     setOpenFilter(null);
+    setPage(1);
   }, [clearChannels]);
 
   return (
@@ -1091,14 +1128,26 @@ export default function ConversationsPage() {
           <ConversationTable
             items={visibleItems}
             loading={loading}
+            page={page}
+            setPage={setPage}
+            totalItems={totalCount}
             status={status}
-            setStatus={setStatus}
+            setStatus={(next) => {
+              setStatus(next);
+              setPage(1);
+            }}
             tabCounts={tabCounts}
             openFilter={openFilter}
             setOpenFilter={setOpenFilter}
             q={q}
-            setQ={setQ}
-            onSearchSubmit={() => load()}
+            setQ={(next) => {
+              setQ(next);
+              if (!next.trim()) setPage(1);
+            }}
+            onSearchSubmit={() => {
+              setPage(1);
+              load();
+            }}
             onSeeAll={handleSeeAll}
             channelFilter={channelFilter}
             setChannelFilter={setChannelFilter}
@@ -1108,13 +1157,22 @@ export default function ConversationsPage() {
             channelCounts={channelCounts}
             channelTotal={leadFilteredItems.length}
             dateRange={dateRange}
-            setDateRange={setDateRange}
+            setDateRange={(next) => {
+              setDateRange(next);
+              setPage(1);
+            }}
             activePreset={activePreset}
             setActivePreset={setActivePreset}
             filterLead={filterLead}
-            setFilterLead={setFilterLead}
+            setFilterLead={(updater) => {
+              setFilterLead(updater);
+              setPage(1);
+            }}
             statFilter={statFilter}
-            setStatFilter={setStatFilter}
+            setStatFilter={(next) => {
+              setStatFilter(next);
+              setPage(1);
+            }}
             statCounts={statValues}
           />
 
