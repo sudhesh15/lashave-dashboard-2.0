@@ -3207,7 +3207,7 @@ function LivePreview({
                   display: 'flex',
                   gap: 7,
                   alignItems: 'flex-start',
-                  margin: '4px 0 10px',
+                  margin: '4px 0 6px',
                 }}
               >
                 <div
@@ -3227,6 +3227,113 @@ function LivePreview({
                   <span style={{ color: brandColor, fontWeight: 700 }}>
                     privacy policy
                   </span>
+                </span>
+              </div>
+            )}
+            {adv.marketing_consent_enabled && (
+              <div
+                style={{
+                  display: 'flex',
+                  gap: 7,
+                  alignItems: 'flex-start',
+                  margin: '0 0 6px',
+                }}
+              >
+                <div
+                  style={{
+                    width: 13,
+                    height: 13,
+                    borderRadius: 4,
+                    border: `1.5px solid ${brandColor}`,
+                    flexShrink: 0,
+                    marginTop: 1,
+                  }}
+                />
+                <span
+                  style={{ fontSize: 12, color: textSub, lineHeight: 1.45 }}
+                >
+                  {adv.marketing_consent_text ||
+                    'I would like to receive product updates and offers by email.'}
+                </span>
+              </div>
+            )}
+            {adv.age_assurance_enabled && (
+              <div
+                style={{
+                  display: 'flex',
+                  gap: 7,
+                  alignItems: 'flex-start',
+                  margin: '0 0 6px',
+                }}
+              >
+                <div
+                  style={{
+                    width: 13,
+                    height: 13,
+                    borderRadius: 4,
+                    border: `1.5px solid ${brandColor}`,
+                    flexShrink: 0,
+                    marginTop: 1,
+                  }}
+                />
+                <span
+                  style={{ fontSize: 12, color: textSub, lineHeight: 1.45 }}
+                >
+                  I confirm I am 16 years of age or older.
+                </span>
+              </div>
+            )}
+            {adv.activity_tracking_enabled && (
+              <div
+                style={{
+                  display: 'flex',
+                  gap: 7,
+                  alignItems: 'flex-start',
+                  margin: '0 0 6px',
+                }}
+              >
+                <div
+                  style={{
+                    width: 13,
+                    height: 13,
+                    borderRadius: 4,
+                    border: `1.5px solid ${brandColor}`,
+                    flexShrink: 0,
+                    marginTop: 1,
+                  }}
+                />
+                <span
+                  style={{ fontSize: 12, color: textSub, lineHeight: 1.45 }}
+                >
+                  Allow activity tracking on this site (pages viewed, time
+                  spent).
+                </span>
+              </div>
+            )}
+            {adv.lead_profiling_consent_enabled && (
+              <div
+                style={{
+                  display: 'flex',
+                  gap: 7,
+                  alignItems: 'flex-start',
+                  margin: '0 0 10px',
+                }}
+              >
+                <div
+                  style={{
+                    width: 13,
+                    height: 13,
+                    borderRadius: 4,
+                    border: `1.5px solid ${brandColor}`,
+                    flexShrink: 0,
+                    marginTop: 1,
+                  }}
+                />
+                <span
+                  style={{ fontSize: 12, color: textSub, lineHeight: 1.45 }}
+                >
+                  Allow building a profile and lead score from this
+                  conversation.
                 </span>
               </div>
             )}
