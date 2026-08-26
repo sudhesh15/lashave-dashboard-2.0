@@ -643,6 +643,13 @@ function ReviewRow({
 }
 
 function ReviewsInner() {
+const REVIEW_SYNC_INTERVAL_SECONDS =
+  Number(process.env.NEXT_PUBLIC_REVIEW_SYNC_INTERVAL_SEC0NDS) || 60;
+
+const REVIEW_SYNC_INTERVAL_SEC =
+  REVIEW_SYNC_INTERVAL_SECONDS * 1000;
+
+
   const { isDark } = useTheme();
   const [channels, setChannels] = useState<Channel[]>([]);
   const [selectedChannelId, setSelectedChannelId] = useState<number | null>(
@@ -755,25 +762,32 @@ function ReviewsInner() {
     }
   }, [selectedChannelId]);
 
-  const syncReviews = useCallback(async () => {
-    if (!selectedChannelId) return;
-    setLoadingReviews(true);
-    try {
-      await apiFetch<unknown>(
-        `/admin/channels/google/${selectedChannelId}/reviews`,
-        {
-          method: 'POST',
-          auth: true,
-        },
-      );
-      await loadReviews();
-      showMessage('Reviews synced.', 'success');
-    } catch (err: unknown) {
-      showMessage(errorMessage(err, 'Failed to sync reviews.'), 'error');
-    } finally {
-      setLoadingReviews(false);
-    }
-  }, [loadReviews, selectedChannelId, showMessage]);
+const syncReviews = useCallback(async () => {
+  if (!selectedChannelId) return;
+
+  setLoadingReviews(true);
+
+  try {
+    await apiFetch<unknown>(
+      `/admin/channels/google/${selectedChannelId}/reviews`,
+      {
+        method: 'GET',
+        auth: true,
+      },
+    );
+
+    await loadReviews();
+
+    showMessage('Reviews synced.', 'success');
+  } catch (err: unknown) {
+    showMessage(
+      errorMessage(err, 'Failed to sync reviews.'),
+      'error',
+    );
+  } finally {
+    setLoadingReviews(false);
+  }
+}, [loadReviews, selectedChannelId, showMessage]);
 
   const loadCriticalReviews = useCallback(async () => {
     if (!selectedChannelId) {
@@ -860,6 +874,20 @@ function ReviewsInner() {
     }
   }
 
+ useEffect(() => {
+  if (!selectedChannelId) return;
+
+  // Run once immediately
+  void syncReviews();
+
+  // Then every configured interval
+  const intervalId = setInterval(() => {
+    void syncReviews();
+  }, REVIEW_SYNC_INTERVAL_SEC);
+
+  return () => clearInterval(intervalId);
+}, [selectedChannelId, syncReviews]);
+
   useEffect(() => {
     const timer = window.setTimeout(() => {
       void loadChannels();
@@ -942,10 +970,6 @@ function ReviewsInner() {
        })).filter((keyword) => keyword.count > 0),
      [dateScopedReviews],
    );
-
- 
-
- 
 
   const filteredReviews = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
@@ -1142,7 +1166,7 @@ function ReviewsInner() {
             />
           </div>
 
-          <button
+          {/* <button
             type='button'
             onClick={() => void syncReviews()}
             disabled={!selectedChannelId || loadingReviews}
@@ -1152,7 +1176,7 @@ function ReviewsInner() {
               className={`h-4 w-4 ${loadingReviews ? 'animate-spin' : ''}`}
             />
             Sync
-          </button>
+          </button> */}
         </div>
       </div>
 
