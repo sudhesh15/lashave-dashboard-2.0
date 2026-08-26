@@ -846,9 +846,9 @@ function ConversationTable({
                       <td className='px-5 py-3 text-right sm:px-6'>
                         <Link
                           href={`/conversations/${item.id}`}
-                          className='inline-flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-[10px] bg-brand-500 px-3.5 type-small font-semibold text-white shadow-theme-xs hover:bg-brand-600'
+                          className='inline-flex h-8 items-center justify-center gap-1 whitespace-nowrap rounded-[9px] bg-brand-500 px-3 text-[13px] font-semibold text-white shadow-theme-xs hover:bg-brand-600'
                         >
-                          <Eye size={13.5} />
+                          <Eye size={13} />
                           View Conversation
                         </Link>
                       </td>
