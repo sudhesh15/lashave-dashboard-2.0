@@ -643,11 +643,11 @@ function ReviewRow({
 }
 
 function ReviewsInner() {
-const REVIEW_SYNC_INTERVAL_MINUTES =
-  Number(process.env.NEXT_PUBLIC_REVIEW_SYNC_INTERVAL_MINUTES) || 240;
+const REVIEW_SYNC_INTERVAL_SECONDS =
+  Number(process.env.NEXT_PUBLIC_REVIEW_SYNC_INTERVAL_SEC0NDS) || 60;
 
-const REVIEW_SYNC_INTERVAL_MS =
-  REVIEW_SYNC_INTERVAL_MINUTES * 60 * 1000;
+const REVIEW_SYNC_INTERVAL_SEC =
+  REVIEW_SYNC_INTERVAL_SECONDS * 1000;
 
 
   const { isDark } = useTheme();
@@ -883,7 +883,7 @@ const syncReviews = useCallback(async () => {
   // Then every configured interval
   const intervalId = setInterval(() => {
     void syncReviews();
-  }, REVIEW_SYNC_INTERVAL_MS);
+  }, REVIEW_SYNC_INTERVAL_SEC);
 
   return () => clearInterval(intervalId);
 }, [selectedChannelId, syncReviews]);
