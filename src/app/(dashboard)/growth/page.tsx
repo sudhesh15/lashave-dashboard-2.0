@@ -96,6 +96,8 @@ type GrowthReport = {
   weekly_action_plan?: GrowthItem[];
   quick_wins?: GrowthItem[];
   urgent_actions?: GrowthItem[];
+  consultant?: ConsultantResponse;
+  radar?: RadarResponse;
 };
 
 type LatestGrowthResponse = {
@@ -237,8 +239,6 @@ type RadarResponse = {
 };
 
 /* ─────────────────────── palette ─────────────────────── */
-// Pulled from the TailAdmin token scale in globals.css — used only where a
-// chart series needs a real color value.
 const PALETTE = {
   brand: '#465FFF',
   success: '#12B76A',
@@ -521,8 +521,6 @@ function MagazineGrid({
 }
 
 /* ─────────────────────── Campaigns timeline ─────────────────────── */
-
-
 const CHANNEL_CFG: Record<string, { color: string; logo: React.ReactNode }> = {
   instagram: {
     color: '#E4405F',
@@ -772,9 +770,8 @@ export default function GrowthPage() {
   const focusLine = useMemo(() => {
     if (report?.executive_summary) return report.executive_summary;
     const voice = report?.customer_voice?.[0] ? itemTitle(report.customer_voice[0]) : 'customer questions';
-    const complaint = report?.complaints?.[0] ? itemTitle(report.complaints[0]) : 'trust gaps';
-    const opp = report?.opportunities?.[0] ? itemTitle(report.opportunities[0]) : 'follow-up opportunities';
-    return `Customers are talking about ${voice}. This week, fix ${complaint} and use ${opp} to convert more conversations.`;
+    const opp = report?.opportunities?.[0] ? itemTitle(report.opportunities[0]) : 'growth opportunities';
+    return `Customers are talking about ${voice}. This week, use ${opp} to convert more conversations.`;
   }, [report]);
 
   async function loadLatest() {
@@ -782,9 +779,8 @@ export default function GrowthPage() {
     setErr(null);
 
     try {
-      const [overviewRes, latestRes, historyRes] = await Promise.allSettled([
+      const [overviewRes, historyRes] = await Promise.allSettled([
         apiFetch<GrowthOverviewResponse>('/admin/growth/overview', { auth: true }),
-        apiFetch<LatestGrowthResponse>('/admin/growth/latest', { auth: true }),
         apiFetch<GrowthHistoryResponse>('/admin/growth/history?limit=20', { auth: true }),
       ]);
 
@@ -792,37 +788,33 @@ export default function GrowthPage() {
         const ov = overviewRes.value;
         setOverview(ov);
 
-        if (ov.consultant?.ideas?.length) {
-          setConsultantIdeas(ov.consultant.ideas);
-          setConsultantNote(ov.consultant.consultant_note || '');
-        }
-        if (ov.radar?.trends?.length) {
-          setRadarTrends(ov.radar.trends);
-          setRadarSummary(ov.radar.radar_summary || '');
-          setRadarScannedAt(ov.weekly_generated_at || null);
-        }
+        setLatest({
+          exists: ov.latest_report_exists ?? false,
+          id: ov.latest_report_id,
+          week_start: ov.week_start,
+          week_end: ov.week_end,
+          created_at: ov.latest_report_created_at,
+          report: ov.report,
+        });
 
-        if (ov?.report && !ov.latest_report_exists) {
-          setLatest({
-            exists: false,
-            week_start: ov.week_start,
-            week_end: ov.week_end,
-            created_at: ov.latest_report_created_at,
-            report: ov.report,
-          });
-        }
-      }
+        const consultant = ov.consultant ?? ov.report?.consultant ?? null;
+        setConsultantIdeas(consultant?.ideas ?? []);
+        setConsultantNote(consultant?.consultant_note ?? '');
 
-      if (latestRes.status === 'fulfilled') {
-        setLatest(latestRes.value);
+        const radar = ov.radar ?? ov.report?.radar ?? null;
+        setRadarTrends(radar?.trends ?? []);
+        setRadarSummary(radar?.radar_summary ?? '');
+        setRadarScannedAt(
+          ov.latest_report_created_at ??
+          ov.weekly_generated_at ??
+          null,
+        );
+      } else {
+        throw overviewRes.reason;
       }
 
       if (historyRes.status === 'fulfilled') {
         setHistory(historyRes.value.reports || []);
-      }
-
-      if (overviewRes.status === 'rejected' && latestRes.status === 'rejected') {
-        throw overviewRes.reason || latestRes.reason;
       }
     } catch (e: any) {
       const msg =
@@ -833,60 +825,69 @@ export default function GrowthPage() {
     }
   }
 
+  const wait = (milliseconds: number) =>
+    new Promise((resolve) => window.setTimeout(resolve, milliseconds));
+
+  async function waitForGrowthGeneration(): Promise<void> {
+    const maxAttempts = 90; // 3 minutes at 2-second intervals
+
+    for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+      const status = await apiFetch<{
+        status: 'idle' | 'queued' | 'processing' | 'completed' | 'failed';
+        error?: string | null;
+        report_id?: number | null;
+      }>('/admin/growth/generation-status', {
+        auth: true,
+      });
+
+      if (status.status === 'completed') {
+        await loadLatest();
+        return;
+      }
+
+      if (status.status === 'failed') {
+        await loadLatest();
+        throw new Error(
+          status.error ||
+          'The new plan could not be completed. Your previous plan is still available.',
+        );
+      }
+
+      await wait(2000);
+    }
+
+    throw new Error(
+      'Generation is taking longer than expected. Your previous plan remains available; refresh shortly to check the new plan.',
+    );
+  }
+
   async function generateReport() {
+    if (generating) return;
+
     setGenerating(true);
     setErr(null);
+
     try {
-      const res = await apiFetch<any>('/admin/growth/generate', {
+      const res = await apiFetch<{
+        status: 'queued' | 'already_processing' | 'not_due';
+        queued: boolean;
+      }>('/admin/growth/generate', {
         method: 'POST',
         auth: true,
         body: {},
       });
-      setLatest({
-        exists: true,
-        id: res.id,
-        week_start: res.week_start,
-        week_end: res.week_end,
-        created_at: res.created_at,
-        report: res.report,
-      });
 
-      setOverview((prev) =>
-        prev
-          ? {
-              ...prev,
-              latest_report_exists: true,
-              latest_report_id: res.id,
-              latest_report_created_at: res.created_at,
-              report: res.report,
-              consultant: res.consultant,
-              radar: res.radar,
-              weekly_generated: true,
-              weekly_generated_at: res.created_at,
-              next_regeneration_at: res.next_regeneration_at,
-              can_regenerate: res.can_regenerate ?? false,
-            }
-          : prev,
-      );
-
-      try {
-        const hist = await apiFetch<GrowthHistoryResponse>('/admin/growth/history?limit=20', { auth: true });
-        setHistory(hist.reports || []);
-      } catch {
-        /* non-fatal: history refresh is best-effort */
+      if (res.status === 'not_due') {
+        await loadLatest();
+        return;
       }
 
-      if (res.consultant?.ideas?.length) {
-        setConsultantIdeas(res.consultant.ideas);
-        setConsultantNote(res.consultant.consultant_note || '');
-      }
-      if (res.radar?.trends?.length) {
-        setRadarTrends(res.radar.trends);
-        setRadarSummary(res.radar.radar_summary || '');
-        setRadarScannedAt(res.created_at || new Date().toISOString());
-      }
+      await waitForGrowthGeneration();
     } catch (e: any) {
-      setErr(e?.message || 'Failed to generate Growth report');
+      setErr(
+        e?.message ||
+        'The new plan could not be generated. Your previous plan remains available.',
+      );
     } finally {
       setGenerating(false);
     }
@@ -1002,71 +1003,69 @@ export default function GrowthPage() {
     icon: React.ReactNode;
     count?: number;
   }[] = [
-    {
-      key: 'growth-consultant',
-      title: 'Growth Consultant',
-      subtitle: 'Strategic growth ideas',
-      icon: <Brain size={20} />,
-      count: consultantIdeas.length,
-    },
-    {
-      key: 'content-ideas',
-      title: 'Content Ideas',
-      subtitle: 'Social post angles',
-      icon: <Lightbulb size={20} />,
-      count: counts.contentIdeas,
-    },
-    {
-      key: 'campaigns',
-      title: 'Campaigns',
-      subtitle: 'Weekly campaign angles',
-      icon: <Megaphone size={20} />,
-      count: counts.campaigns,
-    },
-    {
-      key: 'weekly-action-plan',
-      title: 'Weekly Action Plan',
-      subtitle: 'Execution checklist',
-      icon: <CheckCircle2 size={20} />,
-      count: counts.weeklyActions,
-    },
-    {
-      key: 'custom-reel-script',
-      title: 'Generate a Custom Reel Script',
-      subtitle: 'Create reel scripts',
-      icon: <Wand2 size={20} />,
-    },
-    {
-      key: 'trending',
-      title: 'Trending now',
-      subtitle: 'Live market trends',
-      icon: <Flame size={20} />,
-      count: radarTrends.filter((tr) => tr.category === 'trending').length,
-    },
-    {
-      key: 'industry',
-      title: 'Industry shifts',
-      subtitle: 'Category changes',
-      icon: <MapPin size={20} />,
-      count: radarTrends.filter((tr) => tr.category === 'industry').length,
-    },
-    {
-      key: 'competitor',
-      title: 'Competitor moves',
-      subtitle: 'Competitive activity',
-      icon: <Target size={20} />,
-      count: radarTrends.filter((tr) => tr.category === 'competitor').length,
-    },
-
-    // Keep history last
-    {
-      key: 'report-history',
-      title: 'Report History',
-      subtitle: 'Previous weekly reports',
-      icon: <CalendarDays size={20} />,
-      count: history.length,
-    },
-  ];
+      {
+        key: 'growth-consultant',
+        title: 'Growth Consultant',
+        subtitle: 'Strategic growth ideas',
+        icon: <Brain size={20} />,
+        count: consultantIdeas.length,
+      },
+      {
+        key: 'content-ideas',
+        title: 'Content Ideas',
+        subtitle: 'Social post angles',
+        icon: <Lightbulb size={20} />,
+        count: counts.contentIdeas,
+      },
+      {
+        key: 'campaigns',
+        title: 'Campaigns',
+        subtitle: 'Weekly campaign angles',
+        icon: <Megaphone size={20} />,
+        count: counts.campaigns,
+      },
+      {
+        key: 'weekly-action-plan',
+        title: 'Weekly Action Plan',
+        subtitle: 'Execution checklist',
+        icon: <CheckCircle2 size={20} />,
+        count: counts.weeklyActions,
+      },
+      {
+        key: 'custom-reel-script',
+        title: 'Generate a Custom Reel Script',
+        subtitle: 'Create reel scripts',
+        icon: <Wand2 size={20} />,
+      },
+      {
+        key: 'trending',
+        title: 'Trending now',
+        subtitle: 'Live market trends',
+        icon: <Flame size={20} />,
+        count: radarTrends.filter((tr) => tr.category === 'trending').length,
+      },
+      {
+        key: 'industry',
+        title: 'Industry shifts',
+        subtitle: 'Category changes',
+        icon: <MapPin size={20} />,
+        count: radarTrends.filter((tr) => tr.category === 'industry').length,
+      },
+      {
+        key: 'competitor',
+        title: 'Competitor moves',
+        subtitle: 'Competitive activity',
+        icon: <Target size={20} />,
+        count: radarTrends.filter((tr) => tr.category === 'competitor').length,
+      },
+      {
+        key: 'report-history',
+        title: 'Report History',
+        subtitle: 'Previous weekly reports',
+        icon: <CalendarDays size={20} />,
+        count: history.length,
+      },
+    ];
 
   return (
     <RequireAuth>
@@ -1084,6 +1083,26 @@ export default function GrowthPage() {
         </div>
 
         <div className='flex flex-wrap items-center gap-3'>
+          {hasGenerated && (
+            <span className='inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1.5 type-caption font-medium text-gray-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400'>
+              <Clock size={13} />
+              Updated {fmtDate(latest?.created_at)}
+            </span>
+          )}
+
+          <Button
+            variant='outline'
+            onClick={loadLatest}
+            disabled={loading}
+          >
+            {loading ? (
+              <Loader2 size={15} className='animate-spin' />
+            ) : (
+              <RefreshCw size={15} />
+            )}
+            Refresh
+          </Button>
+
           {hasGenerated && !canRegenerate ? (
             <span className='inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1.5 type-caption font-medium text-gray-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400'>
               <CalendarDays size={13} />
@@ -1510,196 +1529,196 @@ export default function GrowthPage() {
               {(activeSection === 'trending' ||
                 activeSection === 'industry' ||
                 activeSection === 'competitor') && (
-                <Section
-                  icon={
-                    activeSection === 'trending' ? (
-                      <Flame size={20} />
-                    ) : activeSection === 'industry' ? (
-                      <MapPin size={20} />
-                    ) : (
-                      <Target size={20} />
-                    )
-                  }
-                  title={
-                    GROWTH_NAV.find((item) => item.key === activeSection)
-                      ?.title || 'Market Signals'
-                  }
-                  sub={
-                    radarScannedAt
-                      ? `Scanned ${fmtDate(radarScannedAt)}`
-                      : "What's trending now and how you can use it"
-                  }
-                  count={filteredRadarTrends.length}
-                >
-                  {radarSummary && (
-                    <div className='mb-4 rounded-xl border border-warning-200 bg-warning-50 p-4 dark:border-warning-500/25 dark:bg-warning-500/10'>
-                      <div className='mb-1 flex items-center gap-1.5 type-caption font-semibold text-warning-700 dark:text-orange-300'>
-                        <Radar size={13} /> Market overview
+                  <Section
+                    icon={
+                      activeSection === 'trending' ? (
+                        <Flame size={20} />
+                      ) : activeSection === 'industry' ? (
+                        <MapPin size={20} />
+                      ) : (
+                        <Target size={20} />
+                      )
+                    }
+                    title={
+                      GROWTH_NAV.find((item) => item.key === activeSection)
+                        ?.title || 'Market Signals'
+                    }
+                    sub={
+                      radarScannedAt
+                        ? `Scanned ${fmtDate(radarScannedAt)}`
+                        : "What's trending now and how you can use it"
+                    }
+                    count={filteredRadarTrends.length}
+                  >
+                    {radarSummary && (
+                      <div className='mb-4 rounded-xl border border-warning-200 bg-warning-50 p-4 dark:border-warning-500/25 dark:bg-warning-500/10'>
+                        <div className='mb-1 flex items-center gap-1.5 type-caption font-semibold text-warning-700 dark:text-orange-300'>
+                          <Radar size={13} /> Market overview
+                        </div>
+                        <p className='type-small leading-relaxed text-gray-700 dark:text-gray-200'>
+                          {radarSummary}
+                        </p>
                       </div>
-                      <p className='type-small leading-relaxed text-gray-700 dark:text-gray-200'>
-                        {radarSummary}
-                      </p>
-                    </div>
-                  )}
+                    )}
 
-                  {filteredRadarTrends.length > 0 ? (
-                    <div className='flex flex-col gap-3'>
-                      {filteredRadarTrends.map((trend, idx) => {
-                        const urgency =
-                          URGENCY_BADGE[trend.urgency || 'watch'] ||
-                          URGENCY_BADGE.watch;
-                        const scoreColor =
-                          trend.match_score >= 80
-                            ? PALETTE.success
-                            : trend.match_score >= 60
-                              ? PALETTE.warning
-                              : '#94A3B8';
-                        const isExpanded = expandedRadarIdx === idx;
-                        const CategoryIcon =
-                          trend.category === 'trending'
-                            ? Flame
-                            : trend.category === 'industry'
-                              ? MapPin
-                              : Target;
+                    {filteredRadarTrends.length > 0 ? (
+                      <div className='flex flex-col gap-3'>
+                        {filteredRadarTrends.map((trend, idx) => {
+                          const urgency =
+                            URGENCY_BADGE[trend.urgency || 'watch'] ||
+                            URGENCY_BADGE.watch;
+                          const scoreColor =
+                            trend.match_score >= 80
+                              ? PALETTE.success
+                              : trend.match_score >= 60
+                                ? PALETTE.warning
+                                : '#94A3B8';
+                          const isExpanded = expandedRadarIdx === idx;
+                          const CategoryIcon =
+                            trend.category === 'trending'
+                              ? Flame
+                              : trend.category === 'industry'
+                                ? MapPin
+                                : Target;
 
-                        return (
-                          <div
-                            key={`${trend.title}-${idx}`}
-                            className='overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800'
-                          >
-                            <div className='grid grid-cols-1 sm:grid-cols-[1fr_140px]'>
-                              <div className='p-4'>
-                                <div className='mb-1.5 flex items-center gap-2'>
-                                  <Badge
-                                    color={urgency.color}
-                                    startIcon={
-                                      trend.urgency === 'act_now' ? (
-                                        <Flame size={11} />
-                                      ) : (
-                                        <Clock size={11} />
-                                      )
-                                    }
-                                  >
-                                    {urgency.label}
-                                  </Badge>
-                                  {trend.source_url && (
-                                    <a
-                                      href={trend.source_url}
-                                      target='_blank'
-                                      rel='noopener noreferrer'
-                                      className='type-caption text-gray-400 no-underline hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300'
-                                    >
-                                      {(() => {
-                                        try {
-                                          return new URL(
-                                            trend.source_url,
-                                          ).hostname.replace('www.', '');
-                                        } catch {
-                                          return '';
-                                        }
-                                      })()}
-                                    </a>
-                                  )}
-                                </div>
-                                <div className='mb-1.5 type-small font-semibold text-gray-800 dark:text-white/90'>
-                                  {trend.title}
-                                </div>
-                                <p className='mb-2.5 type-caption leading-relaxed text-gray-500 dark:text-gray-400'>
-                                  {trend.description}
-                                </p>
-
-                                <div className='mb-2.5 flex items-center gap-2'>
-                                  <div className='h-1.5 flex-1 overflow-hidden rounded-full bg-gray-100 dark:bg-white/[0.06]'>
-                                    <div
-                                      className='h-full rounded-full transition-all duration-700'
-                                      style={{
-                                        width: `${trend.match_score}%`,
-                                        background: scoreColor,
-                                      }}
-                                    />
-                                  </div>
-                                  <span
-                                    className='type-caption font-semibold'
-                                    style={{ color: scoreColor }}
-                                  >
-                                    {trend.match_score}%
-                                  </span>
-                                </div>
-
-                                <button
-                                  type='button'
-                                  onClick={() =>
-                                    setExpandedRadarIdx(isExpanded ? null : idx)
-                                  }
-                                  className='flex items-center gap-1.5 type-caption font-semibold text-brand-500 dark:text-brand-400'
-                                >
-                                  <ChevronDown
-                                    size={13}
-                                    className={cn(
-                                      'transition-transform',
-                                      isExpanded && 'rotate-180',
-                                    )}
-                                  />
-                                  How you can use this
-                                </button>
-
-                                {isExpanded && trend.implementation && (
-                                  <>
-                                    <div className='mt-2.5 rounded-[10px] bg-gray-50 p-3 type-caption leading-relaxed text-gray-600 dark:bg-white/[0.03] dark:text-gray-300'>
-                                      {trend.implementation}
-                                    </div>
-                                    <Button
-                                      variant='outline'
-                                      size='sm'
-                                      className='mt-2.5'
-                                      onClick={() =>
-                                        generateScript(
-                                          trend.title,
-                                          trend.implementation ||
-                                            trend.description,
+                          return (
+                            <div
+                              key={`${trend.title}-${idx}`}
+                              className='overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800'
+                            >
+                              <div className='grid grid-cols-1 sm:grid-cols-[1fr_140px]'>
+                                <div className='p-4'>
+                                  <div className='mb-1.5 flex items-center gap-2'>
+                                    <Badge
+                                      color={urgency.color}
+                                      startIcon={
+                                        trend.urgency === 'act_now' ? (
+                                          <Flame size={11} />
+                                        ) : (
+                                          <Clock size={11} />
                                         )
                                       }
                                     >
-                                      <Film size={13} /> Reel script
-                                    </Button>
-                                  </>
-                                )}
-                              </div>
-                              <div
-                                className='flex min-h-[110px] items-center justify-center bg-gray-50 bg-cover bg-center dark:bg-white/[0.03]'
-                                style={
-                                  trend.thumbnail
-                                    ? {
+                                      {urgency.label}
+                                    </Badge>
+                                    {trend.source_url && (
+                                      <a
+                                        href={trend.source_url}
+                                        target='_blank'
+                                        rel='noopener noreferrer'
+                                        className='type-caption text-gray-400 no-underline hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300'
+                                      >
+                                        {(() => {
+                                          try {
+                                            return new URL(
+                                              trend.source_url,
+                                            ).hostname.replace('www.', '');
+                                          } catch {
+                                            return '';
+                                          }
+                                        })()}
+                                      </a>
+                                    )}
+                                  </div>
+                                  <div className='mb-1.5 type-small font-semibold text-gray-800 dark:text-white/90'>
+                                    {trend.title}
+                                  </div>
+                                  <p className='mb-2.5 type-caption leading-relaxed text-gray-500 dark:text-gray-400'>
+                                    {trend.description}
+                                  </p>
+
+                                  <div className='mb-2.5 flex items-center gap-2'>
+                                    <div className='h-1.5 flex-1 overflow-hidden rounded-full bg-gray-100 dark:bg-white/[0.06]'>
+                                      <div
+                                        className='h-full rounded-full transition-all duration-700'
+                                        style={{
+                                          width: `${trend.match_score}%`,
+                                          background: scoreColor,
+                                        }}
+                                      />
+                                    </div>
+                                    <span
+                                      className='type-caption font-semibold'
+                                      style={{ color: scoreColor }}
+                                    >
+                                      {trend.match_score}%
+                                    </span>
+                                  </div>
+
+                                  <button
+                                    type='button'
+                                    onClick={() =>
+                                      setExpandedRadarIdx(isExpanded ? null : idx)
+                                    }
+                                    className='flex items-center gap-1.5 type-caption font-semibold text-brand-500 dark:text-brand-400'
+                                  >
+                                    <ChevronDown
+                                      size={13}
+                                      className={cn(
+                                        'transition-transform',
+                                        isExpanded && 'rotate-180',
+                                      )}
+                                    />
+                                    How you can use this
+                                  </button>
+
+                                  {isExpanded && trend.implementation && (
+                                    <>
+                                      <div className='mt-2.5 rounded-[10px] bg-gray-50 p-3 type-caption leading-relaxed text-gray-600 dark:bg-white/[0.03] dark:text-gray-300'>
+                                        {trend.implementation}
+                                      </div>
+                                      <Button
+                                        variant='outline'
+                                        size='sm'
+                                        className='mt-2.5'
+                                        onClick={() =>
+                                          generateScript(
+                                            trend.title,
+                                            trend.implementation ||
+                                            trend.description,
+                                          )
+                                        }
+                                      >
+                                        <Film size={13} /> Reel script
+                                      </Button>
+                                    </>
+                                  )}
+                                </div>
+                                <div
+                                  className='flex min-h-[110px] items-center justify-center bg-gray-50 bg-cover bg-center dark:bg-white/[0.03]'
+                                  style={
+                                    trend.thumbnail
+                                      ? {
                                         backgroundImage: `url(${trend.thumbnail})`,
                                       }
-                                    : undefined
-                                }
-                              >
-                                {!trend.thumbnail && (
-                                  <CategoryIcon
-                                    size={26}
-                                    className='text-gray-300 dark:text-gray-700'
-                                  />
-                                )}
+                                      : undefined
+                                  }
+                                >
+                                  {!trend.thumbnail && (
+                                    <CategoryIcon
+                                      size={26}
+                                      className='text-gray-300 dark:text-gray-700'
+                                    />
+                                  )}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <Empty
-                      text={
-                        radarTrends.length === 0
-                          ? generating
-                            ? 'Scanning market trends...'
-                            : 'Click "Generate Plan" above to scan live market trends for your business.'
-                          : `No ${radarTab} trends found. Try another tab.`
-                      }
-                    />
-                  )}
-                </Section>
-              )}
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <Empty
+                        text={
+                          radarTrends.length === 0
+                            ? generating
+                              ? 'Scanning market trends...'
+                              : 'Click "Generate Plan" above to scan live market trends for your business.'
+                            : `No ${radarTab} trends found. Try another tab.`
+                        }
+                      />
+                    )}
+                  </Section>
+                )}
 
               {activeSection === 'content-ideas' && (
                 <Section
