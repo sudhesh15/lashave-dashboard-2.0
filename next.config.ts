@@ -7,10 +7,17 @@ const nextConfig = {
   ],
 
   async rewrites() {
+    const gatewayBase = process.env.GATEWAY_BASE || 'http://127.0.0.1:8001';
     return [
       {
+        source: '/admin/:path*',
+        destination: `${gatewayBase}/admin/:path*`,
+        basePath: false,
+      },
+      {
         source: '/api/:path*',
-        destination: 'http://127.0.0.1:8001/:path*',
+        destination: `${gatewayBase}/:path*`,
+        basePath: false,
       },
     ];
   },
