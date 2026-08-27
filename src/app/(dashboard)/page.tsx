@@ -361,19 +361,19 @@ function ChartHeader({
 
 // helper
 const TOPIC_COLOR_MAP: Record<string, string> = {
-  pricing: '#60A5FA',
-  booking: '#22D3EE',
-  appointment: '#2DD4BF',
-  support: '#FCA5A5',
-  product: '#C4B5FD',
-  availability: '#F0ABFC',
-  complaint: '#FB7185',
-  refund: '#FDBA74',
-  hours: '#FCD34D',
-  general_interest: '#CBD5E1',
-  integration: '#93C5FD',
-  demo: '#67E8F9',
-  cancellation: '#F472B6',
+  pricing: 'var(--color-blue-light-500)',
+  booking: 'var(--color-brand-500)',
+  appointment: 'var(--color-success-500)',
+  support: 'var(--color-error-300)',
+  product: 'var(--color-theme-purple-500)',
+  availability: 'var(--color-theme-pink-500)',
+  complaint: 'var(--color-error-500)',
+  refund: 'var(--color-orange-500)',
+  hours: 'var(--color-warning-500)',
+  general_interest: 'var(--color-gray-400)',
+  integration: 'var(--color-blue-light-400)',
+  demo: 'var(--color-success-400)',
+  cancellation: 'var(--color-error-400)',
 };
 
 function getTopicColor(topic: string): string {
@@ -381,7 +381,7 @@ function getTopicColor(topic: string): string {
   for (const [key, color] of Object.entries(TOPIC_COLOR_MAP)) {
     if (lower.includes(key)) return color;
   }
-  return '#94A3B8'; // fallback slate
+  return 'var(--color-gray-400)';
 }
 
 function EmptyBlock({ label }: { label: string }) {
@@ -485,10 +485,10 @@ function TopicsCard({
   return (
     <Card className='p-4 sm:p-5'>
       <div className='mb-3'>
-        <h3 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
+        <h3 className='type-card-title font-semibold text-card-foreground'>
           What customers want right now
         </h3>
-        <p className='mt-0.5 type-small text-gray-500 dark:text-gray-400'>
+        <p className='mt-0.5 type-small text-muted-foreground'>
           Real-time themes from customer chats — questions, objections, purchase signals, and service requests.
         </p>
       </div>
@@ -497,7 +497,7 @@ function TopicsCard({
       ) : topics.length === 0 ? (
         <EmptyBlock label='No conversation topics detected yet' />
       ) : (
-        <div className='grid grid-cols-2 gap-2.5 sm:grid-cols-4 lg:grid-cols-8'>
+        <div className='grid auto-cols-fr gap-2.5 [grid-template-columns:repeat(auto-fit,minmax(120px,1fr))] sm:[grid-template-columns:repeat(auto-fit,minmax(150px,1fr))] lg:[grid-template-columns:repeat(auto-fit,minmax(128px,1fr))]'>
           {topics.slice(0, 8).map((topic) => {
             const pct = Math.max(Math.round((topic.count / max) * 100), 8);
             const actualPct = Math.round((topic.count / max) * 100);
@@ -505,20 +505,23 @@ function TopicsCard({
             return (
               <div
                 key={topic.topic}
-                className='rounded-xl border border-gray-200 bg-white p-3 dark:border-gray-800 dark:bg-white/[0.03]'
+                className='min-w-0 w-full rounded-xl border border-border bg-card p-3'
               >
-                <div className='mb-1.5 flex items-center justify-between gap-2'>
-                  <span className='truncate type-small font-semibold capitalize text-gray-700 dark:text-gray-300'>
+                <div className='mb-1.5 flex items-center justify-between gap-2 min-w-0 w-full'>
+                  <span
+                    className='truncate min-w-0 flex-1 type-small font-semibold capitalize text-gray-700 dark:text-gray-300'
+                    title={topic.topic.replace(/_/g, ' ')}
+                  >
                     {topic.topic.replace(/_/g, ' ')}
                   </span>
                   <span
-                    className='shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-bold text-white'
+                    className='shrink-0 rounded-full px-1.5 py-0.5 type-micro font-bold text-white'
                     style={{ backgroundColor: color }}
                   >
                     {topic.count}
                   </span>
                 </div>
-                <div className='h-[3px] overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800'>
+                <div className='h-[3px] overflow-hidden rounded-full bg-muted'>
                   <div
                     className='h-full rounded-full'
                     style={{
@@ -527,7 +530,7 @@ function TopicsCard({
                     }}
                   />
                 </div>
-                <p className='mt-1 text-[10px] font-medium text-gray-400 dark:text-gray-500'>
+                <p className='mt-1 type-micro font-medium text-muted-foreground'>
                   Demand weight · {actualPct}%
                 </p>
               </div>
@@ -833,7 +836,7 @@ function ActiveChannelsCard({
   };
 
   return (
-    <div className='min-w-0 w-full grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-2.5 lg:grid-cols-4 lg:gap-3 xl:grid-cols-6'>
+    <div className='min-w-0 w-full grid auto-cols-fr gap-2 [grid-template-columns:repeat(auto-fit,minmax(160px,1fr))] sm:gap-2.5 sm:[grid-template-columns:repeat(auto-fit,minmax(180px,1fr))] lg:gap-3 lg:[grid-template-columns:repeat(auto-fit,minmax(170px,1fr))]'>
       {displayChannels.map((item) => {
         const messagesToday = messagesForPlatform(item.platform);
         const isActive = Boolean(item.channel?.is_active);
