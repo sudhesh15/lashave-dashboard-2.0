@@ -604,6 +604,9 @@ const upcomingBookings = useMemo(
           isDark ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.08)'
         }`,
         backdropFilter: 'blur(12px)',
+        minWidth: 0,
+        maxWidth: '100%',
+        overflow: 'hidden',
       }}
     >
       {/* Thin, theme-aware scrollbar for the today list so it stays tidy
@@ -709,22 +712,44 @@ const upcomingBookings = useMemo(
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    gap: 10,
+                    gap: 8,
                     padding: '10px 12px',
                     borderRadius: 12,
                     background: isDark
                       ? 'rgba(255,255,255,0.04)'
                       : 'rgba(15,23,42,0.03)',
                     cursor: 'pointer',
+                    minWidth: 0,
+                    maxWidth: '100%',
+                    width: '100%',
+                    overflow: 'hidden',
                   }}
                 >
                   {/* LEFT */}
-                  <div style={{ display: 'flex', gap: 10, minWidth: 0, flexShrink: 0 }}>
+                  <div style={{ display: 'flex', gap: 10, minWidth: 0, flex: '1 1 0%' }}>
                     <div style={{ position: 'relative', width: 34, height: 34, flexShrink: 0 }}>
                       {b.profile_pic_url ? (
                         <img
                           src={b.profile_pic_url}
                           alt=""
+                          onError={(e) => {
+                            const el = e.currentTarget;
+                            if (el.style.visibility !== 'hidden') {
+                              el.style.visibility = 'hidden';
+                              el.style.position = 'absolute';
+                              el.style.inset = '0';
+                              const fallback = document.createElement('div');
+                              fallback.style.cssText = `
+                                width: 34px; height: 34px; border-radius: 999px;
+                                background: ${getAvatarGradient(b.customer_name)};
+                                display: flex; align-items: center; justify-content: center;
+                                color: #fff; font-size: 14px; font-weight: 600;
+                                position: absolute; inset: 0;
+                              `;
+                              fallback.textContent = getInitial(b.customer_name);
+                              el.parentElement?.appendChild(fallback);
+                            }
+                          }}
                           style={{
                             width: 34,
                             height: 34,
@@ -773,8 +798,11 @@ const upcomingBookings = useMemo(
                       </div>
                     </div>
 
-                    <div style={{ minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 30 }}>
+                    <div style={{ minWidth: 0, flex: '1 1 0%' }}>
+                      <div
+                        style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}
+                        title={`${b.customer_name ?? 'Customer'}`}
+                      >
                         <p
                           style={{
                             fontSize: 13,
@@ -783,37 +811,37 @@ const upcomingBookings = useMemo(
                             whiteSpace: 'nowrap',
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
+                            minWidth: 0,
+                            flex: '1 1 0%',
+                            margin: 0,
                           }}
                         >
                           {b.customer_name ?? 'Customer'}
                         </p>
 
                         {/* CHANNEL LOGO — real brand logo, beside the username */}
-                        <PlatformIcon cfg={logoCfg} size={13} />
+                        <div style={{ flexShrink: 0 }}>
+                          <PlatformIcon cfg={logoCfg} size={13} />
+                        </div>
                       </div>
 
-                      <p style={{ fontSize: 11, color: t.textSub, whiteSpace: 'nowrap' }}>
+                      <p
+                        title={formatSlot(b.start_time, b.end_time)}
+                        style={{
+                          fontSize: 11,
+                          color: t.textSub,
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                        }}
+                      >
                         {formatSlot(b.start_time, b.end_time)}
                       </p>
                     </div>
                   </div>
 
-                  {/* SLOT — sits in the actual middle of the row */}
-                  <div
-                    style={{
-                      flex: 1,
-                      textAlign: 'center',
-                      fontSize: 12,
-                      fontWeight: 600,
-                      color: t.textSub,
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {formatSlot(b.start_time, b.end_time)}
-                  </div>
-
-                  {/* RIGHT: timer + status, pinned to the edge */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                  {/* RIGHT: timer + status */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0, minWidth: 0 }}>
                     <CountdownBadge target={b.start_time} now={now} isDark={isDark} />
 
                     <span
@@ -826,6 +854,7 @@ const upcomingBookings = useMemo(
                         fontWeight: 700,
                         textTransform: 'capitalize',
                         whiteSpace: 'nowrap',
+                        flexShrink: 0,
                       }}
                     >
                       {b.status}
