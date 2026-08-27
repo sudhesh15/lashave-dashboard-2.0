@@ -1214,17 +1214,17 @@ const bookingChannelFilterRef = useRef<HTMLDivElement>(null);
         </div>
 
         <div className='min-w-0 px-5 py-5 sm:px-6'>
-          <div className='flex flex-col gap-4 rounded-t-xl border border-b-0 border-gray-200 bg-white px-5 py-4 dark:border-white/[0.05] dark:bg-white/[0.01] lg:flex-row lg:items-center lg:justify-between'>
-            <div className='flex items-center gap-3'>
+          <div className='min-w-0 w-full max-w-full flex flex-col gap-4 rounded-t-xl border border-b-0 border-gray-200 bg-white px-5 py-4 dark:border-white/[0.05] dark:bg-white/[0.01] lg:flex-row lg:items-start lg:justify-between lg:flex-wrap'>
+            <div className='flex items-center gap-3 min-w-0 shrink-0'>
               <h4 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
                 {activeBookingLabel}
               </h4>
-              <span className='rounded-full bg-brand-50 px-3 py-0.5 type-caption font-semibold text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'>
+              <span className='rounded-full bg-brand-50 px-3 py-0.5 type-caption font-semibold text-brand-500 dark:bg-brand-500/15 dark:text-brand-400 shrink-0'>
                 {sortedBookings.length}
               </span>
             </div>
-            <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end'>
-              <div className='relative w-full sm:w-[260px]'>
+            <div className='min-w-0 w-full max-w-full flex flex-wrap flex-col gap-3 sm:flex-row sm:items-center sm:justify-end'>
+              <div className='relative w-full sm:w-[260px] min-w-0 shrink-0'>
                 <Search className='pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400' />
                 <input
                   type='search'
@@ -1235,7 +1235,7 @@ const bookingChannelFilterRef = useRef<HTMLDivElement>(null);
                 />
               </div>
               {/* Channel filter */}
-              <div ref={bookingChannelFilterRef} className='relative'>
+              <div ref={bookingChannelFilterRef} className='relative min-w-0 max-w-full shrink-0'>
                 <Button
                   variant='outline'
                   onClick={() =>
@@ -1243,7 +1243,7 @@ const bookingChannelFilterRef = useRef<HTMLDivElement>(null);
                       openBookingFilter === 'channel' ? null : 'channel',
                     )
                   }
-                  className='min-w-[165px]'
+                  className='min-w-[165px] max-w-full'
                 >
                   <Radio size={14} className='shrink-0' />
                   {bookingChannelFilter.length > 0 && (
@@ -1346,7 +1346,7 @@ const bookingChannelFilterRef = useRef<HTMLDivElement>(null);
                   </div>
                 )}
               </div>
-              <div ref={bookingFilterRef} className='relative'>
+              <div ref={bookingFilterRef} className='relative min-w-0 max-w-full shrink-0'>
                 <Button
                   variant='outline'
                   onClick={() =>
@@ -1354,11 +1354,14 @@ const bookingChannelFilterRef = useRef<HTMLDivElement>(null);
                       openBookingFilter === 'status' ? null : 'status',
                     )
                   }
+                  className='max-w-full'
                 >
-                  <SlidersHorizontal size={14} />
-                  {activeTab === 'all'
-                    ? 'Filter'
-                    : `${TABS.find((t) => t.key === activeTab)?.label ?? ''} bookings`}
+                  <SlidersHorizontal size={14} className='shrink-0' />
+                  <span className='truncate min-w-0'>
+                    {activeTab === 'all'
+                      ? 'Filter'
+                      : `${TABS.find((t) => t.key === activeTab)?.label ?? ''} bookings`}
+                  </span>
                 </Button>
                 {openBookingFilter === 'status' && (
                   <div className='absolute right-0 z-20 mt-2 w-56 overflow-hidden rounded-xl border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-800 dark:bg-gray-900'>
@@ -1398,7 +1401,7 @@ const bookingChannelFilterRef = useRef<HTMLDivElement>(null);
                   </div>
                 )}
               </div>
-              <div ref={bookingDateFilterRef}>
+              <div ref={bookingDateFilterRef} className='min-w-0 max-w-full shrink-0'>
                 <DateFilter
                   dateRange={bookingDateRange}
                   activePreset={bookingDatePreset}
@@ -1424,6 +1427,7 @@ const bookingChannelFilterRef = useRef<HTMLDivElement>(null);
                   setBookingChannelFilter([]);
                   setOpenBookingFilter(null);
                 }}
+                className='min-w-0 max-w-full shrink-0'
               >
                 See all
               </Button>
