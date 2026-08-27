@@ -1505,7 +1505,7 @@ ${about}`.trim();
         )}
 
         <div className='mb-4 min-w-0 w-full'>
-          <BookingPanel t={bookingsTheme} isDark={isDark} />
+          <BookingPanel />
         </div>
 
         <div className='mb-4 min-w-0 w-full'>
