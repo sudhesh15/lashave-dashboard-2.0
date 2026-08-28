@@ -43,11 +43,12 @@ export function DateFilter({
     });
 
   return (
-    <div className='relative shrink-0'>
+    <div className='relative min-w-0 max-w-full shrink-0'>
       <Button
         variant='outline'
         onClick={onToggle}
         className={cn(
+          'max-w-full',
           dateRange &&
             'border-brand-300 bg-brand-50 text-brand-500 dark:border-brand-500/30 dark:bg-brand-500/15 dark:text-brand-400',
         )}
