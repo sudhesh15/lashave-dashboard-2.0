@@ -213,61 +213,72 @@ const LOGO_PLATFORM_CFG: Record<
   { logoSrc: string; label: string; color: string; bg: string; border: string; filter: string }
 > = {
   instagram: {
-    logoSrc: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/instagram.svg',
+    logoSrc: '/brand-logo/instagram.png',
     label: 'Instagram',
     color: 'var(--color-theme-pink-500)',
     bg: 'color-mix(in oklab, var(--color-theme-pink-500) 14%, transparent)',
     border: 'color-mix(in oklab, var(--color-theme-pink-500) 38%, transparent)',
-    filter: 'invert(48%) sepia(79%) saturate(2476%) hue-rotate(304deg) brightness(95%) contrast(95%)',
+    filter: 'none',
   },
   youtube: {
-    logoSrc: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/youtube.svg',
+    logoSrc: '/brand-logo/youtube.png',
     label: 'YouTube',
     color: 'var(--color-error-500)',
     bg: 'color-mix(in oklab, var(--color-error-500) 14%, transparent)',
     border: 'color-mix(in oklab, var(--color-error-500) 34%, transparent)',
-    filter: 'invert(11%) sepia(99%) saturate(7481%) hue-rotate(1deg) brightness(102%) contrast(111%)',
+    filter: 'none',
   },
   whatsapp: {
-    logoSrc: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/whatsapp.svg',
+    logoSrc: '/brand-logo/whatsapp.png',
     label: 'WhatsApp',
     color: 'var(--color-success-500)',
     bg: 'color-mix(in oklab, var(--color-success-500) 14%, transparent)',
     border: 'color-mix(in oklab, var(--color-success-500) 34%, transparent)',
-    filter: 'invert(64%) sepia(52%) saturate(456%) hue-rotate(95deg) brightness(96%) contrast(92%)',
+    filter: 'none',
   },
   telegram: {
-    logoSrc: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/telegram.svg',
+    logoSrc: '/brand-logo/telegram.png',
     label: 'Telegram',
     color: 'var(--color-brand-500)',
     bg: 'color-mix(in oklab, var(--color-brand-500) 14%, transparent)',
     border: 'color-mix(in oklab, var(--color-brand-500) 34%, transparent)',
-    filter: 'invert(44%) sepia(99%) saturate(400%) hue-rotate(165deg) brightness(95%) contrast(92%)',
+    filter: 'none',
   },
   facebook: {
-    logoSrc: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/facebook.svg',
+    logoSrc: '/brand-logo/facebook.png',
     label: 'Facebook',
     color: 'var(--color-brand-600)',
     bg: 'color-mix(in oklab, var(--color-brand-600) 14%, transparent)',
     border: 'color-mix(in oklab, var(--color-brand-600) 34%, transparent)',
-    filter: 'invert(29%) sepia(93%) saturate(1716%) hue-rotate(210deg) brightness(101%) contrast(96%)',
+    filter: 'none',
   },
 };
 
 const DEFAULT_LOGO_CFG = {
-  logoSrc: null as string | null,
+  logoSrc: '/brand-logo/website.png' as string | null,
   label: 'Channel',
   color: 'var(--color-gray-400)',
   bg: 'color-mix(in oklab, var(--color-gray-400) 12%, transparent)',
   border: 'color-mix(in oklab, var(--color-gray-400) 24%, transparent)',
-  filter: 'invert(40%) sepia(8%) saturate(500%) hue-rotate(180deg) brightness(95%) contrast(90%)',
+  filter: 'none',
 };
+
+function formatChannelLabel(channel?: string) {
+  const trimmed = channel?.trim();
+  if (!trimmed) return 'Channel';
+
+  return trimmed
+    .split(/[\s_-]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join(' ');
+}
 
 function getLogoPlatformCfg(channel?: string): LogoPlatformCfg {
   return (
     (channel ? LOGO_PLATFORM_CFG[channel.toLowerCase()] : undefined) ?? {
       ...DEFAULT_LOGO_CFG,
-      label: channel || 'Channel',
+      label: formatChannelLabel(channel),
     }
   );
 }
@@ -337,14 +348,14 @@ function formatCountdown(target: string, now: number) {
 
 function CountdownBadge({ target, now }: { target: string; now: number }) {
   const value = formatCountdown(target, now);
-  if (!value) return <span className="text-muted-foreground/50 type-micro">—</span>;
+  if (!value) return <span className="text-[11px] font-medium text-gray-400 dark:text-gray-500">-</span>;
 
   return (
     <span
-      className="inline-flex shrink-0 items-center gap-1 rounded-full bg-warning-500/15 px-2.5 py-1 type-micro font-bold tabular-nums leading-none text-warning-700 tracking-[0.02em] dark:bg-warning-500/10 dark:text-warning-500"
+      className="inline-flex h-8 shrink-0 items-center justify-center rounded-[9px] bg-brand-50 px-3 type-small font-semibold tabular-nums leading-none text-brand-600 dark:bg-brand-500/15 dark:text-brand-400"
       style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace' }}
     >
-      ⏱ <span>{value}</span>
+      {value}
     </span>
   );
 }
@@ -378,14 +389,8 @@ function CloseButton({ onClose }: { onClose: () => void }) {
 
 /* ───────────────────────── table sections ───────────────────────── */
 
-type SectionLabel = {
-  key: string;
-  title: string;
-  accent: string; // left border accent color class (e.g. border-l-brand-500)
-};
-
 const TABLE_HEAD_CELL =
-  'px-4 py-2.5 text-left type-micro font-semibold uppercase tracking-[0.14em] text-muted-foreground whitespace-nowrap';
+  'px-5 py-3.5 text-left type-caption font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 sm:px-6 whitespace-nowrap';
 
 /* ───────────────────────── component ───────────────────────── */
 
@@ -485,13 +490,13 @@ export default function BookingPanel() {
   const statusPill = (status: string): StatusPillCfg => {
     switch (status) {
       case 'confirmed':
-        return { label: 'Confirmed', cls: 'bg-success-500 text-white' };
+        return { label: 'Confirmed', cls: 'bg-success-50 text-success-600 dark:bg-success-500/15 dark:text-success-500' };
       case 'rescheduled':
-        return { label: 'Rescheduled', cls: 'bg-warning-500 text-white' };
+        return { label: 'Rescheduled', cls: 'bg-warning-50 text-warning-600 dark:bg-warning-500/15 dark:text-orange-400' };
       case 'cancelled':
-        return { label: 'Cancelled', cls: 'bg-gray-500 text-white' };
+        return { label: 'Cancelled', cls: 'bg-gray-100 text-gray-700 dark:bg-white/5 dark:text-white/80' };
       default:
-        return { label: status, cls: 'bg-gray-500 text-white' };
+        return { label: status, cls: 'bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400' };
     }
   };
 
@@ -534,112 +539,75 @@ export default function BookingPanel() {
     b: Booking;
     section: 'today' | 'upcoming';
   }) {
-    const platform = getPlatformCfg(b.channel);
     const logoCfg = getLogoPlatformCfg(b.channel);
     const pill = statusPill(b.status);
     const name = b.customer_name ?? 'Customer';
-    const accent =
-      section === 'today'
-        ? 'border-l-[3px] border-l-brand-500/80'
-        : 'border-l-[3px] border-l-gray-500/30';
-
     return (
       <tr
         onClick={() => {
           window.location.href = '/availability';
         }}
-        className={`${accent} transition-colors hover:bg-brand-50/60 dark:hover:bg-brand-500/10 cursor-pointer border-b border-border/40 last:border-b-0`}
+        className="cursor-pointer transition hover:bg-gray-50 dark:hover:bg-white/[0.02]"
       >
-        <td className="px-4 py-3">
+        <td className="px-5 py-3 sm:px-6">
           <div className="flex min-w-0 items-center gap-3">
             <div className="relative h-[34px] w-[34px] shrink-0">
               <CustomerAvatar name={name} profilePic={b.profile_pic_url} />
-              <div
-                title={platform.label}
-                className="absolute -bottom-[3px] -right-[3px] flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 border-white dark:border-gray-900"
-                style={{ background: platform.bg }}
-              >
-                <platform.Glyph />
-              </div>
             </div>
             <div className="min-w-0 flex-1">
-              <div className="flex min-w-0 w-full items-center gap-2">
+              <div className="flex min-w-0 items-center gap-2">
                 <p
-                  className="truncate min-w-0 flex-1 type-small font-bold text-card-foreground leading-none"
+                  className="truncate min-w-0 flex-1 type-small font-semibold text-gray-800 dark:text-white/90"
                   title={name}
                 >
                   {name}
                 </p>
-                <div className="shrink-0 flex items-center">
-                  <PlatformIcon cfg={logoCfg} size={12} />
-                </div>
+                {section === 'today' && (
+                  <span className="shrink-0 rounded-full bg-brand-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand-600 dark:bg-brand-500/15 dark:text-brand-400">
+                    Today
+                  </span>
+                )}
               </div>
             </div>
           </div>
         </td>
 
-        <td className="px-4 py-3">
+        <td className="px-5 py-3 sm:px-6">
           <span
-            className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-muted/60 px-2.5 py-1 type-micro font-medium text-card-foreground"
-            style={{ background: logoCfg.bg }}
+            className="inline-flex items-center gap-2 type-small font-medium text-gray-700 dark:text-gray-300"
             title={logoCfg.label}
           >
-            <span
-              className="h-2 w-2 rounded-full"
-              style={{ background: logoCfg.color }}
-            />
-            <span>{logoCfg.label}</span>
+            <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gray-50 dark:bg-white/5">
+              <img
+                src={logoCfg.logoSrc || '/brand-logo/website.png'}
+                alt={logoCfg.label}
+                className="h-4 w-4 shrink-0 object-contain"
+              />
+            </span>
+            <span className="truncate">{logoCfg.label}</span>
           </span>
         </td>
 
-        <td className="px-4 py-3 whitespace-nowrap">
-          <span className="inline-flex shrink-0 items-center rounded-full border border-border bg-card px-2.5 py-1 type-micro font-semibold tabular-nums leading-none text-card-foreground">
+        <td className="px-5 py-3 sm:px-6">
+          <span className="whitespace-nowrap type-small font-medium tabular-nums text-gray-700 dark:text-gray-300">
             {section === 'today'
               ? formatSlot(b.start_time, b.end_time)
               : formatDateTime(b.start_time)}
           </span>
         </td>
 
-        <td className="px-4 py-3">
+        <td className="px-5 py-3 sm:px-6">
           <CountdownBadge target={b.start_time} now={now} />
         </td>
 
-        <td className="px-4 py-3">
+        <td className="px-5 py-3 sm:px-6">
           <span
-            className={`inline-flex shrink-0 items-center rounded-full px-2.5 py-1 type-micro font-bold capitalize leading-none text-white ${pill.cls}`}
+            className={`inline-flex shrink-0 items-center rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize leading-none ${pill.cls}`}
           >
             {pill.label}
           </span>
         </td>
       </tr>
-    );
-  }
-
-  function SectionHeader({
-    label,
-    count,
-    accentBg,
-  }: {
-    label: string;
-    count: number;
-    accentBg: string; // css var/gradient inline bg for the count badge
-  }) {
-    return (
-      <span className="inline-flex items-center gap-2">
-        <span
-          className="inline-flex h-5 w-1 rounded-full"
-          style={{ background: accentBg }}
-        />
-        <span className="type-caption font-bold uppercase tracking-[0.14em] text-card-foreground">
-          {label}
-        </span>
-        <span
-          className="inline-flex h-[20px] min-w-[20px] items-center justify-center rounded-full px-1.5 type-micro font-bold text-white"
-          style={{ background: accentBg }}
-        >
-          {count}
-        </span>
-      </span>
     );
   }
 
@@ -680,7 +648,7 @@ export default function BookingPanel() {
   const hasRows = totalShown > 0;
 
   return (
-    <div className="min-w-0 w-full max-w-full overflow-hidden rounded-2xl border border-border bg-card shadow-sm backdrop-blur-sm">
+    <div className="min-w-0 w-full max-w-full overflow-hidden rounded-xl border border-gray-200 bg-card shadow-sm backdrop-blur-sm dark:border-white/[0.05]">
       <style>{`
         .bp-scroll::-webkit-scrollbar { height: 8px; width: 8px; }
         .bp-scroll::-webkit-scrollbar-track { background: transparent; }
@@ -701,16 +669,16 @@ export default function BookingPanel() {
       `}</style>
 
       {/* HEADER */}
-      <div className="relative border-b border-border/60 bg-gradient-to-br from-muted/40 via-card to-card px-5 pt-5 pb-4">
+      <div className="relative px-5 pt-5 pb-4 sm:px-6">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
-            <p className="type-label text-muted-foreground uppercase tracking-[0.16em]">
+            <p className="type-label text-gray-400 uppercase tracking-[0.16em] dark:text-gray-500">
               Bookings
             </p>
-            <h3 className="mt-1 type-card-title text-card-foreground">
+            <h3 className="mt-1 type-card-title text-gray-800 dark:text-white/90">
               Today&rsquo;s Schedule
             </h3>
-            <p className="mt-1 type-caption text-muted-foreground">
+            <p className="mt-1 type-caption text-gray-500 dark:text-gray-400">
               {todayCount > 0 ? (
                 <>
                   <span className="font-semibold text-brand-600 dark:text-brand-400">
@@ -728,7 +696,16 @@ export default function BookingPanel() {
                   )}
                 </>
               ) : (
-                <>No appointments today — jump to <span className="font-semibold text-brand-600 dark:text-brand-400">All Bookings</span> for the full calendar.</>
+                <>
+                  No appointments today — jump to{' '}
+                  <a
+                    href="/availability"
+                    className="font-semibold text-brand-600 transition hover:text-brand-700 hover:underline dark:text-brand-400 dark:hover:text-brand-300"
+                  >
+                    All Bookings
+                  </a>{' '}
+                  for the full calendar.
+                </>
               )}
             </p>
           </div>
@@ -748,66 +725,45 @@ export default function BookingPanel() {
 
       {/* TABLE */}
       <div className="bp-scroll overflow-x-auto">
-        <table className="min-w-[720px] w-full border-collapse">
-          <thead>
-            <tr className="bg-muted/50 border-b border-border/60">
-              <th className={`${TABLE_HEAD_CELL} w-[34%]`}>Customer</th>
-              <th className={`${TABLE_HEAD_CELL} w-[18%]`}>Channel</th>
-              <th className={`${TABLE_HEAD_CELL} w-[22%]`}>Slot</th>
-              <th className={`${TABLE_HEAD_CELL} w-[16%]`}>Starts in</th>
-              <th className={`${TABLE_HEAD_CELL} w-[10%]`}>Status</th>
+        <table className="lashvae-column-dividers min-w-[760px] w-full table-fixed">
+          <colgroup>
+            <col className="w-[27%]" />
+            <col className="w-[18%]" />
+            <col className="w-[27%]" />
+            <col className="w-[15%]" />
+            <col className="w-[13%]" />
+          </colgroup>
+          <thead className="border-b border-gray-100 dark:border-white/[0.05]">
+            <tr>
+              <th className={TABLE_HEAD_CELL}>Customer</th>
+              <th className={TABLE_HEAD_CELL}>Channel</th>
+              <th className={TABLE_HEAD_CELL}>Slot</th>
+              <th className={TABLE_HEAD_CELL}>Starts in</th>
+              <th className={TABLE_HEAD_CELL}>Status</th>
             </tr>
           </thead>
 
-          <tbody>
+          <tbody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
             {!hasRows ? (
               <tr>
                 <td colSpan={5} className="px-5 py-14 text-center">
-                  <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-muted text-muted-foreground">
+                  <div className="hidden">
                     🗓️
                   </div>
-                  <p className="mt-4 type-caption font-semibold text-card-foreground">
+                  <p className="mt-4 type-small font-medium text-gray-800 dark:text-white/90">
                     Nothing scheduled right now
                   </p>
-                  <p className="mt-1 type-small text-muted-foreground">
+                  <p className="mt-1 type-small text-gray-500 dark:text-gray-400">
                     New bookings will show up here as soon as they come in.
                   </p>
                 </td>
               </tr>
             ) : (
               <>
-                {todayBookings.length > 0 && (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      className="sticky top-0 bg-card/95 backdrop-blur-md px-4 py-2 border-b border-border/50"
-                    >
-                      <SectionHeader
-                        label="Today"
-                        count={todayCount}
-                        accentBg="linear-gradient(135deg,var(--color-brand-500),var(--color-theme-purple-500))"
-                      />
-                    </td>
-                  </tr>
-                )}
                 {todayBookings.map((b) => (
                   <BookingTableRow key={b.id} b={b} section="today" />
                 ))}
 
-                {upcomingBookings.length > 0 && (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      className="sticky top-0 bg-muted/30 backdrop-blur-md px-4 py-2 border-y border-border/50"
-                    >
-                      <SectionHeader
-                        label="Upcoming"
-                        count={upcomingCount}
-                        accentBg="color-mix(in oklab, var(--color-gray-500) 70%, transparent)"
-                      />
-                    </td>
-                  </tr>
-                )}
                 {upcomingBookings.map((b) => (
                   <BookingTableRow key={b.id} b={b} section="upcoming" />
                 ))}
@@ -818,10 +774,10 @@ export default function BookingPanel() {
       </div>
 
       {/* FOOTER */}
-      <div className="flex items-center justify-between gap-3 border-t border-border/60 bg-muted/20 px-5 py-3">
-        <p className="type-micro text-muted-foreground">
+      <div className="flex items-center justify-between gap-3 border-t border-gray-100 px-5 py-3 dark:border-white/[0.05] sm:px-6">
+        <p className="type-micro text-gray-500 dark:text-gray-400">
           Showing{' '}
-          <span className="font-semibold text-card-foreground">
+          <span className="font-semibold text-gray-800 dark:text-white/90">
             {totalShown}
           </span>{' '}
           booking{totalShown === 1 ? '' : 's'} · All times in IST
@@ -831,13 +787,13 @@ export default function BookingPanel() {
           onClick={() => {
             window.location.href = '/availability';
           }}
-          className="inline-flex items-center gap-1.5 rounded-full bg-card border border-border/70 px-3.5 py-1.5 type-micro font-semibold text-card-foreground transition hover:border-brand-300 hover:bg-brand-50 dark:hover:bg-brand-500/10 dark:hover:border-brand-500/30 focus:outline-none focus:ring-3 focus:ring-brand-500/20"
+          className="inline-flex h-8 items-center justify-center gap-2 whitespace-nowrap rounded-[10px] bg-brand-500 px-3.5 type-small font-medium text-white shadow-theme-xs transition hover:bg-brand-600 focus:outline-none focus:ring-3 focus:ring-brand-500/20"
         >
           View All Bookings
           <svg
             viewBox="0 0 24 24"
-            width="13"
-            height="13"
+            width="14"
+            height="14"
             fill="none"
             stroke="currentColor"
             strokeWidth="2.2"

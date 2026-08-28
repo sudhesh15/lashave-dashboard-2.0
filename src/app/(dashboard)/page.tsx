@@ -359,31 +359,6 @@ function ChartHeader({
   );
 }
 
-// helper
-const TOPIC_COLOR_MAP: Record<string, string> = {
-  pricing: 'var(--color-blue-light-500)',
-  booking: 'var(--color-brand-500)',
-  appointment: 'var(--color-success-500)',
-  support: 'var(--color-error-300)',
-  product: 'var(--color-theme-purple-500)',
-  availability: 'var(--color-theme-pink-500)',
-  complaint: 'var(--color-error-500)',
-  refund: 'var(--color-orange-500)',
-  hours: 'var(--color-warning-500)',
-  general_interest: 'var(--color-gray-400)',
-  integration: 'var(--color-blue-light-400)',
-  demo: 'var(--color-success-400)',
-  cancellation: 'var(--color-error-400)',
-};
-
-function getTopicColor(topic: string): string {
-  const lower = topic.toLowerCase();
-  for (const [key, color] of Object.entries(TOPIC_COLOR_MAP)) {
-    if (lower.includes(key)) return color;
-  }
-  return 'var(--color-gray-400)';
-}
-
 function EmptyBlock({ label }: { label: string }) {
   return (
     <div className='flex min-h-40 items-center justify-center rounded-xl border border-dashed border-gray-200 type-small text-gray-500 dark:border-gray-800 dark:text-gray-400'>
@@ -481,58 +456,55 @@ function TopicsCard({
   loading: boolean;
 }) {
   const max = Math.max(...topics.map((topic) => topic.count), 1);
+  const total = topics.reduce((sum, topic) => sum + topic.count, 0);
 
   return (
     <Card className='p-4 sm:p-5'>
-      <div className='mb-3'>
-        <h3 className='type-card-title font-semibold text-card-foreground'>
-          What customers want right now
-        </h3>
-        <p className='mt-0.5 type-small text-muted-foreground'>
-          Real-time themes from customer chats — questions, objections, purchase signals, and service requests.
-        </p>
+      <div className='mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between'>
+        <div className='min-w-0'>
+          <h3 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
+            What customers want right now
+          </h3>
+          <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>
+            Real-time themes from customer chats: questions, objections, purchase signals, and service requests.
+          </p>
+        </div>
+        <div className='inline-flex h-8 shrink-0 items-center justify-center rounded-[10px] bg-brand-50 px-3 type-small font-semibold text-brand-600 dark:bg-brand-500/15 dark:text-brand-400'>
+          {loading ? '-' : `${total} signals`}
+        </div>
       </div>
       {loading ? (
         <EmptyBlock label='Loading topics' />
       ) : topics.length === 0 ? (
         <EmptyBlock label='No conversation topics detected yet' />
       ) : (
-        <div className='grid auto-cols-fr gap-2.5 [grid-template-columns:repeat(auto-fit,minmax(120px,1fr))] sm:[grid-template-columns:repeat(auto-fit,minmax(150px,1fr))] lg:[grid-template-columns:repeat(auto-fit,minmax(128px,1fr))]'>
+        <div className='overflow-hidden rounded-xl border border-gray-200 divide-y divide-gray-100 dark:border-gray-800 dark:divide-white/[0.05]'>
           {topics.slice(0, 8).map((topic) => {
             const pct = Math.max(Math.round((topic.count / max) * 100), 8);
-            const actualPct = Math.round((topic.count / max) * 100);
-            const color = getTopicColor(topic.topic);
+            const label = topic.topic.replace(/_/g, ' ');
             return (
               <div
                 key={topic.topic}
-                className='min-w-0 w-full rounded-xl border border-border bg-card p-3'
+                className='grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-2.5 transition hover:bg-gray-50 dark:hover:bg-white/[0.02] sm:px-5'
               >
-                <div className='mb-1.5 flex items-center justify-between gap-2 min-w-0 w-full'>
+                <div className='min-w-0'>
                   <span
-                    className='truncate min-w-0 flex-1 type-small font-semibold capitalize text-gray-700 dark:text-gray-300'
-                    title={topic.topic.replace(/_/g, ' ')}
+                    className='block truncate type-small font-semibold capitalize text-gray-800 dark:text-white/90'
+                    title={label}
                   >
-                    {topic.topic.replace(/_/g, ' ')}
+                    {label}
                   </span>
-                  <span
-                    className='shrink-0 rounded-full px-1.5 py-0.5 type-micro font-bold text-white'
-                    style={{ backgroundColor: color }}
-                  >
-                    {topic.count}
-                  </span>
+                  <div className='mt-2 h-1 overflow-hidden rounded-full bg-gray-100 dark:bg-white/[0.06]'>
+                    <div
+                      className='h-full rounded-full bg-brand-500'
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
                 </div>
-                <div className='h-[3px] overflow-hidden rounded-full bg-muted'>
-                  <div
-                    className='h-full rounded-full'
-                    style={{
-                      width: `${pct}%`,
-                      backgroundColor: color,
-                    }}
-                  />
-                </div>
-                <p className='mt-1 type-micro font-medium text-muted-foreground'>
-                  Demand weight · {actualPct}%
-                </p>
+
+                <span className='shrink-0 rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-semibold tabular-nums text-gray-700 dark:bg-white/5 dark:text-white/80'>
+                  {topic.count} chats
+                </span>
               </div>
             );
           })}
@@ -653,13 +625,13 @@ function FaqGapsCard({ gaps, loading }: { gaps: FaqGap[]; loading: boolean }) {
           {gaps.slice(0, 5).map((gap, index) => (
             <div
               key={`${gap.query}-${index}`}
-              className='flex items-center justify-between gap-3 px-1 py-2.5'
+              className='flex items-start justify-between gap-3 px-1 py-2.5'
             >
-              <p className='truncate type-small font-medium text-gray-700 dark:text-gray-300'>
+              <p className='min-w-0 flex-1 whitespace-normal break-words type-small font-medium leading-5 text-gray-700 dark:text-gray-300'>
                 &ldquo;{gap.query}&rdquo;
               </p>
               <span className='shrink-0 rounded-full border border-brand-100 bg-brand-50 px-2 py-0.5 text-[10px] font-bold text-brand-600 dark:border-brand-500/20 dark:bg-brand-500/10 dark:text-brand-400'>
-                {gap.count}×
+                {gap.count}x
               </span>
             </div>
           ))}
@@ -1588,7 +1560,7 @@ ${about}`.trim();
         </div>
 
         <div className='mt-4 grid grid-cols-1 gap-3 sm:gap-4 xl:grid-cols-12 min-w-0 w-full'>
-          <div className='xl:col-span-8 min-w-0'>
+          <div className='xl:col-span-12 min-w-0'>
             <MessagesAreaChart
               points={msgChart}
               total={overview?.total_messages ?? 0}
@@ -1597,7 +1569,7 @@ ${about}`.trim();
             />
           </div>
 
-          <div className='xl:col-span-4 min-w-0'>
+          <div className='xl:col-span-12 min-w-0'>
             <FaqGapsCard gaps={faqGaps} loading={faqLoading} />
           </div>
         </div>
