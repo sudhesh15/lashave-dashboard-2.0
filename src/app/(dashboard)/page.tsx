@@ -359,31 +359,6 @@ function ChartHeader({
   );
 }
 
-// helper
-const TOPIC_COLOR_MAP: Record<string, string> = {
-  pricing: '#60A5FA',
-  booking: '#22D3EE',
-  appointment: '#2DD4BF',
-  support: '#FCA5A5',
-  product: '#C4B5FD',
-  availability: '#F0ABFC',
-  complaint: '#FB7185',
-  refund: '#FDBA74',
-  hours: '#FCD34D',
-  general_interest: '#CBD5E1',
-  integration: '#93C5FD',
-  demo: '#67E8F9',
-  cancellation: '#F472B6',
-};
-
-function getTopicColor(topic: string): string {
-  const lower = topic.toLowerCase();
-  for (const [key, color] of Object.entries(TOPIC_COLOR_MAP)) {
-    if (lower.includes(key)) return color;
-  }
-  return '#94A3B8'; // fallback slate
-}
-
 function EmptyBlock({ label }: { label: string }) {
   return (
     <div className='flex min-h-40 items-center justify-center rounded-xl border border-dashed border-gray-200 type-small text-gray-500 dark:border-gray-800 dark:text-gray-400'>
@@ -481,55 +456,55 @@ function TopicsCard({
   loading: boolean;
 }) {
   const max = Math.max(...topics.map((topic) => topic.count), 1);
+  const total = topics.reduce((sum, topic) => sum + topic.count, 0);
 
   return (
     <Card className='p-4 sm:p-5'>
-      <div className='mb-3'>
-        <h3 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
-          What customers want right now
-        </h3>
-        <p className='mt-0.5 type-small text-gray-500 dark:text-gray-400'>
-          Real-time themes from customer chats — questions, objections, purchase signals, and service requests.
-        </p>
+      <div className='mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between'>
+        <div className='min-w-0'>
+          <h3 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
+            What customers want right now
+          </h3>
+          <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>
+            Real-time themes from customer chats: questions, objections, purchase signals, and service requests.
+          </p>
+        </div>
+        <div className='inline-flex h-8 shrink-0 items-center justify-center rounded-[10px] bg-brand-50 px-3 type-small font-semibold text-brand-600 dark:bg-brand-500/15 dark:text-brand-400'>
+          {loading ? '-' : `${total} signals`}
+        </div>
       </div>
       {loading ? (
         <EmptyBlock label='Loading topics' />
       ) : topics.length === 0 ? (
         <EmptyBlock label='No conversation topics detected yet' />
       ) : (
-        <div className='grid grid-cols-2 gap-2.5 sm:grid-cols-4 lg:grid-cols-8'>
+        <div className='overflow-hidden rounded-xl border border-gray-200 divide-y divide-gray-100 dark:border-gray-800 dark:divide-white/[0.05]'>
           {topics.slice(0, 8).map((topic) => {
             const pct = Math.max(Math.round((topic.count / max) * 100), 8);
-            const actualPct = Math.round((topic.count / max) * 100);
-            const color = getTopicColor(topic.topic);
+            const label = topic.topic.replace(/_/g, ' ');
             return (
               <div
                 key={topic.topic}
-                className='rounded-xl border border-gray-200 bg-white p-3 dark:border-gray-800 dark:bg-white/[0.03]'
+                className='grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-2.5 transition hover:bg-gray-50 dark:hover:bg-white/[0.02] sm:px-5'
               >
-                <div className='mb-1.5 flex items-center justify-between gap-2'>
-                  <span className='truncate type-small font-semibold capitalize text-gray-700 dark:text-gray-300'>
-                    {topic.topic.replace(/_/g, ' ')}
-                  </span>
+                <div className='min-w-0'>
                   <span
-                    className='shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-bold text-white'
-                    style={{ backgroundColor: color }}
+                    className='block truncate type-small font-semibold capitalize text-gray-800 dark:text-white/90'
+                    title={label}
                   >
-                    {topic.count}
+                    {label}
                   </span>
+                  <div className='mt-2 h-1 overflow-hidden rounded-full bg-gray-100 dark:bg-white/[0.06]'>
+                    <div
+                      className='h-full rounded-full bg-brand-500'
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
                 </div>
-                <div className='h-[3px] overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800'>
-                  <div
-                    className='h-full rounded-full'
-                    style={{
-                      width: `${pct}%`,
-                      backgroundColor: color,
-                    }}
-                  />
-                </div>
-                <p className='mt-1 text-[10px] font-medium text-gray-400 dark:text-gray-500'>
-                  Demand weight · {actualPct}%
-                </p>
+
+                <span className='shrink-0 rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-semibold tabular-nums text-gray-700 dark:bg-white/5 dark:text-white/80'>
+                  {topic.count} chats
+                </span>
               </div>
             );
           })}
@@ -650,13 +625,13 @@ function FaqGapsCard({ gaps, loading }: { gaps: FaqGap[]; loading: boolean }) {
           {gaps.slice(0, 5).map((gap, index) => (
             <div
               key={`${gap.query}-${index}`}
-              className='flex items-center justify-between gap-3 px-1 py-2.5'
+              className='flex items-start justify-between gap-3 px-1 py-2.5'
             >
-              <p className='truncate type-small font-medium text-gray-700 dark:text-gray-300'>
+              <p className='min-w-0 flex-1 whitespace-normal break-words type-small font-medium leading-5 text-gray-700 dark:text-gray-300'>
                 &ldquo;{gap.query}&rdquo;
               </p>
               <span className='shrink-0 rounded-full border border-brand-100 bg-brand-50 px-2 py-0.5 text-[10px] font-bold text-brand-600 dark:border-brand-500/20 dark:bg-brand-500/10 dark:text-brand-400'>
-                {gap.count}×
+                {gap.count}x
               </span>
             </div>
           ))}
@@ -833,37 +808,39 @@ function ActiveChannelsCard({
   };
 
   return (
-    <div className='grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-6'>
+    <div className='min-w-0 w-full grid auto-cols-fr gap-2 [grid-template-columns:repeat(auto-fit,minmax(160px,1fr))] sm:gap-2.5 sm:[grid-template-columns:repeat(auto-fit,minmax(180px,1fr))] lg:gap-3 lg:[grid-template-columns:repeat(auto-fit,minmax(170px,1fr))]'>
       {displayChannels.map((item) => {
         const messagesToday = messagesForPlatform(item.platform);
         const isActive = Boolean(item.channel?.is_active);
 
         return (
-          <Card
+          <div
             key={item.channel?.id || item.platform}
-            className={`p-3 ${item.comingSoon ? 'opacity-75' : ''}`}
+            className={`flex min-h-[108px] min-w-0 w-full flex-col overflow-hidden rounded-2xl border border-gray-200/70 bg-white/90 p-2.5 shadow-sm backdrop-blur dark:border-white/[0.07] dark:bg-gray-900/60 sm:p-3 ${
+              item.comingSoon ? 'opacity-75' : ''
+            }`}
           >
-            <div className='flex items-start gap-2.5'>
-              <div className='flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-50 dark:bg-brand-500/10'>
+            <div className='flex items-start gap-2 sm:gap-2.5 w-full min-w-0'>
+              <div className='flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-brand-50 dark:bg-brand-500/10 sm:h-9 sm:w-9'>
                 <Image
                   src={logoForPlatform(item.platform)}
                   alt={`${item.label} logo`}
                   width={28}
                   height={28}
-                  className={`h-7 w-7 object-contain ${
+                  className={`h-6 w-6 object-contain sm:h-7 sm:w-7 ${
                     item.comingSoon ? 'grayscale' : ''
                   }`}
                 />
               </div>
-              <div className='min-w-0 flex-1'>
-                <p className='truncate type-small font-semibold capitalize text-gray-800 dark:text-white/90'>
+              <div className='min-w-0 flex-1 w-full overflow-hidden'>
+                <p className='w-full truncate text-[13px] font-semibold capitalize text-gray-800 dark:text-white/90 sm:type-small' title={item.label}>
                   {item.label}
                 </p>
-                <div className='mt-0.5 flex items-center gap-1'>
+                <div className='mt-0.5 flex min-w-0 w-full items-center gap-1 overflow-hidden'>
                   {loading ? (
-                    <span className='h-3 w-10 animate-pulse rounded-full bg-gray-100 dark:bg-white/5' />
+                    <span className='h-3 w-10 shrink-0 animate-pulse rounded-full bg-gray-100 dark:bg-white/5' />
                   ) : item.comingSoon ? (
-                    <span className='inline-flex items-center gap-0.5 rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-500 dark:bg-white/5 dark:text-gray-400'>
+                    <span className='inline-flex shrink-0 items-center gap-0.5 rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-500 dark:bg-white/5 dark:text-gray-400'>
                       <Clock3 className='h-2.5 w-2.5' />
                       Coming soon
                     </span>
@@ -871,19 +848,24 @@ function ActiveChannelsCard({
                     <button
                       type='button'
                       onClick={onConnectNow}
-                      className='inline-flex items-center gap-0.5 rounded-full bg-brand-50 px-1.5 py-0.5 text-[10px] font-medium text-brand-600 hover:bg-brand-100 dark:bg-brand-500/15 dark:text-brand-400'
+                      className='inline-flex shrink-0 items-center gap-0.5 rounded-full bg-brand-50 px-1.5 py-0.5 text-[10px] font-medium text-brand-600 hover:bg-brand-100 dark:bg-brand-500/15 dark:text-brand-400'
                     >
                       <Plus className='h-2.5 w-2.5' />
                       Connect now
                     </button>
                   ) : isActive ? (
-                    <span className='inline-flex items-center gap-0.5 text-[10px] font-medium text-success-600 dark:text-success-500'>
-                      <span className='h-1.5 w-1.5 rounded-full bg-success-500' />
-                      Live · {item.displayName}
+                    <span
+                      className='inline-flex min-w-0 w-full items-center gap-1 text-[10px] font-medium text-success-600 dark:text-success-500'
+                      title={`Live · ${item.displayName}`}
+                    >
+                      <span className='h-1.5 w-1.5 shrink-0 rounded-full bg-success-500' />
+                      <span className='min-w-0 truncate'>
+                        Live · {item.displayName}
+                      </span>
                     </span>
                   ) : (
-                    <span className='inline-flex items-center gap-0.5 text-[10px] font-medium text-gray-500 dark:text-gray-400'>
-                      <span className='h-1.5 w-1.5 rounded-full bg-gray-400' />
+                    <span className='inline-flex shrink-0 items-center gap-0.5 text-[10px] font-medium text-gray-500 dark:text-gray-400'>
+                      <span className='h-1.5 w-1.5 shrink-0 rounded-full bg-gray-400' />
                       Paused
                     </span>
                   )}
@@ -891,8 +873,8 @@ function ActiveChannelsCard({
               </div>
             </div>
 
-            <div className='mt-2.5 flex items-end justify-between'>
-              <p className='text-[10px] uppercase tracking-wider font-medium text-gray-400 dark:text-gray-500'>
+            <div className='mt-auto flex items-end justify-between pt-2 sm:pt-2.5 w-full min-w-0'>
+              <p className='text-[10px] font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500'>
                 Msgs today
               </p>
               <p className='text-sm font-bold text-brand-600 dark:text-brand-400'>
@@ -901,7 +883,7 @@ function ActiveChannelsCard({
                   : messagesToday}
               </p>
             </div>
-          </Card>
+          </div>
         );
       })}
     </div>
@@ -1441,9 +1423,9 @@ ${about}`.trim();
 
   return (
     <RequireAuth>
-      <div className='mx-auto w-full max-w-[1440px] px-4 py-4 sm:px-6 lg:px-8'>
-        <div className='mb-4 flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between'>
-          <div>
+      <div className='mx-auto w-full max-w-[1440px] overflow-x-hidden px-4 py-4 sm:px-6 lg:px-8'>
+        <div className='mb-4 min-w-0 flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between'>
+          <div className='min-w-0'>
             <p className='type-small font-medium text-brand-500 dark:text-brand-400'>
               Overview
             </p>
@@ -1481,7 +1463,7 @@ ${about}`.trim();
         )}
 
         {loaded && (!hasFaqs || !hasChannels) && (
-          <div className='mb-4'>
+          <div className='mb-4 min-w-0'>
             <OnboardingCard
               hasFaqs={hasFaqs}
               hasChannels={hasChannels}
@@ -1494,11 +1476,11 @@ ${about}`.trim();
           </div>
         )}
 
-        <div className='mb-4'>
-          <BookingPanel t={bookingsTheme} isDark={isDark} />
+        <div className='mb-4 min-w-0 w-full'>
+          <BookingPanel />
         </div>
 
-        <div className='mb-4'>
+        <div className='mb-4 min-w-0 w-full'>
           <ActiveChannelsCard
             channels={channels}
             messagesTodayByChannel={messagesTodayByChannel}
@@ -1507,7 +1489,7 @@ ${about}`.trim();
           />
         </div>
 
-        <div className='grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 md:gap-4'>
+        <div className='grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 lg:grid-cols-5 md:gap-4 min-w-0 w-full'>
           <MetricCard
             label='Conversations'
             value={overview?.total_conversations ?? 0}
@@ -1559,12 +1541,12 @@ ${about}`.trim();
           />
         </div>
 
-        <div className='mt-4 grid grid-cols-1 gap-4 xl:grid-cols-12'>
-          <div className='xl:col-span-7'>
+        <div className='mt-4 grid grid-cols-1 gap-3 sm:gap-4 xl:grid-cols-12 min-w-0 w-full'>
+          <div className='xl:col-span-7 min-w-0'>
             <AttentionCard items={attentionItems} loading={attentionLoading} />
           </div>
 
-          <div className='xl:col-span-5'>
+          <div className='xl:col-span-5 min-w-0'>
             <PipelineChart
               pipeline={pipeline}
               pipeMap={pipeMap}
@@ -1573,12 +1555,12 @@ ${about}`.trim();
           </div>
         </div>
 
-        <div className='mt-4'>
+        <div className='mt-4 min-w-0 w-full'>
           <TopicsCard topics={topics} loading={topicsLoading} />
         </div>
 
-        <div className='mt-4 grid grid-cols-1 gap-4 xl:grid-cols-12'>
-          <div className='xl:col-span-8'>
+        <div className='mt-4 grid grid-cols-1 gap-3 sm:gap-4 xl:grid-cols-12 min-w-0 w-full'>
+          <div className='xl:col-span-12 min-w-0'>
             <MessagesAreaChart
               points={msgChart}
               total={overview?.total_messages ?? 0}
@@ -1587,7 +1569,7 @@ ${about}`.trim();
             />
           </div>
 
-          <div className='xl:col-span-4'>
+          <div className='xl:col-span-12 min-w-0'>
             <FaqGapsCard gaps={faqGaps} loading={faqLoading} />
           </div>
         </div>

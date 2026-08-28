@@ -331,21 +331,32 @@ function ConversationAvatar({
   size?: number;
 }) {
   const name = displayName(conversation);
-  const image =
+  const rawImage =
     conversation.profile_pic_url ||
     conversation.lead?.meta?.instagram_profile?.profile_pic_url;
+  const [broken, setBroken] = useState(false);
+
+  const image = broken ? undefined : rawImage;
+
+  useEffect(() => {
+    setBroken(false);
+  }, [rawImage]);
 
   if (image) {
     return (
-      <Image
-        width={size}
-        height={size}
-        src={image}
-        alt={name}
-        unoptimized
+      <span
         style={{ height: size, width: size }}
-        className='rounded-full object-cover'
-      />
+        className='inline-flex shrink-0 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800'
+      >
+        <img
+          src={image}
+          alt={name}
+          loading='lazy'
+          onError={() => setBroken(true)}
+          style={{ height: size, width: size }}
+          className='h-full w-full object-cover'
+        />
+      </span>
     );
   }
 
