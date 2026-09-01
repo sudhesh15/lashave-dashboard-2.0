@@ -73,7 +73,7 @@ type ConvoItem = {
   } | null;
 };
 
-const PAGE_SIZE = 25;
+const PAGE_SIZE = 10;
 
 function errorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
