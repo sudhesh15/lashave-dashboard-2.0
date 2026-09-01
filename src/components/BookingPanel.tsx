@@ -669,7 +669,11 @@ export default function BookingPanel() {
       `}</style>
 
       {/* HEADER */}
-      <div className="relative px-5 pt-5 pb-4 sm:px-6">
+      <div
+        className={`relative px-5 pt-5 pb-4 sm:px-6 ${
+          hasRows ? 'border-b border-gray-100 dark:border-white/[0.05]' : ''
+        }`}
+      >
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <p className="type-label text-gray-400 uppercase tracking-[0.16em] dark:text-gray-500">
@@ -723,43 +727,29 @@ export default function BookingPanel() {
         </div>
       </div>
 
-      {/* TABLE */}
-      <div className="bp-scroll overflow-x-auto">
-        <table className="lashvae-column-dividers min-w-[760px] w-full table-fixed">
-          <colgroup>
-            <col className="w-[27%]" />
-            <col className="w-[18%]" />
-            <col className="w-[27%]" />
-            <col className="w-[15%]" />
-            <col className="w-[13%]" />
-          </colgroup>
-          <thead className="border-b border-gray-100 dark:border-white/[0.05]">
-            <tr>
-              <th className={TABLE_HEAD_CELL}>Customer</th>
-              <th className={TABLE_HEAD_CELL}>Channel</th>
-              <th className={TABLE_HEAD_CELL}>Slot</th>
-              <th className={TABLE_HEAD_CELL}>Starts in</th>
-              <th className={TABLE_HEAD_CELL}>Status</th>
-            </tr>
-          </thead>
+      {hasRows && (
+        <>
+          {/* TABLE */}
+          <div className="bp-scroll overflow-x-auto">
+            <table className="lashvae-column-dividers min-w-[760px] w-full table-fixed">
+              <colgroup>
+                <col className="w-[27%]" />
+                <col className="w-[18%]" />
+                <col className="w-[27%]" />
+                <col className="w-[15%]" />
+                <col className="w-[13%]" />
+              </colgroup>
+              <thead className="border-b border-gray-100 dark:border-white/[0.05]">
+                <tr>
+                  <th className={TABLE_HEAD_CELL}>Customer</th>
+                  <th className={TABLE_HEAD_CELL}>Channel</th>
+                  <th className={TABLE_HEAD_CELL}>Slot</th>
+                  <th className={TABLE_HEAD_CELL}>Starts in</th>
+                  <th className={TABLE_HEAD_CELL}>Status</th>
+                </tr>
+              </thead>
 
-          <tbody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-            {!hasRows ? (
-              <tr>
-                <td colSpan={5} className="px-5 py-14 text-center">
-                  <div className="hidden">
-                    🗓️
-                  </div>
-                  <p className="mt-4 type-small font-medium text-gray-800 dark:text-white/90">
-                    Nothing scheduled right now
-                  </p>
-                  <p className="mt-1 type-small text-gray-500 dark:text-gray-400">
-                    New bookings will show up here as soon as they come in.
-                  </p>
-                </td>
-              </tr>
-            ) : (
-              <>
+              <tbody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
                 {todayBookings.map((b) => (
                   <BookingTableRow key={b.id} b={b} section="today" />
                 ))}
@@ -767,44 +757,44 @@ export default function BookingPanel() {
                 {upcomingBookings.map((b) => (
                   <BookingTableRow key={b.id} b={b} section="upcoming" />
                 ))}
-              </>
-            )}
-          </tbody>
-        </table>
-      </div>
+              </tbody>
+            </table>
+          </div>
 
-      {/* FOOTER */}
-      <div className="flex items-center justify-between gap-3 border-t border-gray-100 px-5 py-3 dark:border-white/[0.05] sm:px-6">
-        <p className="type-micro text-gray-500 dark:text-gray-400">
-          Showing{' '}
-          <span className="font-semibold text-gray-800 dark:text-white/90">
-            {totalShown}
-          </span>{' '}
-          booking{totalShown === 1 ? '' : 's'} · All times in IST
-        </p>
-        <button
-          type="button"
-          onClick={() => {
-            window.location.href = '/availability';
-          }}
-          className="inline-flex h-8 items-center justify-center gap-2 whitespace-nowrap rounded-[10px] bg-brand-500 px-3.5 type-small font-medium text-white shadow-theme-xs transition hover:bg-brand-600 focus:outline-none focus:ring-3 focus:ring-brand-500/20"
-        >
-          View All Bookings
-          <svg
-            viewBox="0 0 24 24"
-            width="14"
-            height="14"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M5 12h14" />
-            <path d="m13 6 6 6-6 6" />
-          </svg>
-        </button>
-      </div>
+          {/* FOOTER */}
+          <div className="flex items-center justify-between gap-3 border-t border-gray-100 px-5 py-3 dark:border-white/[0.05] sm:px-6">
+            <p className="type-micro text-gray-500 dark:text-gray-400">
+              Showing{' '}
+              <span className="font-semibold text-gray-800 dark:text-white/90">
+                {totalShown}
+              </span>{' '}
+              booking{totalShown === 1 ? '' : 's'} · All times in IST
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                window.location.href = '/availability';
+              }}
+              className="inline-flex h-8 items-center justify-center gap-2 whitespace-nowrap rounded-[10px] bg-brand-500 px-3.5 type-small font-medium text-white shadow-theme-xs transition hover:bg-brand-600 focus:outline-none focus:ring-3 focus:ring-brand-500/20"
+            >
+              View All Bookings
+              <svg
+                viewBox="0 0 24 24"
+                width="14"
+                height="14"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M5 12h14" />
+                <path d="m13 6 6 6-6 6" />
+              </svg>
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 }
