@@ -178,49 +178,49 @@ const STAT_FILTERS: {
     key: 'all',
     label: 'Total',
     tone: 'gray',
-    icon: <List className='h-5 w-5' />,
+    icon: <List className='h-4 w-4' />,
   },
   {
     key: 'complaint',
     label: 'Complaint',
     tone: 'error',
-    icon: <AlertTriangle className='h-5 w-5' />,
+    icon: <AlertTriangle className='h-4 w-4' />,
   },
   {
     key: 'feedback',
     label: 'Feedback',
     tone: 'brand',
-    icon: <MessageCircle className='h-5 w-5' />,
+    icon: <MessageCircle className='h-4 w-4' />,
   },
   {
     key: 'order',
     label: 'Order',
     tone: 'warning',
-    icon: <Package className='h-5 w-5' />,
+    icon: <Package className='h-4 w-4' />,
   },
   {
     key: 'enquiry',
     label: 'Enquiry',
     tone: 'brand',
-    icon: <HelpCircle className='h-5 w-5' />,
+    icon: <HelpCircle className='h-4 w-4' />,
   },
   {
     key: 'open',
     label: 'Open',
     tone: 'success',
-    icon: <CheckCircle2 className='h-5 w-5' />,
+    icon: <CheckCircle2 className='h-4 w-4' />,
   },
   {
     key: 'handoff',
     label: 'Handoff',
     tone: 'warning',
-    icon: <ArrowRightLeft className='h-5 w-5' />,
+    icon: <ArrowRightLeft className='h-4 w-4' />,
   },
   {
     key: 'lead',
     label: 'With lead',
     tone: 'success',
-    icon: <Target className='h-5 w-5' />,
+    icon: <Target className='h-4 w-4' />,
   },
 ];
 
@@ -300,22 +300,22 @@ function StatTile({
       type='button'
       onClick={onClick}
       className={cn(
-        'flex min-w-0 items-center gap-2 rounded-2xl border bg-white p-3 text-left transition dark:bg-gray-900/60 sm:gap-3 xl:p-3',
+        'flex min-w-0 items-center gap-2 rounded-xl border bg-white px-2.5 py-2 text-left transition dark:bg-gray-900/60 sm:gap-2.5',
         active
           ? 'border-brand-500 ring-1 ring-brand-500/30 dark:border-brand-400'
           : 'border-gray-200 hover:border-gray-300 dark:border-gray-800 dark:hover:border-gray-700',
       )}
     >
       <span
-        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${STAT_TONE[tone]}`}
+        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${STAT_TONE[tone]}`}
       >
         {icon}
       </span>
-      <div className='min-w-0'>
-        <div className='type-card-title font-bold text-gray-800 dark:text-white/90'>
+      <div className='min-w-0 flex-1'>
+        <div className='type-body font-bold leading-tight text-gray-800 dark:text-white/90'>
           {formatCompact(value)}
         </div>
-        <div className='truncate type-caption leading-5 text-gray-500 dark:text-gray-400'>
+        <div className='truncate type-micro leading-[1.25] text-gray-500 dark:text-gray-400'>
           {label}
         </div>
       </div>
@@ -482,21 +482,21 @@ function ConversationTable({
 
   return (
     <div className='min-w-0 max-w-full overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]'>
-      <div className='flex flex-col gap-2 border-b border-gray-100 px-5 py-5 dark:border-white/[0.05] sm:flex-row sm:items-center sm:justify-between sm:px-6 '>
-        <h3 className='type-body font-semibold text-gray-800 dark:text-white/90'>
+      <div className='flex flex-col gap-1.5 border-b border-gray-100 px-4 py-3 dark:border-white/[0.05] sm:flex-row sm:items-center sm:justify-between sm:px-5 '>
+        <h3 className='type-small font-semibold text-gray-800 dark:text-white/90'>
           Inbox
         </h3>
-        <div className='type-small font-medium text-gray-500 dark:text-gray-400'>
+        <div className='type-micro font-medium text-gray-500 dark:text-gray-400'>
           {items.length} conversations
         </div>
       </div>
 
-      <div className='min-w-0 py-5'>
-        <div className='flex flex-col gap-4 rounded-t-xl border border-b-0 border-gray-200 bg-white px-5 py-4 dark:border-white/[0.05] dark:bg-white/[0.01] sm:px-6 lg:flex-row lg:items-center lg:justify-between '>
-          <h4 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
+      <div className='min-w-0 py-4'>
+        <div className='flex flex-col gap-3 rounded-t-xl border border-b-0 border-gray-200 bg-white px-4 py-3 dark:border-white/[0.05] dark:bg-white/[0.01] sm:px-5 lg:flex-row lg:items-center lg:justify-between '>
+          <h4 className='type-body font-semibold text-gray-800 dark:text-white/90'>
             {activeTab.label} conversations
           </h4>
-          <div className='flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end '>
+          <div className='flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end '>
             <div className='relative w-full sm:w-[280px]'>
               <Search className='pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400' />
               <input
@@ -505,7 +505,7 @@ function ConversationTable({
                 onChange={(e) => setQ(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && onSearchSubmit()}
                 placeholder='Search by username or ID'
-                className='h-10 w-full rounded-[10px] border border-gray-300 bg-white py-2 pl-10 pr-4 type-small text-gray-800 shadow-theme-xs outline-none placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-gray-500'
+                className='h-9 w-full rounded-[10px] border border-gray-300 bg-white py-2 pl-10 pr-4 type-small text-gray-800 shadow-theme-xs outline-none placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-gray-500'
               />
             </div>
 
@@ -650,13 +650,13 @@ function ConversationTable({
               type='button'
               onClick={() => setFilterLead((value) => !value)}
               className={cn(
-                'inline-flex h-10 shrink-0 items-center gap-2 rounded-[10px] px-4 type-small font-medium transition',
+                'inline-flex h-9 shrink-0 items-center gap-2 rounded-[10px] px-3.5 type-small font-medium transition',
                 filterLead
                   ? 'bg-brand-500 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-white/5',
               )}
             >
-              <Users className='h-4 w-4' />
+              <Users className='h-3.5 w-3.5' />
               Leads only
             </button>
 
@@ -1081,17 +1081,17 @@ export default function ConversationsPage() {
 
   return (
     <RequireAuth>
-      <div className='mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 lg:px-8'>
-        <div className='rounded-[28px] border border-gray-200 bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.04)] dark:border-gray-800 dark:bg-white/[0.03] sm:p-8'>
-          <div className='flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between'>
+      <div className='mx-auto w-full max-w-[1440px] px-4 py-5 sm:px-6 lg:px-8'>
+        <div className='rounded-2xl border border-gray-200 bg-white p-4.5 shadow-[0_10px_30px_rgba(15,23,42,0.04)] dark:border-gray-800 dark:bg-white/[0.03] sm:p-5'>
+          <div className='flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between'>
             <div>
-              <p className='type-small font-semibold uppercase tracking-[0.24em] text-gray-500 dark:text-gray-400'>
+              <p className='type-small font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400'>
                 Conversations
               </p>
-              <h1 className='mt-2 text-title-sm font-semibold text-gray-800 dark:text-white/90'>
+              <h1 className='mt-1 text-title-sm font-semibold text-gray-800 dark:text-white/90'>
                 Inbox management
               </h1>
-              <p className='mt-2 max-w-2xl type-small text-gray-500 dark:text-gray-400'>
+              <p className='mt-1 max-w-2xl type-small text-gray-500 dark:text-gray-400'>
                 Review customer conversations, lead quality, channel source, and
                 intent signals from a single workspace.
               </p>
@@ -1099,20 +1099,20 @@ export default function ConversationsPage() {
 
             <div className='flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-3'>
               <button
-                className='inline-flex h-10 items-center justify-center gap-2 rounded-[10px] border border-gray-200 bg-white px-4 type-small font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/[0.05]'
+                className='inline-flex h-8 items-center justify-center gap-2 rounded-[10px] border border-gray-200 bg-white px-3.5 type-small font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/[0.05]'
                 onClick={() => load()}
               >
-                <RefreshCw className='h-4 w-4' />
+                <RefreshCw className='h-3.5 w-3.5' />
                 Refresh
               </button>
-              <div className='flex items-center gap-2 type-caption text-gray-500 dark:text-gray-400'>
-                <Clock3 className='h-3.5 w-3.5' />
+              <div className='flex items-center gap-1.5 type-micro text-gray-500 dark:text-gray-400'>
+                <Clock3 className='h-3 w-3' />
                 Last refreshed {lastRefresh.toLocaleTimeString()}
               </div>
             </div>
           </div>
 
-          <div className='mt-8 grid grid-cols-2 gap-3 lg:grid-cols-4 3xl:grid-cols-8'>
+          <div className='mt-5 grid grid-cols-2 gap-2 lg:grid-cols-4 3xl:grid-cols-8'>
             {STAT_FILTERS.map((stat) => (
               <StatTile
                 key={stat.key}
@@ -1130,12 +1130,12 @@ export default function ConversationsPage() {
         </div>
 
         {err && (
-          <div className='mt-6 rounded-xl border border-error-200 bg-error-50 px-4 py-3 type-small text-error-700 dark:border-error-500/20 dark:bg-error-500/10 dark:text-error-400'>
+          <div className='mt-4 rounded-xl border border-error-200 bg-error-50 px-4 py-3 type-small text-error-700 dark:border-error-500/20 dark:bg-error-500/10 dark:text-error-400'>
             {err}
           </div>
         )}
 
-        <div className='mt-6'>
+        <div className='mt-4'>
           <ConversationTable
             items={visibleItems}
             loading={loading}
