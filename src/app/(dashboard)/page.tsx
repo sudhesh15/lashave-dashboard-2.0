@@ -22,6 +22,11 @@ import type {
   TS,
 } from '@/components/overview/types';
 import { RequireAuth } from '@/components/require-auth';
+import {
+  TablePagination,
+  getPageItems,
+  getTotalPages,
+} from '@/components/ui/table-pagination';
 import { apiFetch } from '@/lib/api';
 import {
   analyzeKnowledgeWebsite,
@@ -54,6 +59,38 @@ const BRAND = '#465FFF';
 const BRAND_LIGHT = '#9CB9FF';
 const PIPELINE_STATUSES = ['new', 'contacted', 'qualified', 'won', 'lost'];
 const PIPELINE_COLORS = ['#465FFF', '#5E76FF', '#7592FF', '#9CB9FF', '#C2D6FF'];
+
+/* Slots of the categorical palette declared in globals.css (--viz-cat-1..8). */
+const VIZ_CAT_SLOTS = 8;
+
+/*
+  Give every category its own palette slot, keyed off the category name rather
+  than its position in the list - so a topic keeps its colour when the counts
+  re-rank or a filter drops one of its neighbours. Names are hashed to a
+  preferred slot and collisions take the next free one, which keeps the colours
+  on screen distinct from each other.
+*/
+function buildCategoryColorSlots(names: string[]) {
+  const slots = new Map<string, number>();
+  const taken = new Set<number>();
+
+  [...names]
+    .sort((a, b) => a.localeCompare(b))
+    .forEach((name) => {
+      let hash = 0;
+      for (let index = 0; index < name.length; index += 1) {
+        hash = (hash * 31 + name.charCodeAt(index)) % 100003;
+      }
+      let slot = hash % VIZ_CAT_SLOTS;
+      while (taken.has(slot) && taken.size < VIZ_CAT_SLOTS) {
+        slot = (slot + 1) % VIZ_CAT_SLOTS;
+      }
+      taken.add(slot);
+      slots.set(name, slot + 1);
+    });
+
+  return slots;
+}
 
 type UnknownRecord = Record<string, unknown>;
 type ItemsResponse = { items?: UnknownRecord[]; total?: number };
@@ -457,6 +494,10 @@ function TopicsCard({
 }) {
   const max = Math.max(...topics.map((topic) => topic.count), 1);
   const total = topics.reduce((sum, topic) => sum + topic.count, 0);
+  const visible = topics.slice(0, VIZ_CAT_SLOTS);
+  const colorSlots = buildCategoryColorSlots(
+    visible.map((topic) => topic.topic),
+  );
 
   return (
     <Card className='p-4 sm:p-5'>
@@ -479,30 +520,45 @@ function TopicsCard({
         <EmptyBlock label='No conversation topics detected yet' />
       ) : (
         <div className='overflow-hidden rounded-xl border border-gray-200 divide-y divide-gray-100 dark:border-gray-800 dark:divide-white/[0.05]'>
-          {topics.slice(0, 8).map((topic) => {
+          {visible.map((topic) => {
             const pct = Math.max(Math.round((topic.count / max) * 100), 8);
             const label = topic.topic.replace(/_/g, ' ');
+            const color = `var(--viz-cat-${colorSlots.get(topic.topic) ?? 1})`;
             return (
               <div
                 key={topic.topic}
                 className='grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-2.5 transition hover:bg-gray-50 dark:hover:bg-white/[0.02] sm:px-5'
               >
                 <div className='min-w-0'>
-                  <span
-                    className='block truncate type-small font-semibold capitalize text-gray-800 dark:text-white/90'
-                    title={label}
-                  >
-                    {label}
-                  </span>
+                  <div className='flex min-w-0 items-center gap-2'>
+                    <span
+                      className='h-2 w-2 shrink-0 rounded-full'
+                      style={{ backgroundColor: color }}
+                      aria-hidden='true'
+                    />
+                    <span
+                      className='min-w-0 truncate type-small font-semibold capitalize'
+                      title={label}
+                      style={{ color }}
+                    >
+                      {label}
+                    </span>
+                  </div>
                   <div className='mt-2 h-1 overflow-hidden rounded-full bg-gray-100 dark:bg-white/[0.06]'>
                     <div
-                      className='h-full rounded-full bg-brand-500'
-                      style={{ width: `${pct}%` }}
+                      className='h-full rounded-full'
+                      style={{ width: `${pct}%`, backgroundColor: color }}
                     />
                   </div>
                 </div>
 
-                <span className='shrink-0 rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-semibold tabular-nums text-gray-700 dark:bg-white/5 dark:text-white/80'>
+                <span
+                  className='shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold tabular-nums'
+                  style={{
+                    backgroundColor: `color-mix(in srgb, ${color} 14%, transparent)`,
+                    color,
+                  }}
+                >
                   {topic.count} chats
                 </span>
               </div>
@@ -740,6 +796,34 @@ function PipelineChart({
   );
 }
 
+/* Channel cards always render as a single row - how many fit depends on width. */
+const CHANNEL_ROW_BREAKPOINTS = [
+  { minWidth: 1536, size: 5 },
+  { minWidth: 1280, size: 4 },
+  { minWidth: 1024, size: 3 },
+  { minWidth: 640, size: 2 },
+  { minWidth: 0, size: 1 },
+];
+
+function useChannelsPerRow() {
+  const [perRow, setPerRow] = useState(CHANNEL_ROW_BREAKPOINTS[0].size);
+
+  useEffect(() => {
+    const update = () => {
+      const width = window.innerWidth;
+      const match = CHANNEL_ROW_BREAKPOINTS.find(
+        (breakpoint) => width >= breakpoint.minWidth,
+      );
+      setPerRow(match?.size ?? 1);
+    };
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
+
+  return perRow;
+}
+
 function ActiveChannelsCard({
   channels,
   messagesTodayByChannel,
@@ -752,13 +836,16 @@ function ActiveChannelsCard({
   loading: boolean;
 }) {
   const COMING_SOON = new Set(['youtube', 'whatsapp']);
+  const perRow = useChannelsPerRow();
+  const [page, setPage] = useState(1);
 
   const ALL_PLATFORMS = [
     { platform: 'instagram', label: 'Instagram' },
     { platform: 'telegram', label: 'Telegram' },
-    { platform: 'facebook', label: 'Facebook' },
     { platform: 'website', label: 'Website' },
     { platform: 'google', label: 'Google Maps' },
+    { platform: 'facebook', label: 'Facebook' },
+    { platform: 'whatsapp', label: 'WhatsApp' },
     { platform: 'youtube', label: 'YouTube' },
   ];
 
@@ -807,85 +894,118 @@ function ActiveChannelsCard({
     return messagesTodayByChannel[key] || 0;
   };
 
-  return (
-    <div className='min-w-0 w-full grid auto-cols-fr gap-2 [grid-template-columns:repeat(auto-fit,minmax(160px,1fr))] sm:gap-2.5 sm:[grid-template-columns:repeat(auto-fit,minmax(180px,1fr))] lg:gap-3 lg:[grid-template-columns:repeat(auto-fit,minmax(170px,1fr))]'>
-      {displayChannels.map((item) => {
-        const messagesToday = messagesForPlatform(item.platform);
-        const isActive = Boolean(item.channel?.is_active);
+  const totalPages = getTotalPages(displayChannels.length, perRow);
+  const currentPage = Math.min(Math.max(1, page), totalPages);
+  const pageChannels = getPageItems(displayChannels, currentPage, perRow);
 
-        return (
-          <div
-            key={item.channel?.id || item.platform}
-            className={`flex min-h-[108px] min-w-0 w-full flex-col overflow-hidden rounded-2xl border border-gray-200/70 bg-white/90 p-2.5 shadow-sm backdrop-blur dark:border-white/[0.07] dark:bg-gray-900/60 sm:p-3 ${
-              item.comingSoon ? 'opacity-75' : ''
-            }`}
-          >
-            <div className='flex items-start gap-2 sm:gap-2.5 w-full min-w-0'>
-              <div className='flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-brand-50 dark:bg-brand-500/10 sm:h-9 sm:w-9'>
-                <Image
-                  src={logoForPlatform(item.platform)}
-                  alt={`${item.label} logo`}
-                  width={28}
-                  height={28}
-                  className={`h-6 w-6 object-contain sm:h-7 sm:w-7 ${
-                    item.comingSoon ? 'grayscale' : ''
+  return (
+    <div className='min-w-0 w-full'>
+      <div
+        className='grid min-w-0 w-full auto-cols-fr gap-4'
+        style={{ gridTemplateColumns: `repeat(${perRow}, minmax(0, 1fr))` }}
+      >
+        {pageChannels.map((item) => {
+          const messagesToday = messagesForPlatform(item.platform);
+          const isActive = Boolean(item.channel?.is_active);
+          /* Website/Google Maps fall back to the label - no point repeating it. */
+          const accountName =
+            item.connected &&
+            !item.comingSoon &&
+            item.displayName !== item.label
+              ? item.displayName
+              : null;
+
+          return (
+            <Card
+              key={item.channel?.id || item.platform}
+              className='flex min-h-[176px] min-w-0 flex-col p-4 sm:p-5'
+            >
+              <div className='flex min-w-0 items-start gap-3'>
+                <div
+                  className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${
+                    item.comingSoon
+                      ? 'bg-gray-100 dark:bg-white/[0.06]'
+                      : 'bg-brand-50 dark:bg-brand-500/[0.12]'
                   }`}
-                />
-              </div>
-              <div className='min-w-0 flex-1 w-full overflow-hidden'>
-                <p className='w-full truncate text-[13px] font-semibold capitalize text-gray-800 dark:text-white/90 sm:type-small' title={item.label}>
-                  {item.label}
-                </p>
-                <div className='mt-0.5 flex min-w-0 w-full items-center gap-1 overflow-hidden'>
-                  {loading ? (
-                    <span className='h-3 w-10 shrink-0 animate-pulse rounded-full bg-gray-100 dark:bg-white/5' />
-                  ) : item.comingSoon ? (
-                    <span className='inline-flex shrink-0 items-center gap-0.5 rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-500 dark:bg-white/5 dark:text-gray-400'>
-                      <Clock3 className='h-2.5 w-2.5' />
-                      Coming soon
-                    </span>
-                  ) : !item.connected ? (
-                    <button
-                      type='button'
-                      onClick={onConnectNow}
-                      className='inline-flex shrink-0 items-center gap-0.5 rounded-full bg-brand-50 px-1.5 py-0.5 text-[10px] font-medium text-brand-600 hover:bg-brand-100 dark:bg-brand-500/15 dark:text-brand-400'
-                    >
-                      <Plus className='h-2.5 w-2.5' />
-                      Connect now
-                    </button>
-                  ) : isActive ? (
-                    <span
-                      className='inline-flex min-w-0 w-full items-center gap-1 text-[10px] font-medium text-success-600 dark:text-success-500'
-                      title={`Live · ${item.displayName}`}
-                    >
-                      <span className='h-1.5 w-1.5 shrink-0 rounded-full bg-success-500' />
-                      <span className='min-w-0 truncate'>
-                        Live · {item.displayName}
+                >
+                  <Image
+                    src={logoForPlatform(item.platform)}
+                    alt={`${item.label} logo`}
+                    width={32}
+                    height={32}
+                    className={`h-8 w-8 object-contain ${
+                      item.comingSoon ? 'grayscale' : ''
+                    }`}
+                  />
+                </div>
+                <div className='min-w-0 flex-1'>
+                  <p
+                    className='truncate type-body font-semibold text-gray-800 dark:text-white/90'
+                    title={item.label}
+                  >
+                    {item.label}
+                  </p>
+                  <div className='mt-2 flex min-w-0 items-center'>
+                    {loading ? (
+                      <span className='h-6 w-24 animate-pulse rounded-full bg-gray-100 dark:bg-white/5' />
+                    ) : item.comingSoon ? (
+                      <span className='inline-flex items-center gap-1.5 rounded-full bg-gray-100 px-2.5 py-1 type-caption font-medium text-gray-500 dark:bg-white/[0.06] dark:text-gray-400'>
+                        <Clock3 className='h-3.5 w-3.5' />
+                        Coming soon
                       </span>
-                    </span>
-                  ) : (
-                    <span className='inline-flex shrink-0 items-center gap-0.5 text-[10px] font-medium text-gray-500 dark:text-gray-400'>
-                      <span className='h-1.5 w-1.5 shrink-0 rounded-full bg-gray-400' />
-                      Paused
-                    </span>
+                    ) : !item.connected ? (
+                      <button
+                        type='button'
+                        onClick={onConnectNow}
+                        className='inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-2.5 py-1 type-caption font-medium text-brand-600 transition-colors hover:bg-brand-100 dark:bg-brand-500/15 dark:text-brand-400 dark:hover:bg-brand-500/25'
+                      >
+                        <Plus className='h-3.5 w-3.5' />
+                        Connect now
+                      </button>
+                    ) : isActive ? (
+                      <span className='inline-flex items-center gap-1.5 rounded-full bg-success-50 px-2.5 py-1 type-caption font-medium text-success-600 dark:bg-success-500/15 dark:text-success-500'>
+                        <span className='h-2 w-2 shrink-0 rounded-full bg-success-500' />
+                        Live
+                      </span>
+                    ) : (
+                      <span className='inline-flex items-center gap-1.5 rounded-full bg-gray-100 px-2.5 py-1 type-caption font-medium text-gray-500 dark:bg-white/[0.06] dark:text-gray-400'>
+                        <span className='h-2 w-2 shrink-0 rounded-full bg-gray-400' />
+                        Paused
+                      </span>
+                    )}
+                  </div>
+                  {!loading && accountName && (
+                    <p
+                      className='mt-2 truncate type-caption text-gray-500 dark:text-gray-400'
+                      title={accountName}
+                    >
+                      {accountName}
+                    </p>
                   )}
                 </div>
               </div>
-            </div>
 
-            <div className='mt-auto flex items-end justify-between pt-2 sm:pt-2.5 w-full min-w-0'>
-              <p className='text-[10px] font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500'>
-                Msgs today
-              </p>
-              <p className='text-sm font-bold text-brand-600 dark:text-brand-400'>
-                {loading || !item.connected || item.comingSoon
-                  ? '0'
-                  : messagesToday}
-              </p>
-            </div>
-          </div>
-        );
-      })}
+              <div className='mt-auto flex items-end justify-between gap-3 border-t border-gray-100 pt-4 dark:border-gray-800'>
+                <p className='type-caption font-medium text-gray-500 dark:text-gray-400'>
+                  Messages Today
+                </p>
+                <p className='text-2xl font-bold leading-none text-brand-600 dark:text-brand-400'>
+                  {loading || !item.connected || item.comingSoon
+                    ? '0'
+                    : messagesToday}
+                </p>
+              </div>
+            </Card>
+          );
+        })}
+      </div>
+
+      <TablePagination
+        page={currentPage}
+        totalItems={displayChannels.length}
+        pageSize={perRow}
+        onPageChange={setPage}
+      />
     </div>
   );
 }

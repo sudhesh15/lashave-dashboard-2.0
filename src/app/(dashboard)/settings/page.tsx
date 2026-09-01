@@ -10,6 +10,7 @@ import {
   ChevronRight,
   Clock3,
   CreditCard,
+  FileText,
   Globe2,
   Menu,
   MessageSquare,
@@ -24,6 +25,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import CustomerInfoCard from '@/components/CustomerInfoCard';
 import CustomerInfoModal from '@/components/CustomerInfoModal';
+import NotificationSettingsCard from '@/components/settings/NotificationSettingsCard';
 import PageBreadcrumb from '@/components/common/PageBreadcrumb';
 import { SettingsActionRow } from '@/components/settings/SettingsActionRow';
 import { Badge } from '@/components/ui/badge';
@@ -97,6 +99,27 @@ const defaultAvailability: AvailabilityItem[] = DAYS.map((_, index) => ({
 interface BookingSettingsResponse {
   ok: boolean;
   booking_enabled: boolean;
+  booking_advance_days?: number;
+}
+
+const BOOKING_WINDOW_MIN = 1;
+const BOOKING_WINDOW_MAX = 365;
+const BOOKING_WINDOW_PRESETS = [7, 30, 90, 180, 365] as const;
+
+function clampBookingWindowDays(value: number) {
+  return Math.max(
+    BOOKING_WINDOW_MIN,
+    Math.min(BOOKING_WINDOW_MAX, Math.round(value)),
+  );
+}
+
+function formatBookingWindowDate(days: number) {
+  return new Date(
+    Date.now() + (days - 1) * 86_400_000,
+  ).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+  });
 }
 
 function isToday(dateStr: string) {
@@ -124,10 +147,99 @@ const INPUT_CLASS =
 const TEXTAREA_CLASS =
   'rounded-[10px] border-gray-300 px-4 py-3 type-small text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus-visible:border-brand-300 focus-visible:ring-3 focus-visible:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus-visible:border-brand-800';
 
+const SETTINGS_SECTIONS = [
+  'ai',
+  'profile',
+  'booking',
+  'channels',
+  'knowledge',
+  'billing',
+];
+
+function BookingWindowEditor({
+  value,
+  onChange,
+}: {
+  value: number;
+  onChange: (value: number) => void;
+}) {
+  const days = clampBookingWindowDays(value);
+
+  return (
+    <div className='rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-white/[0.02]'>
+      <div>
+        <h4 className='type-small font-semibold text-gray-800 dark:text-white/90'>
+          Booking window
+        </h4>
+        <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>
+          How many days ahead can customers book, starting from today?
+        </p>
+      </div>
+
+      <div className='mt-4 flex items-center gap-3'>
+        <span className='shrink-0 type-small text-gray-500 dark:text-gray-400'>
+          Open for next
+        </span>
+        <input
+          type='range'
+          min={BOOKING_WINDOW_MIN}
+          max={BOOKING_WINDOW_MAX}
+          value={days}
+          onChange={(e) =>
+            onChange(clampBookingWindowDays(Number(e.target.value)))
+          }
+          className='h-2 flex-1 cursor-pointer accent-brand-500'
+        />
+        <div className='min-w-[78px] rounded-[10px] border border-brand-200 bg-brand-50 px-2.5 py-1.5 text-center type-small font-semibold text-brand-500 dark:border-brand-500/30 dark:bg-brand-500/10 dark:text-brand-400'>
+          {days} day{days === 1 ? '' : 's'}
+        </div>
+      </div>
+
+      <div className='mt-3 flex flex-wrap gap-2'>
+        {BOOKING_WINDOW_PRESETS.map((preset) => {
+          const active = days === preset;
+
+          return (
+            <button
+              key={preset}
+              type='button'
+              onClick={() => onChange(preset)}
+              className={cn(
+                'rounded-lg px-3 py-1.5 type-caption font-semibold transition',
+                active
+                  ? 'border border-brand-300 bg-brand-50 text-brand-500 dark:border-brand-500/30 dark:bg-brand-500/10 dark:text-brand-400'
+                  : 'border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 dark:border-gray-700 dark:bg-transparent dark:text-gray-400 dark:hover:bg-white/[0.03]',
+              )}
+            >
+              {preset === BOOKING_WINDOW_MAX ? '365d (max)' : `${preset}d`}
+            </button>
+          );
+        })}
+      </div>
+
+      <p className='mt-3 rounded-xl border border-brand-200 bg-brand-50 px-3 py-2.5 type-small leading-6 text-brand-700 dark:border-brand-500/30 dark:bg-brand-500/10 dark:text-brand-300'>
+        Customers can pick any date from{' '}
+        <strong>
+          {new Date().toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+          })}
+        </strong>{' '}
+        to <strong>{formatBookingWindowDate(days)}</strong> — shifts forward
+        automatically every day.
+      </p>
+    </div>
+  );
+}
+
 export default function SettingsPage() {
   const { isDark } = useTheme();
   const searchParams = useSearchParams();
   const isWeekly = searchParams.get('weekly') === 'true';
+  const requestedSection = searchParams.get('section');
+  const initialSection = SETTINGS_SECTIONS.includes(requestedSection || '')
+    ? (requestedSection as string)
+    : 'ai';
 
   const [s, setS] = useState<Settings | null>(null);
   const [loaded, setLoaded] = useState(false);
@@ -138,7 +250,7 @@ export default function SettingsPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
 
   const [togglingAI, setTogglingAI] = useState(false);
-  const [activeSection, setActiveSection] = useState('ai');
+  const [activeSection, setActiveSection] = useState(initialSection);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [showAvailabilityPanel, setShowAvailabilityPanel] = useState<
     true | false
@@ -150,6 +262,13 @@ export default function SettingsPage() {
   const [showCustomerInfoModal, setShowCustomerInfoModal] = useState(false);
 
   const router = useRouter();
+  const settingsReturnHref = `/settings?section=${encodeURIComponent(activeSection)}`;
+
+  useEffect(() => {
+    if (SETTINGS_SECTIONS.includes(requestedSection || '')) {
+      setActiveSection(requestedSection as string);
+    }
+  }, [requestedSection]);
 
   /* Filtered list */
   const bookingStats = [
@@ -187,8 +306,10 @@ export default function SettingsPage() {
     booking_slot_duration_minutes: 30,
     booking_buffer_minutes: 10,
     booking_timezone: 'Asia/Kolkata',
+    booking_advance_days: 30,
   });
 
+  const [advanceDaysDraft, setAdvanceDaysDraft] = useState(30);
   const [savingBookingSettings, setSavingBookingSettings] = useState(false);
 
   // Handoff automation state
@@ -222,18 +343,36 @@ export default function SettingsPage() {
 
   const taRef = useRef<HTMLTextAreaElement>(null);
 
-  const saveBookingSettings = async () => {
+  const openAvailabilityPanel = () => {
+    setAdvanceDaysDraft(bookingSettings.booking_advance_days || 30);
+    setShowAvailabilityPanel(true);
+  };
+
+  const saveBookingSettings = async (
+    settings: typeof bookingSettings = bookingSettings,
+  ) => {
     try {
       setSavingBookingSettings(true);
+
+      const payload = {
+        ...settings,
+        booking_advance_days: clampBookingWindowDays(
+          settings.booking_advance_days || 30,
+        ),
+      };
 
       const data = await apiFetch<BookingSettingsResponse>(
         '/admin/booking/settings',
         {
           method: 'PUT',
-          body: bookingSettings,
+          body: payload,
           auth: true,
         },
       );
+
+      setBookingSettings(payload);
+      setAdvanceDaysDraft(payload.booking_advance_days);
+
       if (data.booking_enabled) {
         setShowAvailabilityPanel(true);
       }
@@ -263,6 +402,20 @@ export default function SettingsPage() {
         auth: true,
       });
 
+      const nextAdvanceDays = clampBookingWindowDays(advanceDaysDraft);
+
+      await apiFetch<BookingSettingsResponse>('/admin/booking/settings', {
+        method: 'PUT',
+        body: { booking_advance_days: nextAdvanceDays },
+        auth: true,
+      });
+
+      setBookingSettings((prev) => ({
+        ...prev,
+        booking_advance_days: nextAdvanceDays,
+      }));
+      setAdvanceDaysDraft(nextAdvanceDays);
+
       setShowAvailabilityPanel(false);
     } finally {
       setSavingAvailability(false);
@@ -285,6 +438,7 @@ export default function SettingsPage() {
         booking_slot_duration_minutes: number;
         booking_buffer_minutes: number;
         booking_timezone: string;
+        booking_advance_days?: number;
       }>('/admin/booking/settings', { auth: true });
 
       const availabilityRes = await apiFetch<{ items: AvailabilityItem[] }>(
@@ -315,7 +469,9 @@ export default function SettingsPage() {
           bookingRes.booking_slot_duration_minutes ?? 30,
         booking_buffer_minutes: bookingRes.booking_buffer_minutes ?? 10,
         booking_timezone: bookingRes.booking_timezone ?? 'Asia/Kolkata',
+        booking_advance_days: bookingRes.booking_advance_days ?? 30,
       });
+      setAdvanceDaysDraft(bookingRes.booking_advance_days ?? 30);
 
       data.handoff_keywords = Array.isArray(data.handoff_keywords)
         ? data.handoff_keywords
@@ -579,6 +735,12 @@ export default function SettingsPage() {
       icon: <MessageSquare size={20} />,
     },
     {
+      key: 'knowledge',
+      title: 'Knowledge',
+      subtitle: 'Manage files and FAQs',
+      icon: <FileText size={20} />,
+    },
+    {
       key: 'billing',
       title: 'Billing',
       subtitle: 'Plan and billing details',
@@ -634,7 +796,16 @@ export default function SettingsPage() {
                         }
 
                         if (item.key === 'channels') {
-                          router.push('/channels');
+                          router.push(
+                            `/channels?from=settings&returnTo=${encodeURIComponent(settingsReturnHref)}`,
+                          );
+                          return;
+                        }
+
+                        if (item.key === 'knowledge') {
+                          router.push(
+                            `/faq?from=settings&returnTo=${encodeURIComponent(settingsReturnHref)}`,
+                          );
                           return;
                         }
 
@@ -703,6 +874,8 @@ export default function SettingsPage() {
         <div className='min-w-0'>
           {activeSection === 'ai' && (
             <div className='flex flex-col gap-6'>
+              <NotificationSettingsCard />
+
               {/* AI enable card */}
               <div className='rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03] sm:p-6'>
                 <div className='mb-4 flex flex-wrap items-center justify-between gap-3'>
@@ -1081,7 +1254,7 @@ export default function SettingsPage() {
                   actionColorClass='bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/[0.08] dark:text-gray-300 dark:hover:bg-white/[0.14]'
                   onAction={() => setShowBookingModal(true)}
                 >
-                  <div className='mt-4 grid grid-cols-1 gap-3 2xl:grid-cols-3'>
+                  <div className='mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 2xl:grid-cols-4'>
                     {[
                       {
                         icon: <Clock3 size={16} />,
@@ -1102,6 +1275,13 @@ export default function SettingsPage() {
                         value:
                           bookingSettings.booking_timezone || 'Asia/Kolkata',
                         label: 'Timezone',
+                      },
+                      {
+                        icon: <CalendarDays size={16} />,
+                        value: `${
+                          bookingSettings.booking_advance_days || 30
+                        } days`,
+                        label: 'Booking window',
                       },
                     ].map((item) => (
                       <div
@@ -1127,8 +1307,8 @@ export default function SettingsPage() {
                   description='Set your working days and available hours for appointments.'
                   actionLabel='Configure'
                   actionColorClass='bg-brand-50 text-brand-500 hover:bg-brand-100 dark:bg-brand-500/15 dark:hover:bg-brand-500/25'
-                  onAction={() => setShowAvailabilityPanel(true)}
-                  onRowClick={() => setShowAvailabilityPanel(true)}
+                  onAction={openAvailabilityPanel}
+                  onRowClick={openAvailabilityPanel}
                 >
                   <div className='mt-4 flex flex-wrap gap-2'>
                     {availability.map((day, index) => (
@@ -1231,7 +1411,7 @@ export default function SettingsPage() {
             </button>
           </div>
 
-          <div className='mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3'>
+          <div className='mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4'>
             {[
               {
                 icon: <Clock3 size={18} />,
@@ -1249,6 +1429,11 @@ export default function SettingsPage() {
                 icon: <Globe2 size={18} />,
                 label: 'Timezone',
                 value: bookingSettings.booking_timezone || 'Asia/Kolkata',
+              },
+              {
+                icon: <CalendarDays size={18} />,
+                label: 'Booking Window',
+                value: `${bookingSettings.booking_advance_days || 30} days`,
               },
             ].map((item) => (
               <div
@@ -1331,6 +1516,18 @@ export default function SettingsPage() {
             </div>
           </div>
 
+          <div className='mb-6'>
+            <BookingWindowEditor
+              value={bookingSettings.booking_advance_days || 30}
+              onChange={(days) =>
+                setBookingSettings((prev) => ({
+                  ...prev,
+                  booking_advance_days: days,
+                }))
+              }
+            />
+          </div>
+
           <div className='flex flex-wrap items-center justify-between gap-4'>
             <p className='type-caption text-gray-500 dark:text-gray-400'>
               Booking works only when this toggle is enabled. Customers stay
@@ -1339,7 +1536,13 @@ export default function SettingsPage() {
 
             <Button
               onClick={async () => {
-                await saveBookingSettings();
+                const nextSettings = {
+                  ...bookingSettings,
+                  booking_advance_days: clampBookingWindowDays(
+                    bookingSettings.booking_advance_days || 30,
+                  ),
+                };
+                await saveBookingSettings(nextSettings);
                 setShowBookingModal(false);
               }}
               disabled={savingBookingSettings}
@@ -1369,7 +1572,12 @@ export default function SettingsPage() {
             </p>
           </div>
 
-          <div className='custom-scrollbar flex flex-col gap-3 overflow-y-auto p-6'>
+          <div className='custom-scrollbar flex flex-col gap-4 overflow-y-auto p-6'>
+            <BookingWindowEditor
+              value={advanceDaysDraft}
+              onChange={setAdvanceDaysDraft}
+            />
+
             {availability.map((item) => (
               <div
                 key={item.day_of_week}

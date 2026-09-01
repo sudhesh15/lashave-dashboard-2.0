@@ -6,6 +6,7 @@ import { apiFetch } from "@/lib/api";
 import {
   Bot,
   CheckCircle2,
+  ChevronLeft,
   Loader2,
   Save,
   Settings2,
@@ -337,16 +338,19 @@ export function ChannelSettingsDrawer({
   channelId,
   channelName,
   onClose,
+  onBackToSettings,
 }: {
   channelId: number;
   channelName: string;
   platformColor: string;
   onClose: () => void;
+  onBackToSettings?: () => void;
 }) {
   const [settings, setSettings] = useState<LLMSettings>(DEFAULT_SETTINGS);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [dirty, setDirty] = useState(false);
   const [err, setErr] = useState("");
   const [mounted, setMounted] = useState(false);
   const drawerRef = useRef<HTMLDivElement>(null);
@@ -360,8 +364,10 @@ export function ChannelSettingsDrawer({
         { auth: true },
       );
       setSettings({ ...DEFAULT_SETTINGS, ...data });
+      setDirty(false);
     } catch {
       setSettings(DEFAULT_SETTINGS);
+      setDirty(false);
     } finally {
       setLoading(false);
     }
@@ -387,22 +393,41 @@ export function ChannelSettingsDrawer({
         drawerRef.current &&
         !drawerRef.current.contains(event.target as Node)
       ) {
-        onClose();
+        requestClose();
       }
     }
 
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
-  }, [onClose]);
+  }, [dirty, onClose]);
 
   useEffect(() => {
     function handleKey(event: KeyboardEvent) {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape") requestClose();
     }
 
     document.addEventListener("keydown", handleKey);
     return () => document.removeEventListener("keydown", handleKey);
-  }, [onClose]);
+  }, [dirty, onClose]);
+
+  function confirmLeaveWithUnsavedChanges() {
+    return (
+      !dirty ||
+      window.confirm(
+        "You have unsaved channel settings. Leave without saving?",
+      )
+    );
+  }
+
+  function requestClose() {
+    if (!confirmLeaveWithUnsavedChanges()) return;
+    onClose();
+  }
+
+  function requestBackToSettings() {
+    if (!confirmLeaveWithUnsavedChanges()) return;
+    onBackToSettings?.();
+  }
 
   async function save() {
     setSaving(true);
@@ -415,6 +440,7 @@ export function ChannelSettingsDrawer({
         body: settings,
       });
       setSaved(true);
+      setDirty(false);
       window.setTimeout(() => setSaved(false), 2500);
     } catch (error) {
       setErr(errorMessage(error, "Failed to save settings"));
@@ -426,6 +452,7 @@ export function ChannelSettingsDrawer({
   function patch<K extends keyof LLMSettings>(key: K, value: LLMSettings[K]) {
     setSettings((current) => ({ ...current, [key]: value }));
     setSaved(false);
+    setDirty(true);
   }
 
   if (!mounted) return null;
@@ -436,7 +463,7 @@ export function ChannelSettingsDrawer({
       <div
         className='fixed inset-0 z-[10000] bg-black/25 backdrop-blur-[2px] dark:bg-black/40'
         aria-hidden='true'
-        onClick={onClose}
+        onClick={requestClose}
       />
 
       {/* DRAWER */}
@@ -469,19 +496,36 @@ export function ChannelSettingsDrawer({
             </div>
           </div>
 
-          <button
-            type='button'
-            onClick={onClose}
-            className='flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px]
-                     border border-gray-200 bg-white text-gray-500 transition
-                     hover:bg-gray-50 hover:text-gray-700
-                     dark:border-gray-800 dark:bg-white/[0.03]
-                     dark:text-gray-400 dark:hover:bg-white/[0.05]
-                     dark:hover:text-white/90'
-            aria-label='Close settings'
-          >
-            <X className='h-4 w-4' />
-          </button>
+          <div className='flex shrink-0 items-center gap-2'>
+            {onBackToSettings && (
+              <button
+                type='button'
+                onClick={requestBackToSettings}
+                className='inline-flex h-9 items-center justify-center gap-1.5 rounded-[10px]
+                         border border-gray-200 bg-white px-3 type-caption font-medium
+                         text-gray-700 transition hover:bg-gray-50 hover:text-gray-900
+                         dark:border-gray-800 dark:bg-white/[0.03]
+                         dark:text-gray-300 dark:hover:bg-white/[0.05]
+                         dark:hover:text-white/90'
+              >
+                <ChevronLeft className='h-4 w-4' />
+                Settings
+              </button>
+            )}
+            <button
+              type='button'
+              onClick={requestClose}
+              className='flex h-9 w-9 items-center justify-center rounded-[10px]
+                       border border-gray-200 bg-white text-gray-500 transition
+                       hover:bg-gray-50 hover:text-gray-700
+                       dark:border-gray-800 dark:bg-white/[0.03]
+                       dark:text-gray-400 dark:hover:bg-white/[0.05]
+                       dark:hover:text-white/90'
+              aria-label='Close settings'
+            >
+              <X className='h-4 w-4' />
+            </button>
+          </div>
         </div>
 
         {/* CONTENT */}
@@ -598,7 +642,7 @@ export function ChannelSettingsDrawer({
           <div className='flex justify-end gap-3'>
             <button
               type='button'
-              onClick={onClose}
+              onClick={requestClose}
               className='inline-flex h-10 items-center justify-center rounded-[10px]
                        border border-gray-200 bg-white px-5 type-small font-medium
                        text-gray-700 shadow-theme-xs transition hover:bg-gray-50

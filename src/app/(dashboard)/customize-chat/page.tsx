@@ -13,9 +13,15 @@
    ══════════════════════════════════════════════════════════════════════════ */
 
 import { RequireAuth } from '@/components/require-auth';
+import {
+  ConversationLimitBanner,
+  FeatureGate,
+  LockedAccountBanner,
+} from '@/components/billing/FeatureGate';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Modal } from '@/components/ui/modal';
 import { Switch as UiSwitch } from '@/components/ui/switch';
 import { apiFetch } from '@/lib/api';
 import { useTheme } from '@/lib/theme-context';
@@ -58,7 +64,7 @@ import {
   X,
   Zap,
 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 const SEND_ADVANCED_CONFIG = true;
@@ -373,6 +379,105 @@ const BACKEND_ALLOWED_SHAPES = new Set([
 ]);
 const BACKEND_ICON_FALLBACK = 'chat';
 const BACKEND_SHAPE_FALLBACK = 'circle';
+
+type WidgetDraftInput = {
+  brandColor: string;
+  position: string;
+  widgetTitle: string;
+  greetingText: string;
+  avatarUrl: string;
+  collectName: boolean;
+  collectEmail: boolean;
+  customDetails: boolean;
+  customDetailsFields: CustomDetailField[];
+  bubbleColor: string;
+  bubbleShape: string;
+  bubbleIcon: string;
+  autoOpenDelayMs: number;
+  offlineMessage: string;
+  adv: AdvancedConfig;
+};
+
+function buildWidgetSaveBody(input: WidgetDraftInput): Record<string, unknown> {
+  const safeBubbleIcon = BACKEND_ALLOWED_ICONS.has(input.bubbleIcon)
+    ? input.bubbleIcon
+    : BACKEND_ICON_FALLBACK;
+  const safeBubbleShape = BACKEND_ALLOWED_SHAPES.has(input.bubbleShape)
+    ? input.bubbleShape
+    : BACKEND_SHAPE_FALLBACK;
+
+  const body: Record<string, unknown> = {
+    brand_color: input.brandColor,
+    position: input.position,
+    widget_title: input.widgetTitle,
+    greeting_text: input.greetingText,
+    avatar_url: input.avatarUrl || null,
+    collect_name: input.collectName,
+    collect_email: input.collectEmail,
+    custom_details: input.customDetails,
+    bubble_color: input.bubbleColor,
+    bubble_shape: safeBubbleShape,
+    bubble_icon: safeBubbleIcon,
+    custom_details_fields: input.customDetails
+      ? input.customDetailsFields.filter((field) => field.label.trim())
+      : [],
+    auto_open_delay_ms: input.autoOpenDelayMs,
+    offline_message: input.offlineMessage || null,
+  };
+
+  if (SEND_ADVANCED_CONFIG) {
+    body.advanced_config = {
+      ...input.adv,
+      header_style: 'solid',
+      launcher_icon: input.bubbleIcon,
+      launcher_shape: input.bubbleShape,
+      contact_topics: input.adv.contact_topics.filter((topic) =>
+        topic.label.trim(),
+      ),
+      faq_items: input.adv.faq_items.filter((item) => item.q.trim()),
+      proactive_rules: input.adv.proactive_rules.filter((rule) =>
+        rule.message.trim(),
+      ),
+    };
+  }
+
+  return body;
+}
+
+function serializeWidgetDraft(input: WidgetDraftInput): string {
+  return JSON.stringify(buildWidgetSaveBody(input));
+}
+
+function widgetConfigToDraftInput(cfg: WidgetConfig): WidgetDraftInput {
+  const mergedAdv: AdvancedConfig = {
+    ...DEFAULT_ADVANCED,
+    ...(cfg.advanced_config || {}),
+  };
+
+  if (!cfg.advanced_config?.launcher_animation) {
+    mergedAdv.launcher_animation = mergedAdv.launcher_pulse ? 'pulse' : 'none';
+  }
+
+  return {
+    brandColor: cfg.brand_color || '#465FFF',
+    position: cfg.position || 'bottom-right',
+    widgetTitle: cfg.widget_title || '',
+    greetingText: cfg.greeting_text || '',
+    avatarUrl: cfg.avatar_url || '',
+    collectName: cfg.collect_name ?? true,
+    collectEmail: cfg.collect_email ?? true,
+    customDetails: Boolean(cfg.custom_details),
+    customDetailsFields: cfg.custom_details_fields || [],
+    bubbleColor: cfg.bubble_color || cfg.brand_color || '#465FFF',
+    bubbleShape:
+      cfg.advanced_config?.launcher_shape || cfg.bubble_shape || 'circle',
+    bubbleIcon:
+      cfg.advanced_config?.launcher_icon || cfg.bubble_icon || 'chat',
+    autoOpenDelayMs: cfg.auto_open_delay_ms ?? 0,
+    offlineMessage: cfg.offline_message || '',
+    adv: mergedAdv,
+  };
+}
 
 /* ── premium constants ─────────────────────────────────────────────────── */
 
@@ -4191,10 +4296,9 @@ function Sidebar({
           We&apos;re here to help you set up your chatbot.
         </div>
         <Button
-          variant='outline'
           size='sm'
-          className='w-full'
-          onClick={() => router.push('/profile?support=True')}
+          className='w-full bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600'
+          onClick={() => router.push('/profile?activeNav=support')}
         >
           Contact Support
         </Button>
@@ -4204,13 +4308,75 @@ function Sidebar({
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
+   UNSAVED CHANGES DIALOG
+   ══════════════════════════════════════════════════════════════════════════ */
+
+function UnsavedChangesDialog({
+  open,
+  saving,
+  onSave,
+  onDiscard,
+  onStay,
+}: {
+  open: boolean;
+  saving: boolean;
+  onSave: () => void;
+  onDiscard: () => void;
+  onStay: () => void;
+}) {
+  return (
+    <Modal
+      isOpen={open}
+      onClose={onStay}
+      showCloseButton={false}
+      className='m-4 max-w-[440px]'
+    >
+      <div className='p-6'>
+        <div className='mb-5 flex items-start gap-3'>
+          <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-warning-50 text-warning-600 dark:bg-warning-500/10 dark:text-warning-500'>
+            <AlertTriangle className='h-5 w-5' />
+          </div>
+          <div>
+            <h3 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
+              Save changes?
+            </h3>
+            <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>
+              You have unsaved widget changes. Do you want to save them before
+              leaving?
+            </p>
+          </div>
+        </div>
+
+        <div className='flex flex-col-reverse gap-2 sm:flex-row sm:justify-end'>
+          <Button variant='outline' onClick={onStay} disabled={saving}>
+            Cancel
+          </Button>
+          <Button variant='outline' onClick={onDiscard} disabled={saving}>
+            Don&apos;t Save
+          </Button>
+          <Button onClick={onSave} disabled={saving}>
+            {saving ? 'Saving...' : 'Save'}
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
    MAIN PAGE — CustomizeChatInner
    ══════════════════════════════════════════════════════════════════════════ */
+
+type PendingLeaveAction =
+  | { type: 'route'; href: string }
+  | { type: 'section'; sectionId: SectionId };
 
 function CustomizeChatInner() {
   const { isDark } = useTheme();
   const c = th(isDark);
   const router = useRouter();
+  const pathname = usePathname();
+  const pendingLeaveRef = useRef<PendingLeaveAction | null>(null);
 
   /* ── section state ─────────────────────────────────────────────────────── */
   const [activeSection, setActiveSection] = useState<SectionId>('appearance');
@@ -4257,6 +4423,54 @@ function CustomizeChatInner() {
   const [guideType, setGuideType] = useState<GuideType>('builder');
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [showDisconnectConfirm, setShowDisconnectConfirm] = useState(false);
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const [savedSignature, setSavedSignature] = useState<string | null>(null);
+
+  const currentDraftInput = useMemo<WidgetDraftInput>(
+    () => ({
+      brandColor,
+      position,
+      widgetTitle,
+      greetingText,
+      avatarUrl,
+      collectName,
+      collectEmail,
+      customDetails,
+      customDetailsFields,
+      bubbleColor,
+      bubbleShape,
+      bubbleIcon,
+      autoOpenDelayMs,
+      offlineMessage,
+      adv,
+    }),
+    [
+      brandColor,
+      position,
+      widgetTitle,
+      greetingText,
+      avatarUrl,
+      collectName,
+      collectEmail,
+      customDetails,
+      customDetailsFields,
+      bubbleColor,
+      bubbleShape,
+      bubbleIcon,
+      autoOpenDelayMs,
+      offlineMessage,
+      adv,
+    ],
+  );
+
+  const currentDraftSignature = useMemo(
+    () => serializeWidgetDraft(currentDraftInput),
+    [currentDraftInput],
+  );
+
+  const isDirty = Boolean(
+    savedSignature && currentDraftSignature !== savedSignature,
+  );
 
   /* ── load config ───────────────────────────────────────────────────────── */
   const load = useCallback(async () => {
@@ -4303,6 +4517,9 @@ function CustomizeChatInner() {
         setWidgetKey(cfg.widget_key || '');
         setIsActive(Boolean(cfg.is_active));
         setOriginal(cfg);
+        setSavedSignature(
+          serializeWidgetDraft(widgetConfigToDraftInput(cfg)),
+        );
       }
       if (data.embed_code) setEmbedCode(data.embed_code);
     } catch (e: any) {
@@ -4315,6 +4532,86 @@ function CustomizeChatInner() {
   useEffect(() => {
     load();
   }, [load]);
+
+  function applyLeaveAction(action: PendingLeaveAction) {
+    if (action.type === 'route') {
+      router.push(action.href);
+      return;
+    }
+
+    setActiveSection(action.sectionId);
+  }
+
+  const requestLeave = useCallback(
+    (action: PendingLeaveAction) => {
+      if (action.type === 'section' && action.sectionId === activeSection) {
+        return;
+      }
+
+      if (!isDirty) {
+        applyLeaveAction(action);
+        return;
+      }
+
+      pendingLeaveRef.current = action;
+      setShowUnsavedDialog(true);
+    },
+    [activeSection, isDirty, router],
+  );
+
+  function requestSectionChange(sectionId: SectionId) {
+    requestLeave({ type: 'section', sectionId });
+  }
+
+  useEffect(() => {
+    if (!isDirty) return;
+
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = '';
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isDirty]);
+
+  useEffect(() => {
+    if (!isDirty) return;
+
+    const handleDocumentClick = (event: MouseEvent) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+
+      const anchor = target.closest('a[href]');
+      if (!anchor) return;
+
+      const href = anchor.getAttribute('href');
+      if (
+        !href ||
+        href.startsWith('#') ||
+        href.startsWith('mailto:') ||
+        href.startsWith('tel:')
+      ) {
+        return;
+      }
+
+      const url = new URL(href, window.location.origin);
+      if (url.origin !== window.location.origin) return;
+
+      const nextPath = `${url.pathname}${url.search}${url.hash}`;
+      const currentPath = `${pathname}${window.location.search}${window.location.hash}`;
+
+      if (nextPath === currentPath) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      requestLeave({ type: 'route', href: nextPath });
+    };
+
+    document.addEventListener('click', handleDocumentClick, true);
+    return () => document.removeEventListener('click', handleDocumentClick, true);
+  }, [isDirty, pathname, requestLeave]);
 
   /* ── computed values ───────────────────────────────────────────────────── */
   const effectiveEmbedCode = useMemo(() => {
@@ -4391,59 +4688,43 @@ function CustomizeChatInner() {
   }
 
   /* ── save ──────────────────────────────────────────────────────────────── */
-  async function handleSave() {
+  async function handleSave(): Promise<boolean> {
     setSaving(true);
     setSaved(false);
     try {
-      // The backend enforces a strict enum on bubble_icon and bubble_shape.
-      // If the user picked a premium option (e.g. sparkle, blob), we send a
-      // safe fallback up top and preserve the real choice in advanced_config.
-      const safeBubbleIcon = BACKEND_ALLOWED_ICONS.has(bubbleIcon)
-        ? bubbleIcon
-        : BACKEND_ICON_FALLBACK;
-      const safeBubbleShape = BACKEND_ALLOWED_SHAPES.has(bubbleShape)
-        ? bubbleShape
-        : BACKEND_SHAPE_FALLBACK;
-
-      const body: Record<string, any> = {
-        brand_color: brandColor,
-        position,
-        widget_title: widgetTitle,
-        greeting_text: greetingText,
-        avatar_url: avatarUrl || null,
-        collect_name: collectName,
-        collect_email: collectEmail,
-        custom_details: customDetails,
-        bubble_color: bubbleColor,
-        bubble_shape: safeBubbleShape,
-        bubble_icon: safeBubbleIcon,
-        custom_details_fields: customDetails
-          ? customDetailsFields.filter((field) => field.label.trim())
-          : [],
-        auto_open_delay_ms: autoOpenDelayMs,
-        offline_message: offlineMessage || null,
-      };
-      if (SEND_ADVANCED_CONFIG) {
-        body.advanced_config = {
-          ...adv,
-          header_style: 'solid',
-          // Real launcher selection lives here so premium options round-trip.
-          launcher_icon: bubbleIcon,
-          launcher_shape: bubbleShape,
-          contact_topics: adv.contact_topics.filter((t) => t.label.trim()),
-          faq_items: adv.faq_items.filter((f) => f.q.trim()),
-          proactive_rules: adv.proactive_rules.filter((r) => r.message.trim()),
-        };
-      }
+      const body = buildWidgetSaveBody(currentDraftInput);
       await apiFetch('/admin/widget', { method: 'PUT', auth: true, body });
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
       await load();
+      return true;
     } catch (e: any) {
       alert(e?.message || 'Failed to save changes');
+      return false;
     } finally {
       setSaving(false);
     }
+  }
+
+  function closeUnsavedDialog() {
+    pendingLeaveRef.current = null;
+    setShowUnsavedDialog(false);
+  }
+
+  async function handleSaveAndLeave() {
+    const action = pendingLeaveRef.current;
+    const didSave = await handleSave();
+    if (!didSave) return;
+
+    closeUnsavedDialog();
+    if (action) applyLeaveAction(action);
+  }
+
+  function handleDiscardAndLeave() {
+    const action = pendingLeaveRef.current;
+    handleReset();
+    closeUnsavedDialog();
+    if (action) applyLeaveAction(action);
   }
 
   /* ── reset ─────────────────────────────────────────────────────────────── */
@@ -6328,7 +6609,7 @@ function CustomizeChatInner() {
             <Button
               variant='outline'
               size='sm'
-              onClick={() => router.push('/channels')}
+              onClick={() => requestLeave({ type: 'route', href: '/channels' })}
             >
               <ArrowLeft size={14} />
               Back
@@ -6370,7 +6651,7 @@ function CustomizeChatInner() {
             </Button>
             <Button
               size='sm'
-              onClick={handleSave}
+              onClick={() => void handleSave()}
               disabled={saving}
               className={cn(saved && 'bg-success-500 hover:bg-success-600')}
             >
@@ -6400,7 +6681,7 @@ function CustomizeChatInner() {
           <div className='cw-sidebar-col'>
             <Sidebar
               activeSection={activeSection}
-              onSelect={setActiveSection}
+              onSelect={requestSectionChange}
               router={router}
             />
           </div>
@@ -6567,7 +6848,7 @@ function CustomizeChatInner() {
                   variant='outline'
                   size='sm'
                   className='mb-2 w-full'
-                  onClick={() => setActiveSection('install')}
+                  onClick={() => requestSectionChange('install')}
                 >
                   <Copy size={12} />
                   View Embed Script
@@ -6576,7 +6857,7 @@ function CustomizeChatInner() {
                   variant='outline'
                   size='sm'
                   className='w-full'
-                  onClick={() => setActiveSection('testing')}
+                  onClick={() => requestSectionChange('testing')}
                 >
                   <TestTube size={12} />
                   Quick Testing
@@ -6595,6 +6876,14 @@ function CustomizeChatInner() {
           onConfirm={handleDisableWidget}
         />
       )}
+
+      <UnsavedChangesDialog
+        open={showUnsavedDialog}
+        saving={saving}
+        onSave={() => void handleSaveAndLeave()}
+        onDiscard={handleDiscardAndLeave}
+        onStay={closeUnsavedDialog}
+      />
     </>
   );
 }
@@ -6606,7 +6895,11 @@ function CustomizeChatInner() {
 export default function CustomizeChatPage() {
   return (
     <RequireAuth>
-      <CustomizeChatInner />
+      <LockedAccountBanner />
+      <ConversationLimitBanner />
+      <FeatureGate feature='widget'>
+        <CustomizeChatInner />
+      </FeatureGate>
     </RequireAuth>
   );
 }

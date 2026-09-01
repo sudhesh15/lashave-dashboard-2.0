@@ -9,6 +9,7 @@ import { apiFetch, clearToken } from '@/lib/api';
 import type { ApexOptions } from 'apexcharts';
 import emailjs from '@emailjs/browser';
 import {
+  ArrowLeft,
   BadgeCheck,
   Camera,
   CheckCircle2,
@@ -1372,9 +1373,16 @@ function LoadingProfile() {
 }
 
 function ProfileContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const billingRequested = searchParams.get('billing') === 'True' || searchParams.get('billing') === 'true';
-  const initialNav = searchParams.get('activeNav') === 'subscription' || billingRequested ? 'subscription' : 'overview';
+  const requestedNav = searchParams.get('activeNav') as NavId | null;
+  const initialNav =
+    requestedNav && NAV.some((item) => item.id === requestedNav)
+      ? requestedNav
+      : billingRequested
+        ? 'subscription'
+        : 'overview';
   const [activeNav, setActiveNav] = useState<NavId>(initialNav);
   const [me, setMe] = useState<MeResp | null>(null);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
@@ -1415,9 +1423,19 @@ function ProfileContent() {
   return (
     <div className='mx-auto max-w-screen-2xl p-4 md:p-6'>
       <div className='rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6'>
-        <h3 className='mb-5 type-card-title font-semibold text-gray-800 dark:text-white/90 lg:mb-7'>
-          Profile
-        </h3>
+        <div className='mb-5 flex items-center gap-3 lg:mb-7'>
+          <button
+            type='button'
+            onClick={() => router.push('/settings')}
+            className='flex h-9 w-9 items-center justify-center rounded-[10px] border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400 dark:hover:bg-white/[0.05]'
+            aria-label='Back to settings'
+          >
+            <ArrowLeft className='h-4.5 w-4.5' />
+          </button>
+          <h3 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
+            Profile
+          </h3>
+        </div>
 
         {fetchErr && (
           <div className='mb-6'>
