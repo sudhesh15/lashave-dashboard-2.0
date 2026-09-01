@@ -41,6 +41,11 @@ import dynamic from 'next/dynamic';
 import { useEffect, useMemo, useState } from 'react';
 
 import PageBreadcrumb from '@/components/common/PageBreadcrumb';
+import {
+  ConversationLimitBanner,
+  FeatureGate,
+  LockedAccountBanner,
+} from '@/components/billing/FeatureGate';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -1069,6 +1074,9 @@ export default function GrowthPage() {
 
   return (
     <RequireAuth>
+      <LockedAccountBanner />
+      <ConversationLimitBanner />
+      <FeatureGate feature='growth_reports'>
       <PageBreadcrumb pageTitle='Growth' />
 
       <div className='mb-6 flex flex-wrap items-start justify-between gap-4'>
@@ -2350,6 +2358,7 @@ export default function GrowthPage() {
           </div>
         </Modal>
       )}
+      </FeatureGate>
     </RequireAuth>
   );
 }

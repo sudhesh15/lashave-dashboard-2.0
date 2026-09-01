@@ -5,6 +5,7 @@ import { AppSidebar } from "@/components/layout/AppSidebar";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { Backdrop } from "@/components/layout/Backdrop";
 import { GlobalBillingBanner } from "@/components/GlobalBillingBanner";
+import { BillingProvider } from "@/lib/billing-context";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
@@ -21,14 +22,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     : "w-full max-w-full lg:w-[calc(100%-90px)] lg:max-w-[calc(100vw-90px)]";
 
   return (
-    <div className="min-h-screen overflow-x-clip bg-background xl:flex">
-      <AppSidebar />
-      <Backdrop />
-      <div className={`min-w-0 flex-1 overflow-x-clip transition-all duration-300 ease-in-out ${mainContentMargin} ${mainContentWidth}`}>
-        <AppHeader />
-        <GlobalBillingBanner />
-        <div className="mx-auto min-w-0 max-w-full p-4 md:p-6">{children}</div>
+    <BillingProvider>
+      <div className="min-h-screen overflow-x-clip bg-background xl:flex">
+        <AppSidebar />
+        <Backdrop />
+        <div className={`min-w-0 flex-1 overflow-x-clip transition-all duration-300 ease-in-out ${mainContentMargin} ${mainContentWidth}`}>
+          <AppHeader />
+          <GlobalBillingBanner />
+          <div className="mx-auto min-w-0 max-w-full p-4 md:p-6">{children}</div>
+        </div>
       </div>
-    </div>
+    </BillingProvider>
   );
 }

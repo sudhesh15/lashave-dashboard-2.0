@@ -1,6 +1,10 @@
 'use client';
 
 import { RequireAuth } from '@/components/require-auth';
+import {
+  ConversationLimitBanner,
+  LockedAccountBanner,
+} from '@/components/billing/FeatureGate';
 import { apiFetch } from '@/lib/api';
 import {
   analyzeKnowledgeWebsite,
@@ -65,6 +69,7 @@ import {
   ZoomOut,
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 import PageBreadcrumb from '@/components/common/PageBreadcrumb';
 import { Badge } from '@/components/ui/badge';
@@ -7423,6 +7428,13 @@ function exportCsv(items: FaqItem[]) {
 export default function FAQPage() {
   const { isDark } = useTheme();
   const th = isDark ? FAQ_DARK : FAQ_LIGHT;
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const openedFromSettings = searchParams.get('from') === 'settings';
+  const settingsReturnTo = searchParams.get('returnTo') || '/settings';
+  const settingsBackHref = settingsReturnTo.startsWith('/settings')
+    ? settingsReturnTo
+    : '/settings';
 
   const [rawQ, setRawQ] = useState('');
   const [dq, setDq] = useState('');
@@ -9029,6 +9041,8 @@ export default function FAQPage() {
 
   return (
     <RequireAuth>
+      <LockedAccountBanner />
+      <ConversationLimitBanner />
       <style>{`
         @keyframes faq-fade { from { opacity: 0; } to { opacity: 1; } }
         @keyframes faq-pop { from { opacity: 0; transform: scale(.92); } to { opacity: 1; transform: scale(1); } }
@@ -9254,6 +9268,16 @@ export default function FAQPage() {
               </p>
             </div>
             <div className='flex flex-wrap items-center gap-2'>
+              {openedFromSettings && (
+                <Button
+                  variant='outline'
+                  size='sm'
+                  onClick={() => router.push(settingsBackHref)}
+                >
+                  <ChevronLeft size={14} />
+                  Back to Settings
+                </Button>
+              )}
               <Button
                 variant='outline'
                 size='sm'

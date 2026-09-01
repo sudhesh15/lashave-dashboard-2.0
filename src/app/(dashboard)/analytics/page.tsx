@@ -1,6 +1,10 @@
 'use client';
 import { DateFilter } from '@/components/date-filter';
 import { RequireAuth } from '@/components/require-auth';
+import {
+  ConversationLimitBanner,
+  LockedAccountBanner,
+} from '@/components/billing/FeatureGate';
 import { apiFetch } from '@/lib/api';
 import { resolveMoodForLead, type Mood } from '@/lib/chat-classifiers';
 import { useTheme } from '@/lib/theme-context';
@@ -12,6 +16,7 @@ import {
   ChevronDown,
   Clock,
   Copy,
+  Download,
   Eye,
   Globe,
   Inbox,
@@ -510,7 +515,8 @@ function CustomerTabControls({
       </div>
 
       <Button variant='outline' size='sm' onClick={onExport}>
-        Export CSV
+        <Download size={14} />
+        Download CSV
       </Button>
     </div>
   );
@@ -1845,8 +1851,15 @@ function CustomersTab({
     return () => window.clearTimeout(timer);
   }, [chanFilter, debQ, displayed.length, segFilter, sortOption]);
 
+  const displayedRef = useRef<LeadItem[]>(displayed);
+
   useEffect(() => {
-    if (exportTrigger === 0 || !displayed.length) return;
+    displayedRef.current = displayed;
+  }, [displayed]);
+
+  useEffect(() => {
+    const customersToExport = displayedRef.current;
+    if (exportTrigger === 0 || !customersToExport.length) return;
 
     const headers = [
       'Name',
@@ -1857,7 +1870,7 @@ function CustomersTab({
       'Last Updated',
     ];
 
-    const rows = displayed.map((lead) => [
+    const rows = customersToExport.map((lead) => [
       `"${lead.display_name || lead.external_user_id}"`,
       lead.channel,
       lead.meta?.score ?? 0,
@@ -1886,7 +1899,7 @@ function CustomersTab({
     document.body.removeChild(link);
 
     URL.revokeObjectURL(url);
-  }, [displayed, exportTrigger]);
+  }, [exportTrigger]);
 
   return (
     <>
@@ -2533,6 +2546,8 @@ export default function AnalyticsPage() {
 
   return (
     <RequireAuth>
+      <LockedAccountBanner />
+      <ConversationLimitBanner />
       <PageBreadcrumb pageTitle='Analytics' />
 
       <div className='mb-6 flex flex-wrap items-start justify-end gap-3'>
