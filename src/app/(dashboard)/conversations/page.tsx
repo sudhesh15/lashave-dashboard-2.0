@@ -669,13 +669,12 @@ function ConversationTable({
         <div className='min-w-0 max-w-full overflow-hidden rounded-b-xl border border-gray-200 dark:border-white/[0.05]'>
           <table className='lashvae-column-dividers w-full table-fixed min-h-80'>
             <colgroup>
-              <col className='w-[30%]' /> {/* Customer — flexible */}
-              <col className='w-[140px]' /> {/* Channel */}
-              <col className='w-[120px]' /> {/* Intent */}
-              <col className='w-[120px]' /> {/* Status */}
-              <col className='w-[112px]' /> {/* Lead */}
-              <col className='w-[112px]' /> {/* Last seen */}
-              <col className='w-[200px]' /> {/* Actions */}
+              <col className='w-[34%]' /> {/* Customer — flexible */}
+              <col className='w-[128px]' /> {/* Channel */}
+              <col className='w-[108px]' /> {/* Intent */}
+              <col className='w-[108px]' /> {/* Status */}
+              <col className='w-[104px]' /> {/* Lead */}
+              <col className='w-[128px]' /> {/* Actions */}
             </colgroup>
 
             <thead className='border-b border-gray-100 dark:border-white/[0.05]'>
@@ -686,13 +685,12 @@ function ConversationTable({
                   'Intent',
                   'Status',
                   'Lead',
-                  'Last seen',
                   'Actions',
                 ].map((header) => (
                   <th
                     key={header}
                     className={cn(
-                      'px-5 py-3.5 type-caption font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 sm:px-6',
+                      'px-3 py-2.5 type-caption font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 sm:px-4',
                       header === 'Actions' ? 'text-right' : 'text-left',
                     )}
                   >
@@ -706,8 +704,8 @@ function ConversationTable({
               {loading && (
                 <tr>
                   <td
-                    colSpan={7}
-                    className='px-5 py-14 text-center type-small text-gray-500 dark:text-gray-400'
+                    colSpan={6}
+                    className='px-3 py-12 text-center type-small text-gray-500 dark:text-gray-400 sm:px-4'
                   >
                     Loading conversations
                   </td>
@@ -717,8 +715,8 @@ function ConversationTable({
               {!loading && items.length === 0 && (
                 <tr>
                   <td
-                    colSpan={7}
-                    className='px-5 py-14 text-center type-small text-gray-500 dark:text-gray-400'
+                    colSpan={6}
+                    className='px-3 py-12 text-center type-small text-gray-500 dark:text-gray-400 sm:px-4'
                   >
                     {q.trim()
                       ? 'No conversations match this search'
@@ -744,21 +742,21 @@ function ConversationTable({
                       className='transition hover:bg-gray-50 dark:hover:bg-white/[0.02]'
                     >
                       {/* Customer */}
-                      <td className='px-5 py-3 sm:px-6'>
+                      <td className='px-3 py-2.5 sm:px-4'>
                         <Link
                           href={`/conversations/${item.id}`}
-                          className='flex items-center gap-3'
+                          className='flex items-center gap-2.5'
                         >
                           <div className='relative shrink-0'>
                             <ConversationAvatar
                               conversation={item}
-                              size={34}
+                              size={30}
                             />
                           </div>
 
                           <div className='min-w-0 flex-1'>
-                            <div className='flex items-center gap-2'>
-                              <span className='group relative block min-w-0 type-small font-semibold text-gray-800 dark:text-white/90'>
+                            <div className='flex items-center gap-1.5'>
+                              <span className='group relative block min-w-0 flex-1 type-small font-semibold text-gray-800 dark:text-white/90'>
                                 <span className='block truncate'>{name}</span>
 
                                 <span className='pointer-events-none absolute left-0 top-full z-50 mt-1 hidden max-w-[280px] group-hover:block'>
@@ -770,6 +768,12 @@ function ConversationTable({
                                 </span>
                               </span>
 
+                              <span className='shrink-0 truncate type-micro text-gray-500 dark:text-gray-400'>
+                                <span className='font-medium text-gray-700 dark:text-gray-300'>
+                                  {timeAgo(item.last_message_at)}
+                                </span>
+                              </span>
+
                               {item.unread_count != null &&
                                 item.unread_count > 0 && (
                                   <span className='shrink-0 rounded-full bg-brand-500 px-1.5 py-0 text-[10px] font-bold text-white'>
@@ -778,7 +782,7 @@ function ConversationTable({
                                 )}
                             </div>
 
-                            <span className='mt-1 block truncate type-caption text-gray-500 dark:text-gray-400'>
+                            <span className='mt-1 block truncate type-micro text-gray-500 dark:text-gray-400'>
                               {preview}
                             </span>
                           </div>
@@ -786,9 +790,9 @@ function ConversationTable({
                       </td>
 
                       {/* Channel */}
-                      <td className='px-5 py-3 type-small text-gray-500 dark:text-gray-400 sm:px-6'>
-                        <span className='inline-flex items-center gap-2'>
-                          <span className='inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gray-50 dark:bg-white/5'>
+                      <td className='px-3 py-2.5 type-small text-gray-500 dark:text-gray-400 sm:px-4'>
+                        <span className='inline-flex items-center gap-1.5'>
+                          <span className='inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-gray-50 dark:bg-white/5'>
                             <Image
                               src={
                                 CHANNEL_LOGOS[
@@ -796,32 +800,32 @@ function ConversationTable({
                                 ] || '/brand-logo/website.png'
                               }
                               alt={platformLabel(item.channel)}
-                              width={16}
-                              height={16}
-                              className='h-4 w-4 shrink-0 object-contain'
+                              width={14}
+                              height={14}
+                              className='h-3.5 w-3.5 shrink-0 object-contain'
                             />
                           </span>
-                          <span className='truncate font-medium text-gray-700 dark:text-gray-300'>
+                          <span className='truncate type-micro font-medium text-gray-700 dark:text-gray-300'>
                             {platformLabel(item.channel)}
                           </span>
                         </span>
                       </td>
 
                       {/* Intent */}
-                      <td className='px-5 py-3 sm:px-6'>
+                      <td className='px-3 py-2.5 sm:px-4'>
                         <span
                           title={category || 'Unclassified'}
-                          className='inline-flex items-center rounded-full bg-brand-50 px-2.5 py-1 text-[11px] font-semibold capitalize text-brand-600 truncate dark:bg-brand-500/15 dark:text-brand-400'
+                          className='inline-flex items-center rounded-full bg-brand-50 px-2 py-0.5 type-micro font-semibold capitalize text-brand-600 truncate dark:bg-brand-500/15 dark:text-brand-400'
                         >
                           {category || '—'}
                         </span>
                       </td>
 
                       {/* Status */}
-                      <td className='px-5 py-3 sm:px-6'>
+                      <td className='px-3 py-2.5 sm:px-4'>
                         <span
                           title={item.status || 'unknown'}
-                          className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize truncate ${badgeClass(
+                          className={`inline-flex items-center rounded-full px-2 py-0.5 type-micro font-semibold capitalize truncate ${badgeClass(
                             item.status,
                           )}`}
                         >
@@ -830,37 +834,32 @@ function ConversationTable({
                       </td>
 
                       {/* Lead */}
-                      <td className='px-5 py-3 sm:px-6'>
+                      <td className='px-3 py-2.5 sm:px-4'>
                         {item.lead ? (
                           <span
                             title={item.lead.status || 'new'}
-                            className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize truncate ${leadBadgeClass(
+                            className={`inline-flex items-center rounded-full px-2 py-0.5 type-micro font-semibold capitalize truncate ${leadBadgeClass(
                               item.lead.status,
                             )}`}
                           >
                             {item.lead.status || 'new'}
                           </span>
                         ) : (
-                          <span className='text-[11px] font-medium text-gray-400 dark:text-gray-500'>
+                          <span className='type-micro font-medium text-gray-400 dark:text-gray-500'>
                             —
                           </span>
                         )}
                       </td>
 
-                      <td className='px-5 py-3 type-small font-medium text-gray-500 dark:text-gray-400 sm:px-6'>
-                        <span className='whitespace-nowrap'>
-                          {timeAgo(item.last_message_at)}
-                        </span>
-                      </td>
-
                       {/* Actions */}
-                      <td className='px-5 py-3 text-right sm:px-6'>
+                      <td className='px-3 py-2.5 text-right sm:px-4'>
                         <Link
                           href={`/conversations/${item.id}`}
-                          className='inline-flex h-8 items-center justify-center gap-1 whitespace-nowrap rounded-[9px] bg-brand-500 px-3 text-[13px] font-semibold text-white shadow-theme-xs hover:bg-brand-600'
+                          title='View conversation'
+                          className='inline-flex h-7 items-center justify-center gap-1 whitespace-nowrap rounded-[8px] bg-brand-500 px-2.5 type-micro font-semibold text-white shadow-theme-xs transition hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500/30'
                         >
-                          <Eye size={13} />
-                          View Conversation
+                          <Eye size={12} />
+                          View
                         </Link>
                       </td>
                     </tr>
