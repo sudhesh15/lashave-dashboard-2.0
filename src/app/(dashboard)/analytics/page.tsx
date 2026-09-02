@@ -2601,8 +2601,6 @@ export default function AnalyticsPage() {
         })}
       </div>
 
-      //test
-
       <div key={tab}>
         {tab === 'overview' && (
           <OverviewTab isDark={isDark} dateRange={dateRange} />
