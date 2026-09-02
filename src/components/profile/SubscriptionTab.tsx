@@ -1,40 +1,13 @@
 'use client';
 
 import { apiFetch } from '@/lib/api';
+import { daysUntil } from '@/lib/billing';
+import { useBilling } from '@/lib/billing-context';
 import { useTheme } from '@/lib/theme-context';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-
-type BillingStatus = {
-  tenant_id: string;
-  plan_id: 'starter' | 'pro' | 'business';
-  billing_cycle: 'monthly' | 'annual' | null;
-  subscription_status: 'none' | 'trialing' | 'active' | 'past_due' | 'canceled';
-  trial_ends_at: string | null;
-  current_period_start: string | null;
-  current_period_end: string | null;
-  has_stripe_customer: boolean;
-  has_active_subscription: boolean;
-};
-
-type UsageSummary = {
-  plan_id: string;
-  plan_name: string;
-  subscription_status: string;
-  trial_ends_at: string | null;
-  current_period_end: string | null;
-  usage: {
-    ai_messages: { used: number; limit: number };
-    channels: { used: number; limit: number };
-    team_seats: { used: number; limit: number };
-    knowledge_docs: { used: number; limit: number };
-  };
-  features: {
-    growth_reports: boolean;
-    booking: boolean;
-    widget: boolean;
-  };
-};
 
 type CurrencyCode = 'INR' | 'GBP' | 'USD';
 type BillingCycle = 'monthly' | 'annual';
@@ -147,17 +120,19 @@ const PLANS: PlanDisplay[] = [
   },
 ];
 
-const PLAN_NAMES: Record<PaidPlanId, string> = {
+const PLAN_NAMES: Record<string, string> = {
   starter: 'Basic',
+  basic: 'Basic',
   pro: 'Growth',
+  growth: 'Growth',
   business: 'Enterprise',
+  enterprise: 'Enterprise',
 };
 
-const DISPLAY_CONVERSATION_LIMITS: Record<PaidPlanId, number> = {
-  starter: 300,
-  pro: 1500,
-  business: 10000,
-};
+function planDisplayName(planId: string | null | undefined, fallback?: string | null) {
+  if (!planId) return fallback ?? 'Plan';
+  return PLAN_NAMES[planId.toLowerCase()] ?? fallback ?? planId;
+}
 
 function fmtDate(iso: string | null) {
   if (!iso) return '—';
@@ -169,29 +144,9 @@ function fmtDate(iso: string | null) {
   });
 }
 
-function daysUntil(iso: string | null): number | null {
-  if (!iso) return null;
-
-  const difference = new Date(iso).getTime() - Date.now();
-  return Math.max(0, Math.ceil(difference / 86_400_000));
-}
-
 function pct(used: number, limit: number): number {
   if (limit <= 0) return 0;
   return Math.min(100, Math.round((used / limit) * 100));
-}
-
-function usageMetric(
-  usage: UsageSummary | null,
-  key: keyof UsageSummary['usage'],
-  fallbackLimit: number,
-) {
-  const metric = usage?.usage?.[key];
-
-  return {
-    used: metric?.used ?? 0,
-    limit: metric?.limit ?? fallbackLimit,
-  };
 }
 
 function normalizeCountryCode(value: unknown): string {
@@ -257,45 +212,31 @@ export default function SubscriptionTab({ me }: { me: any }) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { isDark } = useTheme();
+  const {
+    status,
+    usage,
+    loading,
+    error: billingError,
+    refresh,
+  } = useBilling();
 
-  const [status, setStatus] = useState<BillingStatus | null>(null);
-  const [usage, setUsage] = useState<UsageSummary | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [actionError, setActionError] = useState('');
   const [toast, setToast] = useState('');
-  const [busy, setBusy] = useState<'checkout' | 'portal' | null>(null);
+  const [busy, setBusy] = useState<'checkout' | 'portal' | 'trial' | null>(null);
   const [cycle, setCycle] = useState<BillingCycle>('monthly');
   const [currency, setCurrency] = useState<CurrencyCode>('USD');
+
+  const error = actionError || billingError;
 
   useEffect(() => {
     setCurrency(detectCurrency(me));
   }, [me]);
 
-  const refresh = useCallback(async () => {
-    try {
-      setError('');
-
-      const [billingStatus, usageSummary] = await Promise.all([
-        apiFetch<BillingStatus>('/admin/billing/status', { auth: true }),
-        apiFetch<UsageSummary>('/admin/me/usage', { auth: true }),
-      ]);
-
-      setStatus(billingStatus);
-      setUsage(usageSummary);
-
-      if (billingStatus.billing_cycle) {
-        setCycle(billingStatus.billing_cycle);
-      }
-    } catch (caughtError: any) {
-      setError(caughtError?.message ?? 'Failed to load billing information');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
-    void refresh();
-  }, [refresh]);
+    if (status?.billing_cycle) {
+      setCycle(status.billing_cycle);
+    }
+  }, [status?.billing_cycle]);
 
   useEffect(() => {
     const redirectStatus = searchParams.get('status');
@@ -334,7 +275,7 @@ export default function SubscriptionTab({ me }: { me: any }) {
 
   async function startCheckout(planId: PaidPlanId, billingCycle: BillingCycle) {
     setBusy('checkout');
-    setError('');
+    setActionError('');
 
     try {
       const { url } = await apiFetch<{ url: string; session_id: string }>(
@@ -353,14 +294,33 @@ export default function SubscriptionTab({ me }: { me: any }) {
 
       window.location.assign(url);
     } catch (caughtError: any) {
-      setError(caughtError?.message ?? 'Failed to start checkout');
+      setActionError(caughtError?.message ?? 'Failed to start checkout');
+      setBusy(null);
+    }
+  }
+
+  async function startTrial() {
+    setBusy('trial');
+    setActionError('');
+
+    try {
+      await apiFetch('/admin/billing/start-trial', {
+        auth: true,
+        method: 'POST',
+      });
+      setToast('Free trial started — enjoy 14 days on us!');
+      await refresh();
+      window.setTimeout(() => setToast(''), 4000);
+    } catch (caughtError: any) {
+      setActionError(caughtError?.message ?? 'Could not start trial');
+    } finally {
       setBusy(null);
     }
   }
 
   async function openPortal() {
     setBusy('portal');
-    setError('');
+    setActionError('');
 
     try {
       const { url } = await apiFetch<{ url: string }>('/admin/billing/portal', {
@@ -370,7 +330,7 @@ export default function SubscriptionTab({ me }: { me: any }) {
 
       window.location.assign(url);
     } catch (caughtError: any) {
-      setError(caughtError?.message ?? 'Failed to open billing portal');
+      setActionError(caughtError?.message ?? 'Failed to open billing portal');
       setBusy(null);
     }
   }
@@ -384,46 +344,68 @@ export default function SubscriptionTab({ me }: { me: any }) {
     window.location.href = `mailto:sales@lashvae.com?subject=${subject}&body=${body}`;
   }
 
-  const isTrialing = status?.subscription_status === 'trialing';
+  const isLocked = Boolean(status?.locked || usage?.locked);
+  const isTrialing = status?.subscription_status === 'trialing' && !isLocked;
   const isPastDue = status?.subscription_status === 'past_due';
   const isCanceled = status?.subscription_status === 'canceled';
   const isNoSubscription =
-    status?.subscription_status === 'none' || !status?.has_active_subscription;
+    status?.subscription_status === 'none' ||
+    (!status?.has_active_subscription && !isTrialing);
 
-  const trialDaysLeft = daysUntil(status?.trial_ends_at ?? null);
-  const currentPlan = (usage?.plan_id ??
-    status?.plan_id ??
-    'starter') as PaidPlanId;
-  const currentPlanName = isTrialing ? 'Free Trial' : PLAN_NAMES[currentPlan];
+  const trialDaysLeft =
+    status?.trial_days_left ?? daysUntil(status?.trial_ends_at ?? null);
+  const currentPlanId = usage?.plan_id ?? status?.plan_id ?? null;
+  const currentPlanName = isTrialing
+    ? 'Free Trial'
+    : planDisplayName(currentPlanId, usage?.plan_name);
 
-  const conversations = useMemo(() => {
-    const used = usage?.usage?.ai_messages?.used ?? 0;
+  const conversationUsage = usage?.conversations ?? {
+    used: 0,
+    limit: 0,
+    remaining: 0,
+    topup_remaining: 0,
+  };
+  const channels = usage?.channels ?? {
+    used: 0,
+    limit: 0,
+    remaining: 0,
+    topup_remaining: 0,
+  };
+  const knowledgeDocs = usage?.knowledge_docs ?? {
+    used: 0,
+    limit: 0,
+    remaining: 0,
+    topup_remaining: 0,
+  };
 
-    if (isTrialing) {
-      return { used, limit: 150 };
+  const complimentaryCredits = status?.complimentary_credits ?? 0;
+  const periodStart = status?.current_period_start ?? null;
+  const periodEnd =
+    status?.current_period_end ??
+    usage?.current_period_end ??
+    (isTrialing ? status?.trial_ends_at ?? null : null);
+
+  const showUsageSummary = Boolean(
+    usage &&
+      (conversationUsage.limit > 0 ||
+        isTrialing ||
+        status?.has_active_subscription ||
+        isLocked),
+  );
+
+  function matchesCurrentPlan(planId: 'trial' | PaidPlanId) {
+    if (planId === 'trial') return isTrialing;
+    if (!currentPlanId || isTrialing) return false;
+
+    const normalized = currentPlanId.toLowerCase();
+    if (planId === 'starter') {
+      return normalized === 'starter' || normalized === 'basic';
     }
-
-    return {
-      used,
-      limit:
-        currentPlan === 'business'
-          ? (usage?.usage?.ai_messages?.limit ??
-            DISPLAY_CONVERSATION_LIMITS.business)
-          : DISPLAY_CONVERSATION_LIMITS[currentPlan],
-    };
-  }, [usage, isTrialing, currentPlan]);
-
-  const channels = usageMetric(
-    usage,
-    'channels',
-    currentPlan === 'starter' ? 1 : currentPlan === 'pro' ? 4 : 6,
-  );
-
-  const knowledgeDocs = usageMetric(
-    usage,
-    'knowledge_docs',
-    currentPlan === 'business' ? 10 : 10,
-  );
+    if (planId === 'pro') {
+      return normalized === 'pro' || normalized === 'growth';
+    }
+    return normalized === 'business' || normalized === 'enterprise';
+  }
 
   if (loading) {
     return (
@@ -467,11 +449,13 @@ export default function SubscriptionTab({ me }: { me: any }) {
         <div>
           <div className='panel-title'>Subscription</div>
           <div className='panel-sub'>
-            {isTrialing
-              ? `14-day free trial · ${trialDaysLeft ?? 0} days remaining`
-              : isNoSubscription
-                ? 'Choose a plan to unlock full access'
-                : `${currentPlanName} · ${status?.billing_cycle ?? 'monthly'}`}
+            {isLocked
+              ? 'Trial ended'
+              : isTrialing
+                ? `14-day free trial · ${trialDaysLeft ?? 0} days remaining`
+                : isNoSubscription
+                  ? 'Choose a plan to unlock full access'
+                  : `${currentPlanName} · ${status?.billing_cycle ?? 'monthly'}`}
           </div>
         </div>
 
@@ -481,6 +465,17 @@ export default function SubscriptionTab({ me }: { me: any }) {
       <div className='panel-body'>
         {toast && <div className='sub-toast'>{toast}</div>}
         {error && status && <div className='form-error'>{error}</div>}
+
+        {isLocked && (
+          <div className='sub-banner sub-banner-error'>
+            <div className='sub-banner-title'>Your free trial has ended</div>
+            <div className='sub-banner-body'>
+              Your AI has paused on all channels. Choose a plan below to switch
+              it back on — your channels, knowledge and settings are all still
+              here, waiting.
+            </div>
+          </div>
+        )}
 
         {isPastDue && (
           <div className='sub-banner sub-banner-error'>
@@ -510,7 +505,7 @@ export default function SubscriptionTab({ me }: { me: any }) {
           </div>
         )}
 
-        {usage && (
+        {showUsageSummary && (
           <div className='sub-current-card'>
             <div className='sub-current-head'>
               <div>
@@ -525,44 +520,155 @@ export default function SubscriptionTab({ me }: { me: any }) {
                   {isCanceled && (
                     <span className='sub-badge sub-badge-muted'>Canceled</span>
                   )}
+                  {isLocked && (
+                    <span className='sub-badge sub-badge-error'>Trial ended</span>
+                  )}
                 </div>
 
                 <div className='sub-current-tagline'>
                   {isTrialing
-                    ? '150 conversations included during your trial'
-                    : PLANS.find((plan) => plan.id === currentPlan)?.tagline}
+                    ? `${conversationUsage.limit.toLocaleString()} conversations included during your trial`
+                    : usage?.plan_name
+                      ? `${usage.plan_name} plan`
+                      : PLANS.find((plan) => matchesCurrentPlan(plan.id as PaidPlanId))
+                          ?.tagline}
                 </div>
               </div>
 
               {status?.has_stripe_customer && (
-                <button
-                  className='sub-btn-ghost'
+                <Button
+                  type='button'
+                  variant='default'
+                  size='sm'
+                  className='shrink-0'
                   onClick={openPortal}
                   disabled={busy !== null}
                 >
-                  {busy === 'portal' ? 'Opening…' : 'Manage billing'}
-                </button>
+                  {busy === 'portal' ? (
+                    <>
+                      <Loader2 className='h-4 w-4 animate-spin' />
+                      Opening…
+                    </>
+                  ) : (
+                    'Manage Billing'
+                  )}
+                </Button>
               )}
             </div>
 
-            {status?.current_period_end && !isTrialing && (
-              <div className='sub-renewal'>
-                {isCanceled
-                  ? `Access ends ${fmtDate(status.current_period_end)}`
-                  : `Renews ${fmtDate(status.current_period_end)}`}
+            {(periodStart || periodEnd) && (
+              <div className='sub-billing-period'>
+                {periodStart && (
+                  <span>Billing period: {fmtDate(periodStart)}</span>
+                )}
+                {periodStart && periodEnd && <span> → </span>}
+                {periodEnd && (
+                  <span>
+                    {isTrialing
+                      ? `Trial ends ${fmtDate(periodEnd)}`
+                      : isCanceled
+                        ? `Access ends ${fmtDate(periodEnd)}`
+                        : `Renews ${fmtDate(periodEnd)}`}
+                  </span>
+                )}
+              </div>
+            )}
+
+            <div className='sub-usage-summary'>
+              <div className='sub-usage-summary-head'>
+                <span>
+                  {isTrialing
+                    ? 'Trial conversations'
+                    : 'Conversations this period'}
+                </span>
+                <span
+                  className={
+                    conversationUsage.used >= conversationUsage.limit
+                      ? 'sub-over'
+                      : ''
+                  }
+                >
+                  <strong>{conversationUsage.used.toLocaleString()}</strong> /{' '}
+                  {conversationUsage.limit.toLocaleString()} used
+                </span>
+              </div>
+
+              <div className='sub-progress-track'>
+                <div
+                  className='sub-progress-fill'
+                  style={{
+                    width: `${pct(conversationUsage.used, conversationUsage.limit)}%`,
+                    background:
+                      conversationUsage.used >= conversationUsage.limit
+                        ? '#ef4444'
+                        : '#465fff',
+                  }}
+                />
+              </div>
+
+              <div className='sub-usage-legend'>
+                {conversationUsage.remaining > 0 ? (
+                  <>
+                    <strong>{conversationUsage.remaining.toLocaleString()}</strong>{' '}
+                    conversations remaining in your current allowance.
+                  </>
+                ) : conversationUsage.used >= conversationUsage.limit ? (
+                  <>
+                    You have used all plan conversations this period.
+                    {conversationUsage.topup_remaining > 0
+                      ? ' Additional replies are using top-up credits.'
+                      : ''}
+                  </>
+                ) : (
+                  <>Track your conversation usage for this billing period.</>
+                )}
+                {periodEnd && <> Resets {fmtDate(periodEnd)}.</>}
+              </div>
+            </div>
+
+            <div className='sub-credit-grid'>
+              <div className='sub-credit-card'>
+                <span className='sub-credit-label'>Total allowance</span>
+                <span className='sub-credit-value'>
+                  {conversationUsage.limit.toLocaleString()}
+                </span>
+              </div>
+              <div className='sub-credit-card'>
+                <span className='sub-credit-label'>Used</span>
+                <span className='sub-credit-value'>
+                  {conversationUsage.used.toLocaleString()}
+                </span>
+              </div>
+              <div className='sub-credit-card'>
+                <span className='sub-credit-label'>Remaining</span>
+                <span className='sub-credit-value'>
+                  {conversationUsage.remaining.toLocaleString()}
+                </span>
+              </div>
+              <div className='sub-credit-card'>
+                <span className='sub-credit-label'>Top-up credits</span>
+                <span className='sub-credit-value'>
+                  {conversationUsage.topup_remaining.toLocaleString()}
+                </span>
+              </div>
+              {complimentaryCredits > 0 && (
+                <div className='sub-credit-card sub-credit-card-highlight'>
+                  <span className='sub-credit-label'>Complimentary credits</span>
+                  <span className='sub-credit-value'>
+                    {complimentaryCredits.toLocaleString()}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {complimentaryCredits > 0 && (
+              <div className='sub-credit-note'>
+                Complimentary credits are used after your monthly plan allowance
+                runs out.
               </div>
             )}
 
             <div className='sub-usage-grid'>
-              <UsageBar
-                label={
-                  isTrialing
-                    ? 'Trial conversations'
-                    : 'Conversations this month'
-                }
-                used={conversations.used}
-                limit={conversations.limit}
-              />
               <UsageBar
                 label='Connected channels'
                 used={channels.used}
@@ -610,8 +716,7 @@ export default function SubscriptionTab({ me }: { me: any }) {
 
             const isCurrent =
               plan.id !== 'trial' &&
-              currentPlan === plan.id &&
-              !isTrialing &&
+              matchesCurrentPlan(plan.id) &&
               !isNoSubscription &&
               !isCanceled;
 
@@ -681,10 +786,26 @@ export default function SubscriptionTab({ me }: { me: any }) {
                 </ul>
 
                 {plan.id === 'trial' ? (
-                  <button className='sub-btn-ghost' disabled>
+                  <button
+                    className={
+                      trialIsCurrent || !status?.trial_eligible
+                        ? 'sub-btn-ghost'
+                        : 'sub-btn-primary'
+                    }
+                    disabled={
+                      trialIsCurrent ||
+                      !status?.trial_eligible ||
+                      busy !== null
+                    }
+                    onClick={() => void startTrial()}
+                  >
                     {trialIsCurrent
                       ? 'Current plan'
-                      : 'Included for new accounts'}
+                      : busy === 'trial'
+                        ? 'Starting trial…'
+                        : status?.trial_eligible
+                          ? 'Start 14-day free trial'
+                          : 'Included for new accounts'}
                   </button>
                 ) : isEnterprise ? (
                   <button
@@ -824,6 +945,92 @@ export default function SubscriptionTab({ me }: { me: any }) {
           font-size: 12px;
           color: ${isDark ? 'rgba(248,250,252,0.55)' : 'rgba(15,23,42,0.55)'};
           margin-bottom: 20px;
+        }
+
+        .sub-billing-period {
+          font-size: 12px;
+          color: ${isDark ? 'rgba(248,250,252,0.55)' : 'rgba(15,23,42,0.55)'};
+          margin: 8px 0 18px;
+        }
+
+        .sub-usage-summary {
+          margin-bottom: 18px;
+        }
+
+        .sub-usage-summary-head {
+          display: flex;
+          justify-content: space-between;
+          gap: 12px;
+          font-size: 13px;
+          color: ${isDark ? 'rgba(248,250,252,0.72)' : 'rgba(15,23,42,0.72)'};
+          margin-bottom: 8px;
+        }
+
+        .sub-over {
+          color: #ef4444;
+        }
+
+        .sub-progress-track {
+          height: 10px;
+          border-radius: 999px;
+          background: ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.08)'};
+          overflow: hidden;
+        }
+
+        .sub-progress-fill {
+          height: 100%;
+          border-radius: 999px;
+          transition: width 0.3s ease;
+        }
+
+        .sub-usage-legend {
+          margin-top: 8px;
+          font-size: 12px;
+          line-height: 1.5;
+          color: ${isDark ? 'rgba(248,250,252,0.55)' : 'rgba(15,23,42,0.55)'};
+        }
+
+        .sub-credit-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+          gap: 12px;
+          margin-bottom: 12px;
+        }
+
+        .sub-credit-card {
+          padding: 14px;
+          border-radius: 12px;
+          border: 1px solid
+            ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.08)'};
+          background: ${isDark ? 'rgba(255,255,255,0.02)' : '#fff'};
+        }
+
+        .sub-credit-card-highlight {
+          border-color: rgba(70, 95, 255, 0.28);
+          background: rgba(70, 95, 255, 0.08);
+        }
+
+        .sub-credit-label {
+          display: block;
+          font-size: 11px;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+          color: ${isDark ? 'rgba(248,250,252,0.48)' : 'rgba(15,23,42,0.48)'};
+          margin-bottom: 6px;
+        }
+
+        .sub-credit-value {
+          display: block;
+          font-size: 20px;
+          font-weight: 700;
+          color: ${isDark ? '#f8fafc' : '#0f172a'};
+        }
+
+        .sub-credit-note {
+          margin-bottom: 18px;
+          font-size: 12px;
+          color: ${isDark ? 'rgba(248,250,252,0.55)' : 'rgba(15,23,42,0.55)'};
         }
 
         .sub-usage-grid {

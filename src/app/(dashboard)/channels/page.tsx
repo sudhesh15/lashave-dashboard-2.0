@@ -1,20 +1,23 @@
 'use client';
 
-import DataProcessingAgreementModal, {
-  type SocialChannel,
-} from '@/components/DataProcessingAgreementModal';
 import GoogleLocationModal from '@/components/GoogleLocationModal';
 import { RequireAuth } from '@/components/require-auth';
+import {
+  ConversationLimitBanner,
+  LockedAccountBanner,
+} from '@/components/billing/FeatureGate';
 import {
   getPageItems,
   TablePagination,
 } from '@/components/ui/table-pagination';
 import WebsiteWidgetModal from '@/components/Websitewidgetmodal ';
 import { apiFetch } from '@/lib/api';
+import { useBilling } from '@/lib/billing-context';
 import { useTheme } from '@/lib/theme-context';
 import {
   AlertTriangle,
   Check,
+  ChevronLeft,
   Globe2,
   Loader2,
   MapPin,
@@ -107,6 +110,25 @@ const PLATFORM_LOGOS: Record<string, string> = {
   'youtube': '/brand-logo/youtube.png',
   'meta': '/brand-logo/meta.png',
 };
+
+const CONNECT_STAGES = [
+  'Review permissions and privacy terms',
+  'Authorize with the channel provider',
+  'Verify the connected account',
+  'Start syncing customer conversations',
+];
+
+const DATA_ACCESS_NOTES = [
+  'Customer messages, comments, reviews, and conversation metadata',
+  'Profile identifiers needed to route replies and display conversations',
+  'Channel account information required for setup, verification, and support',
+];
+
+const PROCESSING_NOTES = [
+  'Data is used to power inbox management, AI-assisted replies, classifications, lead detection, analytics, and service workflows.',
+  'Processing is handled under GDPR and DPDPA safeguards with access limited to authorized workspace users and required service operations.',
+  'Your business remains responsible for having a lawful basis, notifying customers, and maintaining your own privacy notice.',
+];
 
 function errorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
@@ -251,6 +273,8 @@ function ConnectModal({
   error,
   token,
   setToken,
+  acknowledged,
+  setAcknowledged,
   onCancel,
   onConfirm,
 }: {
@@ -259,28 +283,107 @@ function ConnectModal({
   error: string;
   token: string;
   setToken: (value: string) => void;
+  acknowledged: boolean;
+  setAcknowledged: (value: boolean) => void;
   onCancel: () => void;
   onConfirm: () => void;
 }) {
   const isTelegram = platform === 'telegram';
+  const connectDisabled =
+    connecting || !acknowledged || (isTelegram && !token.trim());
+
   return (
     <div className='fixed inset-0 z-[400] grid place-items-center bg-gray-900/50 p-6 backdrop-blur-sm'>
-      <Card className='w-full max-w-lg p-6 shadow-theme-xl'>
+      <Card className='max-h-[90vh] w-full max-w-2xl overflow-y-auto p-6 shadow-theme-xl'>
         <h2 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
           Connect {platformLabel(platform)}
         </h2>
         <p className='mt-2 type-small text-gray-500 dark:text-gray-400'>
-          Authorize this channel so Lashvae can manage customer messages from
-          the dashboard.
+          Review the setup process and data-processing terms before authorizing
+          Lashvae to manage this channel.
         </p>
+
+        <div className='mt-5 grid gap-4 lg:grid-cols-2'>
+          <div className='rounded-xl border border-gray-200 p-4 dark:border-gray-800'>
+            <h3 className='type-small font-semibold text-gray-800 dark:text-white/90'>
+              Connection stages
+            </h3>
+            <ol className='mt-3 space-y-3'>
+              {CONNECT_STAGES.map((stage, index) => (
+                <li
+                  key={stage}
+                  className='flex gap-3 type-small text-gray-600 dark:text-gray-400'
+                >
+                  <span className='flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-50 text-[12px] font-semibold text-brand-600 dark:bg-brand-500/15 dark:text-brand-300'>
+                    {index + 1}
+                  </span>
+                  <span>{stage}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+
+          <div className='rounded-xl border border-gray-200 p-4 dark:border-gray-800'>
+            <h3 className='type-small font-semibold text-gray-800 dark:text-white/90'>
+              Data accessed
+            </h3>
+            <ul className='mt-3 space-y-2'>
+              {DATA_ACCESS_NOTES.map((note) => (
+                <li
+                  key={note}
+                  className='flex gap-2 type-small text-gray-600 dark:text-gray-400'
+                >
+                  <Check className='mt-0.5 h-4 w-4 shrink-0 text-success-500' />
+                  <span>{note}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <div className='mt-4 rounded-xl border border-success-200 bg-success-50 p-4 dark:border-success-500/20 dark:bg-success-500/10'>
+          <h3 className='type-small font-semibold text-gray-800 dark:text-white/90'>
+            Privacy and GDPR acknowledgement
+          </h3>
+          <div className='mt-3 space-y-2'>
+            {PROCESSING_NOTES.map((note) => (
+              <p
+                key={note}
+                className='type-small text-gray-600 dark:text-gray-400'
+              >
+                {note}
+              </p>
+            ))}
+          </div>
+        </div>
+
         {isTelegram && (
-          <input
-            value={token}
-            onChange={(event) => setToken(event.target.value)}
-            placeholder='Telegram bot token'
-            className='mt-5 h-10 w-full rounded-[10px] border border-gray-200 bg-white px-3 type-small text-gray-700 outline-none focus:border-brand-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300'
-          />
+          <div className='mt-5'>
+            <label className='type-small font-medium text-gray-700 dark:text-gray-300'>
+              Telegram bot token
+            </label>
+            <input
+              value={token}
+              onChange={(event) => setToken(event.target.value)}
+              placeholder='Telegram bot token'
+              className='mt-2 h-10 w-full rounded-[10px] border border-gray-200 bg-white px-3 type-small text-gray-700 outline-none focus:border-brand-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300'
+            />
+          </div>
         )}
+
+        <label className='mt-5 flex cursor-pointer gap-3 rounded-xl border border-gray-200 p-4 transition hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/[0.03]'>
+          <input
+            type='checkbox'
+            checked={acknowledged}
+            onChange={(event) => setAcknowledged(event.target.checked)}
+            className='mt-1 h-4 w-4 shrink-0 rounded border-gray-300 text-brand-500 focus:ring-brand-500'
+          />
+          <span className='type-small text-gray-600 dark:text-gray-400'>
+            I understand and acknowledge the data-processing and privacy terms,
+            and confirm that I am authorized to connect this business channel.
+          </span>
+        </label>
+
         {error && (
           <p className='mt-4 rounded-[10px] border border-error-200 bg-error-50 px-3 py-2 type-small text-error-700 dark:border-error-500/20 dark:bg-error-500/10 dark:text-error-500'>
             {error}
@@ -298,7 +401,7 @@ function ConnectModal({
           <button
             type='button'
             onClick={onConfirm}
-            disabled={connecting || (isTelegram && !token.trim())}
+            disabled={connectDisabled}
             className='inline-flex h-10 items-center gap-2 rounded-[10px] bg-brand-500 px-4 type-small font-medium text-white disabled:opacity-60'
           >
             {connecting && <Loader2 className='h-4 w-4 animate-spin' />}
@@ -385,18 +488,20 @@ function ChannelsInner() {
   const { isDark } = useTheme();
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { canConnectChannel, isLocked, usage } = useBilling();
+  const openedFromSettings = searchParams.get('from') === 'settings';
+  const settingsReturnTo = searchParams.get('returnTo') || '/settings?section=channels';
+  const settingsBackHref = settingsReturnTo.startsWith('/settings')
+    ? settingsReturnTo
+    : '/settings?section=channels';
   const [channels, setChannels] = useState<Channel[]>([]);
   const [overview, setOverview] = useState<Overview | null>(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState('');
   const [success, setSuccess] = useState('');
-  const [processingAccepted, setProcessingAccepted] = useState<boolean | null>(
-    null,
-  );
-  const [agreementPlatform, setAgreementPlatform] =
-    useState<SocialChannel | null>(null);
   const [connectPlatform, setConnectPlatform] = useState<string | null>(null);
   const [connectToken, setConnectToken] = useState('');
+  const [connectAcknowledged, setConnectAcknowledged] = useState(false);
   const [connectError, setConnectError] = useState('');
   const [connecting, setConnecting] = useState(false);
   const [disconnectTarget, setDisconnectTarget] = useState<Channel | null>(
@@ -452,14 +557,6 @@ function ChannelsInner() {
       void apiFetch<Overview>('/admin/stats/overview', { auth: true })
         .then(setOverview)
         .catch(() => undefined);
-      void apiFetch<{ accepted: boolean }>(
-        '/admin/processing-acceptance/status',
-        {
-          auth: true,
-        },
-      )
-        .then((res) => setProcessingAccepted(res.accepted))
-        .catch(() => setProcessingAccepted(false));
     }, 0);
     return () => window.clearTimeout(timer);
   }, [load, loadWebsiteWidget]);
@@ -499,6 +596,18 @@ function ChannelsInner() {
         } else {
           setErr(searchParams.get('google_msg') || 'Google connection failed.');
         }
+      }
+
+      const quotaStatus = searchParams.get('ig_status');
+      if (quotaStatus === 'quota_exceeded') {
+        router.replace('/channels', { scroll: false });
+        const used = searchParams.get('used');
+        const limit = searchParams.get('limit');
+        setErr(
+          used && limit
+            ? `Channel limit reached. You are using ${used} of ${limit} available channels.`
+            : 'Channel limit reached. Upgrade your plan to connect more channels.',
+        );
       }
     }, 0);
     return () => window.clearTimeout(timer);
@@ -631,24 +740,51 @@ function ChannelsInner() {
     }
   }
 
-  function openConnect(platform: string) {
-    if (processingAccepted === null) return;
+  async function recordProcessingAcknowledgement() {
+    await apiFetch('/admin/processing-acceptance', {
+      method: 'POST',
+      auth: true,
+      body: {
+        accepted: true,
+        privacy_notice_url: null,
+      },
+    });
+  }
 
-    if (processingAccepted === false) {
-      setAgreementPlatform(platform as SocialChannel);
+  function openConnect(platform: string) {
+    if (!canConnectChannel) {
+      setErr(
+        isLocked
+          ? 'Your trial has ended. Upgrade to connect channels.'
+          : `Channel limit reached (${usage?.channels.used ?? 0}/${usage?.channels.limit ?? 0}). Upgrade to connect more.`,
+      );
       return;
     }
 
     setConnectToken('');
     setConnectError('');
+    setConnectAcknowledged(false);
     setConnectPlatform(platform);
   }
 
   async function confirmConnect() {
     if (!connectPlatform) return;
+    if (!connectAcknowledged) {
+      setConnectError(
+        'Please acknowledge the data-processing and privacy terms to continue.',
+      );
+      return;
+    }
     setConnecting(true);
     setConnectError('');
     try {
+      await recordProcessingAcknowledgement();
+      if (connectPlatform === 'website') {
+        setConnectPlatform(null);
+        setWebsiteModalOpen(true);
+        await loadWebsiteWidget();
+        return;
+      }
       await handleConnect(connectPlatform, connectToken.trim() || undefined);
       setConnectPlatform(null);
     } catch (error: unknown) {
@@ -659,16 +795,8 @@ function ChannelsInner() {
   }
 
   async function openWebsiteModal() {
-  if (processingAccepted === null) return;
-
-  if (processingAccepted === false) {
-    setAgreementPlatform('website');
-    return;
+    openConnect('website');
   }
-
-  setWebsiteModalOpen(true);
-  await loadWebsiteWidget();
-}
 
   async function enableWebsiteWidget() {
     setWebsiteSaving(true);
@@ -768,30 +896,6 @@ function ChannelsInner() {
         />
       )}
 
-      {agreementPlatform && (
-        <DataProcessingAgreementModal
-          platform={agreementPlatform}
-          isDark={isDark}
-          onClose={() => setAgreementPlatform(null)}
-          onAccepted={() => {
-            const platform = agreementPlatform;
-
-            setProcessingAccepted(true);
-            setAgreementPlatform(null);
-
-            if (platform === 'website') {
-              setWebsiteModalOpen(true);
-              void loadWebsiteWidget();
-              return;
-            }
-
-            setConnectToken('');
-            setConnectError('');
-            setConnectPlatform(platform);
-          }}
-        />
-      )}
-
       {connectPlatform && (
         <ConnectModal
           platform={connectPlatform}
@@ -799,6 +903,8 @@ function ChannelsInner() {
           error={connectError}
           token={connectToken}
           setToken={setConnectToken}
+          acknowledged={connectAcknowledged}
+          setAcknowledged={setConnectAcknowledged}
           onCancel={() => setConnectPlatform(null)}
           onConfirm={() => void confirmConnect()}
         />
@@ -810,6 +916,11 @@ function ChannelsInner() {
           channelName={channelName(settingsTarget)}
           platformColor={settingsCfgColor}
           onClose={() => setSettingsTarget(null)}
+          onBackToSettings={
+            openedFromSettings
+              ? () => router.push(settingsBackHref)
+              : undefined
+          }
         />
       )}
 
@@ -827,6 +938,8 @@ function ChannelsInner() {
       )}
 
       <div className='mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 lg:px-8'>
+        <LockedAccountBanner />
+        <ConversationLimitBanner />
         <div className='mb-6 flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between'>
           <div>
             <p className='type-small font-medium text-brand-500 dark:text-brand-400'>
@@ -840,14 +953,26 @@ function ChannelsInner() {
               channels.
             </p>
           </div>
-          <button
-            type='button'
-            onClick={() => void load()}
-            className='inline-flex h-10 items-center justify-center gap-2 rounded-[10px] border border-gray-200 bg-white px-4 type-small font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/[0.05]'
-          >
-            <RefreshCw className='h-4 w-4' />
-            Refresh
-          </button>
+          <div className='flex flex-wrap items-center gap-2'>
+            {openedFromSettings && (
+              <button
+                type='button'
+                onClick={() => router.push(settingsBackHref)}
+                className='inline-flex h-10 items-center justify-center gap-2 rounded-[10px] border border-gray-200 bg-white px-4 type-small font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/[0.05]'
+              >
+                <ChevronLeft className='h-4 w-4' />
+                Back to Settings
+              </button>
+            )}
+            <button
+              type='button'
+              onClick={() => void load()}
+              className='inline-flex h-10 items-center justify-center gap-2 rounded-[10px] border border-gray-200 bg-white px-4 type-small font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/[0.05]'
+            >
+              <RefreshCw className='h-4 w-4' />
+              Refresh
+            </button>
+          </div>
         </div>
 
         {success && (

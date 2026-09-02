@@ -17,7 +17,12 @@ import {
 } from '@/components/ui/table-pagination';
 import { useOutsideClick } from '@/hooks/useOutsideClick';
 import { apiFetch } from '@/lib/api';
-import { type Mood } from '@/lib/chat-classifiers';
+import {
+  detectCategory,
+  resolveMoodForLead,
+  type Category,
+  type Mood,
+} from '@/lib/chat-classifiers';
 import { cn } from '@/lib/utils';
 import {
   AlertTriangle,
@@ -53,12 +58,18 @@ type LeadItem = {
   source: string;
   intent: string;
   service: string;
+  category?: string | null;
+  classification?: string | null;
+  conversation_category?: string | null;
   contacts: { emails?: string[]; phones?: string[] };
   meta: {
     score?: number;
     triggers?: string[];
     text_preview?: string;
     mood?: Mood;
+    category?: string | null;
+    classification?: string | null;
+    intent_category?: string | null;
     instagram_profile?: {
       profile_pic_url?: string | null;
       is_user_follow_business?: boolean | null;
@@ -75,6 +86,23 @@ type FollowUpItem = {
   reason?: string | null;
   insight?: string | null;
   priority?: string | null;
+  due_at?: string | null;
+  due_date?: string | null;
+  follow_up_at?: string | null;
+  followup_at?: string | null;
+  next_follow_up_at?: string | null;
+  scheduled_at?: string | null;
+};
+
+type LeadSentiment = {
+  emoji: string;
+  label: 'Positive' | 'Neutral' | 'Concerned' | 'Negative' | 'Urgent';
+  color: 'success' | 'light' | 'warning' | 'error';
+};
+
+type LeadCategory = {
+  label: 'Enquiry' | 'Complaint' | 'Support' | 'Booking' | 'Order' | 'Feedback';
+  color: 'primary' | 'error' | 'warning' | 'success' | 'info' | 'light';
 };
 
 const PIPELINE = ['new', 'contacted', 'qualified', 'won', 'lost'];
@@ -128,6 +156,184 @@ function titleCase(value: string) {
     .replace(/[_-]/g, ' ')
     .replace(/\b\w/g, (char) => char.toUpperCase())
     .trim();
+}
+
+function startOfDay(date: Date) {
+  const next = new Date(date);
+  next.setHours(0, 0, 0, 0);
+  return next;
+}
+
+function getFollowUpDueDate(followUp: FollowUpItem) {
+  const raw =
+    followUp.due_at ||
+    followUp.due_date ||
+    followUp.follow_up_at ||
+    followUp.followup_at ||
+    followUp.next_follow_up_at ||
+    followUp.scheduled_at;
+  if (!raw) return null;
+
+  const date = new Date(raw);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function getFollowUpTiming(followUp: FollowUpItem) {
+  const dueDate = getFollowUpDueDate(followUp);
+  if (!dueDate) return 'today';
+
+  const today = startOfDay(new Date()).getTime();
+  const dueDay = startOfDay(dueDate).getTime();
+  if (dueDay < today) return 'overdue';
+  if (dueDay === today) return 'today';
+  return 'upcoming';
+}
+
+function formatFollowUpDue(followUp: FollowUpItem) {
+  const dueDate = getFollowUpDueDate(followUp);
+  if (!dueDate) return 'Due today';
+
+  const timing = getFollowUpTiming(followUp);
+  const label = dueDate.toLocaleDateString('en-IN', {
+    day: 'numeric',
+    month: 'short',
+  });
+  if (timing === 'overdue') return `Overdue since ${label}`;
+  if (timing === 'today') return 'Due today';
+  return `Upcoming ${label}`;
+}
+
+function getLeadSentiment(lead: LeadItem): LeadSentiment {
+  const mood = resolveMoodForLead({
+    storedMood: lead.meta?.mood,
+    text_preview: lead.meta?.text_preview,
+    triggers: lead.meta?.triggers,
+    intent: lead.intent,
+  });
+
+  const moodKey = mood.mood?.toLowerCase();
+  if (moodKey === 'urgent') {
+    return {
+      emoji: '🚨',
+      label: 'Urgent',
+      color: 'error',
+    };
+  }
+  if (moodKey === 'frustrated') {
+    return {
+      emoji: '😠',
+      label: 'Negative',
+      color: 'error',
+    };
+  }
+  if (moodKey === 'confused' || moodKey === 'cold') {
+    return {
+      emoji: '😟',
+      label: 'Concerned',
+      color: 'warning',
+    };
+  }
+  if (moodKey === 'happy' || moodKey === 'excited') {
+    return {
+      emoji: '😊',
+      label: 'Positive',
+      color: 'success',
+    };
+  }
+
+  return {
+    emoji: '😐',
+    label: 'Neutral',
+    color: 'light',
+  };
+}
+
+function normalizeLeadCategory(value?: string | null): LeadCategory['label'] | null {
+  const key = (value || '').toLowerCase().trim().replace(/[\s-]+/g, '_');
+  if (!key || key === 'none' || key === 'unknown' || key === 'general') {
+    return null;
+  }
+
+  if (key.includes('complaint') || key.includes('negative')) return 'Complaint';
+  if (key.includes('support') || key.includes('issue') || key.includes('help')) {
+    return 'Support';
+  }
+  if (
+    key.includes('booking') ||
+    key.includes('appointment') ||
+    key.includes('reservation') ||
+    key.includes('schedule')
+  ) {
+    return 'Booking';
+  }
+  if (
+    key.includes('order') ||
+    key.includes('pricing') ||
+    key.includes('purchase') ||
+    key.includes('payment') ||
+    key.includes('plan')
+  ) {
+    return 'Order';
+  }
+  if (key.includes('feedback') || key.includes('review')) return 'Feedback';
+  if (
+    key.includes('enquiry') ||
+    key.includes('inquiry') ||
+    key.includes('demo') ||
+    key.includes('integration') ||
+    key.includes('interest')
+  ) {
+    return 'Enquiry';
+  }
+
+  return null;
+}
+
+function categoryTone(label: LeadCategory['label']): LeadCategory['color'] {
+  const tones: Record<LeadCategory['label'], LeadCategory['color']> = {
+    Enquiry: 'info',
+    Complaint: 'error',
+    Support: 'warning',
+    Booking: 'primary',
+    Order: 'success',
+    Feedback: 'light',
+  };
+
+  return tones[label];
+}
+
+function getLeadCategory(lead: LeadItem): LeadCategory {
+  const backendLabel =
+    normalizeLeadCategory(lead.category) ||
+    normalizeLeadCategory(lead.classification) ||
+    normalizeLeadCategory(lead.conversation_category) ||
+    normalizeLeadCategory(lead.meta?.category) ||
+    normalizeLeadCategory(lead.meta?.classification) ||
+    normalizeLeadCategory(lead.meta?.intent_category) ||
+    normalizeLeadCategory(lead.intent) ||
+    normalizeLeadCategory(lead.service);
+
+  if (backendLabel) {
+    return {
+      label: backendLabel,
+      color: categoryTone(backendLabel),
+    };
+  }
+
+  const detected: Category = detectCategory({
+    text_preview: lead.meta?.text_preview,
+    triggers: lead.meta?.triggers,
+    intent: lead.intent,
+    service: lead.service,
+    mood: lead.meta?.mood?.mood,
+    contacts: lead.contacts,
+  });
+  const fallbackLabel = normalizeLeadCategory(detected) || 'Enquiry';
+
+  return {
+    label: fallbackLabel,
+    color: categoryTone(fallbackLabel),
+  };
 }
 
 function getDisplayInfo(lead: LeadItem) {
@@ -286,6 +492,130 @@ function MetricCard({
   );
 }
 
+function FollowUpsPanel({ items }: { items: FollowUpItem[] }) {
+  const groups = [
+    {
+      key: 'overdue',
+      label: 'Overdue',
+      color: 'error' as const,
+      border:
+        'border-error-200 bg-error-50/60 dark:border-error-500/20 dark:bg-error-500/10',
+    },
+    {
+      key: 'today',
+      label: 'Due today',
+      color: 'primary' as const,
+      border:
+        'border-brand-200 bg-brand-50/60 dark:border-brand-500/20 dark:bg-brand-500/10',
+    },
+    {
+      key: 'upcoming',
+      label: 'Upcoming',
+      color: 'warning' as const,
+      border:
+        'border-warning-200 bg-warning-50/60 dark:border-warning-500/20 dark:bg-warning-500/10',
+    },
+  ];
+
+  const grouped = items.reduce<Record<string, FollowUpItem[]>>(
+    (acc, item) => {
+      const timing = getFollowUpTiming(item);
+      acc[timing] = [...(acc[timing] || []), item];
+      return acc;
+    },
+    { overdue: [], today: [], upcoming: [] },
+  );
+
+  return (
+    <div className='mb-6 overflow-hidden rounded-2xl border border-brand-200 bg-white shadow-theme-sm dark:border-brand-500/20 dark:bg-white/[0.03]'>
+      <div className='border-b border-brand-100 bg-brand-50/60 px-5 py-5 dark:border-brand-500/15 dark:bg-brand-500/10 sm:px-6'>
+        <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
+          <div>
+            <h3 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
+              Today&apos;s Follow-ups
+            </h3>
+            <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>
+              Time-sensitive lead conversations that need attention.
+            </p>
+          </div>
+          <Badge color='primary'>{items.length} follow-ups</Badge>
+        </div>
+      </div>
+
+      <div className='grid gap-4 p-4 sm:p-6 lg:grid-cols-3'>
+        {groups.map((group) => {
+          const groupItems = grouped[group.key] || [];
+          return (
+            <div
+              key={group.key}
+              className={cn('rounded-xl border p-4', group.border)}
+            >
+              <div className='mb-3 flex items-center justify-between gap-3'>
+                <h4 className='type-small font-semibold text-gray-800 dark:text-white/90'>
+                  {group.label}
+                </h4>
+                <Badge color={group.color}>{groupItems.length}</Badge>
+              </div>
+
+              {groupItems.length === 0 ? (
+                <div className='rounded-[10px] border border-dashed border-gray-200 bg-white/70 px-3 py-5 text-center type-caption text-gray-500 dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-gray-400'>
+                  No {group.label.toLowerCase()} follow-ups
+                </div>
+              ) : (
+                <div className='space-y-3'>
+                  {groupItems.slice(0, 4).map((followUp, index) => (
+                    <Link
+                      key={followUp.conversation_id}
+                      href={`/conversations/${followUp.conversation_id}`}
+                      className='block rounded-[10px] border border-white/70 bg-white p-3 shadow-theme-xs transition hover:border-brand-200 hover:bg-white dark:border-white/[0.06] dark:bg-gray-900 dark:hover:border-brand-500/30'
+                    >
+                      <div className='flex items-start justify-between gap-3'>
+                        <div className='min-w-0'>
+                          <p className='truncate type-small font-semibold text-gray-800 dark:text-white/90'>
+                            {followUp.name ||
+                              followUp.lead_or_customer ||
+                              followUp.title ||
+                              `Follow-up ${index + 1}`}
+                          </p>
+                          <p className='mt-1 type-caption font-medium text-gray-500 dark:text-gray-400'>
+                            {formatFollowUpDue(followUp)}
+                          </p>
+                        </div>
+                        {followUp.priority && (
+                          <Badge
+                            color={
+                              String(followUp.priority).toUpperCase() ===
+                              'HIGH'
+                                ? 'error'
+                                : 'warning'
+                            }
+                          >
+                            {titleCase(String(followUp.priority))}
+                          </Badge>
+                        )}
+                      </div>
+                      <p className='mt-2 line-clamp-2 type-caption text-gray-500 dark:text-gray-400'>
+                        {followUp.reason ||
+                          followUp.insight ||
+                          'No reason provided'}
+                      </p>
+                    </Link>
+                  ))}
+                  {groupItems.length > 4 && (
+                    <p className='type-caption font-medium text-gray-500 dark:text-gray-400'>
+                      +{groupItems.length - 4} more in this group
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 const STAGE_TONE: Record<string, string> = {
   new: 'text-brand-500 dark:text-brand-400',
   contacted: 'text-warning-600 dark:text-orange-400',
@@ -401,6 +731,8 @@ function LeadWorklist({
               {[
                 'Lead',
                 'Stage',
+                'Sentiment',
+                'Category',
                 'Channel',
                 'Contact',
                 'Activity',
@@ -445,6 +777,8 @@ function LeadWorklist({
               const display = getDisplayInfo(lead);
               const email = lead.contacts?.emails?.[0] || '';
               const phone = lead.contacts?.phones?.[0] || '';
+              const sentiment = getLeadSentiment(lead);
+              const category = getLeadCategory(lead);
               return (
                 <tr
                   key={lead.id}
@@ -905,6 +1239,8 @@ export default function LeadsPage() {
           />
         </div>
 
+        <FollowUpsPanel items={voiceFollowUps} />
+
         <div className='flex flex-col gap-6'>
           <div className='flex flex-col gap-6'>
             <div className='min-w-0 max-w-full overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]'>
@@ -1202,67 +1538,6 @@ export default function LeadsPage() {
               </div>
             </div>
 
-            <div className='rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]'>
-              <div className='border-b border-gray-100 px-6 py-5 dark:border-gray-800'>
-                <div className='flex items-center justify-between gap-3'>
-                  <div>
-                    <h3 className='type-body font-medium text-gray-800 dark:text-white/90'>
-                      Follow-ups
-                    </h3>
-                    <p className='mt-1 type-small text-gray-500 dark:text-gray-400'>
-                      Recommended conversations to revisit.
-                    </p>
-                  </div>
-                  <Badge color='light'>{voiceFollowUps.length}</Badge>
-                </div>
-              </div>
-
-              <div className='space-y-3 p-4 sm:p-6'>
-                {voiceFollowUps.length === 0 ? (
-                  <div className='rounded-xl border border-gray-200 bg-gray-50 px-4 py-8 text-center dark:border-gray-800 dark:bg-white/[0.02]'>
-                    <p className='type-small font-medium text-gray-700 dark:text-gray-300'>
-                      No follow-ups waiting
-                    </p>
-                    <p className='mt-1 type-caption text-gray-500 dark:text-gray-400'>
-                      Growth recommendations will appear here.
-                    </p>
-                  </div>
-                ) : (
-                  voiceFollowUps.map((followUp, index) => (
-                    <Link
-                      key={followUp.conversation_id}
-                      href={`/conversations/${followUp.conversation_id}`}
-                      className='block rounded-xl border border-gray-200 bg-white p-4 transition hover:border-gray-300 hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-900 dark:hover:bg-white/[0.03]'
-                    >
-                      <div className='flex items-start justify-between gap-3'>
-                        <div className='min-w-0'>
-                          <p className='truncate type-small font-medium text-gray-800 dark:text-white/90'>
-                            {followUp.name ||
-                              followUp.lead_or_customer ||
-                              followUp.title ||
-                              `Follow-up ${index + 1}`}
-                          </p>
-                          <p className='mt-1 line-clamp-2 type-caption text-gray-500 dark:text-gray-400'>
-                            {followUp.reason ||
-                              followUp.insight ||
-                              'No reason provided'}
-                          </p>
-                        </div>
-                        {followUp.priority && (
-                          <Badge
-                            color={
-                              followUp.priority === 'HIGH' ? 'error' : 'warning'
-                            }
-                          >
-                            {titleCase(String(followUp.priority))}
-                          </Badge>
-                        )}
-                      </div>
-                    </Link>
-                  ))
-                )}
-              </div>
-            </div>
           </div>
         </div>
       </div>

@@ -493,12 +493,12 @@ function ConnectedState({
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
           <button
             type="button"
-            onClick={() => { onClose(); window.location.href = '/profile?support=True'; }}
+            onClick={() => { onClose(); window.location.href = '/profile?activeNav=support'; }}
             style={{
               height: 42, borderRadius: 14,
-              border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(15,23,42,0.10)',
-              background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(15,23,42,0.03)',
-              color: isDark ? '#CBD5E1' : '#475569',
+              border: '1px solid rgba(59,130,246,0.35)',
+              background: isDark ? 'rgba(59,130,246,0.14)' : 'rgba(59,130,246,0.08)',
+              color: isDark ? '#BFDBFE' : '#2563EB',
               cursor: 'pointer', fontWeight: 600, fontSize: 13,
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
             }}
@@ -507,14 +507,15 @@ function ConnectedState({
           </button>
           <button
             type="button"
-            onClick={() => { onClose(); window.location.href = '/profile?support=True'; }}
+            onClick={() => { onClose(); window.location.href = '/profile?activeNav=support'; }}
             style={{
               height: 42, borderRadius: 14,
-              border: isDark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(15,23,42,0.10)',
-              background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(15,23,42,0.03)',
-              color: isDark ? '#CBD5E1' : '#475569',
+              border: '1px solid rgba(59,130,246,0.35)',
+              background: isDark ? 'linear-gradient(135deg,#2563EB,#4F46E5)' : 'linear-gradient(135deg,#3B82F6,#4F46E5)',
+              color: '#FFFFFF',
               cursor: 'pointer', fontWeight: 600, fontSize: 13,
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+              boxShadow: '0 8px 22px rgba(59,130,246,0.28)',
             }}
           >
             🛟 Get Support

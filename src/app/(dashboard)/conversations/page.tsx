@@ -12,6 +12,7 @@ import { RequireAuth } from '@/components/require-auth';
 import { Button } from '@/components/ui/button';
 import {
   TablePagination,
+  getPageItems,
 } from '@/components/ui/table-pagination';
 import { useOutsideClick } from '@/hooks/useOutsideClick';
 import { apiFetch } from '@/lib/api';
@@ -73,7 +74,18 @@ type ConvoItem = {
   } | null;
 };
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 8;
+const CONVERSATION_LOAD_LIMIT = 10000;
+
+function responseTotal(
+  data: { items?: unknown[]; total_count?: number; count?: number; total?: number },
+  fallback = 0,
+) {
+  if (typeof data.total_count === 'number') return data.total_count;
+  if (typeof data.count === 'number') return data.count;
+  if (typeof data.total === 'number') return data.total;
+  return data.items?.length ?? fallback;
+}
 
 function errorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
@@ -166,6 +178,43 @@ function isRealLead(lead?: ConvoItem['lead']) {
   return ['qualified', 'won', 'hot', 'warm'].includes(
     String(lead.status || '').toLowerCase(),
   );
+}
+
+function normalizeChannel(value?: string | null) {
+  const key = (value || '').toLowerCase().trim().replace(/[\s-]+/g, '_');
+  const aliases: Record<string, string> = {
+    fb: 'facebook',
+    facebook_messenger: 'facebook',
+    google_reviews: 'google',
+    googlemaps: 'google',
+    google_maps: 'google',
+    ig: 'instagram',
+    insta: 'instagram',
+    telegram_bot: 'telegram',
+    web: 'website',
+    website_chat: 'website',
+    whatsapp_business: 'whatsapp',
+  };
+  return aliases[key] || key;
+}
+
+function getConversationChannelId(
+  item: ConvoItem,
+  channels: ChannelItem[],
+): number | null {
+  if (
+    item.channel_id != null &&
+    channels.some((channel) => channel.id === item.channel_id)
+  ) {
+    return item.channel_id;
+  }
+
+  const platform = normalizeChannel(item.channel);
+  const match = channels.find(
+    (channel) => normalizeChannel(channel.platform) === platform,
+  );
+
+  return match?.id ?? item.channel_id ?? null;
 }
 
 const STAT_FILTERS: {
@@ -444,7 +493,7 @@ function ConversationTable({
   setStatFilter: (value: string) => void;
   statCounts: Record<string, number>;
 }) {
-  const pageItems = items;
+  const pageItems = getPageItems(items, page, PAGE_SIZE);
 
   const channelFilterRef = useRef<HTMLDivElement>(null);
   const conversationFilterRef = useRef<HTMLDivElement>(null);
@@ -475,7 +524,7 @@ function ConversationTable({
   useEffect(() => {
     const timer = window.setTimeout(() => setPage(1), 0);
     return () => window.clearTimeout(timer);
-  }, [status, q, dateRange, activePreset, statFilter]);
+  }, [status, q, dateRange, activePreset, statFilter, channelFilter]);
 
   const activeTab =
     INBOX_TABS.find((tab) => tab.key === status) ?? INBOX_TABS[0];
@@ -893,6 +942,7 @@ export default function ConversationsPage() {
   const [items, setItems] = useState<ConvoItem[]>([]);
   const [countsAll, setCountsAll] = useState<ConvoItem[]>([]);
   const [totalCount, setTotalCount] = useState(0);
+  const [channelTotal, setChannelTotal] = useState(0);
   const [filterLead, setFilterLead] = useState(false);
   const [openFilter, setOpenFilter] = useState<InboxFilterKey | null>(null);
   const [q, setQ] = useState('');
@@ -915,8 +965,8 @@ export default function ConversationsPage() {
 
       try {
         const pageQ = new URLSearchParams();
-        pageQ.set('limit', String(PAGE_SIZE));
-        pageQ.set('offset', String((Math.max(1, page) - 1) * PAGE_SIZE));
+        pageQ.set('limit', String(CONVERSATION_LOAD_LIMIT));
+        pageQ.set('offset', '0');
         if (q.trim()) pageQ.set('q', q.trim());
         if (status !== 'all') pageQ.set('status', status);
 
@@ -932,41 +982,20 @@ export default function ConversationsPage() {
           pageQ.set('to_ts', to.toISOString());
         }
 
-        const countsQ = new URLSearchParams(pageQ.toString());
-        countsQ.set('offset', '0');
-        countsQ.set('limit', String(1000));
+        const data = await apiFetch<{
+          items: ConvoItem[];
+          total_count?: number;
+          count?: number;
+          total?: number;
+        }>(`/admin/conversations?${pageQ.toString()}`, { auth: true });
 
-        const [pageData, countsData] = await Promise.all([
-          apiFetch<{
-            items: ConvoItem[];
-            total_count?: number;
-            count?: number;
-            total?: number;
-          }>(`/admin/conversations?${pageQ.toString()}`, { auth: true }),
-          apiFetch<{
-            items: ConvoItem[];
-          }>(`/admin/conversations?${countsQ.toString()}`, { auth: true }),
-        ]);
-
-        const pageItems = (pageData.items || []).filter(
+        const loadedItems = (data.items || []).filter(
           (item) => item.channel?.toLowerCase() !== 'google',
         );
-        const countsItems = (countsData.items || []).filter(
-          (item) => item.channel?.toLowerCase() !== 'google',
-        );
-        setItems(pageItems);
-        const receivedTotal =
-          typeof pageData.total_count === 'number'
-            ? pageData.total_count
-            : typeof pageData.count === 'number'
-              ? pageData.count
-              : typeof pageData.total === 'number'
-                ? pageData.total
-                : countsItems.length < 1000
-                  ? countsItems.length
-                  : Math.max(totalCount, countsItems.length * 2);
-        setTotalCount(receivedTotal);
-        setCountsAll(countsItems);
+        setItems(loadedItems);
+        setTotalCount(responseTotal(data, loadedItems.length));
+        setChannelTotal(loadedItems.length);
+        setCountsAll(loadedItems);
         setLastRefresh(new Date());
       } catch (error: unknown) {
         setErr(errorMessage(error, 'Failed to load conversations'));
@@ -974,7 +1003,7 @@ export default function ConversationsPage() {
         if (!opts?.silent) setLoading(false);
       }
     },
-    [dateRange, page, q, status, totalCount], // channelFilter intentionally NOT here — no refetch on channel select
+    [dateRange, q, status],
   );
 
   useEffect(() => {
@@ -995,31 +1024,34 @@ export default function ConversationsPage() {
 
   // Channel counts computed BEFORE the channel filter, so every channel keeps its
   // real total whether or not it's selected.
-  const channelCounts = useMemo(
+  const sampledChannelCounts = useMemo(
     () =>
       leadFilteredItems.reduce<Record<number, number>>((acc, item) => {
-        if (item.channel_id != null)
-          acc[item.channel_id] = (acc[item.channel_id] || 0) + 1;
+        const channelId = getConversationChannelId(item, channels);
+        if (channelId != null) {
+          acc[channelId] = (acc[channelId] || 0) + 1;
+        }
         return acc;
       }, {}),
-    [leadFilteredItems],
+    [channels, leadFilteredItems],
   );
+  const displayChannelCounts = sampledChannelCounts;
+  const displayChannelTotal = filterLead ? leadFilteredItems.length : channelTotal;
 
   // What the table actually renders — channel filter applied here on top.
   const visibleItems = useMemo(() => {
     let list = items;
     if (channelFilter.channel_ids.length > 0) {
-      list = list.filter(
-        (item) =>
-          item.channel_id != null &&
-          channelFilter.channel_ids.includes(item.channel_id),
-      );
+      list = list.filter((item) => {
+        const channelId = getConversationChannelId(item, channels);
+        return channelId != null && channelFilter.channel_ids.includes(channelId);
+      });
     }
     if (statFilter !== 'all') {
       list = list.filter((item) => matchesStatFilter(item, statFilter));
     }
     return list;
-  }, [items, channelFilter, statFilter]);
+  }, [channels, items, channelFilter, statFilter]);
 
   const statusCounts = useMemo(
     () =>
@@ -1140,7 +1172,7 @@ export default function ConversationsPage() {
             loading={loading}
             page={page}
             setPage={setPage}
-            totalItems={totalCount}
+            totalItems={visibleItems.length}
             status={status}
             setStatus={(next) => {
               setStatus(next);
@@ -1164,8 +1196,8 @@ export default function ConversationsPage() {
             channels={channels}
             channelsLoading={channelsLoading}
             selectedChannels={selectedChannels}
-            channelCounts={channelCounts}
-            channelTotal={leadFilteredItems.length}
+            channelCounts={displayChannelCounts}
+            channelTotal={displayChannelTotal || totalCount}
             dateRange={dateRange}
             setDateRange={(next) => {
               setDateRange(next);

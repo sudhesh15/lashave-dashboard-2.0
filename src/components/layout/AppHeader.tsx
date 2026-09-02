@@ -6,6 +6,7 @@ import { useSidebar } from "@/lib/sidebar-context";
 import { ThemeToggleButton } from "@/components/layout/ThemeToggleButton";
 import { AppearancePaletteButton } from "@/components/layout/AppearancePaletteButton";
 import { UserDropdown } from "@/components/layout/UserDropdown";
+import { TrialPill } from "@/components/billing/TrialPill";
 
 export function AppHeader() {
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
@@ -40,6 +41,9 @@ export function AppHeader() {
         </div>
 
         <div className="flex w-full items-center justify-between gap-4 px-5 py-4 shadow-theme-md lg:w-auto lg:justify-end lg:px-0 lg:shadow-none">
+          <div className="hidden lg:block">
+            <TrialPill />
+          </div>
           <div className="flex items-center gap-2 2xsm:gap-3">
             <AppearancePaletteButton />
             <ThemeToggleButton />

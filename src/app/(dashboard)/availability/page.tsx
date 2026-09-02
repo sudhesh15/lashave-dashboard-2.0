@@ -2,6 +2,11 @@
 
 import { DateFilter } from '@/components/date-filter';
 import { RequireAuth } from '@/components/require-auth';
+import {
+  ConversationLimitBanner,
+  FeatureGate,
+  LockedAccountBanner,
+} from '@/components/billing/FeatureGate';
 import { apiFetch } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import {
@@ -2393,7 +2398,11 @@ const bookingChannelFilterRef = useRef<HTMLDivElement>(null);
 export default function AvailabilityPage() {
   return (
     <RequireAuth>
-      <AvailabilityContent />
+      <LockedAccountBanner />
+      <ConversationLimitBanner />
+      <FeatureGate feature='booking'>
+        <AvailabilityContent />
+      </FeatureGate>
     </RequireAuth>
   );
 }
