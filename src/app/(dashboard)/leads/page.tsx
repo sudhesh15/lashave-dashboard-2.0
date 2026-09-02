@@ -717,17 +717,14 @@ function LeadWorklist({
   return (
     <div className='min-w-0 max-w-full overflow-hidden rounded-b-xl border border-gray-200 dark:border-white/[0.05]'>
       <div className='w-full overflow-x-auto'>
-        <table className='lashvae-column-dividers min-w-[1600px] table-fixed min-h-80'>
+        <table className='lashvae-column-dividers w-full table-fixed min-h-80'>
           <colgroup>
-            <col className='w-[280px]' />
-            <col className='w-[170px]' />
+            <col className='w-[30%]' />
             <col className='w-[150px]' />
-            <col className='w-[150px]' />
-            <col className='w-[160px]' />
-            <col className='w-[240px]' />
-            <col className='w-[200px]' />
-            <col className='w-[120px]' />
-            <col className='w-[190px]' />
+            <col className='w-[140px]' />
+            <col className='w-[220px]' />
+            <col className='w-[112px]' />
+            <col className='w-[180px]' />
           </colgroup>
           <thead className='border-b border-gray-100 dark:border-white/[0.05]'>
             <tr>
@@ -737,14 +734,16 @@ function LeadWorklist({
                 'Sentiment',
                 'Category',
                 'Channel',
-                'Email',
-                'Phone',
+                'Contact',
                 'Activity',
                 'Actions',
               ].map((header) => (
                 <th
                   key={header}
-                  className='px-5 py-3 text-left type-body font-medium text-gray-500 dark:text-gray-400'
+                  className={cn(
+                    'px-5 py-3.5 type-caption font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 sm:px-6',
+                    header === 'Actions' ? 'text-right' : 'text-left',
+                  )}
                 >
                   {header}
                 </th>
@@ -755,7 +754,7 @@ function LeadWorklist({
             {loading && items.length === 0 && (
               <tr>
                 <td
-                  colSpan={9}
+                  colSpan={6}
                   className='px-5 py-14 text-center type-small text-gray-500 dark:text-gray-400'
                 >
                   Loading leads
@@ -766,7 +765,7 @@ function LeadWorklist({
             {!loading && items.length === 0 && (
               <tr>
                 <td
-                  colSpan={9}
+                  colSpan={6}
                   className='px-5 py-14 text-center type-small text-gray-500 dark:text-gray-400'
                 >
                   {searchQ ? 'No leads match this search' : 'No leads found'}
@@ -788,25 +787,33 @@ function LeadWorklist({
                   <td className='px-5 py-3 sm:px-6'>
                     <div className='flex items-center gap-3'>
                       <LeadAvatar lead={lead} label={display.label} />
-                      <div className='min-w-0'>
-                        <span className='group relative block max-w-full type-small font-medium text-gray-800 dark:text-white/90'>
-                          <Link
-                            href={`/conversations/${lead.conversation_id}`}
-                            className='block truncate hover:text-brand-500 dark:hover:text-brand-400'
-                          >
-                            <Highlight text={display.label} query={searchQ} />
-                          </Link>
-                          <span className='pointer-events-none absolute left-0 top-full z-50 mt-1 hidden max-w-[280px] group-hover:block'>
-                            <span className='absolute -top-1 left-3 h-2 w-2 rotate-45 rounded-[2px] bg-gray-900' />
-                            <span className='relative block rounded-[10px] bg-gray-900 px-3 py-1.5 type-caption font-medium text-white shadow-lg'>
-                              {display.label}
+                      <div className='min-w-0 flex-1'>
+                        <div className='flex items-center gap-2'>
+                          <span className='group relative block min-w-0 type-small font-semibold text-gray-800 dark:text-white/90'>
+                            <Link
+                              href={`/conversations/${lead.conversation_id}`}
+                              className='block truncate hover:text-brand-500 dark:hover:text-brand-400'
+                            >
+                              <Highlight text={display.label} query={searchQ} />
+                            </Link>
+                            <span className='pointer-events-none absolute left-0 top-full z-50 mt-1 hidden max-w-[280px] group-hover:block'>
+                              <span className='absolute -top-1 left-3 h-2 w-2 rotate-45 rounded-[2px] bg-gray-900' />
+                              <span className='relative block rounded-[10px] bg-gray-900 px-3 py-1.5 type-caption font-medium text-white shadow-lg'>
+                                {display.label}
+                              </span>
                             </span>
                           </span>
-                        </span>
+                        </div>
+
+                        {display.subtitle ? (
+                          <span className='mt-1 block truncate type-caption text-gray-500 dark:text-gray-400'>
+                            {display.subtitle}
+                          </span>
+                        ) : null}
                       </div>
                     </div>
                   </td>
-                  <td className='px-6 py-3'>
+                  <td className='px-5 py-3 sm:px-6'>
                     <StageSelect
                       status={lead.status}
                       disabled={updatingId === lead.id}
@@ -814,53 +821,86 @@ function LeadWorklist({
                       label={display.label}
                     />
                   </td>
-                  <td className='px-6 py-3'>
-                    <Badge color={sentiment.color}>
-                      <span aria-hidden='true'>{sentiment.emoji}</span>
-                      {sentiment.label}
-                    </Badge>
-                  </td>
-                  <td className='px-6 py-3'>
-                    <Badge color={category.color}>{category.label}</Badge>
-                  </td>
-                  <td className='px-6 py-3'>
-                    <span className='inline-flex items-center gap-2 type-small text-gray-700 dark:text-gray-300'>
-                      <Image
-                        src={
-                          CHANNEL_LOGOS[(lead.channel || '').toLowerCase()] ||
-                          '/brand-logo/website.png'
-                        }
-                        alt={titleCase(lead.channel || 'Channel')}
-                        width={18}
-                        height={18}
-                        className='h-[18px] w-[18px] shrink-0 object-contain'
-                      />
-                      <span className='truncate'>
+                  <td className='px-5 py-3 sm:px-6'>
+                    <span className='inline-flex min-w-0 items-center gap-2 type-small text-gray-700 dark:text-gray-300'>
+                      <span className='inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gray-50 dark:bg-white/5'>
+                        <Image
+                          src={
+                            CHANNEL_LOGOS[(lead.channel || '').toLowerCase()] ||
+                            '/brand-logo/website.png'
+                          }
+                          alt={titleCase(lead.channel || 'Channel')}
+                          width={16}
+                          height={16}
+                          className='h-4 w-4 shrink-0 object-contain'
+                        />
+                      </span>
+                      <span className='truncate min-w-0'>
                         {titleCase(lead.channel || 'Channel')}
                       </span>
                     </span>
                   </td>
-                  <td className='px-6 py-3 type-small text-gray-500 dark:text-gray-400'>
-                    <span className='block truncate' title={email || undefined}>
-                      {email || 'No email saved'}
-                    </span>
+                  <td className='px-5 py-3 type-small text-gray-500 dark:text-gray-400 sm:px-6'>
+                    <div className='min-w-0 space-y-0.5'>
+                      <div
+                        className='flex min-w-0 items-center gap-1.5 text-gray-500 dark:text-gray-400'
+                        title={email || undefined}
+                      >
+                        <svg
+                          viewBox='0 0 24 24'
+                          width='11'
+                          height='11'
+                          fill='none'
+                          stroke='currentColor'
+                          strokeWidth='2'
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                          className='shrink-0 text-gray-400'
+                        >
+                          <rect x='3' y='5' width='18' height='14' rx='2' />
+                          <path d='m3 7 9 6 9-6' />
+                        </svg>
+                        <span className='truncate min-w-0'>
+                          {email || 'No email saved'}
+                        </span>
+                      </div>
+                      <div
+                        className='flex min-w-0 items-center gap-1.5 text-gray-500 dark:text-gray-400'
+                        title={phone || undefined}
+                      >
+                        <svg
+                          viewBox='0 0 24 24'
+                          width='11'
+                          height='11'
+                          fill='none'
+                          stroke='currentColor'
+                          strokeWidth='2'
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                          className='shrink-0 text-gray-400'
+                        >
+                          <path d='M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.6a2 2 0 0 1-.4 2.1L8 9.9a16 16 0 0 0 6 6l1.5-1.4a2 2 0 0 1 2.1-.4c.8.3 1.7.6 2.6.7a2 2 0 0 1 1.7 2z' />
+                        </svg>
+                        <span className='truncate min-w-0'>
+                          {phone || 'No phone saved'}
+                        </span>
+                      </div>
+                    </div>
                   </td>
-                  <td className='px-6 py-3 type-small text-gray-500 dark:text-gray-400'>
-                    <span className='block truncate' title={phone || undefined}>
-                      {phone || 'No phone saved'}
-                    </span>
-                  </td>
-                  <td className='px-6 py-3 type-small tabular-nums text-gray-500 dark:text-gray-400'>
+                  <td className='px-5 py-3 type-small tabular-nums text-gray-500 dark:text-gray-400 sm:px-6'>
                     {timeAgo(lead.updated_at)}
                   </td>
-                  <td className='px-6 py-3'>
-                    <Link
-                      href={`/conversations/${lead.conversation_id}`}
-                      className='inline-flex h-8 items-center gap-2 whitespace-nowrap rounded-[10px] bg-brand-500 px-3 type-small font-medium text-white shadow-theme-xs hover:bg-brand-600'
-                    >
-                      <Eye size={14} />
-                      View conversation
-                    </Link>
+                  <td className='px-5 py-3 sm:px-6'>
+                    <div className='flex justify-end'>
+                      <Link
+                        href={`/conversations/${lead.conversation_id}`}
+                        className='inline-flex h-8 w-full max-w-[170px] items-center justify-center gap-1.5 truncate whitespace-nowrap rounded-[10px] bg-brand-500 px-3 type-small font-medium text-white shadow-theme-xs hover:bg-brand-600'
+                        title='View conversation'
+                      >
+                        <Eye size={14} className='shrink-0' />
+                        <span className='truncate'>View</span>
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               );
