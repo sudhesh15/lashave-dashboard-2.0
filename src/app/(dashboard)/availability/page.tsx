@@ -2,11 +2,6 @@
 
 import { DateFilter } from '@/components/date-filter';
 import { RequireAuth } from '@/components/require-auth';
-import {
-  ConversationLimitBanner,
-  FeatureGate,
-  LockedAccountBanner,
-} from '@/components/billing/FeatureGate';
 import { apiFetch } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import {
@@ -422,12 +417,12 @@ function AvailabilityContent() {
   const [currentPage, setCurrentPage] = useState(1);
   const [bookingSearch, setBookingSearch] = useState('');
 
-const [openBookingFilter, setOpenBookingFilter] = useState<
-  'status' | 'date' | 'channel' | null
->(null);
+  const [openBookingFilter, setOpenBookingFilter] = useState<
+    'status' | 'date' | 'channel' | null
+  >(null);
 
-const [bookingChannelFilter, setBookingChannelFilter] = useState<string[]>([]);
-const bookingChannelFilterRef = useRef<HTMLDivElement>(null);
+  const [bookingChannelFilter, setBookingChannelFilter] = useState<string[]>([]);
+  const bookingChannelFilterRef = useRef<HTMLDivElement>(null);
 
   const [bookingDateRange, setBookingDateRange] = useState<{
     from: string;
@@ -554,85 +549,85 @@ const bookingChannelFilterRef = useRef<HTMLDivElement>(null);
       ? 'All channels'
       : bookingChannelFilter.length === 1
         ? bookingChannelFilter[0].charAt(0).toUpperCase() +
-          bookingChannelFilter[0].slice(1)
+        bookingChannelFilter[0].slice(1)
         : `${bookingChannelFilter.length} channels`;
 
   /* Filtered list */
- const filteredBookings = useMemo(() => {
-   const byTab = (() => {
-     switch (activeTab) {
-       case 'today':
-         return bookings.filter((b) => isToday(b.start_time));
+  const filteredBookings = useMemo(() => {
+    const byTab = (() => {
+      switch (activeTab) {
+        case 'today':
+          return bookings.filter((b) => isToday(b.start_time));
 
-       case 'upcoming':
-         return bookings.filter(
-           (b) => isUpcoming(b.start_time) && b.status !== 'cancelled',
-         );
+        case 'upcoming':
+          return bookings.filter(
+            (b) => isUpcoming(b.start_time) && b.status !== 'cancelled',
+          );
 
-       case 'confirmed':
-         return bookings.filter(
-           (b) =>
-             ['confirmed', 'rescheduled'].includes(b.status) &&
-             !isBookingCompleted(b),
-         );
+        case 'confirmed':
+          return bookings.filter(
+            (b) =>
+              ['confirmed', 'rescheduled'].includes(b.status) &&
+              !isBookingCompleted(b),
+          );
 
-       case 'completed':
-         return bookings.filter((b) => isBookingCompleted(b));
+        case 'completed':
+          return bookings.filter((b) => isBookingCompleted(b));
 
-       case 'cancelled':
-         return bookings.filter((b) => b.status === 'cancelled');
+        case 'cancelled':
+          return bookings.filter((b) => b.status === 'cancelled');
 
-       default:
-         return bookings.filter((b) => b.status !== 'cancelled');
-     }
-   })();
+        default:
+          return bookings.filter((b) => b.status !== 'cancelled');
+      }
+    })();
 
-   const byDate = bookingDateRange
-     ? byTab.filter((booking) => {
-         const key = (booking.start_time || booking.booking_date || '').slice(
-           0,
-           10,
-         );
-         if (!key) return false;
-         return key >= bookingDateRange.from && key <= bookingDateRange.to;
-       })
-     : byTab;
+    const byDate = bookingDateRange
+      ? byTab.filter((booking) => {
+        const key = (booking.start_time || booking.booking_date || '').slice(
+          0,
+          10,
+        );
+        if (!key) return false;
+        return key >= bookingDateRange.from && key <= bookingDateRange.to;
+      })
+      : byTab;
 
-   const byChannel =
-     bookingChannelFilter.length === 0
-       ? byDate
-       : byDate.filter((booking) =>
-           bookingChannelFilter.includes((booking.channel || '').toLowerCase()),
-         );
+    const byChannel =
+      bookingChannelFilter.length === 0
+        ? byDate
+        : byDate.filter((booking) =>
+          bookingChannelFilter.includes((booking.channel || '').toLowerCase()),
+        );
 
-   const query = bookingSearch.trim().toLowerCase();
-   if (!query) return byChannel;
+    const query = bookingSearch.trim().toLowerCase();
+    if (!query) return byChannel;
 
-   return byChannel.filter((booking) =>
-     [
-       booking.customer_name,
-       booking.customer_phone,
-       booking.customer_details?.phone,
-       booking.customer_details?.email,
-       booking.channel,
-       booking.status,
-       booking.booking_date,
-       booking.start_time,
-       booking.end_time,
-       booking.instagram_profile?.username,
-     ]
-       .filter(Boolean)
-       .join(' ')
-       .toLowerCase()
-       .includes(query),
-   );
- }, [
-   bookings,
-   activeTab,
-   bookingSearch,
-   bookingDateRange,
-   bookingChannelFilter,
- ]);
+    return byChannel.filter((booking) =>
+      [
+        booking.customer_name,
+        booking.customer_phone,
+        booking.customer_details?.phone,
+        booking.customer_details?.email,
+        booking.channel,
+        booking.status,
+        booking.booking_date,
+        booking.start_time,
+        booking.end_time,
+        booking.instagram_profile?.username,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase()
+        .includes(query),
+    );
+  }, [
+    bookings,
+    activeTab,
+    bookingSearch,
+    bookingDateRange,
+    bookingChannelFilter,
+  ]);
   const sortedBookings = useMemo(() => {
     const getSortValue = (booking: Booking) => {
       const displayName =
@@ -691,9 +686,9 @@ const bookingChannelFilterRef = useRef<HTMLDivElement>(null);
     setBookingSort((current) =>
       current.key === key
         ? {
-            key,
-            direction: current.direction === 'asc' ? 'desc' : 'asc',
-          }
+          key,
+          direction: current.direction === 'asc' ? 'desc' : 'asc',
+        }
         : { key, direction: 'asc' },
     );
   };
@@ -822,41 +817,41 @@ const bookingChannelFilterRef = useRef<HTMLDivElement>(null);
       method: 'POST' | 'PUT' | 'PATCH';
       body?: { status: string };
     }> = [
-      {
-        path: `/admin/booking/${bookingId}/status`,
-        method: 'PUT',
-        body: { status: 'completed' },
-      },
-      {
-        path: `/admin/booking/${bookingId}/status`,
-        method: 'PATCH',
-        body: { status: 'completed' },
-      },
-      {
-        path: `/admin/bookings/${bookingId}/status`,
-        method: 'PUT',
-        body: { status: 'completed' },
-      },
-      {
-        path: `/admin/bookings/${bookingId}/status`,
-        method: 'PATCH',
-        body: { status: 'completed' },
-      },
-      {
-        path: `/admin/booking/${bookingId}/complete`,
-        method: 'POST',
-      },
-      {
-        path: `/admin/booking/${bookingId}`,
-        method: 'PATCH',
-        body: { status: 'completed' },
-      },
-      {
-        path: `/admin/bookings/${bookingId}`,
-        method: 'PATCH',
-        body: { status: 'completed' },
-      },
-    ];
+        {
+          path: `/admin/booking/${bookingId}/status`,
+          method: 'PUT',
+          body: { status: 'completed' },
+        },
+        {
+          path: `/admin/booking/${bookingId}/status`,
+          method: 'PATCH',
+          body: { status: 'completed' },
+        },
+        {
+          path: `/admin/bookings/${bookingId}/status`,
+          method: 'PUT',
+          body: { status: 'completed' },
+        },
+        {
+          path: `/admin/bookings/${bookingId}/status`,
+          method: 'PATCH',
+          body: { status: 'completed' },
+        },
+        {
+          path: `/admin/booking/${bookingId}/complete`,
+          method: 'POST',
+        },
+        {
+          path: `/admin/booking/${bookingId}`,
+          method: 'PATCH',
+          body: { status: 'completed' },
+        },
+        {
+          path: `/admin/bookings/${bookingId}`,
+          method: 'PATCH',
+          body: { status: 'completed' },
+        },
+      ];
 
     let lastError: unknown = null;
     for (const attempt of attempts) {
@@ -1039,6 +1034,11 @@ const bookingChannelFilterRef = useRef<HTMLDivElement>(null);
         field.field_key.toLowerCase() === 'phone' ||
         field.label.toLowerCase().includes('phone'),
     );
+    const emailField = customerFields.find(
+      (field) =>
+        field.field_key.toLowerCase() === 'email' ||
+        field.label.toLowerCase().includes('email'),
+    );
 
     try {
       setCreatingManualBooking(true);
@@ -1051,6 +1051,9 @@ const bookingChannelFilterRef = useRef<HTMLDivElement>(null);
           tenant_id: bookingSettings.tenant_id,
           conversation_id: null,
           customer_name: name,
+          customer_email: emailField
+            ? (manualValues[emailField.field_key] || '').trim().toLowerCase()
+            : '',
           customer_phone: phoneField
             ? (manualValues[phoneField.field_key] || '').trim() || null
             : null,
@@ -1080,8 +1083,8 @@ const bookingChannelFilterRef = useRef<HTMLDivElement>(null);
 
   const manualDayLabel = manualDate
     ? new Date(`${manualDate}T00:00:00`).toLocaleDateString('en-IN', {
-        weekday: 'long',
-      })
+      weekday: 'long',
+    })
     : '';
 
   const primaryFieldKeys = ['name', 'phone', 'email'];
@@ -1219,17 +1222,17 @@ const bookingChannelFilterRef = useRef<HTMLDivElement>(null);
         </div>
 
         <div className='min-w-0 px-5 py-5 sm:px-6'>
-          <div className='min-w-0 w-full max-w-full flex flex-col gap-4 rounded-t-xl border border-b-0 border-gray-200 bg-white px-5 py-4 dark:border-white/[0.05] dark:bg-white/[0.01] lg:flex-row lg:items-start lg:justify-between lg:flex-wrap'>
-            <div className='flex items-center gap-3 min-w-0 shrink-0'>
+          <div className='flex flex-col gap-4 rounded-t-xl border border-b-0 border-gray-200 bg-white px-5 py-4 dark:border-white/[0.05] dark:bg-white/[0.01] lg:flex-row lg:items-center lg:justify-between'>
+            <div className='flex items-center gap-3'>
               <h4 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
                 {activeBookingLabel}
               </h4>
-              <span className='rounded-full bg-brand-50 px-3 py-0.5 type-caption font-semibold text-brand-500 dark:bg-brand-500/15 dark:text-brand-400 shrink-0'>
+              <span className='rounded-full bg-brand-50 px-3 py-0.5 type-caption font-semibold text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'>
                 {sortedBookings.length}
               </span>
             </div>
-            <div className='min-w-0 w-full max-w-full flex flex-wrap flex-col gap-3 sm:flex-row sm:items-center sm:justify-end'>
-              <div className='relative w-full sm:w-[260px] min-w-0 shrink-0'>
+            <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end'>
+              <div className='relative w-full sm:w-[260px]'>
                 <Search className='pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400' />
                 <input
                   type='search'
@@ -1240,7 +1243,7 @@ const bookingChannelFilterRef = useRef<HTMLDivElement>(null);
                 />
               </div>
               {/* Channel filter */}
-              <div ref={bookingChannelFilterRef} className='relative min-w-0 max-w-full shrink-0'>
+              <div ref={bookingChannelFilterRef} className='relative'>
                 <Button
                   variant='outline'
                   onClick={() =>
@@ -1248,7 +1251,7 @@ const bookingChannelFilterRef = useRef<HTMLDivElement>(null);
                       openBookingFilter === 'channel' ? null : 'channel',
                     )
                   }
-                  className='min-w-[165px] max-w-full'
+                  className='min-w-[165px]'
                 >
                   <Radio size={14} className='shrink-0' />
                   {bookingChannelFilter.length > 0 && (
@@ -1351,7 +1354,7 @@ const bookingChannelFilterRef = useRef<HTMLDivElement>(null);
                   </div>
                 )}
               </div>
-              <div ref={bookingFilterRef} className='relative min-w-0 max-w-full shrink-0'>
+              <div ref={bookingFilterRef} className='relative'>
                 <Button
                   variant='outline'
                   onClick={() =>
@@ -1359,14 +1362,11 @@ const bookingChannelFilterRef = useRef<HTMLDivElement>(null);
                       openBookingFilter === 'status' ? null : 'status',
                     )
                   }
-                  className='max-w-full'
                 >
-                  <SlidersHorizontal size={14} className='shrink-0' />
-                  <span className='truncate min-w-0'>
-                    {activeTab === 'all'
-                      ? 'Filter'
-                      : `${TABS.find((t) => t.key === activeTab)?.label ?? ''} bookings`}
-                  </span>
+                  <SlidersHorizontal size={14} />
+                  {activeTab === 'all'
+                    ? 'Filter'
+                    : `${TABS.find((t) => t.key === activeTab)?.label ?? ''} bookings`}
                 </Button>
                 {openBookingFilter === 'status' && (
                   <div className='absolute right-0 z-20 mt-2 w-56 overflow-hidden rounded-xl border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-800 dark:bg-gray-900'>
@@ -1406,7 +1406,7 @@ const bookingChannelFilterRef = useRef<HTMLDivElement>(null);
                   </div>
                 )}
               </div>
-              <div ref={bookingDateFilterRef} className='min-w-0 max-w-full shrink-0'>
+              <div ref={bookingDateFilterRef}>
                 <DateFilter
                   dateRange={bookingDateRange}
                   activePreset={bookingDatePreset}
@@ -1432,7 +1432,6 @@ const bookingChannelFilterRef = useRef<HTMLDivElement>(null);
                   setBookingChannelFilter([]);
                   setOpenBookingFilter(null);
                 }}
-                className='min-w-0 max-w-full shrink-0'
               >
                 See all
               </Button>
@@ -1585,12 +1584,12 @@ const bookingChannelFilterRef = useRef<HTMLDivElement>(null);
                             <span className='inline-flex items-center gap-2'>
                               {booking.channel &&
                                 CHANNEL_LOGOS[
-                                  booking.channel.toLowerCase()
+                                booking.channel.toLowerCase()
                                 ] && (
                                   <Image
                                     src={
                                       CHANNEL_LOGOS[
-                                        booking.channel.toLowerCase()
+                                      booking.channel.toLowerCase()
                                       ]
                                     }
                                     alt={booking.channel}
@@ -2398,11 +2397,7 @@ const bookingChannelFilterRef = useRef<HTMLDivElement>(null);
 export default function AvailabilityPage() {
   return (
     <RequireAuth>
-      <LockedAccountBanner />
-      <ConversationLimitBanner />
-      <FeatureGate feature='booking'>
-        <AvailabilityContent />
-      </FeatureGate>
+      <AvailabilityContent />
     </RequireAuth>
   );
 }
