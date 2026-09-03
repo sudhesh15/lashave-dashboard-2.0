@@ -6,6 +6,8 @@ import { useBilling } from '@/lib/billing-context';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
+//trialpill file
+
 export function TrialPill() {
   const { loading, isTrialing, isLocked, trialDaysLeft } = useBilling();
 
