@@ -184,7 +184,7 @@ export function ConversationLimitBanner() {
   );
 }
 
-//test
+//test featureGate file
 
 export function TrialEndingBanner() {
   const { loading, isTrialing, trialDaysLeft, status } = useBilling();
