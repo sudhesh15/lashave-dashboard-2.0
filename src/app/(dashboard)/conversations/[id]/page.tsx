@@ -90,43 +90,43 @@ type ChannelTheme = {
 const CHANNEL_THEME: Record<string, ChannelTheme> = {
   whatsapp: {
     logo: '/brand-logo/whatsapp.png',
-    accent: 'bg-[#25D366]',
-    accentHover: 'hover:bg-[#1DA851]',
-    bubble: 'bg-[#25D366]',
+    accent: 'bg-brand-500',
+    accentHover: 'hover:bg-brand-600',
+    bubble: 'bg-brand-500',
     bubbleText: 'text-white',
-    ring: 'focus:border-[#25D366] focus:ring-[#25D366]/10',
+    ring: 'focus:border-brand-300 focus:ring-brand-500/10',
   },
   instagram: {
     logo: '/brand-logo/instagram.png',
-    accent: 'bg-gradient-to-r from-[#833AB4] via-[#E1306C] to-[#F77737]',
-    accentHover: 'hover:opacity-90',
-    bubble: 'bg-gradient-to-r from-[#833AB4] via-[#E1306C] to-[#F77737]',
+    accent: 'bg-brand-500',
+    accentHover: 'hover:bg-brand-600',
+    bubble: 'bg-brand-500',
     bubbleText: 'text-white',
-    ring: 'focus:border-[#E1306C] focus:ring-[#E1306C]/10',
+    ring: 'focus:border-brand-300 focus:ring-brand-500/10',
   },
   facebook: {
     logo: '/brand-logo/facebook.png',
-    accent: 'bg-[#1877F2]',
-    accentHover: 'hover:bg-[#1461C7]',
-    bubble: 'bg-[#1877F2]',
+    accent: 'bg-brand-500',
+    accentHover: 'hover:bg-brand-600',
+    bubble: 'bg-brand-500',
     bubbleText: 'text-white',
-    ring: 'focus:border-[#1877F2] focus:ring-[#1877F2]/10',
+    ring: 'focus:border-brand-300 focus:ring-brand-500/10',
   },
   telegram: {
     logo: '/brand-logo/telegram.png',
-    accent: 'bg-[#26A5E4]',
-    accentHover: 'hover:bg-[#1E8AC0]',
-    bubble: 'bg-[#26A5E4]',
+    accent: 'bg-brand-500',
+    accentHover: 'hover:bg-brand-600',
+    bubble: 'bg-brand-500',
     bubbleText: 'text-white',
-    ring: 'focus:border-[#26A5E4] focus:ring-[#26A5E4]/10',
+    ring: 'focus:border-brand-300 focus:ring-brand-500/10',
   },
   youtube: {
     logo: '/brand-logo/youtube.png',
-    accent: 'bg-[#FF0000]',
-    accentHover: 'hover:bg-[#CC0000]',
-    bubble: 'bg-[#FF0000]',
+    accent: 'bg-brand-500',
+    accentHover: 'hover:bg-brand-600',
+    bubble: 'bg-brand-500',
     bubbleText: 'text-white',
-    ring: 'focus:border-[#FF0000] focus:ring-[#FF0000]/10',
+    ring: 'focus:border-brand-300 focus:ring-brand-500/10',
   },
   website: {
     logo: '/brand-logo/website.png',
@@ -736,19 +736,25 @@ export default function ConversationDetailPage() {
                     onKeyDown={(event) => {
                       if (
                         (event.metaKey || event.ctrlKey) &&
-                        event.key === 'Enter'
+                        event.key === 'Enter' &&
+                        !isHandoff
                       ) {
                         void sendReply();
                       }
                     }}
-                    placeholder='Message as agent…'
-                    className={`h-9 min-w-0 flex-1 rounded-full border border-gray-300 bg-transparent px-4 type-caption font-medium text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 ${channelTheme.ring}`}
+                    disabled={isHandoff}
+                    placeholder={
+                      isHandoff
+                        ? 'Conversation handed off — use Back to AI to reply…'
+                        : 'Message as agent…'
+                    }
+                    className={`h-9 min-w-0 flex-1 rounded-full border border-gray-300 bg-transparent px-4 type-caption font-medium text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 ${channelTheme.ring} ${isHandoff ? 'cursor-not-allowed opacity-60' : ''}`}
                   />
                   <button
                     type='button'
                     onClick={() => void sendReply()}
-                    disabled={!replyText.trim() || sending}
-                    className={`inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-full px-4 type-caption font-semibold text-white disabled:opacity-60 ${channelTheme.accent} ${channelTheme.accentHover}`}
+                    disabled={!replyText.trim() || sending || isHandoff}
+                    className={`inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-full px-4 type-caption font-semibold text-white disabled:opacity-60 ${channelTheme.accent} ${channelTheme.accentHover} ${isHandoff ? 'cursor-not-allowed' : ''}`}
                   >
                     {sending ? (
                       <Loader2 className='h-3.5 w-3.5 animate-spin' />
