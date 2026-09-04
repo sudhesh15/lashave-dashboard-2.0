@@ -57,19 +57,39 @@ export default function DataProcessingAgreementModal({
     try {
       setSaving(true);
 
+      const fallbackPrivacyUrl = 'https://lashvae.com/legal/dpa';
       await apiFetch('/admin/processing-acceptance', {
         method: 'POST',
         auth: true,
         body: {
           accepted: true,
-          privacy_notice_url: privacyUrl.trim() || null,
+          acknowledged: true,
+          privacy_notice_url: privacyUrl.trim() || fallbackPrivacyUrl,
+          platform,
+          channel: platform,
+          source: 'dpa-modal',
+          dpa_version: 1,
+          accepted_version: 1,
         },
       });
 
       onAccepted();
     } catch (err: any) {
       console.error(err);
-      setError(err?.message || `Could not enable ${platformLabel}.`);
+      const detail =
+        err?.message && typeof err.message === 'string' ? err.message : '';
+      const ignore =
+        /duplicate/i.test(detail) ||
+        /already/i.test(detail) ||
+        /exists/i.test(detail) ||
+        /recorded/i.test(detail);
+      if (ignore) {
+        onAccepted();
+        return;
+      }
+      setError(
+        `Could not record legal acceptance${detail ? `. ${detail}` : '.'}`,
+      );
     } finally {
       setSaving(false);
     }

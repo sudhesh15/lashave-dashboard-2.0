@@ -700,26 +700,50 @@ function ChannelsInner() {
   }
 
   async function handleConnect(platform: string, token?: string) {
+    const fallbackPrivacyUrl = 'https://lashvae.com/legal/dpa';
+    const commonAcceptance = {
+      accepted: true,
+      acknowledged: true,
+      platform,
+      channel: platform,
+      source: 'channels',
+      privacy_notice_url: fallbackPrivacyUrl,
+      dpa_version: 1,
+      accepted_version: 1,
+    };
+
     if (platform === 'instagram') {
       const response = await apiFetch<{ auth_url: string }>(
-        '/admin/channels/instagram/connect',
-        { auth: true },
+        '/api/admin/channels/instagram/connect',
+        {
+          method: 'POST',
+          auth: true,
+          body: commonAcceptance,
+        },
       );
       if (response.auth_url) window.location.assign(response.auth_url);
       return;
     }
     if (platform === 'facebook') {
       const response = await apiFetch<{ auth_url: string }>(
-        '/admin/channels/facebook/connect',
-        { auth: true },
+        '/api/admin/channels/facebook/connect',
+        {
+          method: 'POST',
+          auth: true,
+          body: commonAcceptance,
+        },
       );
       if (response.auth_url) window.location.assign(response.auth_url);
       return;
     }
     if (platform === 'google reviews') {
       const response = await apiFetch<{ auth_url: string }>(
-        '/admin/channels/google/connect',
-        { auth: true },
+        '/api/admin/channels/google/connect',
+        {
+          method: 'POST',
+          auth: true,
+          body: commonAcceptance,
+        },
       );
       if (response.auth_url) window.location.assign(response.auth_url);
       return;
@@ -740,15 +764,32 @@ function ChannelsInner() {
     }
   }
 
-  async function recordProcessingAcknowledgement() {
-    await apiFetch('/admin/processing-acceptance', {
-      method: 'POST',
-      auth: true,
-      body: {
-        accepted: true,
-        privacy_notice_url: null,
-      },
-    });
+  async function recordProcessingAcknowledgement(platform: string) {
+    const fallbackPrivacyUrl = 'https://lashvae.com/legal/dpa';
+    try {
+      await apiFetch('/api/admin/processing-acceptance', {
+        method: 'POST',
+        auth: true,
+        body: {
+          accepted: true,
+          acknowledged: true,
+          privacy_notice_url: fallbackPrivacyUrl,
+          platform,
+          channel: platform,
+          source: 'channels',
+          dpa_version: 1,
+          accepted_version: 1,
+        },
+      });
+    } catch (err: unknown) {
+      const msg = (err instanceof Error ? err.message : '') || '';
+      const ignore =
+        /duplicate/i.test(msg) ||
+        /already/i.test(msg) ||
+        /exists/i.test(msg) ||
+        /recorded/i.test(msg);
+      if (!ignore) throw err;
+    }
   }
 
   function openConnect(platform: string) {
@@ -778,17 +819,32 @@ function ChannelsInner() {
     setConnecting(true);
     setConnectError('');
     try {
-      await recordProcessingAcknowledgement();
+      try {
+        await recordProcessingAcknowledgement(connectPlatform);
+      } catch (error: unknown) {
+        throw new Error(
+          `Could not record legal acceptance. ${errorMessage(error, '')}`.trim(),
+        );
+      }
+
       if (connectPlatform === 'website') {
         setConnectPlatform(null);
         setWebsiteModalOpen(true);
         await loadWebsiteWidget();
         return;
       }
-      await handleConnect(connectPlatform, connectToken.trim() || undefined);
+
+      try {
+        await handleConnect(connectPlatform, connectToken.trim() || undefined);
+      } catch (error: unknown) {
+        throw new Error(errorMessage(error, 'Failed to connect channel.'));
+      }
+
       setConnectPlatform(null);
     } catch (error: unknown) {
-      setConnectError(errorMessage(error, 'Failed to connect channel.'));
+      setConnectError(
+        error instanceof Error ? error.message : 'Failed to connect channel.',
+      );
     } finally {
       setConnecting(false);
     }
