@@ -10,10 +10,7 @@ import {
 import { DateFilter } from '@/components/date-filter';
 import { RequireAuth } from '@/components/require-auth';
 import { Button } from '@/components/ui/button';
-import {
-  TablePagination,
-  getPageItems,
-} from '@/components/ui/table-pagination';
+import { TablePagination } from '@/components/ui/table-pagination';
 import { useOutsideClick } from '@/hooks/useOutsideClick';
 import { apiFetch } from '@/lib/api';
 import {
@@ -75,17 +72,22 @@ type ConvoItem = {
 };
 
 const PAGE_SIZE = 8;
-const CONVERSATION_LOAD_LIMIT = 10000;
 
-function responseTotal(
-  data: { items?: unknown[]; total_count?: number; count?: number; total?: number },
-  fallback = 0,
-) {
-  if (typeof data.total_count === 'number') return data.total_count;
-  if (typeof data.count === 'number') return data.count;
-  if (typeof data.total === 'number') return data.total;
-  return data.items?.length ?? fallback;
-}
+type ConversationsResponse = {
+  items: ConvoItem[];
+  total: number;
+  limit: number;
+  offset: number;
+  has_more: boolean;
+};
+
+type ConversationStatsResponse = {
+  total: number;
+  statuses: Record<string, number>;
+  categories: Record<string, number>;
+  with_lead: number;
+  channels: Record<string, number>;
+};
 
 function errorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
@@ -173,124 +175,61 @@ function getCategory(item: ConvoItem): Category | null {
   });
 }
 
-function isRealLead(lead?: ConvoItem['lead']) {
-  if (!lead) return false;
-  return ['qualified', 'won', 'hot', 'warm'].includes(
-    String(lead.status || '').toLowerCase(),
-  );
-}
-
-function normalizeChannel(value?: string | null) {
-  const key = (value || '').toLowerCase().trim().replace(/[\s-]+/g, '_');
-  const aliases: Record<string, string> = {
-    fb: 'facebook',
-    facebook_messenger: 'facebook',
-    google_reviews: 'google',
-    googlemaps: 'google',
-    google_maps: 'google',
-    ig: 'instagram',
-    insta: 'instagram',
-    telegram_bot: 'telegram',
-    web: 'website',
-    website_chat: 'website',
-    whatsapp_business: 'whatsapp',
-  };
-  return aliases[key] || key;
-}
-
-function getConversationChannelId(
-  item: ConvoItem,
-  channels: ChannelItem[],
-): number | null {
-  if (
-    item.channel_id != null &&
-    channels.some((channel) => channel.id === item.channel_id)
-  ) {
-    return item.channel_id;
-  }
-
-  const platform = normalizeChannel(item.channel);
-  const match = channels.find(
-    (channel) => normalizeChannel(channel.platform) === platform,
-  );
-
-  return match?.id ?? item.channel_id ?? null;
-}
-
 const STAT_FILTERS: {
   key: string;
   label: string;
   tone: keyof typeof STAT_TONE;
   icon: React.ReactNode;
 }[] = [
-  {
-    key: 'all',
-    label: 'Total',
-    tone: 'gray',
-    icon: <List className='h-4 w-4' />,
-  },
-  {
-    key: 'complaint',
-    label: 'Complaint',
-    tone: 'error',
-    icon: <AlertTriangle className='h-4 w-4' />,
-  },
-  {
-    key: 'feedback',
-    label: 'Feedback',
-    tone: 'brand',
-    icon: <MessageCircle className='h-4 w-4' />,
-  },
-  {
-    key: 'order',
-    label: 'Order',
-    tone: 'warning',
-    icon: <Package className='h-4 w-4' />,
-  },
-  {
-    key: 'enquiry',
-    label: 'Enquiry',
-    tone: 'brand',
-    icon: <HelpCircle className='h-4 w-4' />,
-  },
-  {
-    key: 'open',
-    label: 'Open',
-    tone: 'success',
-    icon: <CheckCircle2 className='h-4 w-4' />,
-  },
-  {
-    key: 'handoff',
-    label: 'Handoff',
-    tone: 'warning',
-    icon: <ArrowRightLeft className='h-4 w-4' />,
-  },
-  {
-    key: 'lead',
-    label: 'With lead',
-    tone: 'success',
-    icon: <Target className='h-4 w-4' />,
-  },
-];
-
-function matchesStatFilter(item: ConvoItem, statFilter: string) {
-  switch (statFilter) {
-    case 'all':
-      return true;
-    case 'open':
-    case 'handoff':
-      return (item.status || '').toLowerCase() === statFilter;
-    case 'lead':
-      return isRealLead(item.lead);
-    case 'complaint':
-    case 'feedback':
-    case 'order':
-    case 'enquiry':
-      return getCategory(item) === statFilter;
-    default:
-      return true;
-  }
-}
+    {
+      key: 'all',
+      label: 'Total',
+      tone: 'gray',
+      icon: <List className='h-4 w-4' />,
+    },
+    {
+      key: 'complaint',
+      label: 'Complaint',
+      tone: 'error',
+      icon: <AlertTriangle className='h-4 w-4' />,
+    },
+    {
+      key: 'feedback',
+      label: 'Feedback',
+      tone: 'brand',
+      icon: <MessageCircle className='h-4 w-4' />,
+    },
+    {
+      key: 'order',
+      label: 'Order',
+      tone: 'warning',
+      icon: <Package className='h-4 w-4' />,
+    },
+    {
+      key: 'enquiry',
+      label: 'Enquiry',
+      tone: 'brand',
+      icon: <HelpCircle className='h-4 w-4' />,
+    },
+    {
+      key: 'open',
+      label: 'Open',
+      tone: 'success',
+      icon: <CheckCircle2 className='h-4 w-4' />,
+    },
+    {
+      key: 'handoff',
+      label: 'Handoff',
+      tone: 'warning',
+      icon: <ArrowRightLeft className='h-4 w-4' />,
+    },
+    {
+      key: 'lead',
+      label: 'With lead',
+      tone: 'success',
+      icon: <Target className='h-4 w-4' />,
+    },
+  ];
 
 function badgeClass(status: string) {
   switch (status.toLowerCase()) {
@@ -493,7 +432,8 @@ function ConversationTable({
   setStatFilter: (value: string) => void;
   statCounts: Record<string, number>;
 }) {
-  const pageItems = getPageItems(items, page, PAGE_SIZE);
+  // `items` already contains exactly one server-side page.
+  const pageItems = items;
 
   const channelFilterRef = useRef<HTMLDivElement>(null);
   const conversationFilterRef = useRef<HTMLDivElement>(null);
@@ -536,7 +476,7 @@ function ConversationTable({
           Inbox
         </h3>
         <div className='type-micro font-medium text-gray-500 dark:text-gray-400'>
-          {items.length} conversations
+          {totalItems} conversations
         </div>
       </div>
 
@@ -776,7 +716,15 @@ function ConversationTable({
 
               {!loading &&
                 pageItems.map((item) => {
-                  const category = getCategory(item);
+                  const selectedCategory =
+                    statFilter === 'complaint' ||
+                      statFilter === 'feedback' ||
+                      statFilter === 'order' ||
+                      statFilter === 'enquiry'
+                      ? (statFilter as Category)
+                      : null;
+
+                  const category = selectedCategory ?? getCategory(item);
 
                   const preview =
                     item.lead?.meta?.text_preview ||
@@ -845,7 +793,7 @@ function ConversationTable({
                             <Image
                               src={
                                 CHANNEL_LOGOS[
-                                  (item.channel || '').toLowerCase()
+                                (item.channel || '').toLowerCase()
                                 ] || '/brand-logo/website.png'
                               }
                               alt={platformLabel(item.channel)}
@@ -940,12 +888,18 @@ export default function ConversationsPage() {
   } = useChannelFilter();
 
   const [items, setItems] = useState<ConvoItem[]>([]);
-  const [countsAll, setCountsAll] = useState<ConvoItem[]>([]);
   const [totalCount, setTotalCount] = useState(0);
-  const [channelTotal, setChannelTotal] = useState(0);
+  const [stats, setStats] = useState<ConversationStatsResponse>({
+    total: 0,
+    statuses: {},
+    categories: {},
+    with_lead: 0,
+    channels: {},
+  });
   const [filterLead, setFilterLead] = useState(false);
   const [openFilter, setOpenFilter] = useState<InboxFilterKey | null>(null);
   const [q, setQ] = useState('');
+  const [debouncedQ, setDebouncedQ] = useState('');
   const [status, setStatus] = useState('all');
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -958,144 +912,166 @@ export default function ConversationsPage() {
   const [statFilter, setStatFilter] = useState('all');
   const [page, setPage] = useState(1);
 
-  const load = useCallback(
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedQ(q.trim());
+      setPage(1);
+    }, 400);
+    return () => window.clearTimeout(timer);
+  }, [q]);
+
+  const buildFilterParams = useCallback(() => {
+    const params = new URLSearchParams();
+    if (debouncedQ) params.set('q', debouncedQ);
+
+    // The status stat cards and the conversation-status dropdown share the
+    // same backend field. A selected stat card takes precedence.
+    const effectiveStatus =
+      statFilter === 'open' || statFilter === 'handoff'
+        ? statFilter
+        : status;
+    if (effectiveStatus !== 'all') params.set('status', effectiveStatus);
+
+    if (channelFilter.channel_ids.length > 0) {
+      channelFilter.channel_ids.forEach((channelId) => {
+        params.append('channel_ids', String(channelId));
+      });
+    }
+    if (
+      statFilter === 'complaint' ||
+      statFilter === 'feedback' ||
+      statFilter === 'order' ||
+      statFilter === 'enquiry'
+    ) {
+      params.set('categories', statFilter);
+    }
+    if (filterLead || statFilter === 'lead') {
+      params.set('has_lead', 'true');
+    }
+    if (dateRange?.from) {
+      params.set('from_ts', new Date(dateRange.from).toISOString());
+    }
+    if (dateRange?.to) {
+      const to = new Date(dateRange.to);
+      to.setHours(23, 59, 59, 999);
+      params.set('to_ts', to.toISOString());
+    }
+    return params;
+  }, [
+    channelFilter.channel_ids,
+    dateRange,
+    debouncedQ,
+    filterLead,
+    statFilter,
+    status,
+  ]);
+
+  const loadConversations = useCallback(
     async (opts?: { silent?: boolean }) => {
       if (!opts?.silent) setLoading(true);
       setErr(null);
-
       try {
-        const pageQ = new URLSearchParams();
-        pageQ.set('limit', String(CONVERSATION_LOAD_LIMIT));
-        pageQ.set('offset', '0');
-        if (q.trim()) pageQ.set('q', q.trim());
-        if (status !== 'all') pageQ.set('status', status);
+        const params = buildFilterParams();
+        params.set('limit', String(PAGE_SIZE));
+        params.set('offset', String((page - 1) * PAGE_SIZE));
 
-        // NOTE: channel filter is applied CLIENT-SIDE (see visibleItems / channelCounts).
-        // Do NOT send channel_id here — doing so narrows `items` and breaks the counts.
-
-        if (dateRange?.from) {
-          pageQ.set('from_ts', new Date(dateRange.from).toISOString());
-        }
-        if (dateRange?.to) {
-          const to = new Date(dateRange.to);
-          to.setHours(23, 59, 59, 999);
-          pageQ.set('to_ts', to.toISOString());
-        }
-
-        const data = await apiFetch<{
-          items: ConvoItem[];
-          total_count?: number;
-          count?: number;
-          total?: number;
-        }>(`/admin/conversations?${pageQ.toString()}`, { auth: true });
-
-        const loadedItems = (data.items || []).filter(
-          (item) => item.channel?.toLowerCase() !== 'google',
+        const data = await apiFetch<ConversationsResponse>(
+          `/admin/conversations?${params.toString()}`,
+          { auth: true },
         );
-        setItems(loadedItems);
-        setTotalCount(responseTotal(data, loadedItems.length));
-        setChannelTotal(loadedItems.length);
-        setCountsAll(loadedItems);
+        setItems(data.items || []);
+        setTotalCount(data.total || 0);
         setLastRefresh(new Date());
+
+        // A deletion or incoming filter change can leave the UI beyond the
+        // final page. Move back once and let the effect fetch that page.
+        if (page > 1 && (data.items || []).length === 0 && data.total > 0) {
+          setPage(Math.max(1, Math.ceil(data.total / PAGE_SIZE)));
+        }
       } catch (error: unknown) {
         setErr(errorMessage(error, 'Failed to load conversations'));
+        setItems([]);
       } finally {
         if (!opts?.silent) setLoading(false);
       }
     },
-    [dateRange, q, status],
+    [buildFilterParams, page],
   );
 
-  useEffect(() => {
-    const timer = setTimeout(() => load(), 400);
-    return () => clearTimeout(timer);
-  }, [load]);
-
-  useEffect(() => {
-    const timer = setInterval(() => load({ silent: true }), 15000);
-    return () => clearInterval(timer);
-  }, [load]);
-
-  // Lead-filtered but NOT channel-filtered — the source of truth for channel counts.
-  const leadFilteredItems = useMemo(
-    () => countsAll.filter((item) => !filterLead || isRealLead(item.lead)),
-    [filterLead, countsAll],
-  );
-
-  // Channel counts computed BEFORE the channel filter, so every channel keeps its
-  // real total whether or not it's selected.
-  const sampledChannelCounts = useMemo(
-    () =>
-      leadFilteredItems.reduce<Record<number, number>>((acc, item) => {
-        const channelId = getConversationChannelId(item, channels);
-        if (channelId != null) {
-          acc[channelId] = (acc[channelId] || 0) + 1;
-        }
-        return acc;
-      }, {}),
-    [channels, leadFilteredItems],
-  );
-  const displayChannelCounts = sampledChannelCounts;
-  const displayChannelTotal = filterLead ? leadFilteredItems.length : channelTotal;
-
-  // What the table actually renders — channel filter applied here on top.
-  const visibleItems = useMemo(() => {
-    let list = items;
-    if (channelFilter.channel_ids.length > 0) {
-      list = list.filter((item) => {
-        const channelId = getConversationChannelId(item, channels);
-        return channelId != null && channelFilter.channel_ids.includes(channelId);
+  const loadStats = useCallback(async () => {
+    try {
+      const data = await apiFetch<ConversationStatsResponse>(
+        '/admin/conversations/stats',
+        { auth: true },
+      );
+      setStats({
+        total: data.total || 0,
+        statuses: data.statuses || {},
+        categories: data.categories || {},
+        with_lead: data.with_lead || 0,
+        channels: data.channels || {},
       });
+    } catch (error: unknown) {
+      setErr(errorMessage(error, 'Failed to load conversation counts'));
     }
-    if (statFilter !== 'all') {
-      list = list.filter((item) => matchesStatFilter(item, statFilter));
-    }
-    return list;
-  }, [channels, items, channelFilter, statFilter]);
+  }, []);
 
-  const statusCounts = useMemo(
+  useEffect(() => {
+    void loadConversations();
+  }, [loadConversations]);
+
+  useEffect(() => {
+    void loadStats();
+  }, [loadStats]);
+
+  // Refresh only the current server page, and do nothing for hidden tabs.
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        void loadConversations({ silent: true });
+      }
+    }, 15_000);
+    return () => window.clearInterval(timer);
+  }, [loadConversations]);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === 'visible') void loadStats();
+    }, 60_000);
+    return () => window.clearInterval(timer);
+  }, [loadStats]);
+
+  const channelCounts = useMemo<Record<number, number>>(
     () =>
-      countsAll.reduce<Record<string, number>>((acc, item) => {
-        const key = item.status || 'unknown';
-        acc[key] = (acc[key] || 0) + 1;
-        return acc;
-      }, {}),
-    [countsAll],
+      Object.fromEntries(
+        Object.entries(stats.channels).map(([id, count]) => [Number(id), count]),
+      ),
+    [stats.channels],
   );
-
-  const categoryCounts = useMemo(
-    () =>
-      countsAll.reduce<Record<string, number>>((acc, item) => {
-        const category = getCategory(item);
-        if (category) acc[category] = (acc[category] || 0) + 1;
-        return acc;
-      }, {}),
-    [countsAll],
+  const channelTotal = useMemo(
+    () => Object.values(channelCounts).reduce((sum, count) => sum + count, 0),
+    [channelCounts],
   );
 
   const tabCounts = useMemo(
     () => ({
-      all: countsAll.length,
-      open: statusCounts.open || 0,
-      handoff: statusCounts.handoff || 0,
-      closed: statusCounts.closed || 0,
+      all: stats.total,
+      open: stats.statuses.open || 0,
+      handoff: stats.statuses.handoff || 0,
+      closed: stats.statuses.closed || 0,
     }),
-    [countsAll.length, statusCounts],
+    [stats],
   );
 
-  const openCount = statusCounts.open || 0;
-  const handoffCount = statusCounts.handoff || 0;
-  const leadCount = countsAll.filter((item) => isRealLead(item.lead)).length;
-
   const statValues: Record<string, number> = {
-    all: countsAll.length,
-    complaint: categoryCounts.complaint || 0,
-    feedback: categoryCounts.feedback || 0,
-    order: categoryCounts.order || 0,
-    enquiry: categoryCounts.enquiry || 0,
-    open: openCount,
-    handoff: handoffCount,
-    lead: leadCount,
+    all: stats.total,
+    complaint: stats.categories.complaint || 0,
+    feedback: stats.categories.feedback || 0,
+    order: stats.categories.order || 0,
+    enquiry: stats.categories.enquiry || 0,
+    open: stats.statuses.open || 0,
+    handoff: stats.statuses.handoff || 0,
+    lead: stats.with_lead,
   };
 
   const handleSeeAll = useCallback(() => {
@@ -1131,7 +1107,9 @@ export default function ConversationsPage() {
             <div className='flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-3'>
               <button
                 className='inline-flex h-8 items-center justify-center gap-2 rounded-[10px] border border-gray-200 bg-white px-3.5 type-small font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:bg-white/[0.05]'
-                onClick={() => load()}
+                onClick={() => {
+                  void Promise.all([loadConversations(), loadStats()]);
+                }}
               >
                 <RefreshCw className='h-3.5 w-3.5' />
                 Refresh
@@ -1168,11 +1146,11 @@ export default function ConversationsPage() {
 
         <div className='mt-4'>
           <ConversationTable
-            items={visibleItems}
+            items={items}
             loading={loading}
             page={page}
             setPage={setPage}
-            totalItems={visibleItems.length}
+            totalItems={totalCount}
             status={status}
             setStatus={(next) => {
               setStatus(next);
@@ -1188,7 +1166,7 @@ export default function ConversationsPage() {
             }}
             onSearchSubmit={() => {
               setPage(1);
-              load();
+              setDebouncedQ(q.trim());
             }}
             onSeeAll={handleSeeAll}
             channelFilter={channelFilter}
@@ -1196,8 +1174,8 @@ export default function ConversationsPage() {
             channels={channels}
             channelsLoading={channelsLoading}
             selectedChannels={selectedChannels}
-            channelCounts={displayChannelCounts}
-            channelTotal={displayChannelTotal || totalCount}
+            channelCounts={channelCounts}
+            channelTotal={channelTotal}
             dateRange={dateRange}
             setDateRange={(next) => {
               setDateRange(next);
