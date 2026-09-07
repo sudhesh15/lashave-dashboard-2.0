@@ -920,6 +920,19 @@ export default function ConversationsPage() {
     return () => window.clearTimeout(timer);
   }, [q]);
 
+  // useChannelFilter may return a new selectedChannels array on every render.
+  // A primitive string remains referentially stable and prevents the loading
+  // effect from firing again after every setItems/setLoading update.
+  const selectedPlatformKey = Array.from(
+    new Set(
+      selectedChannels
+        .map((channel) => channel.platform?.trim().toLowerCase())
+        .filter((platform): platform is string => Boolean(platform)),
+    ),
+  )
+    .sort()
+    .join(',');
+
   const buildFilterParams = useCallback(() => {
     const params = new URLSearchParams();
     if (debouncedQ) params.set('q', debouncedQ);
@@ -932,9 +945,12 @@ export default function ConversationsPage() {
         : status;
     if (effectiveStatus !== 'all') params.set('status', effectiveStatus);
 
-    if (channelFilter.channel_ids.length > 0) {
-      channelFilter.channel_ids.forEach((channelId) => {
-        params.append('channel_ids', String(channelId));
+    // Filter by stable platform name, not TenantChannel.id. Reconnecting a
+    // platform creates a new channel row/id, but historical conversations keep
+    // their original id.
+    if (selectedPlatformKey) {
+      selectedPlatformKey.split(',').forEach((platform) => {
+        params.append('channels', platform);
       });
     }
     if (
@@ -958,10 +974,10 @@ export default function ConversationsPage() {
     }
     return params;
   }, [
-    channelFilter.channel_ids,
     dateRange,
     debouncedQ,
     filterLead,
+    selectedPlatformKey,
     statFilter,
     status,
   ]);
@@ -1041,16 +1057,23 @@ export default function ConversationsPage() {
     return () => window.clearInterval(timer);
   }, [loadStats]);
 
+  // ChannelFilter renders current connection rows and expects id-keyed counts.
+  // The API returns stable platform-keyed counts, so map each current row to
+  // the complete historical count for its platform.
   const channelCounts = useMemo<Record<number, number>>(
     () =>
       Object.fromEntries(
-        Object.entries(stats.channels).map(([id, count]) => [Number(id), count]),
+        channels.map((channel) => [
+          channel.id,
+          stats.channels[channel.platform.trim().toLowerCase()] || 0,
+        ]),
       ),
-    [stats.channels],
+    [channels, stats.channels],
   );
   const channelTotal = useMemo(
-    () => Object.values(channelCounts).reduce((sum, count) => sum + count, 0),
-    [channelCounts],
+    () =>
+      Object.values(stats.channels).reduce((sum, count) => sum + count, 0),
+    [stats.channels],
   );
 
   const tabCounts = useMemo(
