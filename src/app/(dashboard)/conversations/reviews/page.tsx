@@ -695,7 +695,7 @@ function ReviewsInner() {
   const [reviewsPage, setReviewsPage] = useState(1);
   const [search, setSearch] = useState("");
   const [success, setSuccess] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const [pendingCriticalCount, setPendingCriticalCount] = useState(0);
   const [needsHumanReviewCount, setNeedsHumanReviewCount] = useState(0);
 
@@ -760,9 +760,9 @@ function ReviewsInner() {
         `/admin/channels/google/${selectedChannelId}/reviews`,
         { auth: true },
       );
-      showMessage("Reviews auto pooled.", "success");
 
       setReviews(Array.isArray(data) ? data : []);
+      setError(null);
     } catch (err: unknown) {
       setError(errorMessage(err, "Failed to load reviews."));
     } finally {
