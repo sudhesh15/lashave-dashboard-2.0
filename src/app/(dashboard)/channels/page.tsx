@@ -205,7 +205,7 @@ function Card({
 
 function ChartHeader({ title, subtitle }: { title: string; subtitle: string }) {
   return (
-    <div className='mb-6'>
+    <div className='mb-4'>
       <h3 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
         {title}
       </h3>
@@ -315,7 +315,7 @@ function ConnectModal({
               value={token}
               onChange={(event) => setToken(event.target.value)}
               placeholder='Telegram bot token'
-              className='mt-2 h-10 w-full rounded-(--radius-control) border border-gray-200 bg-white px-3 type-small text-gray-700 outline-none focus:border-brand-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300'
+              className='mt-2 h-(--control-height-md) w-full rounded-(--radius-control) border border-gray-200 bg-white px-3 type-small text-gray-700 outline-none focus:border-brand-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300'
             />
           </div>
         )}
@@ -343,7 +343,7 @@ function ConnectModal({
             type='button'
             onClick={onCancel}
             disabled={connecting}
-            className='h-10 rounded-(--radius-control) border border-gray-200 bg-white px-4 type-small font-medium text-gray-700 dark:border-gray-800 dark:bg-white/3 dark:text-gray-300'
+            className='h-(--control-height-md) rounded-(--radius-control) border border-gray-200 bg-white px-4 type-small font-medium text-gray-700 dark:border-gray-800 dark:bg-white/3 dark:text-gray-300'
           >
             Cancel
           </button>
@@ -351,7 +351,7 @@ function ConnectModal({
             type='button'
             onClick={onConfirm}
             disabled={connectDisabled}
-            className='inline-flex h-10 items-center gap-2 rounded-(--radius-control) bg-brand-500 px-4 type-small font-medium text-white disabled:opacity-60'
+            className='inline-flex h-(--control-height-md) items-center gap-2 rounded-(--radius-control) bg-brand-500 px-4 type-small font-medium text-white disabled:opacity-60'
           >
             {connecting && <Loader2 className='h-4 w-4 animate-spin' />}
             Connect
@@ -399,14 +399,14 @@ function ConfirmModal({
           <button
             type='button'
             onClick={onCancel}
-            className='h-10 rounded-(--radius-control) border border-gray-200 bg-white px-4 type-small font-medium text-gray-700 dark:border-gray-800 dark:bg-white/3 dark:text-gray-300'
+            className='h-(--control-height-md) rounded-(--radius-control) border border-gray-200 bg-white px-4 type-small font-medium text-gray-700 dark:border-gray-800 dark:bg-white/3 dark:text-gray-300'
           >
             Cancel
           </button>
           <button
             type='button'
             onClick={onConfirm}
-            className={`h-10 rounded-(--radius-control) px-4 type-small font-medium text-white ${
+            className={`h-(--control-height-md) rounded-(--radius-control) px-4 type-small font-medium text-white ${
               tone === 'error' ? 'bg-error-500' : 'bg-warning-500'
             }`}
           >
@@ -946,10 +946,10 @@ function ChannelsInner() {
         />
       )}
 
-      <div className='py-6'>
+      <div className='min-w-0 w-full'>
         <LockedAccountBanner />
         <ConversationLimitBanner />
-        <div className='mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between'>
+        <div className='mb-4 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between'>
           <div>
             <p className='type-small font-medium text-brand-500 dark:text-brand-400'>
               Channels
@@ -967,7 +967,7 @@ function ChannelsInner() {
               <button
                 type='button'
                 onClick={() => router.push(settingsBackHref)}
-                className='inline-flex h-10 items-center justify-center gap-2 rounded-(--radius-control) border border-gray-200 bg-white px-4 type-small font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-800 dark:bg-white/3 dark:text-gray-300 dark:hover:bg-white/5'
+                className='inline-flex h-(--control-height-md) items-center justify-center gap-2 rounded-(--radius-control) border border-gray-200 bg-white px-4 type-small font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-800 dark:bg-white/3 dark:text-gray-300 dark:hover:bg-white/5'
               >
                 <ChevronLeft className='h-4 w-4' />
                 Back to Settings
@@ -976,7 +976,7 @@ function ChannelsInner() {
             <button
               type='button'
               onClick={() => void load()}
-              className='inline-flex h-10 items-center justify-center gap-2 rounded-(--radius-control) border border-gray-200 bg-white px-4 type-small font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-800 dark:bg-white/3 dark:text-gray-300 dark:hover:bg-white/5'
+              className='inline-flex h-(--control-height-md) items-center justify-center gap-2 rounded-(--radius-control) border border-gray-200 bg-white px-4 type-small font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-800 dark:bg-white/3 dark:text-gray-300 dark:hover:bg-white/5'
             >
               <RefreshCw className='h-4 w-4' />
               Refresh
@@ -985,7 +985,7 @@ function ChannelsInner() {
         </div>
 
         {success && (
-          <div className='mb-6 flex items-center gap-3 rounded-xl border border-success-200 bg-success-50 px-4 py-3 type-small font-medium text-success-700 dark:border-success-500/20 dark:bg-success-500/10 dark:text-success-500'>
+          <div className='mb-4 flex items-center gap-3 rounded-xl border border-success-200 bg-success-50 px-4 py-3 type-small font-medium text-success-700 dark:border-success-500/20 dark:bg-success-500/10 dark:text-success-500'>
             <Check className='h-4 w-4' />
             <span className='flex-1'>{success}</span>
             <button type='button' onClick={() => setSuccess('')}>
@@ -995,7 +995,7 @@ function ChannelsInner() {
         )}
 
         {err && (
-          <div className='mb-6 flex items-start gap-3 rounded-xl border border-error-200 bg-error-50 px-4 py-3 type-small font-medium text-error-700 dark:border-error-500/20 dark:bg-error-500/10 dark:text-error-500'>
+          <div className='mb-4 flex items-start gap-3 rounded-xl border border-error-200 bg-error-50 px-4 py-3 type-small font-medium text-error-700 dark:border-error-500/20 dark:bg-error-500/10 dark:text-error-500'>
             <AlertTriangle className='mt-0.5 h-4 w-4 shrink-0' />
             <span className='flex-1'>{err}</span>
             <button type='button' onClick={() => setErr('')}>
@@ -1005,7 +1005,7 @@ function ChannelsInner() {
         )}
 
         <Card className='mt-6 overflow-hidden'>
-          <div className='flex flex-col gap-2 border-b border-gray-100 px-5 py-5 dark:border-white/5 sm:flex-row sm:items-center sm:justify-between sm:px-6'>
+          <div className='flex flex-col gap-2 border-b border-gray-100 px-5 py-4 dark:border-white/5 sm:flex-row sm:items-center sm:justify-between sm:px-6'>
             <div>
               <h3 className='type-body font-semibold text-gray-800 dark:text-white/90'>
                 Connected Channels
@@ -1020,8 +1020,8 @@ function ChannelsInner() {
             </div>
           </div>
 
-          <div className='min-w-0 px-5 py-5 sm:px-6'>
-            <div className='flex flex-col gap-4 rounded-t-xl border border-b-0 border-gray-200 bg-white px-5 py-4 dark:border-white/5 dark:bg-white/1 lg:flex-row lg:items-center lg:justify-between'>
+          <div className='min-w-0 px-5 py-4 sm:px-6'>
+            <div className='flex flex-col gap-2 rounded-t-xl border border-b-0 border-gray-200 bg-white px-5 py-4 dark:border-white/5 dark:bg-white/1 lg:flex-row lg:items-center lg:justify-between'>
               <h4 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
                 Connected channels
               </h4>
@@ -1053,7 +1053,7 @@ function ChannelsInner() {
                       ].map((header) => (
                         <th
                           key={header}
-                          className='px-5 py-3 text-left type-body font-medium text-gray-500 dark:text-gray-400'
+                          className='px-5 py-2.5 text-left type-body font-medium text-gray-500 dark:text-gray-400'
                         >
                           {header}
                         </th>
@@ -1065,7 +1065,7 @@ function ChannelsInner() {
                       <tr>
                         <td
                           colSpan={6}
-                          className='px-5 py-14 text-center type-small text-gray-500 dark:text-gray-400'
+                          className='px-5 py-10 text-center type-small text-gray-500 dark:text-gray-400'
                         >
                           Loading channels
                         </td>
@@ -1074,7 +1074,7 @@ function ChannelsInner() {
                       <tr>
                         <td
                           colSpan={6}
-                          className='px-5 py-14 text-center type-small text-gray-500 dark:text-gray-400'
+                          className='px-5 py-10 text-center type-small text-gray-500 dark:text-gray-400'
                         >
                           No channels connected yet
                         </td>
@@ -1091,7 +1091,7 @@ function ChannelsInner() {
                             key={channel.id}
                             className='transition hover:bg-gray-50 dark:hover:bg-white/2'
                           >
-                            <td className='px-5 py-3 sm:px-6'>
+                            <td className='px-5 py-2.5 sm:px-6'>
                               <div className='flex items-center gap-3'>
                                 <div className='flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-100 ring-1 ring-gray-200 dark:bg-gray-800 dark:ring-gray-700'>
                                   <Image
@@ -1113,10 +1113,10 @@ function ChannelsInner() {
                                 </div>
                               </div>
                             </td>
-                            <td className='px-6 py-3 type-small text-gray-500 dark:text-gray-400'>
+                            <td className='px-6 py-2.5 type-small text-gray-500 dark:text-gray-400'>
                               {platformLabel(channel.platform)}
                             </td>
-                            <td className='px-6 py-3'>
+                            <td className='px-6 py-2.5'>
                               <span
                                 className={`inline-flex rounded-full px-3 py-1 type-caption font-medium ${
                                   channel.is_active
@@ -1127,7 +1127,7 @@ function ChannelsInner() {
                                 {channel.is_active ? 'Active' : 'Offline'}
                               </span>
                             </td>
-                            <td className='px-6 py-3'>
+                            <td className='px-6 py-2.5'>
                               <span
                                 className={`inline-flex rounded-full px-3 py-1 type-caption font-medium ${
                                   token?.status === 'expired'
@@ -1144,12 +1144,12 @@ function ChannelsInner() {
                                   : 'Not applicable'}
                               </span>
                             </td>
-                            <td className='px-6 py-3 type-small text-gray-500 dark:text-gray-400'>
+                            <td className='px-6 py-2.5 type-small text-gray-500 dark:text-gray-400'>
                               {formatDate(
                                 channel.updated_at || channel.created_at,
                               )}
                             </td>
-                            <td className='px-6 py-3'>
+                            <td className='px-6 py-2.5'>
                               <div className='flex items-center gap-2 whitespace-nowrap'>
                                 {/* VERIFY */}
                                 <button
@@ -1341,7 +1341,7 @@ function ChannelsInner() {
           </div>
         </Card>
         {(available.length > 0 || !websiteIsConnected) && (
-          <Card className='mt-6 p-6 sm:p-6'>
+          <Card className='mt-4 p-5'>
             <ChartHeader
               title='Add Channel'
               subtitle='Connect another source using the approved channel setup flow'
@@ -1351,9 +1351,9 @@ function ChannelsInner() {
                 <button
                   type='button'
                   onClick={() => void openWebsiteModal()}
-                  className='rounded-xl border border-gray-200 p-6 text-left transition hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/3'
+                  className='rounded-xl border border-gray-200 p-5 text-left transition hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/3'
                 >
-                  <div className='mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'>
+                  <div className='mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'>
                     <Globe2 className='h-5 w-5' />
                   </div>
                   <h4 className='type-small font-semibold text-gray-800 dark:text-white/90'>
@@ -1376,9 +1376,9 @@ function ChannelsInner() {
                     key={platform}
                     type='button'
                     onClick={() => openConnect(platform)}
-                    className='rounded-xl border border-gray-200 p-6 text-left transition hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/3'
+                    className='rounded-xl border border-gray-200 p-5 text-left transition hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/3'
                   >
-                    <div className='mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 p-2 dark:bg-gray-800'>
+                    <div className='mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 p-2 dark:bg-gray-800'>
                       {logo ? (
                         <Image
                           src={logo}

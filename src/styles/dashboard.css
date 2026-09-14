@@ -6,7 +6,7 @@
  *
  * Contains
  * ─────────
- *   1. Responsive layout utilities  (.page-content, .kpi-grid, etc.)
+ *   1. Responsive layout utilities  (.kpi-grid, etc.)
  *   2. All @keyframe animations
  *   3. Reduced-motion overrides
  * ─────────────────────────────────────────────────────────────────
@@ -99,33 +99,6 @@
    Every page uses <PageShell> which already applies these, but they
    are also available as plain classes for one-off overrides.
 ══════════════════════════════════════════════════════════════════ */
-
-/* Centred content column — matches the max-w-6xl in overview page */
-.page-content {
-  position: relative;
-  z-index: 10;
-  width: 100%;
-  max-width: 87.5rem;
-  margin-inline: auto;
-  padding: 2rem 1rem;     /* mobile: 16px side padding            */
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;            /* 24 px between major sections          */
-}
-
-/* Tablet+  */
-@media (min-width: 640px) {
-  .page-content {
-    padding: 2rem 1.5rem;
-  }
-}
-
-/* Desktop+ */
-@media (min-width: 1024px) {
-  .page-content {
-    padding: 2.5rem 2rem;
-  }
-}
 
 /* ── KPI row ── */
 /* Mobile: 2 cols, Tablet: 2 cols, Desktop: 4 cols */

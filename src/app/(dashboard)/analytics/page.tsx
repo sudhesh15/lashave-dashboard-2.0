@@ -516,7 +516,7 @@ function ChartCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className={cn(CARD, 'px-5 pb-5 pt-5 sm:px-6 sm:pt-6')}>
+    <div className={cn(CARD, 'p-4')}>
       <h3 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
         {title}
       </h3>
@@ -525,7 +525,7 @@ function ChartCard({
           {subtitle}
         </p>
       )}
-      <div className='mt-5'>{children}</div>
+      <div className='mt-4'>{children}</div>
     </div>
   );
 }
@@ -939,7 +939,7 @@ function ConversionGauge({
       options={options}
       series={series}
       type='radialBar'
-      height={260}
+      height={240}
     />
   );
 }
@@ -969,7 +969,7 @@ function MetricCard({
   };
 
   return (
-    <div className={cn(CARD, 'p-6 md:p-6')}>
+    <div className={cn(CARD, 'p-4')}>
       <div
         className={cn(
           'flex h-12 w-12 items-center justify-center rounded-xl',
@@ -978,7 +978,7 @@ function MetricCard({
       >
         {icon}
       </div>
-      <div className='mt-5'>
+      <div className='mt-3'>
         <span className='type-small text-gray-500 dark:text-gray-400'>
           {label}
         </span>
@@ -992,7 +992,7 @@ function MetricCard({
 
 function Empty({ label }: { label: string }) {
   return (
-    <div className='flex flex-col items-center py-8 text-center'>
+    <div className='flex flex-col items-center py-6 text-center'>
       <Inbox size={26} className='mb-2 text-gray-300 dark:text-gray-700' />
       <p className='type-small text-gray-400 dark:text-gray-500'>{label}</p>
     </div>
@@ -1029,7 +1029,7 @@ function CustomerTableRow({
       onClick={onClick}
       className='cursor-pointer transition hover:bg-gray-50 dark:hover:bg-white/2'
     >
-      <td className='px-5 py-3 sm:px-6'>
+      <td className='px-5 py-2.5 sm:px-6'>
         <div className='flex items-center gap-3'>
           {profilePic ? (
             <img
@@ -1068,7 +1068,7 @@ function CustomerTableRow({
         </div>
       </td>
 
-      <td className='px-6 py-3'>
+      <td className='px-6 py-2.5'>
         <span className='inline-flex items-center gap-2 type-small text-gray-700 dark:text-gray-300'>
           {CHANNEL_CFG[(lead.channel || '').toLowerCase()]?.logo || (
             <Globe size={16} className='text-gray-400 dark:text-gray-500' />
@@ -1081,31 +1081,31 @@ function CustomerTableRow({
         </span>
       </td>
 
-      <td className='px-6 py-3 type-small text-gray-500 dark:text-gray-400'>
+      <td className='px-6 py-2.5 type-small text-gray-500 dark:text-gray-400'>
         <span className='block max-w-50 truncate'>{email || '-'}</span>
       </td>
 
-      <td className='px-6 py-3 type-small text-gray-500 dark:text-gray-400'>
+      <td className='px-6 py-2.5 type-small text-gray-500 dark:text-gray-400'>
         {phone || '-'}
       </td>
 
-      <td className='px-6 py-3 type-small capitalize text-gray-500 dark:text-gray-400'>
+      <td className='px-6 py-2.5 type-small capitalize text-gray-500 dark:text-gray-400'>
         <span style={{ color: pipeCfg.color }}>{lead.status || 'new'}</span>
       </td>
 
-      <td className='px-6 py-3'>
+      <td className='px-6 py-2.5'>
         <Badge color={segCfg.badge}>{segCfg.label}</Badge>
       </td>
 
-      <td className='px-6 py-3 type-small text-gray-500 dark:text-gray-400'>
+      <td className='px-6 py-2.5 type-small text-gray-500 dark:text-gray-400'>
         {ago(lead.updated_at)}
       </td>
 
-      <td className='px-6 py-3'>
+      <td className='px-6 py-2.5'>
         <Link
           href={conversationHref}
           onClick={(event) => event.stopPropagation()}
-          className='inline-flex h-8 items-center gap-2 whitespace-nowrap rounded-(--radius-control) bg-brand-500 px-3 type-small font-medium text-white shadow-theme-xs hover:bg-brand-600'
+          className='inline-flex h-(--control-height-sm) items-center gap-2 whitespace-nowrap rounded-(--radius-control) bg-brand-500 px-3 type-small font-medium text-white shadow-theme-xs hover:bg-brand-600'
         >
           <Eye size={14} />
           View conversation
@@ -1853,7 +1853,7 @@ function CustomersTab({
       )}
 
       <div className='min-w-0 max-w-full overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3'>
-        <div className='flex flex-col gap-2 border-b border-gray-100 px-5 py-5 dark:border-white/5 sm:flex-row sm:items-center sm:justify-between sm:px-6'>
+        <div className='flex flex-col gap-2 border-b border-gray-100 px-5 py-4 dark:border-white/5 sm:flex-row sm:items-center sm:justify-between sm:px-6'>
           <h3 className='type-body font-semibold text-gray-800 dark:text-white/90'>
             Customers
           </h3>
@@ -1863,7 +1863,7 @@ function CustomersTab({
           </div>
         </div>
 
-        <div className='min-w-0 px-5 py-5 sm:px-6'>
+        <div className='min-w-0 px-5 py-4 sm:px-6'>
           <div className='flex flex-col gap-4 rounded-t-xl border border-b-0 border-gray-200 bg-white px-5 py-4 dark:border-white/5 dark:bg-white/1 lg:flex-row lg:items-center lg:justify-between'>
             <div>
               <h4 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
@@ -1884,7 +1884,7 @@ function CustomersTab({
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
                   placeholder='Search name, intent, service'
-                  className='h-10 w-full rounded-(--radius-control) border border-gray-300 bg-white py-2 pl-11 pr-4 type-small text-gray-800 shadow-theme-xs outline-none placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-gray-500'
+                  className='h-(--control-height-md) w-full rounded-(--radius-control) border border-gray-300 bg-white py-2 pl-11 pr-4 type-small text-gray-800 shadow-theme-xs outline-none placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-gray-500'
                 />
               </div>
 
@@ -2069,7 +2069,7 @@ function CustomersTab({
                     ].map((header) => (
                       <th
                         key={header}
-                        className='px-5 py-3 text-left type-body font-medium text-gray-500 dark:text-gray-400'
+                        className='px-5 py-2.5 text-left type-body font-medium text-gray-500 dark:text-gray-400'
                       >
                         {header}
                       </th>
@@ -2082,7 +2082,7 @@ function CustomersTab({
                     <tr>
                       <td
                         colSpan={8}
-                        className='px-5 py-14 text-center type-small text-gray-500 dark:text-gray-400'
+                        className='px-5 py-10 text-center type-small text-gray-500 dark:text-gray-400'
                       >
                         Loading customers
                       </td>
@@ -2093,7 +2093,7 @@ function CustomersTab({
                     <tr>
                       <td
                         colSpan={8}
-                        className='px-5 py-14 text-center type-small text-gray-500 dark:text-gray-400'
+                        className='px-5 py-10 text-center type-small text-gray-500 dark:text-gray-400'
                       >
                         {search.trim()
                           ? 'No customers match this search'
@@ -2264,9 +2264,9 @@ const topicDonut = topics.map((t) => ({
   const peakSubtitle = peakUsesTime ? 'busiest time slot' : 'busiest day';
 
   return (
-    <div className='grid grid-cols-12 gap-4 md:gap-6'>
-      <div className='col-span-12 space-y-4 xl:col-span-7 md:space-y-6'>
-        <div className='grid grid-cols-2 gap-4 sm:grid-cols-3 md:gap-6'>
+    <div className='grid grid-cols-12 gap-(--layout-section-gap)'>
+      <div className='col-span-12 space-y-4 lg:col-span-7'>
+        <div className='grid grid-cols-2 gap-(--layout-section-gap) sm:grid-cols-3'>
           <MetricCard
             label='Conversations'
             value={overview?.conversations ?? '—'}
@@ -2321,7 +2321,7 @@ const topicDonut = topics.map((t) => ({
         </ChartCard>
       </div>
 
-      <div className='col-span-12 xl:col-span-5 flex flex-col space-y-8'>
+      <div className='col-span-12 flex flex-col gap-(--layout-section-gap) lg:col-span-5'>
         <ChartCard
           title='Conversion Rate'
           subtitle='Leads captured per conversation'
@@ -2364,7 +2364,7 @@ const topicDonut = topics.map((t) => ({
         >
           {timeseries && timeseries.length > 1 ? (
             <div className='max-w-full overflow-x-auto custom-scrollbar'>
-              <div className='min-w-180 xl:min-w-full'>
+              <div className='min-w-180 lg:min-w-full'>
                 <ActivityAreaChart data={timeseries} isDark={isDark} />
               </div>
             </div>
@@ -2374,7 +2374,7 @@ const topicDonut = topics.map((t) => ({
         </ChartCard>
       </div>
 
-      <div className='col-span-12 xl:col-span-5'>
+      <div className='col-span-12 lg:col-span-5'>
         <ChartCard
           title='Topic Breakdown'
           subtitle='What customers are asking about'
@@ -2387,7 +2387,7 @@ const topicDonut = topics.map((t) => ({
         </ChartCard>
       </div>
 
-      <div className='col-span-12 space-y-4 xl:col-span-7 md:space-y-6'>
+      <div className='col-span-12 space-y-4 lg:col-span-7'>
         <ChartCard title='Pipeline Funnel' subtitle='Leads by pipeline stage'>
           {Object.keys(pipeline).length > 0 ? (
             <div className='flex flex-col gap-2'>
@@ -2421,7 +2421,7 @@ const topicDonut = topics.map((t) => ({
           )}
         </ChartCard>
 
-        <div className='col-span-12 space-y-4 xl:col-span-7 md:space-y-6'>
+        <div className='col-span-12 space-y-4 lg:col-span-7'>
           <ChartCard title='Returning Users' subtitle='Customers who came back'>
             {returning ? (
               <div className='flex items-center gap-4'>
@@ -2498,12 +2498,12 @@ export default function AnalyticsPage() {
 
   return (
     <RequireAuth>
-      <div className='py-4'>
+      <div className='min-w-0 w-full'>
         <LockedAccountBanner />
         <ConversationLimitBanner />
         <PageBreadcrumb pageTitle='Analytics' />
 
-      <div className='mb-6 flex flex-wrap items-start justify-end gap-3'>
+      <div className='mb-4 flex flex-wrap items-start justify-end gap-3'>
         {tab === 'overview' && (
           <>
             <div ref={dateFilterRef} className='relative'>
@@ -2532,7 +2532,7 @@ export default function AnalyticsPage() {
         )}
       </div>
 
-      <div className='mb-6 inline-flex gap-1 rounded-xl border border-gray-200 bg-gray-100 p-1 dark:border-gray-800 dark:bg-white/3'>
+      <div className='mb-4 inline-flex gap-1 rounded-xl border border-gray-200 bg-gray-100 p-1 dark:border-gray-800 dark:bg-white/3'>
         {TABS.map((t) => {
           const active = tab === t.id;
 

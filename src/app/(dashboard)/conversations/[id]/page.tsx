@@ -381,8 +381,8 @@ function MessageBubble({
 
 function DetailSkeleton() {
   return (
-    <div className='mx-auto max-w-screen-2xl p-4 md:p-6'>
-      <div className='h-[calc(100vh-150px)] animate-pulse rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/5' />
+    <div className='min-w-0 w-full'>
+      <div className='min-h-105 animate-pulse rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/5' />
     </div>
   );
 }
@@ -540,13 +540,13 @@ export default function ConversationDetailPage() {
 
   return (
     <RequireAuth>
-      <div className='py-5'>
+      <div className='min-w-0 w-full'>
         <div className='mb-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between'>
           <div className='flex items-center gap-3'>
             <button
               type='button'
               onClick={() => router.push('/conversations')}
-              className='flex h-9 w-9 items-center justify-center rounded-(--radius-control) border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 dark:border-gray-800 dark:bg-white/3 dark:text-gray-400 dark:hover:bg-white/5'
+              className='flex h-(--control-height-sm) w-(--control-height-sm) items-center justify-center rounded-(--radius-control) border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 dark:border-gray-800 dark:bg-white/3 dark:text-gray-400 dark:hover:bg-white/5'
               aria-label='Back to conversations'
             >
               <ArrowLeft className='h-4.5 w-4.5' />
@@ -564,7 +564,7 @@ export default function ConversationDetailPage() {
             <button
               type='button'
               onClick={() => void load()}
-              className='inline-flex h-9 items-center gap-1.5 rounded-(--radius-control) border border-gray-200 bg-white px-3.5 type-small font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-800 dark:bg-white/3 dark:text-gray-300'
+              className='inline-flex h-(--control-height-sm) items-center gap-1.5 rounded-(--radius-control) border border-gray-200 bg-white px-3.5 type-small font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-800 dark:bg-white/3 dark:text-gray-300'
             >
               <RefreshCw className='h-4 w-4' />
               Refresh
@@ -690,7 +690,7 @@ export default function ConversationDetailPage() {
         </Card>
 
         {/* Main 2-col content: Messages (col-8) | stacked sidebar (col-4) */}
-        <div className='grid grid-cols-1 gap-4 lg:grid-cols-12 lg:gap-4'>
+        <div className='grid grid-cols-1 gap-(--layout-section-gap) lg:grid-cols-12'>
           <div className='lg:col-span-8'>
             <Card className='overflow-hidden'>
               {/* Messages header */}

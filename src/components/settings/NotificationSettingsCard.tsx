@@ -255,7 +255,7 @@ export default function NotificationSettingsCard() {
 
   if (loading) {
     return (
-      <div className='rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/3 sm:p-6'>
+      <div className='rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/3'>
         <div className='flex items-center justify-center gap-3 py-8 text-gray-500 dark:text-gray-400'>
           <Loader2 className='h-5 w-5 animate-spin' />
           <span className='type-small'>Loading notification settings…</span>
@@ -268,7 +268,7 @@ export default function NotificationSettingsCard() {
   const masterEnabled = data?.email_notifications_enabled ?? true;
 
   return (
-    <div className='rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/3 sm:p-6'>
+    <div className='rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/3'>
       <div className='mb-5 flex flex-wrap items-start justify-between gap-4 border-b border-gray-100 pb-5 dark:border-gray-800'>
         <div className='flex items-start gap-4'>
           <div
