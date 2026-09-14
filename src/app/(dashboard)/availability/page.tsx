@@ -294,10 +294,10 @@ const applyCompletedOverrides = (items: Booking[]) => {
 };
 
 const SELECT_CLASS =
-  'h-10 w-full appearance-none rounded-(--radius-control) border border-gray-300 bg-transparent px-3.5 py-2 pr-8 type-small text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800';
+  'h-(--control-height-md) w-full appearance-none rounded-(--radius-control) border border-gray-300 bg-transparent px-3.5 py-2 pr-8 type-small text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800';
 
 const TIME_INPUT_CLASS =
-  'h-10 w-full rounded-(--radius-control) border border-gray-300 bg-white px-3 type-small text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 disabled:opacity-40 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90';
+  'h-(--control-height-md) w-full rounded-(--radius-control) border border-gray-300 bg-white px-3 type-small text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 disabled:opacity-40 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90';
 
 /* Avatar */
 function Avatar({
@@ -1175,10 +1175,10 @@ function AvailabilityContent() {
 
   /* Main */
   return (
-    <div className='min-w-0 overflow-x-hidden py-4'>
+    <div className='min-w-0 w-full'>
       {/* No availability warning */}
       {!hasAvailability && (
-        <div className='mb-6 flex items-center gap-3 rounded-xl border border-warning-200 bg-warning-50 px-4 py-3 type-small font-medium text-warning-700 dark:border-warning-500/25 dark:bg-warning-500/10 dark:text-orange-300'>
+        <div className='mb-4 flex items-center gap-3 rounded-xl border border-warning-200 bg-warning-50 px-4 py-3 type-small font-medium text-warning-700 dark:border-warning-500/25 dark:bg-warning-500/10 dark:text-orange-300'>
           <AlertCircle size={16} className='shrink-0' />
           <span>
             No working hours set - customers can&apos;t book yet.{' '}
@@ -1194,7 +1194,7 @@ function AvailabilityContent() {
 
       {/* Bookings list */}
       <div className='min-w-0 max-w-full overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3'>
-        <div className='flex flex-col gap-4 border-b border-gray-100 px-5 py-5 dark:border-white/5 sm:px-6 lg:flex-row lg:items-center lg:justify-between'>
+        <div className='flex flex-col gap-3 border-b border-gray-100 px-5 py-4 dark:border-white/5 sm:px-6 lg:flex-row lg:items-center lg:justify-between'>
           <h3 className='type-body font-semibold text-gray-800 dark:text-white/90'>
             Bookings
           </h3>
@@ -1221,8 +1221,8 @@ function AvailabilityContent() {
           </div>
         </div>
 
-        <div className='min-w-0 px-5 py-5 sm:px-6'>
-          <div className='flex flex-col gap-4 rounded-t-xl border border-b-0 border-gray-200 bg-white px-5 py-4 dark:border-white/5 dark:bg-white/1 lg:flex-row lg:items-center lg:justify-between'>
+        <div className='min-w-0 px-5 py-4 sm:px-6'>
+          <div className='flex flex-col gap-3 rounded-t-xl border border-b-0 border-gray-200 bg-white px-5 py-4 dark:border-white/5 dark:bg-white/1 lg:flex-row lg:items-center lg:justify-between'>
             <div className='flex items-center gap-3'>
               <h4 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
                 {activeBookingLabel}
@@ -1239,7 +1239,7 @@ function AvailabilityContent() {
                   value={bookingSearch}
                   onChange={(event) => setBookingSearch(event.target.value)}
                   placeholder='Search...'
-                  className='h-10 w-full rounded-(--radius-control) border border-gray-300 bg-white py-2 pl-11 pr-4 type-small text-gray-800 shadow-theme-xs outline-none placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-gray-500'
+                  className='h-(--control-height-md) w-full rounded-(--radius-control) border border-gray-300 bg-white py-2 pl-11 pr-4 type-small text-gray-800 shadow-theme-xs outline-none placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-gray-500'
                 />
               </div>
               {/* Channel filter */}
@@ -1465,7 +1465,7 @@ function AvailabilityContent() {
                       <th
                         key={column.key}
                         className={cn(
-                          'px-5 py-3 type-body font-medium text-gray-500 dark:text-gray-400',
+                          'px-5 py-2.5 type-body font-medium text-gray-500 dark:text-gray-400',
                           [
                             'phone',
                             'email',
@@ -1512,7 +1512,7 @@ function AvailabilityContent() {
                     <tr>
                       <td
                         colSpan={8}
-                        className='px-5 py-14 text-center type-small text-gray-500 dark:text-gray-400'
+                        className='px-5 py-10 text-center type-small text-gray-500 dark:text-gray-400'
                       >
                         {bookingSearch.trim()
                           ? 'No bookings match this search'
@@ -1543,7 +1543,7 @@ function AvailabilityContent() {
                           key={booking.id}
                           className='h-13 transition hover:bg-gray-50 dark:hover:bg-white/2'
                         >
-                          <td className='px-5 py-3 sm:px-6'>
+                          <td className='px-5 py-2.5 sm:px-6'>
                             <div
                               className='flex items-center gap-3'
                               title={displayName}
@@ -1570,17 +1570,17 @@ function AvailabilityContent() {
                               </div>
                             </div>
                           </td>
-                          <td className='px-6 py-3 type-small text-gray-500 dark:text-gray-400'>
+                          <td className='px-6 py-2.5 type-small text-gray-500 dark:text-gray-400'>
                             <span className='block truncate'>
                               {contactPhone || 'No phone saved'}
                             </span>
                           </td>
-                          <td className='px-6 py-3 type-small text-gray-500 dark:text-gray-400'>
+                          <td className='px-6 py-2.5 type-small text-gray-500 dark:text-gray-400'>
                             <span className='block truncate'>
                               {contactEmail || 'No email saved'}
                             </span>
                           </td>
-                          <td className='px-6 py-3 type-small capitalize text-gray-500 dark:text-gray-400'>
+                          <td className='px-6 py-2.5 type-small capitalize text-gray-500 dark:text-gray-400'>
                             <span className='inline-flex items-center gap-2'>
                               {booking.channel &&
                                 CHANNEL_LOGOS[
@@ -1603,19 +1603,19 @@ function AvailabilityContent() {
                               </span>
                             </span>
                           </td>
-                          <td className='px-6 py-3 type-small text-gray-500 dark:text-gray-400'>
+                          <td className='px-6 py-2.5 type-small text-gray-500 dark:text-gray-400'>
                             {formatDate(booking.booking_date)}
                           </td>
-                          <td className='px-6 py-3 type-small text-gray-500 dark:text-gray-400'>
+                          <td className='px-6 py-2.5 type-small text-gray-500 dark:text-gray-400'>
                             {formatTime(booking.start_time)} -{' '}
                             {formatTime(booking.end_time)}
                           </td>
-                          <td className='px-6 py-3 text-center'>
+                          <td className='px-6 py-2.5 text-center'>
                             <Badge color={st.color} startIcon={st.icon}>
                               {st.label}
                             </Badge>
                           </td>
-                          <td className='px-6 py-3'>
+                          <td className='px-6 py-2.5'>
                             {!isCancelled && effectiveStatus !== 'completed' ? (
                               <div className='flex items-center gap-2 whitespace-nowrap'>
                                 <button
@@ -1694,7 +1694,7 @@ function AvailabilityContent() {
         className='m-4 max-w-180'
       >
         <div className='flex max-h-[85vh] w-full flex-col overflow-hidden rounded-(--radius-panel) bg-white dark:bg-gray-900'>
-          <div className='border-b border-gray-100 px-6 py-5 pr-14 dark:border-gray-800'>
+          <div className='border-b border-gray-100 px-6 py-4 pr-14 dark:border-gray-800'>
             <h2 className='type-card-title font-bold text-gray-800 dark:text-white/90'>
               Add appointment
             </h2>
@@ -1704,7 +1704,7 @@ function AvailabilityContent() {
             </p>
           </div>
 
-          <div className='custom-scrollbar flex flex-col gap-6 overflow-y-auto p-6'>
+          <div className='custom-scrollbar flex flex-col gap-4 overflow-y-auto p-6'>
             {/* Customer details */}
             <section>
               <div className='mb-3.5 flex items-center gap-3'>
@@ -1969,7 +1969,7 @@ function AvailabilityContent() {
         className='m-4 max-w-190'
       >
         <div className='flex max-h-[85vh] w-full flex-col overflow-hidden rounded-(--radius-panel) bg-white dark:bg-gray-900'>
-          <div className='border-b border-gray-100 px-6 py-5 pr-14 dark:border-gray-800'>
+          <div className='border-b border-gray-100 px-6 py-4 pr-14 dark:border-gray-800'>
             <Badge color='primary' startIcon={<CalendarDays size={13} />}>
               Availability
             </Badge>

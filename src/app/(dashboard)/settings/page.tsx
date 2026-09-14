@@ -141,13 +141,13 @@ function isUpcoming(dateStr: string) {
 }
 
 const SELECT_CLASS =
-  'h-10 w-full appearance-none rounded-(--radius-control) border border-gray-300 bg-transparent px-4 py-2 pr-8 type-small text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800';
+  'h-(--control-height-md) w-full appearance-none rounded-(--radius-control) border border-gray-300 bg-transparent px-4 py-2 pr-8 type-small text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800';
 
 const TIME_INPUT_CLASS =
-  'h-10 w-full rounded-(--radius-control) border border-gray-300 bg-white px-3 type-small text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 disabled:opacity-40 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90';
+  'h-(--control-height-md) w-full rounded-(--radius-control) border border-gray-300 bg-white px-3 type-small text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 disabled:opacity-40 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90';
 
 const INPUT_CLASS =
-  'h-10 rounded-(--radius-control) border-gray-300 px-4 py-2 type-small text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus-visible:border-brand-300 focus-visible:ring-3 focus-visible:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus-visible:border-brand-800';
+  'h-(--control-height-md) rounded-(--radius-control) border-gray-300 px-4 py-2 type-small text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus-visible:border-brand-300 focus-visible:ring-3 focus-visible:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus-visible:border-brand-800';
 
 const TEXTAREA_CLASS =
   'rounded-(--radius-control) border-gray-300 px-4 py-3 type-small text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus-visible:border-brand-300 focus-visible:ring-3 focus-visible:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus-visible:border-brand-800';
@@ -767,22 +767,22 @@ export default function SettingsPage() {
 
   return (
     <RequireAuth>
-      <div className='py-4'>
+      <div className='min-w-0 w-full'>
         <PageBreadcrumb pageTitle='Settings' />
 
       {err && (
-        <div className='mb-6 rounded-(--radius-control) border border-error-200 bg-error-50 px-4 py-3 type-small text-error-600 dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-400'>
+        <div className='mb-4 rounded-(--radius-control) border border-error-200 bg-error-50 px-4 py-3 type-small text-error-600 dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-400'>
           {err}
         </div>
       )}
 
-      <div className='grid grid-cols-1 gap-6 lg:grid-cols-[290px_1fr] lg:items-start'>
+      <div className='grid grid-cols-1 gap-(--layout-section-gap) lg:grid-cols-[290px_1fr] lg:items-start'>
         {/* SIDEBAR */}
         <div>
           {isMobile && (
             <button
               onClick={() => setSettingsMenuOpen((p) => !p)}
-              className='mb-3 flex h-10 w-full items-center justify-between rounded-(--radius-control) border border-gray-200 bg-white px-4 type-small font-medium text-gray-700 shadow-theme-xs transition hover:bg-gray-50 dark:border-gray-800 dark:bg-white/3 dark:text-gray-400 dark:hover:bg-white/3'
+              className='mb-3 flex h-(--control-height-md) w-full items-center justify-between rounded-(--radius-control) border border-gray-200 bg-white px-4 type-small font-medium text-gray-700 shadow-theme-xs transition hover:bg-gray-50 dark:border-gray-800 dark:bg-white/3 dark:text-gray-400 dark:hover:bg-white/3'
             >
               <span>Settings Menu</span>
               <Menu size={18} />
@@ -836,7 +836,7 @@ export default function SettingsPage() {
                         setSettingsMenuOpen(false);
                       }}
                       className={cn(
-                        'flex w-full items-center justify-between gap-3 rounded-(--radius-control) px-3 py-3 text-left transition',
+                        'flex w-full items-center justify-between gap-3 rounded-(--radius-control) px-3 py-2.5 text-left transition',
                         active
                           ? 'bg-brand-50 dark:bg-brand-500/12'
                           : 'hover:bg-gray-50 dark:hover:bg-white/3',
@@ -891,11 +891,11 @@ export default function SettingsPage() {
         {/* CONTENT */}
         <div className='min-w-0'>
           {activeSection === 'ai' && (
-            <div className='flex flex-col gap-6'>
+            <div className='flex flex-col gap-(--layout-section-gap)'>
               <NotificationSettingsCard />
 
               {/* AI enable card */}
-              <div className='rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/3 sm:p-6'>
+              <div className='rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/3'>
                 <div className='mb-4 flex flex-wrap items-center justify-between gap-3'>
                   <div>
                     <h2 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
@@ -953,7 +953,7 @@ export default function SettingsPage() {
               </div>
 
               {/* Handoff Automation */}
-              <div className='rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/3 sm:p-6'>
+              <div className='rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/3'>
                 <div className='mb-2'>
                   <h2 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
                     Handoff Automation
@@ -1123,7 +1123,7 @@ export default function SettingsPage() {
               </div>
 
               {/* About */}
-              <div className='rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/3 sm:p-6'>
+              <div className='rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/3'>
                 <h2 className='mb-4 type-card-title font-semibold text-gray-800 dark:text-white/90'>
                   About
                 </h2>
@@ -1170,7 +1170,7 @@ export default function SettingsPage() {
               </div>
 
               {/* Test */}
-              <div className='rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/3 sm:p-6'>
+              <div className='rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/3'>
                 <div className='mb-4 flex flex-wrap items-center justify-between gap-3'>
                   <div>
                     <h2 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
@@ -1249,8 +1249,8 @@ export default function SettingsPage() {
           )}
 
           {activeSection === 'booking' && (
-            <div className='rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/3 sm:p-6'>
-              <div className='mb-6'>
+            <div className='rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/3'>
+              <div className='mb-4'>
                 <Badge color='primary'>Smart Booking</Badge>
                 <h2 className='mt-3 text-title-sm font-bold text-gray-800 dark:text-white/90'>
                   Smart Booking
@@ -1394,7 +1394,7 @@ export default function SettingsPage() {
         className='m-4 max-w-180'
       >
         <div className='custom-scrollbar relative max-h-[85vh] w-full overflow-y-auto rounded-2xl bg-white p-6 dark:bg-gray-900 sm:p-8'>
-          <div className='mb-6 flex flex-wrap items-start justify-between gap-4 pr-10'>
+          <div className='mb-4 flex flex-wrap items-start justify-between gap-4 pr-10'>
             <div>
               <Badge color='primary' startIcon={<CalendarDays size={14} />}>
                 Smart Booking

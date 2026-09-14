@@ -351,7 +351,7 @@ function TenantsList() {
   const activeCount = tenants.filter((t) => t.is_active).length;
 
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="min-w-0 w-full">
       {toast && (
         <div
           className={
@@ -377,7 +377,7 @@ function TenantsList() {
         <EditModal tenant={editTarget} onSave={(updates) => handleSave(editTarget.id, updates)} onClose={() => setEditTarget(null)} />
       )}
 
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+      <div className="mb-4 flex flex-wrap items-end justify-between gap-4">
         <div>
           <Badge variant="light" color="primary" className="mb-2">
             Super Admin
@@ -394,13 +394,13 @@ function TenantsList() {
         </Button>
       </div>
 
-      <div className="relative mb-5">
+      <div className="relative mb-4">
         <Search className="absolute left-3.5 top-1/2 icon-small -translate-y-1/2 text-gray-400" />
         <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by name or ID…" className="pl-10" />
       </div>
 
       {!loading && tenants.length > 0 && (
-        <div className="mb-5 grid grid-cols-3 gap-3">
+        <div className="mb-4 grid grid-cols-3 gap-3">
           {[
             { label: "Total", value: tenants.length },
             { label: "Active", value: activeCount },
@@ -421,7 +421,7 @@ function TenantsList() {
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="rounded-2xl border border-gray-200 bg-gray-50 py-16 text-center type-small text-gray-400 dark:border-gray-800 dark:bg-white/2">
+        <div className="rounded-2xl border border-gray-200 bg-gray-50 py-10 text-center type-small text-gray-400 dark:border-gray-800 dark:bg-white/2">
           {search ? `No tenants matching "${search}"` : "No tenants yet"}
         </div>
       ) : (
@@ -431,7 +431,7 @@ function TenantsList() {
               key={t.id}
               className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-gray-200 bg-white p-4 transition-colors hover:border-brand-200 hover:bg-brand-25 dark:border-gray-800 dark:bg-white/3 dark:hover:border-brand-500/30 dark:hover:bg-brand-500/5"
             >
-              <div className="flex items-center gap-3.5">
+              <div className="flex items-center gap-3">
                 <AvatarText name={t.name} className="h-10 w-10" />
                 <div>
                   <div className="type-small font-semibold text-gray-900 dark:text-white/90">{t.name}</div>

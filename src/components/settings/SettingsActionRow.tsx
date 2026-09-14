@@ -31,7 +31,7 @@ export function SettingsActionRow({
     <div
       onClick={onRowClick}
       className={cn(
-        "grid grid-cols-1 items-start gap-4 rounded-xl border border-gray-200 bg-white p-6 transition hover:bg-gray-50/50 dark:border-gray-800 dark:bg-white/3 dark:hover:bg-white/4 sm:grid-cols-[52px_1fr_auto] sm:gap-5 sm:p-6",
+        "grid grid-cols-1 items-start gap-4 rounded-xl border border-gray-200 bg-white p-4 transition hover:bg-gray-50/50 dark:border-gray-800 dark:bg-white/3 dark:hover:bg-white/4 sm:grid-cols-[52px_1fr_auto] sm:gap-4 sm:p-4",
         onRowClick && "cursor-pointer"
       )}
     >

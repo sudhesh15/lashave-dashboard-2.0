@@ -413,7 +413,7 @@ function PricingForm() {
   if (!me) return null;
   if (!isSuperAdmin(me.user.role)) {
     return (
-      <div className='mx-auto max-w-lg py-16'>
+      <div className='mx-auto max-w-lg py-10'>
         <Alert
           variant='error'
           title='Access denied'
@@ -426,8 +426,8 @@ function PricingForm() {
   const el = data?.effective_limits;
 
   return (
-    <div className='mx-auto max-w-3xl'>
-      <div className='mb-6'>
+    <div className='min-w-0 w-full'>
+      <div className='mb-4'>
         <Badge variant='light' color='primary' className='mb-2'>
           Super Admin
         </Badge>
@@ -441,7 +441,7 @@ function PricingForm() {
       </div>
 
       {/* How this works */}
-      <div className='mb-6 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 type-small leading-relaxed text-gray-700 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-gray-300'>
+      <div className='mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 type-small leading-relaxed text-gray-700 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-gray-300'>
         <strong className='font-semibold text-blue-700 dark:text-blue-300'>
           How this works:
         </strong>{' '}
@@ -516,7 +516,7 @@ function PricingForm() {
       </div>
 
       {/* Exact-ID lookup */}
-      <details className='mb-6'>
+      <details className='mb-4'>
         <summary className='cursor-pointer select-none py-1 type-caption font-semibold text-gray-500 hover:text-primary dark:text-gray-400'>
           Know the exact ID? Open it directly
         </summary>
@@ -533,7 +533,7 @@ function PricingForm() {
       </details>
 
       {data && el && (
-        <div className='space-y-5'>
+        <div className='space-y-4'>
           {/* Current effective state */}
           <Card>
             <CardContent className='space-y-4 pt-0'>
@@ -604,7 +604,7 @@ function PricingForm() {
                   hint='Force this feature on or off regardless of their plan.'
                 >
                   <select
-                    className='flex h-10 w-full rounded-lg border border-gray-200 bg-transparent px-3 type-small text-gray-900 focus:border-primary focus:outline-none dark:border-white/10 dark:text-white/90'
+                    className='flex h-(--control-height-md) w-full rounded-lg border border-gray-200 bg-transparent px-3 type-small text-gray-900 focus:border-primary focus:outline-none dark:border-white/10 dark:text-white/90'
                     value={form.growth_reports_enabled ?? ''}
                     onChange={(e) =>
                       setForm({
@@ -644,7 +644,7 @@ function PricingForm() {
                   hint="If they've paid before, this must match their locked currency."
                 >
                   <select
-                    className='flex h-10 w-full rounded-lg border border-gray-200 bg-transparent px-3 type-small text-gray-900 focus:border-primary focus:outline-none dark:border-white/10 dark:text-white/90'
+                    className='flex h-(--control-height-md) w-full rounded-lg border border-gray-200 bg-transparent px-3 type-small text-gray-900 focus:border-primary focus:outline-none dark:border-white/10 dark:text-white/90'
                     value={form.custom_price_currency ?? ''}
                     onChange={(e) =>
                       setForm({
@@ -662,7 +662,7 @@ function PricingForm() {
 
                 <Field label='Billing cycle' hint="How often they're charged.">
                   <select
-                    className='flex h-10 w-full rounded-lg border border-gray-200 bg-transparent px-3 type-small text-gray-900 focus:border-primary focus:outline-none dark:border-white/10 dark:text-white/90'
+                    className='flex h-(--control-height-md) w-full rounded-lg border border-gray-200 bg-transparent px-3 type-small text-gray-900 focus:border-primary focus:outline-none dark:border-white/10 dark:text-white/90'
                     value={form.custom_billing_cycle ?? ''}
                     onChange={(e) =>
                       setForm({
