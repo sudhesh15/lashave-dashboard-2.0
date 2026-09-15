@@ -355,13 +355,12 @@ function MessageBubble({
   return (
     <div className={`flex ${fromCustomer ? 'justify-start' : 'justify-end'}`}>
       <div
-        className={`max-w-[78%] rounded-2xl px-4 py-3 ${
-          fromCustomer
-            ? 'rounded-tl-md border border-gray-200 bg-white text-gray-700 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300'
-            : fromHuman
-              ? 'rounded-tr-md bg-gray-800 text-white dark:bg-white/10'
-              : `rounded-tr-md ${theme.bubble} ${theme.bubbleText}`
-        }`}
+        className={`max-w-[78%] rounded-2xl px-4 py-3 ${fromCustomer
+          ? 'rounded-tl-md border border-gray-200 bg-white text-gray-700 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300'
+          : fromHuman
+            ? 'rounded-tr-md bg-gray-800 text-white dark:bg-white/10'
+            : `rounded-tr-md ${theme.bubble} ${theme.bubbleText}`
+          }`}
       >
         <p className='whitespace-pre-wrap type-small leading-6'>
           {message.content}
@@ -424,7 +423,7 @@ export default function ConversationDetailPage() {
       apiFetch(`/admin/conversations/${id}/mark-read`, {
         method: 'POST',
         auth: true,
-      }).catch(() => {});
+      }).catch(() => { });
       // window.setTimeout(
       //   () => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }),
       //   50,
@@ -461,7 +460,7 @@ export default function ConversationDetailPage() {
 
   async function sendReply() {
     const content = replyText.trim();
-    if (!content || sending) return;
+    if (!content || sending || actionLoading || data?.conversation?.status !== 'handoff') return;
     setSending(true);
     setErr(null);
     try {
@@ -735,26 +734,30 @@ export default function ConversationDetailPage() {
                     onChange={(event) => setReplyText(event.target.value)}
                     onKeyDown={(event) => {
                       if (
-                        (event.metaKey || event.ctrlKey) &&
                         event.key === 'Enter' &&
-                        !isHandoff
+                        isHandoff &&
+                        !actionLoading &&
+                        !sending
                       ) {
+                        event.preventDefault();
                         void sendReply();
                       }
                     }}
-                    disabled={isHandoff}
+                    disabled={!isHandoff}
                     placeholder={
-                      isHandoff
-                        ? 'Conversation handed off — use Back to AI to reply…'
-                        : 'Message as agent…'
+                      isClosed
+                        ? 'Conversation is closed…'
+                        : isHandoff
+                          ? 'Message as agent…'
+                          : 'AI is handling conversation — click Handoff to reply…'
                     }
-                    className={`h-9 min-w-0 flex-1 rounded-full border border-gray-300 bg-transparent px-4 type-caption font-medium text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 ${channelTheme.ring} ${isHandoff ? 'cursor-not-allowed opacity-60' : ''}`}
+                    className={`h-9 min-w-0 flex-1 rounded-full border border-gray-300 bg-transparent px-4 type-caption font-medium text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 ${channelTheme.ring} ${!isHandoff ? 'cursor-not-allowed opacity-60' : ''}`}
                   />
                   <button
                     type='button'
                     onClick={() => void sendReply()}
-                    disabled={!replyText.trim() || sending || isHandoff}
-                    className={`inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-full px-4 type-caption font-semibold text-white disabled:opacity-60 ${channelTheme.accent} ${channelTheme.accentHover} ${isHandoff ? 'cursor-not-allowed' : ''}`}
+                    disabled={!replyText.trim() || sending || !isHandoff}
+                    className={`inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-full px-4 type-caption font-semibold text-white disabled:opacity-60 ${channelTheme.accent} ${channelTheme.accentHover} ${!isHandoff ? 'cursor-not-allowed' : ''}`}
                   >
                     {sending ? (
                       <Loader2 className='h-3.5 w-3.5 animate-spin' />
@@ -773,7 +776,7 @@ export default function ConversationDetailPage() {
                     className='inline-flex h-8 items-center gap-1.5 rounded-full border border-success-200 bg-success-50 px-2.5 type-caption font-semibold text-success-700 disabled:opacity-60 dark:border-success-500/20 dark:bg-success-500/10 dark:text-success-400'
                   >
                     {actionLoading === 'handoff' ||
-                    actionLoading === 'reopen' ? (
+                      actionLoading === 'reopen' ? (
                       <Loader2 className='h-3.5 w-3.5 shrink-0 animate-spin' />
                     ) : (
                       <Users className='h-3.5 w-3.5 shrink-0' />
@@ -836,7 +839,7 @@ export default function ConversationDetailPage() {
                     </button>
                   </div>
                   {lead.contacts.emails?.length ||
-                  lead.contacts.phones?.length ? (
+                    lead.contacts.phones?.length ? (
                     <div className='mt-2.5 rounded-xl border border-gray-100 bg-gray-50 px-3 py-2.5 dark:border-white/[0.05] dark:bg-white/[0.02]'>
                       <p className='type-caption font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400'>
                         Contacts
