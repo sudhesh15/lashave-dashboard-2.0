@@ -390,7 +390,7 @@ function CloseButton({ onClose }: { onClose: () => void }) {
 /* ───────────────────────── table sections ───────────────────────── */
 
 const TABLE_HEAD_CELL =
-  'px-5 py-3.5 text-left type-caption font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 sm:px-6 whitespace-nowrap';
+  'px-4 py-2.5 text-left type-caption font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 sm:px-5 whitespace-nowrap';
 
 /* ───────────────────────── component ───────────────────────── */
 
@@ -549,7 +549,7 @@ export default function BookingPanel() {
         }}
         className="cursor-pointer transition hover:bg-gray-50 dark:hover:bg-white/2"
       >
-        <td className="px-5 py-3 sm:px-6">
+        <td className="px-4 py-2.5 sm:px-5">
           <div className="flex min-w-0 items-center gap-3">
             <div className="relative h-8.5 w-8.5 shrink-0">
               <CustomerAvatar name={name} profilePic={b.profile_pic_url} />
@@ -572,7 +572,7 @@ export default function BookingPanel() {
           </div>
         </td>
 
-        <td className="px-5 py-3 sm:px-6">
+        <td className="px-4 py-2.5 sm:px-5">
           <span
             className="inline-flex items-center gap-2 type-small font-medium text-gray-700 dark:text-gray-300"
             title={logoCfg.label}
@@ -588,7 +588,7 @@ export default function BookingPanel() {
           </span>
         </td>
 
-        <td className="px-5 py-3 sm:px-6">
+        <td className="px-4 py-2.5 sm:px-5">
           <span className="whitespace-nowrap type-small font-medium tabular-nums text-gray-700 dark:text-gray-300">
             {section === 'today'
               ? formatSlot(b.start_time, b.end_time)
@@ -596,11 +596,11 @@ export default function BookingPanel() {
           </span>
         </td>
 
-        <td className="px-5 py-3 sm:px-6">
+        <td className="px-4 py-2.5 sm:px-5">
           <CountdownBadge target={b.start_time} now={now} />
         </td>
 
-        <td className="px-5 py-3 sm:px-6">
+        <td className="px-4 py-2.5 sm:px-5">
           <span
             className={`inline-flex shrink-0 items-center rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize leading-none ${pill.cls}`}
           >
@@ -670,7 +670,7 @@ export default function BookingPanel() {
 
       {/* HEADER */}
       <div
-        className={`relative px-5 pt-5 pb-4 sm:px-6 ${
+        className={`relative px-4 pt-4 pb-3 sm:px-5 ${
           hasRows ? 'border-b border-gray-100 dark:border-white/5' : ''
         }`}
       >
@@ -762,7 +762,7 @@ export default function BookingPanel() {
           </div>
 
           {/* FOOTER */}
-          <div className="flex items-center justify-between gap-3 border-t border-gray-100 px-5 py-3 dark:border-white/5 sm:px-6">
+          <div className="flex items-center justify-between gap-3 border-t border-gray-100 px-4 py-2.5 dark:border-white/5 sm:px-5">
             <p className="type-micro text-gray-500 dark:text-gray-400">
               Showing{' '}
               <span className="font-semibold text-gray-800 dark:text-white/90">

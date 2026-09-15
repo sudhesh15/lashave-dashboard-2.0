@@ -157,8 +157,11 @@ const REVIEW_KEYWORDS = [
 ] as const;
 
 type KeywordKey = (typeof REVIEW_KEYWORDS)[number]["key"];
-function friendlyErrorMessage(error: any): string {
-  const raw = error?.message;
+function friendlyErrorMessage(error: unknown): string {
+  const raw =
+    error && typeof error === "object" && "message" in error
+      ? (error as { message?: unknown }).message
+      : undefined;
   if (typeof raw === "string" && raw && raw !== "[object Object]") {
     return raw;
   }
@@ -254,23 +257,23 @@ function MetricCard({
           : "bg-brand-50 text-brand-500 dark:bg-brand-500/12 dark:text-brand-400";
 
   return (
-    <Card className="p-6 md:p-6">
+    <Card className="p-4">
       <span
         className={`inline-flex rounded-full px-3 py-1 type-caption font-medium ${toneClass}`}
       >
         {label}
       </span>
-      <h3 className="mt-5 text-title-sm font-bold text-gray-800 dark:text-white/90">
+      <h3 className="mt-3 text-title-sm font-bold text-gray-800 dark:text-white/90">
         {value}
       </h3>
-      <p className="mt-2 type-small text-gray-500 dark:text-gray-400">{sub}</p>
+      <p className="mt-1 type-small text-gray-500 dark:text-gray-400">{sub}</p>
     </Card>
   );
 }
 
 function ChartHeader({ title, subtitle }: { title: string; subtitle: string }) {
   return (
-    <div className="mb-6">
+    <div className="mb-4">
       <h3 className="type-card-title font-semibold text-gray-800 dark:text-white/90">
         {title}
       </h3>
@@ -334,19 +337,19 @@ function RatingDistributionChart({
   };
 
   return (
-    <Card className="p-6 sm:p-6">
+    <Card className="p-4">
       <ChartHeader
         title="Rating Distribution"
         subtitle="Star mix across the selected Google profile"
       />
-      <div className="grid gap-4 lg:grid-cols-[240px_1fr] lg:items-center">
+      <div className="grid gap-3 lg:grid-cols-[220px_1fr] lg:items-center">
         <ReactApexChart
           options={options}
           series={distribution.map((item) => item.count)}
           type="donut"
-          height={220}
+          height={200}
         />
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           {distribution.map((item, index) => (
             <div key={item.rating}>
               <div className="mb-1 flex justify-between type-small">
@@ -432,7 +435,7 @@ function KeywordSignalChart({
   };
 
   return (
-    <Card className="p-6 sm:p-6">
+    <Card className="p-4">
       <ChartHeader
         title="Review Signals"
         subtitle="Recurring topics found in review text and replies"
@@ -444,10 +447,10 @@ function KeywordSignalChart({
             { name: "Mentions", data: keywordStats.map((item) => item.count) },
           ]}
           type="bar"
-          height={260}
+          height={220}
         />
       ) : (
-        <div className="flex min-h-56 items-center justify-center rounded-xl border border-dashed border-gray-200 type-small text-gray-500 dark:border-gray-800 dark:text-gray-400">
+        <div className="flex min-h-32 items-center justify-center rounded-xl border border-dashed border-gray-200 type-small text-gray-500 dark:border-gray-800 dark:text-gray-400">
           No keyword signals detected
         </div>
       )}
@@ -535,8 +538,8 @@ function ReviewRow({
   return (
     <>
       <tr className="align-top hover:bg-gray-50 dark:hover:bg-white/2">
-        <td className="px-5 py-4 sm:px-6">
-          <div className="flex items-start gap-3">
+        <td className="px-4 py-3 sm:px-5">
+          <div className="flex items-start gap-2.5">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 type-small font-semibold text-gray-700 dark:bg-gray-800 dark:text-gray-300">
               {initials(review.reviewer_name)}
             </div>
@@ -561,18 +564,18 @@ function ReviewRow({
             </div>
           </div>
         </td>
-        <td className="max-w-105 px-5 py-4">
+        <td className="max-w-105 px-4 py-3">
           <p className="line-clamp-3 type-small text-gray-700 dark:text-gray-300">
             {review.comment ||
               `Rated ${rating || "unknown"} stars with no written review.`}
           </p>
           {review.critical_reasons && review.critical_reasons.length > 0 && (
-            <p className="mt-2 type-caption text-gray-500 dark:text-gray-400">
+            <p className="mt-1.5 type-caption text-gray-500 dark:text-gray-400">
               {review.critical_reasons.join(", ")}
             </p>
           )}
         </td>
-        <td className="px-5 py-4">
+        <td className="px-4 py-3">
           <span
             className={`inline-flex rounded-full px-3 py-1 type-caption font-medium ${replied
               ? "bg-success-50 text-success-600 dark:bg-success-500/15 dark:text-success-500"
@@ -588,7 +591,7 @@ function ReviewRow({
                 : "Needs reply"}
           </span>
         </td>
-        <td className="px-5 py-4">
+        <td className="px-4 py-3">
           {replied ? (
             <p className="max-w-80 type-small text-gray-500 dark:text-gray-400">
               {review.reply_text || "Reply published."}
@@ -633,13 +636,13 @@ function ReviewRow({
         <tr>
           <td
             colSpan={4}
-            className="border-t border-gray-100 px-5 pb-5 dark:border-white/5 sm:px-6"
+            className="border-t border-gray-100 px-4 pb-4 dark:border-white/5 sm:px-5"
           >
             <textarea
               value={reply}
               onChange={(event) => setReply(event.target.value)}
               placeholder="Write a reply or generate an AI draft"
-              className="mt-2 min-h-24 w-full resize-y rounded-(--radius-control) border border-gray-200 bg-white px-3 py-2 type-small text-gray-700 outline-none focus:border-brand-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
+              className="mt-1.5 min-h-24 w-full resize-y rounded-(--radius-control) border border-gray-200 bg-white px-3 py-2 type-small text-gray-700 outline-none focus:border-brand-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
             />
           </td>
         </tr>
@@ -791,7 +794,7 @@ function ReviewsInner() {
     intervalRef.current = setInterval(() => {
       void loadReviews();
     }, REVIEW_SYNC_INTERVAL_SEC);
-  }, [loadReviews]);
+  }, [loadReviews, REVIEW_SYNC_INTERVAL_SEC]);
 
   useEffect(() => {
     if (!selectedChannelId) return;
@@ -1095,8 +1098,8 @@ function ReviewsInner() {
   };
 
   return (
-    <div className="py-6">
-      <div className="mb-6  flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+    <div className="min-w-0 w-full">
+      <div className="mb-4  flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <p className="type-small font-medium text-brand-500 dark:text-brand-400">
             Google Reviews
@@ -1110,7 +1113,7 @@ function ReviewsInner() {
           </p>
         </div>
 
-        <div className="flex  flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="flex  flex-col gap-2 sm:flex-row sm:items-center">
           <div ref={channelMenuRef} className="relative">
             <button
               type="button"
@@ -1218,7 +1221,7 @@ function ReviewsInner() {
       </div>
 
       {success && (
-        <div className="mb-6 flex items-center gap-3 rounded-xl border border-success-200 bg-success-50 px-4 py-3 type-small font-medium text-success-700 dark:border-success-500/20 dark:bg-success-500/10 dark:text-success-500">
+        <div className="mb-4 flex items-center gap-3 rounded-xl border border-success-200 bg-success-50 px-4 py-3 type-small font-medium text-success-700 dark:border-success-500/20 dark:bg-success-500/10 dark:text-success-500">
           <Check className="h-4 w-4" />
           <span className="flex-1">{success}</span>
           <button type="button" onClick={() => setSuccess("")}>
@@ -1228,7 +1231,7 @@ function ReviewsInner() {
       )}
 
       {error && (
-        <div className="mb-6 flex items-start gap-3 rounded-xl border border-error-200 bg-error-50 px-4 py-3 type-small font-medium text-error-700 dark:border-error-500/20 dark:bg-error-500/10 dark:text-error-500">
+        <div className="mb-4 flex items-start gap-3 rounded-xl border border-error-200 bg-error-50 px-4 py-3 type-small font-medium text-error-700 dark:border-error-500/20 dark:bg-error-500/10 dark:text-error-500">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
           <span className="flex-1">{error}</span>
           <button type="button" onClick={() => setError("")}>
@@ -1248,7 +1251,7 @@ function ReviewsInner() {
         </Card>
       ) : (
         <>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 md:gap-6">
+          <div className="grid grid-cols-1 gap-(--layout-card-gap) sm:grid-cols-2 lg:grid-cols-4">
             <MetricCard
               label="Average rating"
               value={stats.total ? stats.average.toFixed(1) : "0.0"}
@@ -1274,7 +1277,7 @@ function ReviewsInner() {
             />
           </div>
 
-          <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div className="mt-(--layout-section-gap) grid grid-cols-1 gap-(--layout-card-gap) lg:grid-cols-2">
             <RatingDistributionChart
               distribution={stats.distribution}
               isDark={isDark}
@@ -1282,8 +1285,8 @@ function ReviewsInner() {
             <KeywordSignalChart keywordStats={keywordStats} isDark={isDark} />
           </div>
 
-          <div className="mt-6 min-w-0 max-w-full overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3">
-            <div className="flex flex-col gap-2 border-b border-gray-100 px-5 py-5 dark:border-white/5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+          <div className="mt-(--layout-section-gap) min-w-0 max-w-full overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3">
+            <div className="flex flex-col gap-2 border-b border-gray-100 px-4 py-3 dark:border-white/5 sm:flex-row sm:items-center sm:justify-between sm:px-5">
               <h3 className="type-body font-semibold text-gray-800 dark:text-white/90">
                 Reviews
               </h3>
@@ -1292,12 +1295,12 @@ function ReviewsInner() {
               </div>
             </div>
 
-            <div className="min-w-0 px-5 py-5 sm:px-6">
-              <div className="flex flex-col gap-4 rounded-t-xl border border-b-0 border-gray-200 bg-white px-5 py-4 dark:border-white/5 dark:bg-white/1 lg:flex-row lg:items-center lg:justify-between">
+            <div className="min-w-0 px-4 py-4 sm:px-5">
+              <div className="flex flex-col gap-3 rounded-t-xl border border-b-0 border-gray-200 bg-white px-4 py-3 dark:border-white/5 dark:bg-white/1 lg:flex-row lg:items-center lg:justify-between">
                 <h4 className="type-card-title font-semibold text-gray-800 dark:text-white/90">
                   {activeStatusTab.label} reviews
                 </h4>
-                <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
+                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
                   <div className="relative w-full sm:w-(--control-width-search-sm)">
                     <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400" />
                     <input
@@ -1445,7 +1448,7 @@ function ReviewsInner() {
                           (header) => (
                             <th
                               key={header}
-                              className="px-5 py-3 text-left type-body font-medium text-gray-500 dark:text-gray-400"
+                              className="px-4 py-2.5 text-left type-body font-medium text-gray-500 dark:text-gray-400"
                             >
                               {header}
                             </th>
@@ -1458,7 +1461,7 @@ function ReviewsInner() {
                         <tr>
                           <td
                             colSpan={4}
-                            className="px-5 py-14 text-center type-small text-gray-500 dark:text-gray-400"
+                            className="px-4 py-8 text-center type-small text-gray-500 dark:text-gray-400"
                           >
                             Loading reviews
                           </td>
@@ -1467,7 +1470,7 @@ function ReviewsInner() {
                         <tr>
                           <td
                             colSpan={4}
-                            className="px-5 py-14 text-center type-small text-gray-500 dark:text-gray-400"
+                            className="px-4 py-8 text-center type-small text-gray-500 dark:text-gray-400"
                           >
                             No reviews match this filter
                           </td>

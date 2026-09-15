@@ -272,7 +272,7 @@ function Card({
 }) {
   return (
     <div
-      className={`rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/3 ${className}`}
+      className={`rounded-(--radius-card) border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/3 ${className}`}
     >
       {children}
     </div>
@@ -302,7 +302,7 @@ function MetricCard({
           : 'bg-brand-50 text-brand-600 dark:bg-brand-500/12 dark:text-brand-400';
 
   return (
-    <Card className='p-4 sm:p-5'>
+    <Card className='p-3.5 sm:p-4'>
       <div className='flex items-start justify-between gap-2'>
         <span className='text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400'>
           {label}
@@ -327,7 +327,7 @@ function MetricCard({
 
 function EmptyBlock({ label }: { label: string }) {
   return (
-    <div className='flex min-h-40 items-center justify-center rounded-xl border border-dashed border-gray-200 type-small text-gray-500 dark:border-gray-800 dark:text-gray-400'>
+    <div className='flex min-h-24 items-center justify-center rounded-xl border border-dashed border-gray-200 type-small text-gray-500 dark:border-gray-800 dark:text-gray-400'>
       {label}
     </div>
   );
@@ -345,7 +345,7 @@ function DateFilter({
   setActivePreset: (value: number | null) => void;
 }) {
   return (
-    <div className='flex w-full min-w-0 flex-col gap-2 rounded-xl border border-gray-200 bg-white p-2 dark:border-gray-800 dark:bg-white/3 lg:w-auto lg:flex-row lg:flex-wrap lg:items-center'>
+    <div className='flex w-full min-w-0 flex-col gap-2 rounded-xl border border-gray-200 bg-white p-1.5 dark:border-gray-800 dark:bg-white/3 lg:w-auto lg:flex-row lg:flex-wrap lg:items-center'>
       <div className='grid shrink-0 grid-cols-3 gap-1.5 lg:w-auto'>
         {[
           { label: 'Today', days: 0 },
@@ -354,7 +354,7 @@ function DateFilter({
         ].map((preset) => (
           <button
             key={preset.label}
-            className={`h-8 whitespace-nowrap rounded-lg px-3 type-small font-medium transition ${
+            className={`h-(--control-height-sm) whitespace-nowrap rounded-lg px-3 type-small font-medium transition ${
               activePreset === preset.days
                 ? 'bg-brand-500 text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-white/5'
@@ -383,7 +383,7 @@ function DateFilter({
               to: dateRange?.to ?? toDateStr(new Date()),
             });
           }}
-          className='h-8 min-w-32.5 rounded-lg border border-gray-200 bg-white px-2.5 type-small text-gray-700 outline-none focus:border-brand-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300'
+          className='h-(--control-height-sm) min-w-32.5 rounded-lg border border-gray-200 bg-white px-2.5 type-small text-gray-700 outline-none focus:border-brand-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300'
         />
         <input
           type='date'
@@ -395,13 +395,13 @@ function DateFilter({
               to: e.target.value,
             });
           }}
-          className='h-8 min-w-32.5 rounded-lg border border-gray-200 bg-white px-2.5 type-small text-gray-700 outline-none focus:border-brand-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300'
+          className='h-(--control-height-sm) min-w-32.5 rounded-lg border border-gray-200 bg-white px-2.5 type-small text-gray-700 outline-none focus:border-brand-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300'
         />
       </div>
 
       {dateRange && (
         <button
-          className='h-8 shrink-0 whitespace-nowrap rounded-lg border border-gray-200 px-3 type-small font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5'
+          className='h-(--control-height-sm) shrink-0 whitespace-nowrap rounded-lg border border-gray-200 px-3 type-small font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5'
           onClick={() => {
             setDateRange(null);
             setActivePreset(null);
@@ -425,8 +425,8 @@ function TopicsCard({
   const total = topics.reduce((sum, topic) => sum + topic.count, 0);
 
   return (
-    <Card className='p-4 sm:p-5'>
-      <div className='mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between'>
+    <Card className='p-4'>
+      <div className='mb-3 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between'>
         <div className='min-w-0'>
           <h3 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
             What customers want right now
@@ -451,7 +451,7 @@ function TopicsCard({
             return (
               <div
                 key={topic.topic}
-                className='grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-2.5 transition hover:bg-gray-50 dark:hover:bg-white/2 sm:px-5'
+                className='grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-2 transition hover:bg-gray-50 dark:hover:bg-white/2 sm:px-5'
               >
                 <div className='min-w-0'>
                   <span
@@ -460,7 +460,7 @@ function TopicsCard({
                   >
                     {label}
                   </span>
-                  <div className='mt-2 h-1 overflow-hidden rounded-full bg-gray-100 dark:bg-white/6'>
+                  <div className='mt-1.5 h-1 overflow-hidden rounded-full bg-gray-100 dark:bg-white/6'>
                     <div
                       className='h-full rounded-full bg-brand-500'
                       style={{ width: `${pct}%` }}
@@ -536,7 +536,7 @@ function MessagesAreaChart({
   );
 
   return (
-    <Card className='p-4 sm:p-5'>
+    <Card className='p-4'>
       <div className='mb-2 flex items-start justify-between gap-2'>
         <div>
           <p className='text-[10px] uppercase tracking-wider font-semibold text-gray-400 dark:text-gray-500'>
@@ -573,7 +573,7 @@ function MessagesAreaChart({
 
 function FaqGapsCard({ gaps, loading }: { gaps: FaqGap[]; loading: boolean }) {
   return (
-    <Card className='p-4 sm:p-5'>
+    <Card className='p-4'>
       <div className='mb-3 flex items-start justify-between gap-2'>
         <h3 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
           FAQ Content Gaps
@@ -591,7 +591,7 @@ function FaqGapsCard({ gaps, loading }: { gaps: FaqGap[]; loading: boolean }) {
           {gaps.slice(0, 5).map((gap, index) => (
             <div
               key={`${gap.query}-${index}`}
-              className='flex items-start justify-between gap-3 px-1 py-2.5'
+              className='flex items-start justify-between gap-3 px-1 py-2'
             >
               <p className='min-w-0 flex-1 whitespace-normal wrap-break-word type-small font-medium leading-5 text-gray-700 dark:text-gray-300'>
                 &ldquo;{gap.query}&rdquo;
@@ -640,7 +640,7 @@ function PipelineChart({
   };
 
   return (
-    <Card className='p-4 sm:p-5'>
+    <Card className='p-4'>
       <div className='flex items-start justify-between mb-3'>
         <div>
           <h3 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
@@ -659,7 +659,7 @@ function PipelineChart({
               options={options}
               series={series}
               type='donut'
-              height={280}
+              height={240}
             />
             <div className='pointer-events-none absolute inset-0 flex flex-col items-center justify-center'>
               <h2 className='text-4xl font-bold text-gray-800 dark:text-white/90'>
@@ -667,7 +667,7 @@ function PipelineChart({
               </h2>
             </div>
           </div>
-          <div className='mt-1 space-y-2.5'>
+          <div className='mt-1 space-y-2'>
             {PIPELINE_STATUSES.map((status, index) => {
               const value = pipeMap[status] || 0;
               const pct = total > 0 ? Math.round((value / total) * 100) : 0;
@@ -782,7 +782,7 @@ function ActiveChannelsCard({
         return (
           <div
             key={item.channel?.id || item.platform}
-            className={`flex min-h-27 min-w-0 w-full flex-col overflow-hidden rounded-2xl border border-gray-200/70 bg-white/90 p-2.5 shadow-sm backdrop-blur dark:border-white/7 dark:bg-gray-900/60 sm:p-3 ${
+            className={`flex min-h-24 min-w-0 w-full flex-col overflow-hidden rounded-2xl border border-gray-200/70 bg-white/90 p-2 shadow-sm backdrop-blur dark:border-white/7 dark:bg-gray-900/60 sm:p-2.5 ${
               item.comingSoon ? 'opacity-75' : ''
             }`}
           >
@@ -889,8 +889,8 @@ function AttentionCard({
   ).length;
 
   return (
-    <Card className='p-4 sm:p-5'>
-      <div className='flex items-start justify-between mb-3'>
+    <Card className='p-4 sm:p-4'>
+      <div className='flex items-start justify-between mb-2'>
         <h3 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
           Needs Attention
         </h3>
@@ -918,7 +918,7 @@ function AttentionCard({
               <Link
                 key={`${item.type}-${item.created_at}-${index}`}
                 href={href}
-                className='flex gap-2.5 px-1 py-2.5 hover:bg-gray-50 dark:hover:bg-white/2 rounded-lg transition-colors'
+                className='flex gap-2 px-1 py-2 hover:bg-gray-50 dark:hover:bg-white/2 rounded-lg transition-colors'
               >
                 <span
                   className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${cfg.dot}`}
@@ -1381,8 +1381,8 @@ ${about}`.trim();
 
   return (
     <RequireAuth>
-      <div className='overflow-x-hidden py-4'>
-        <div className='mb-4 min-w-0 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between'>
+      <div className='min-w-0 w-full'>
+        <div className='mb-(--layout-section-gap) min-w-0 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between'>
           <div className='min-w-0'>
             <p className='type-small font-medium text-brand-500 dark:text-brand-400'>
               Overview
@@ -1415,13 +1415,13 @@ ${about}`.trim();
         )}
 
         {err && (
-          <div className='mb-4 rounded-xl border border-error-200 bg-error-50 px-4 py-3 type-small text-error-700 dark:border-error-500/20 dark:bg-error-500/10 dark:text-error-400'>
+          <div className='mb-(--layout-section-gap) rounded-xl border border-error-200 bg-error-50 px-4 py-3 type-small text-error-700 dark:border-error-500/20 dark:bg-error-500/10 dark:text-error-400'>
             {err}
           </div>
         )}
 
         {loaded && (!hasFaqs || !hasChannels) && (
-          <div className='mb-4 min-w-0'>
+          <div className='mb-(--layout-section-gap) min-w-0'>
             <OnboardingCard
               hasFaqs={hasFaqs}
               hasChannels={hasChannels}
@@ -1434,11 +1434,11 @@ ${about}`.trim();
           </div>
         )}
 
-        <div className='mb-4 min-w-0 w-full'>
+        <div className='mb-(--layout-section-gap) min-w-0 w-full'>
           <BookingPanel />
         </div>
 
-        <div className='mb-4 min-w-0 w-full'>
+        <div className='mb-(--layout-section-gap) min-w-0 w-full'>
           <ActiveChannelsCard
             channels={channels}
             messagesTodayByChannel={messagesTodayByChannel}
@@ -1447,7 +1447,7 @@ ${about}`.trim();
           />
         </div>
 
-        <div className='grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 lg:grid-cols-5 md:gap-4 min-w-0 w-full'>
+        <div className='grid min-w-0 w-full grid-cols-2 gap-(--layout-card-gap) sm:grid-cols-3 lg:grid-cols-5'>
           <MetricCard
             label='Conversations'
             value={overview?.total_conversations ?? 0}
@@ -1499,7 +1499,7 @@ ${about}`.trim();
           />
         </div>
 
-        <div className='mt-4 grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-12 min-w-0 w-full'>
+        <div className='mt-(--layout-section-gap) grid min-w-0 w-full grid-cols-1 gap-(--layout-card-gap) lg:grid-cols-12'>
           <div className='lg:col-span-7 min-w-0'>
             <AttentionCard items={attentionItems} loading={attentionLoading} />
           </div>
@@ -1513,11 +1513,11 @@ ${about}`.trim();
           </div>
         </div>
 
-        <div className='mt-4 min-w-0 w-full'>
+        <div className='mt-(--layout-section-gap) min-w-0 w-full'>
           <TopicsCard topics={topics} loading={topicsLoading} />
         </div>
 
-        <div className='mt-4 grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-12 min-w-0 w-full'>
+        <div className='mt-(--layout-section-gap) grid min-w-0 w-full grid-cols-1 gap-(--layout-card-gap) lg:grid-cols-12'>
           <div className='lg:col-span-12 min-w-0'>
             <MessagesAreaChart
               points={msgChart}

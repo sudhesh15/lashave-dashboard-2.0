@@ -31,6 +31,7 @@ import dynamic from 'next/dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
+import { useSidebar } from '@/lib/sidebar-context';
 
 const ReactApexChart = dynamic(() => import('react-apexcharts'), {
   ssr: false,
@@ -188,7 +189,7 @@ function FormField({
         onBlur={onBlur}
         placeholder={placeholder}
         className={cn(
-          'h-10 w-full rounded-(--radius-control) border bg-transparent px-4 py-2 type-small text-gray-800 shadow-theme-xs focus:outline-hidden focus:ring-3 dark:bg-gray-900 dark:text-white/90',
+          'h-(--control-height-md) w-full rounded-(--radius-control) border bg-transparent px-4 py-2 type-small text-gray-800 shadow-theme-xs focus:outline-hidden focus:ring-3 dark:bg-gray-900 dark:text-white/90',
           error
             ? 'border-error-500 focus:border-error-500 focus:ring-error-500/10'
             : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10 dark:border-gray-700',
@@ -225,7 +226,7 @@ function SaveButton({
   onClick: () => void;
 }) {
   return (
-    <Button type='button' onClick={onClick} disabled={loading} className='h-10 px-5'>
+    <Button type='button' onClick={onClick} disabled={loading} className='h-(--control-height-md) px-5'>
       {loading ? (
         <>
           <Loader2 className='h-4 w-4 animate-spin' />
@@ -330,10 +331,10 @@ function CompletionChart({ score }: { score: number }) {
   };
 
   return (
-    <Card className='p-6'>
+    <Card className='p-5'>
       <SectionHeader title='Profile Completion' subtitle='Completed account and workspace fields' />
       <div className='mx-auto max-w-80'>
-        <ReactApexChart options={options} series={[score]} type='radialBar' height={290} />
+        <ReactApexChart options={options} series={[score]} type='radialBar' height={260} />
       </div>
       <p className='text-center type-small text-gray-500 dark:text-gray-400'>
         Keep profile and company information current for better account management.
@@ -354,9 +355,9 @@ function MetaCard({
   const name = displayName(me);
 
   return (
-    <Card className='p-6 lg:p-6'>
-      <div className='flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between'>
-        <div className='flex flex-col items-center gap-6 text-center lg:flex-row lg:text-left'>
+    <Card className='p-5'>
+      <div className='flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between'>
+        <div className='flex flex-col items-center gap-4 text-center lg:flex-row lg:text-left'>
           <AvatarUploader me={me} photoUrl={photoUrl} onUploaded={setPhotoUrl} />
           <div>
             <h2 className='type-h4 font-semibold text-gray-800 dark:text-white/90'>{name}</h2>
@@ -387,11 +388,11 @@ function InfoItem({ label, value }: { label: string; value: string }) {
 
 function OverviewTab({ me }: { me: MeResp }) {
   return (
-    <div className='grid grid-cols-1 gap-6 lg:grid-cols-12'>
-      <div className='space-y-6 lg:col-span-8'>
-        <Card className='p-6 lg:p-6'>
+    <div className='grid grid-cols-1 gap-(--layout-section-gap) lg:grid-cols-12'>
+      <div className='space-y-(--layout-section-gap) lg:col-span-8'>
+        <Card className='p-5'>
           <SectionHeader title='Personal Information' subtitle='Primary account profile fields' />
-          <div className='grid grid-cols-1 gap-5 md:grid-cols-2'>
+          <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
             <InfoItem label='First Name' value={fieldValue(me.user.first_name)} />
             <InfoItem label='Last Name' value={fieldValue(me.user.last_name)} />
             <InfoItem label='Email Address' value={me.user.email} />
@@ -401,9 +402,9 @@ function OverviewTab({ me }: { me: MeResp }) {
           </div>
         </Card>
 
-        <Card className='p-6 lg:p-6'>
+        <Card className='p-5'>
           <SectionHeader title='Company Information' subtitle='Workspace details attached to this account' />
-          <div className='grid grid-cols-1 gap-5 md:grid-cols-2'>
+          <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
             <InfoItem label='Company Name' value={fieldValue(me.tenant?.name)} />
             <InfoItem label='Industry' value={fieldValue(me.tenant?.industry)} />
             <InfoItem label='Website' value={fieldValue(me.tenant?.website)} />
@@ -532,15 +533,15 @@ function DetailsTab({ me }: { me: MeResp }) {
   }
 
   return (
-    <Card className='p-6 lg:p-6'>
-      <div className='mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
+    <Card className='p-5'>
+      <div className='mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
         <SectionHeader title='Details' subtitle='Update your personal or company information' />
         <SaveButton loading={loading} saved={saved} onClick={() => void handleSave()} />
       </div>
 
       {apiErr && <div className='mb-5'><AlertBox>{apiErr}</AlertBox></div>}
 
-      <div className='mb-6 inline-flex rounded-(--radius-control) border border-gray-200 bg-gray-50 p-1 dark:border-gray-800 dark:bg-gray-900'>
+      <div className='mb-4 inline-flex rounded-(--radius-control) border border-gray-200 bg-gray-50 p-1 dark:border-gray-800 dark:bg-gray-900'>
         {(['personal', 'company'] as const).map((item) => (
           <button
             key={item}
@@ -558,8 +559,8 @@ function DetailsTab({ me }: { me: MeResp }) {
       </div>
 
       {mode === 'personal' ? (
-        <div className='space-y-5'>
-          <div className='grid grid-cols-1 gap-5 md:grid-cols-2'>
+        <div className='space-y-4'>
+          <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
             <FormField label='First Name' value={firstName} onChange={setFirstName} />
             <FormField label='Last Name' value={lastName} onChange={setLastName} />
           </div>
@@ -611,7 +612,7 @@ function DetailsTab({ me }: { me: MeResp }) {
                   value={otpCode}
                   onChange={(event) => setOtpCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
                   placeholder='000000'
-                  className='mt-4 h-10 max-w-45 rounded-(--radius-control) border-gray-300 text-center type-card-title tracking-[0.35em] shadow-theme-xs focus-visible:border-brand-300 focus-visible:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900'
+                  className='mt-4 h-(--control-height-md) max-w-45 rounded-(--radius-control) border-gray-300 text-center type-card-title tracking-[0.35em] shadow-theme-xs focus-visible:border-brand-300 focus-visible:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900'
                 />
                 <div className='mt-4 flex flex-wrap items-center gap-3'>
                   <Button type='button' size='sm' onClick={() => void handleVerifyEmailOtp()} disabled={otpBusy}>
@@ -636,13 +637,13 @@ function DetailsTab({ me }: { me: MeResp }) {
               </div>
             )}
           </div>
-          <div className='grid grid-cols-1 gap-5 md:grid-cols-2'>
+          <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
             <FormField label='Phone Number' value={phone} onChange={setPhone} type='tel' placeholder='+1 555 000 0000' />
             <FormField label='Location' value={location} onChange={setLocation} placeholder='City, Country' />
           </div>
         </div>
       ) : (
-        <div className='grid grid-cols-1 gap-5 md:grid-cols-2'>
+        <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
           <FormField label='Company Name' value={companyName} onChange={setCompanyName} />
           <FormField label='Industry' value={industry} onChange={setIndustry} placeholder='e.g. SaaS, Healthcare' />
           <FormField label='Website' value={website} onChange={setWebsite} placeholder='https://yourcompany.com' />
@@ -782,13 +783,13 @@ function SecurityTab() {
   }
 
   return (
-    <div className='space-y-6'>
-      <Card className='p-6 lg:p-6'>
-        <div className='mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
+    <div className='space-y-(--layout-section-gap)'>
+      <Card className='p-5'>
+        <div className='mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
           <SectionHeader title='Security' subtitle='Manage your password and account access' />
           <SaveButton loading={loading} saved={saved} onClick={() => void handleSave()} />
         </div>
-        <div className='mb-6 rounded-2xl border border-gray-200 bg-gray-50 p-6 dark:border-gray-800 dark:bg-gray-900'>
+        <div className='mb-4 rounded-2xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-900'>
           <div className='flex items-start gap-3'>
             <div className='flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-500 dark:bg-brand-500/12 dark:text-brand-400'>
               <LockKeyhole className='h-5 w-5' />
@@ -802,7 +803,7 @@ function SecurityTab() {
           </div>
         </div>
         {(formErr || apiErr) && <div className='mb-5'><AlertBox>{formErr || apiErr}</AlertBox></div>}
-        <div className='grid grid-cols-1 gap-5'>
+        <div className='grid grid-cols-1 gap-4'>
           <FormField label='Current Password' value={current} onChange={setCurrent} type={show ? 'text' : 'password'} />
           <FormField label='New Password' value={next} onChange={setNext} type={show ? 'text' : 'password'} />
           <FormField label='Confirm New Password' value={confirm} onChange={setConfirm} type={show ? 'text' : 'password'} />
@@ -1064,13 +1065,13 @@ Customer requested action: Yes
   }
 
   return (
-    <Card className='p-6 lg:p-6'>
+    <Card className='p-5'>
       <SectionHeader
         title='Support'
         subtitle='Send a message to the Lashvae team'
       />
 
-      <div className='space-y-5'>
+      <div className='space-y-4'>
         {status === 'success' && (
           <AlertBox tone='success'>Your message has been sent.</AlertBox>
         )}
@@ -1123,7 +1124,7 @@ Customer requested action: Yes
               }
               onBlur={() => handleBlur('subject', subject)}
               className={cn(
-                'h-10 w-full rounded-(--radius-control) border bg-transparent px-4 py-2 type-small text-gray-800 shadow-theme-xs focus:outline-hidden focus:ring-3 dark:bg-gray-900 dark:text-white/90',
+                'h-(--control-height-md) w-full rounded-(--radius-control) border bg-transparent px-4 py-2 type-small text-gray-800 shadow-theme-xs focus:outline-hidden focus:ring-3 dark:bg-gray-900 dark:text-white/90',
                 touched.subject && errors.subject
                   ? 'border-error-500 focus:border-error-500 focus:ring-error-500/10'
                   : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10 dark:border-gray-700',
@@ -1194,7 +1195,7 @@ Customer requested action: Yes
             type='button'
             disabled={!canSubmit}
             onClick={() => void handleSubmit()}
-            className='h-10 px-5'
+            className='h-(--control-height-md) px-5'
           >
             {sending && <Loader2 className='h-4 w-4 animate-spin' />}
             Send Message
@@ -1219,7 +1220,7 @@ Customer requested action: Yes
                 <select
                   value={dsarType}
                   onChange={(event) => setDsarType(event.target.value)}
-                  className='h-10 w-full rounded-(--radius-control) border border-gray-300 bg-transparent px-4 py-2 type-small text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90'
+                  className='h-(--control-height-md) w-full rounded-(--radius-control) border border-gray-300 bg-transparent px-4 py-2 type-small text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90'
                 >
                   <option value='' disabled>
                     Select request type
@@ -1239,7 +1240,7 @@ Customer requested action: Yes
                 <select
                   value={dsarChannel}
                   onChange={(event) => setDsarChannel(event.target.value)}
-                  className='h-10 w-full rounded-(--radius-control) border border-gray-300 bg-transparent px-4 py-2 type-small text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90'
+                  className='h-(--control-height-md) w-full rounded-(--radius-control) border border-gray-300 bg-transparent px-4 py-2 type-small text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90'
                 >
                   <option value='' disabled>
                     Select channel
@@ -1261,7 +1262,7 @@ Customer requested action: Yes
                 <select
                   value={identifierType}
                   onChange={(event) => setIdentifierType(event.target.value)}
-                  className='h-10 w-full rounded-(--radius-control) border border-gray-300 bg-transparent px-4 py-2 type-small text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90'
+                  className='h-(--control-height-md) w-full rounded-(--radius-control) border border-gray-300 bg-transparent px-4 py-2 type-small text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90'
                 >
                   <option value='' disabled>
                     Select identifier type
@@ -1343,7 +1344,7 @@ Customer requested action: Yes
                 type='button'
                 disabled={!canSubmitDsar}
                 onClick={() => void handleDsarSubmit()}
-                className='h-10 px-5'
+                className='h-(--control-height-md) px-5'
               >
                 {dsarSending && <Loader2 className='h-4 w-4 animate-spin' />}
                 Submit Data Request
@@ -1360,9 +1361,9 @@ Customer requested action: Yes
 
 function LoadingProfile() {
   return (
-    <div className='mx-auto max-w-screen-2xl p-4 md:p-6'>
-      <div className='rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/3 lg:p-6'>
-        <div className='mb-5 h-6 w-24 animate-pulse rounded-(--radius-control) bg-gray-100 dark:bg-white/5 lg:mb-7' />
+    <div className='min-w-0 w-full'>
+      <div className='rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/3'>
+        <div className='mb-4 h-6 w-24 animate-pulse rounded-(--radius-control) bg-gray-100 dark:bg-white/5' />
         <div className='space-y-6'>
           <div className='h-37 animate-pulse rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/5' />
           <div className='h-105 animate-pulse rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/5' />
@@ -1387,7 +1388,7 @@ function ProfileContent() {
   const [me, setMe] = useState<MeResp | null>(null);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [fetchErr, setFetchErr] = useState('');
-  const [isMobile, setIsMobile] = useState(false);
+  const { isMobile } = useSidebar();
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 
 
@@ -1411,19 +1412,10 @@ function ProfileContent() {
     return () => window.clearTimeout(timer);
   }, [loadProfile]);
 
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 900);
-
-    check();
-    window.addEventListener('resize', check);
-
-    return () => window.removeEventListener('resize', check);
-  }, []);
-
   return (
-    <div className='mx-auto max-w-screen-2xl p-4 md:p-6'>
-      <div className='rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/3 lg:p-6'>
-        <div className='mb-5 flex items-center gap-3 lg:mb-7'>
+    <div className='min-w-0 w-full'>
+      <div className='rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/3'>
+        <div className='mb-4 flex items-center gap-3'>
           <button
             type='button'
             onClick={() => router.push('/settings')}
@@ -1452,13 +1444,13 @@ function ProfileContent() {
           <div className='space-y-6'>
             <MetaCard me={me} photoUrl={photoUrl} setPhotoUrl={setPhotoUrl} />
 
-            <div className='grid grid-cols-1 gap-6 lg:grid-cols-[290px_1fr] lg:items-start'>
+            <div className='grid grid-cols-1 gap-(--layout-section-gap) lg:grid-cols-[290px_1fr] lg:items-start'>
               <div>
                 {isMobile && (
                   <button
                     type='button'
                     onClick={() => setProfileMenuOpen((p) => !p)}
-                    className='mb-3 flex h-10 w-full items-center justify-between rounded-(--radius-control) border border-gray-200 bg-white px-4 type-small font-medium text-gray-700 shadow-theme-xs transition hover:bg-gray-50 dark:border-gray-800 dark:bg-white/3 dark:text-gray-400 dark:hover:bg-white/3'
+                    className='mb-3 flex h-(--control-height-md) w-full items-center justify-between rounded-(--radius-control) border border-gray-200 bg-white px-4 type-small font-medium text-gray-700 shadow-theme-xs transition hover:bg-gray-50 dark:border-gray-800 dark:bg-white/3 dark:text-gray-400 dark:hover:bg-white/3'
                   >
                     <span>Profile Menu</span>
                     <Menu size={18} />
@@ -1489,7 +1481,7 @@ function ProfileContent() {
                               setProfileMenuOpen(false);
                             }}
                             className={cn(
-                              'flex w-full items-center justify-between gap-3 rounded-(--radius-control) px-3 py-3 text-left transition',
+                              'flex w-full items-center justify-between gap-3 rounded-(--radius-control) px-3 py-2.5 text-left transition',
                               active
                                 ? 'bg-brand-50 dark:bg-brand-500/12'
                                 : 'hover:bg-gray-50 dark:hover:bg-white/3',

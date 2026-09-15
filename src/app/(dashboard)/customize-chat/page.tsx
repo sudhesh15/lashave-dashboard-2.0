@@ -806,7 +806,7 @@ function ToggleRow({
   desc,
   checked,
   onChange,
-  mb = 18,
+  mb = 12,
   large,
 }: {
   title: string;
@@ -891,7 +891,7 @@ function TextField({
   onChange,
   placeholder,
   type = 'text',
-  mb = 16,
+  mb = 12,
 }: {
   label: string;
   value: string;
@@ -920,7 +920,7 @@ function TextField({
 
 function SectionHeader({ title, badge }: { title: string; badge?: string }) {
   return (
-    <div className='mb-4.5 flex items-center gap-3'>
+    <div className='mb-4 flex items-center gap-3'>
       <h2 className='type-body font-semibold text-gray-800 dark:text-white/90'>
         {title}
       </h2>
@@ -4147,7 +4147,7 @@ function Sidebar({
                 key={item.id}
                 onClick={() => onSelect(item.id)}
                 className={cn(
-                  'flex w-full items-center justify-between gap-3 rounded-(--radius-control) px-3 py-3 text-left transition',
+                  'flex w-full items-center justify-between gap-3 rounded-(--radius-control) px-3 py-2.5 text-left transition',
                   active
                     ? 'bg-brand-50 dark:bg-brand-500/12'
                     : 'hover:bg-gray-50 dark:hover:bg-white/3',
@@ -4766,7 +4766,7 @@ function CustomizeChatInner() {
     borderRadius: 16,
     background: c.cardBg,
     border: `1px solid ${c.cardBorder}`,
-    padding: 24,
+    padding: 20,
     boxShadow: isDark ? 'none' : '0 1px 2px rgba(16,24,40,.05)',
     ...extra,
   });
@@ -4790,7 +4790,7 @@ function CustomizeChatInner() {
       /* ── INSTALL ─────────────────────────────────────────────────────── */
       case 'install':
         return (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {/* Status / enable card */}
             <div style={cardStyle({ padding: 22 })}>
               <div
@@ -5097,7 +5097,7 @@ function CustomizeChatInner() {
       /* ── TESTING ─────────────────────────────────────────────────────── */
       case 'testing':
         return (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div style={cardStyle()}>
               <SectionHeader title='Quick Testing' />
               <p
@@ -5145,13 +5145,13 @@ function CustomizeChatInner() {
       /* ── APPEARANCE ──────────────────────────────────────────────────── */
       case 'appearance':
         return (
-          <div className='flex flex-col gap-5'>
+          <div className='flex flex-col gap-4'>
             {/* Quick themes */}
             {/* Quick themes */}
-            <div className='rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/3'>
+            <div className='rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/3'>
               <SectionHeader title='Quick Themes' badge='New' />
 
-              <p className='-mt-2 mb-4.5 type-small text-gray-500 dark:text-gray-400'>
+              <p className='-mt-2 mb-4 type-small text-gray-500 dark:text-gray-400'>
                 One click applies a coordinated look — colors, radius, font.
               </p>
 
@@ -5176,7 +5176,7 @@ function CustomizeChatInner() {
             </div>
 
             {/* Colors & Style */}
-            <div className='rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/3'>
+            <div className='rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/3'>
               <SectionHeader title='Colors & Style' />
               <ColorInput
                 label='Brand color'
@@ -5240,9 +5240,9 @@ function CustomizeChatInner() {
       /* ── LAUNCHER ────────────────────────────────────────────────────── */
       case 'launcher':
         return (
-          <div className='flex flex-col gap-5'>
+          <div className='flex flex-col gap-4'>
             {/* Position */}
-            <div className='rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/3'>
+            <div className='rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/3'>
               <SectionHeader title='Widget Position' />
               <div className='grid grid-cols-2 gap-3'>
                 {[
@@ -5278,9 +5278,9 @@ function CustomizeChatInner() {
             </div>
 
             {/* Bubble color + Style presets */}
-            <div className='rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/3'>
+            <div className='rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/3'>
               <SectionHeader title='Bubble Style' badge='Premium' />
-              <p className='-mt-2 mb-4.5 type-small text-gray-500 dark:text-gray-400'>
+              <p className='-mt-2 mb-4 type-small text-gray-500 dark:text-gray-400'>
                 Pick a visual style — color, gradient, glow and depth are baked
                 in.
               </p>
@@ -5302,7 +5302,7 @@ function CustomizeChatInner() {
                       key={s.id}
                       onClick={() => patchAdv({ launcher_style: s.id })}
                       className={cn(
-                        'flex min-h-18 items-center gap-3 rounded-(--radius-control) p-3.5 text-left shadow-theme-xs transition',
+                        'flex min-h-16 items-center gap-3 rounded-(--radius-control) p-3 text-left shadow-theme-xs transition',
                         active
                           ? ''
                           : 'border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-900',
@@ -5356,9 +5356,9 @@ function CustomizeChatInner() {
             </div>
 
             {/* Animation */}
-            <div className='rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/3'>
+            <div className='rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/3'>
               <SectionHeader title='Animation' badge='New' />
-              <p className='-mt-2 mb-4.5 type-small text-gray-500 dark:text-gray-400'>
+              <p className='-mt-2 mb-4 type-small text-gray-500 dark:text-gray-400'>
                 Motion draws attention — pick the one that fits your brand
                 energy.
               </p>
@@ -5382,7 +5382,7 @@ function CustomizeChatInner() {
                       key={a.id}
                       onClick={() => patchAdv({ launcher_animation: a.id })}
                       className={cn(
-                        'flex min-h-18 items-center gap-3 rounded-(--radius-control) p-3.5 text-left shadow-theme-xs transition',
+                        'flex min-h-16 items-center gap-3 rounded-(--radius-control) p-3 text-left shadow-theme-xs transition',
                         active
                           ? ''
                           : 'border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-900',
@@ -5462,7 +5462,7 @@ function CustomizeChatInner() {
             </div>
 
             {/* Shape */}
-            <div className='rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/3'>
+            <div className='rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/3'>
               <SectionHeader title='Shape & Icon' />
 
               <div className='mb-2 type-small font-medium text-gray-500 dark:text-gray-400'>
@@ -5476,7 +5476,7 @@ function CustomizeChatInner() {
                       key={s.id}
                       onClick={() => setBubbleShape(s.id)}
                       className={cn(
-                        'flex flex-col items-center gap-2 rounded-xl px-1.5 py-3.5 transition',
+                        'flex flex-col items-center gap-2 rounded-xl px-1.5 py-3 transition',
                         active
                           ? ''
                           : 'border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-900',
@@ -5692,10 +5692,10 @@ function CustomizeChatInner() {
             </div>
 
             {/* Size + badge */}
-            <div className='rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/3'>
+            <div className='rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/3'>
               <SectionHeader title='Size & Badge' />
 
-              <div className='mb-4.5'>
+              <div className='mb-4'>
                 <div className='mb-1.5 flex justify-between'>
                   <span className='type-small font-medium text-gray-500 dark:text-gray-400'>
                     Launcher size
@@ -5727,7 +5727,7 @@ function CustomizeChatInner() {
             </div>
 
             {/* Teaser */}
-            <div className='rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/3'>
+            <div className='rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/3'>
               <SectionHeader title='Teaser Message' />
               <TextField
                 label='Teaser text'
@@ -5765,8 +5765,8 @@ function CustomizeChatInner() {
       /* ── BRANDING ────────────────────────────────────────────────────── */
       case 'branding':
         return (
-          <div className='flex flex-col gap-5'>
-            <div className='rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/3'>
+          <div className='flex flex-col gap-4'>
+            <div className='rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/3'>
               <SectionHeader title='Branding' />
 
               <div className='mb-2 type-small font-medium text-gray-500 dark:text-gray-400'>
@@ -5877,8 +5877,8 @@ function CustomizeChatInner() {
       /* ── CONTENT (tabs) ──────────────────────────────────────────────── */
       case 'content':
         return (
-          <div className='flex flex-col gap-5'>
-            <div className='rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/3'>
+          <div className='flex flex-col gap-4'>
+            <div className='rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/3'>
               <SectionHeader title='Home Tab' />
               <ToggleRow
                 title='Show Home tab'
@@ -5900,7 +5900,7 @@ function CustomizeChatInner() {
               )}
             </div>
 
-            <div className='rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/3'>
+            <div className='rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/3'>
               <SectionHeader title='Help Center Tab' />
               <ToggleRow
                 title='Show Help Center tab'
@@ -5922,7 +5922,7 @@ function CustomizeChatInner() {
               )}
             </div>
 
-            <div className='rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/3'>
+            <div className='rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/3'>
               <SectionHeader title='Survey Tab' />
               <ToggleRow
                 title='Show Survey tab'
@@ -5940,11 +5940,11 @@ function CustomizeChatInner() {
       /* ── LEAD CAPTURE ────────────────────────────────────────────────── */
       case 'leadcapture':
         return (
-          <div className='flex flex-col gap-5'>
-            <div className='rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/3'>
+          <div className='flex flex-col gap-4'>
+            <div className='rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/3'>
               <SectionHeader title='Lead Capture' />
 
-              <p className='-mt-2 mb-4.5 type-small text-gray-500 dark:text-gray-400'>
+              <p className='-mt-2 mb-4 type-small text-gray-500 dark:text-gray-400'>
                 Ask visitors for a few details before they start chatting.
               </p>
 
@@ -5962,8 +5962,8 @@ function CustomizeChatInner() {
                 />
               </div>
 
-              <div className='mt-5 rounded-xl border border-gray-200 p-4 dark:border-gray-800'>
-                <div className='mb-5'>
+              <div className='mt-4 rounded-xl border border-gray-200 p-4 dark:border-gray-800'>
+                <div className='mb-4'>
                   <h3 className='type-small font-semibold text-gray-800 dark:text-white/90'>
                     Privacy & consent
                   </h3>
@@ -6042,7 +6042,7 @@ function CustomizeChatInner() {
               </div>
             </div>
 
-            <div className='rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/3'>
+            <div className='rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/3'>
               <SectionHeader title='Custom Details' />
 
               <ToggleRow
@@ -6084,9 +6084,9 @@ function CustomizeChatInner() {
       /* ── PROACTIVE ───────────────────────────────────────────────────── */
       case 'proactive':
         return (
-          <div className='rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/3'>
+          <div className='rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/3'>
             <SectionHeader title='Proactive Messages' badge='NEW' />
-            <p className='-mt-2 mb-4.5 type-small text-gray-500 dark:text-gray-400'>
+            <p className='-mt-2 mb-4 type-small text-gray-500 dark:text-gray-400'>
               Nudge visitors when they hesitate, exit, or scroll deep — with
               smart, targeted messages that open the chat automatically.
             </p>
@@ -6100,8 +6100,8 @@ function CustomizeChatInner() {
       /* ── ADVANCED ────────────────────────────────────────────────────── */
       case 'advanced':
         return (
-          <div className='flex flex-col gap-5'>
-            <div className='rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/3'>
+          <div className='flex flex-col gap-4'>
+            <div className='rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/3'>
               <SectionHeader title='Behavior' />
 
               <ToggleRow
@@ -6117,7 +6117,7 @@ function CustomizeChatInner() {
                 onChange={(v) => patchAdv({ hide_on_mobile: v })}
               />
 
-              <div className='mb-4.5'>
+              <div className='mb-4'>
                 <div className='mb-1.5 flex justify-between'>
                   <span className='type-small font-medium text-gray-500 dark:text-gray-400'>
                     Auto-open delay
@@ -6163,7 +6163,7 @@ function CustomizeChatInner() {
               </div>
             </div>
 
-            <div className='rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/3'>
+            <div className='rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/3'>
               <SectionHeader title='Business Hours' />
               <ToggleRow
                 title='Enable business hours'
@@ -6363,9 +6363,9 @@ function CustomizeChatInner() {
 }
 `}</style>
 
-      <div className='cw-admin-page mx-auto max-w-360 px-4 py-8'>
+      <div className='cw-admin-page min-w-0 w-full'>
         {/* ── Top bar ────────────────────────────────────────────────── */}
-        <div className='mx-auto mb-6 flex max-w-350 flex-wrap items-center justify-between gap-4'>
+        <div className='mb-4 flex flex-wrap items-center justify-between gap-4'>
           <div className='flex min-w-0 items-center gap-3.5'>
             <Button
               variant='outline'
@@ -6434,7 +6434,7 @@ function CustomizeChatInner() {
         {/* ── 3-column grid ─────────────────────────────────────────── */}
         <div
           className={cn(
-            'cw-grid mx-auto grid w-full max-w-400 items-start gap-6',
+            'cw-grid grid w-full items-start gap-4',
             hideRightRail && 'cw-grid-no-rail',
           )}
         >

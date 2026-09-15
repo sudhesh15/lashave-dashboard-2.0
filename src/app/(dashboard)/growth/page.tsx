@@ -353,8 +353,8 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <div className={cn(CARD, 'p-6 sm:p-6')}>
-      <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
+    <div className={cn(CARD, 'p-4')}>
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400">
             {icon}
@@ -380,7 +380,7 @@ function Section({
 
 function Empty({ text }: { text: string }) {
   return (
-    <div className="flex min-h-27.5 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-gray-300 px-5 py-8 text-center dark:border-gray-700">
+    <div className="flex min-h-24 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-gray-300 px-5 py-6 text-center dark:border-gray-700">
       <Sparkles size={20} className="text-gray-300 dark:text-gray-700" />
       <p className="type-small text-gray-400 dark:text-gray-500">{text}</p>
     </div>
@@ -1084,10 +1084,10 @@ export default function GrowthPage() {
 
   return (
     <RequireAuth>
-      <div className='py-4'>
+      <div className='min-w-0 w-full'>
         <PageBreadcrumb pageTitle='Growth' />
 
-      <div className='mb-6 flex flex-wrap items-start justify-between gap-4'>
+      <div className='mb-4 flex flex-wrap items-start justify-between gap-4'>
         <div>
           <Badge color='primary' startIcon={<Sparkles size={13} />}>
             AI Growth Studio
@@ -1147,14 +1147,14 @@ export default function GrowthPage() {
       </div>
 
       {err && (
-        <div className='mb-6 flex items-center gap-3 rounded-(--radius-control) border border-error-200 bg-error-50 px-4 py-3 type-small text-error-600 dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-400'>
+        <div className='mb-4 flex items-center gap-3 rounded-(--radius-control) border border-error-200 bg-error-50 px-4 py-3 type-small text-error-600 dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-400'>
           <AlertTriangle size={16} className='shrink-0' />
           {err}
         </div>
       )}
 
       {loading ? (
-        <div className='flex min-h-65 flex-col items-center justify-center gap-3 text-center'>
+        <div className='flex min-h-55 flex-col items-center justify-center gap-3 text-center'>
           <div className='h-8 w-8 animate-spin rounded-full border-[3px] border-gray-200 border-t-brand-500 dark:border-gray-800 dark:border-t-brand-400' />
           <span className='type-small text-gray-400 dark:text-gray-500'>
             Loading Growth report...
@@ -1164,7 +1164,7 @@ export default function GrowthPage() {
         <div
           className={cn(
             CARD,
-            'flex flex-col items-center px-6 py-16 text-center',
+            'flex flex-col items-center px-6 py-10 text-center',
           )}
         >
           <div className='mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'>
@@ -1178,7 +1178,7 @@ export default function GrowthPage() {
             complaints and FAQs.
           </p>
           <Button
-            className='mt-6'
+            className='mt-4'
             onClick={generateReport}
             disabled={generating || (hasGenerated && !canRegenerate)}
           >
@@ -1191,10 +1191,10 @@ export default function GrowthPage() {
           </Button>
         </div>
       ) : (
-        <div className='flex flex-col gap-6'>
+        <div className='flex flex-col gap-(--layout-section-gap)'>
           {/* Hero */}
-          <div className={cn(CARD, 'p-6 sm:p-6')}>
-            <div className='grid grid-cols-1 gap-6 md:grid-cols-[190px_1fr] md:items-center'>
+          <div className={cn(CARD, 'p-4')}>
+            <div className='grid grid-cols-1 gap-4 md:grid-cols-[190px_1fr] md:items-center'>
               <div className='mx-auto w-full max-w-47.5'>
                 <GrowthGauge
                   score={report?.growth_score || 0}
@@ -1223,7 +1223,7 @@ export default function GrowthPage() {
             </div>
 
             {focusLine && (
-              <div className='mt-5 rounded-xl border border-brand-200 bg-brand-50 p-4 dark:border-brand-500/25 dark:bg-brand-500/10'>
+              <div className='mt-4 rounded-xl border border-brand-200 bg-brand-50 p-4 dark:border-brand-500/25 dark:bg-brand-500/10'>
                 <div className='mb-1 flex items-center gap-1.5 type-caption font-semibold text-brand-600 dark:text-brand-400'>
                   <Sparkles size={13} /> This week&apos;s focus
                 </div>
@@ -1234,13 +1234,13 @@ export default function GrowthPage() {
             )}
           </div>
 
-          <div className='grid grid-cols-1 gap-6 lg:grid-cols-[290px_1fr] lg:items-start'>
+          <div className='grid grid-cols-1 gap-(--layout-section-gap) lg:grid-cols-[290px_1fr] lg:items-start'>
             <div>
               {isMobile && (
                 <button
                   type='button'
                   onClick={() => setGrowthMenuOpen((p) => !p)}
-                  className='mb-3 flex h-10 w-full items-center justify-between rounded-(--radius-control) border border-gray-200 bg-white px-4 type-small font-medium text-gray-700 shadow-theme-xs transition hover:bg-gray-50 dark:border-gray-800 dark:bg-white/3 dark:text-gray-400 dark:hover:bg-white/3'
+                  className='mb-3 flex h-(--control-height-md) w-full items-center justify-between rounded-(--radius-control) border border-gray-200 bg-white px-4 type-small font-medium text-gray-700 shadow-theme-xs transition hover:bg-gray-50 dark:border-gray-800 dark:bg-white/3 dark:text-gray-400 dark:hover:bg-white/3'
                 >
                   <span>Growth Menu</span>
                   <Menu size={18} />
@@ -1288,7 +1288,7 @@ export default function GrowthPage() {
                             setGrowthMenuOpen(false);
                           }}
                           className={cn(
-                            'group flex w-full items-center justify-between gap-3 rounded-xl border px-3 py-3 text-left transition-all',
+                            'group flex w-full items-center justify-between gap-3 rounded-xl border px-3 py-2.5 text-left transition-all',
                             active
                               ? 'border-brand-200 bg-white shadow-theme-xs dark:border-brand-500/25 dark:bg-brand-500/12'
                               : 'border-transparent bg-white/40 hover:border-brand-100 hover:bg-white dark:bg-white/2 dark:hover:border-brand-500/15 dark:hover:bg-white/5',
@@ -1346,7 +1346,7 @@ export default function GrowthPage() {
               )}
             </div>
 
-            <div className='min-w-0 space-y-6'>
+            <div className='min-w-0 space-y-(--layout-section-gap)'>
               {/* Cooldown / status pill */}
               {hasGenerated && (
                 <div
@@ -1394,7 +1394,7 @@ export default function GrowthPage() {
                             <div
                               key={h.id}
                               onClick={() => setSelectedHistory(h)}
-                              className='flex cursor-pointer items-center gap-3 rounded-xl border border-gray-200 p-3.5 transition hover:border-gray-300 dark:border-gray-800 dark:hover:border-gray-700'
+                              className='flex cursor-pointer items-center gap-3 rounded-xl border border-gray-200 p-3 transition hover:border-gray-300 dark:border-gray-800 dark:hover:border-gray-700'
                             >
                               <div className='flex h-9 w-9 shrink-0 items-center justify-center rounded-(--radius-control) bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'>
                                 <CalendarDays size={15} />
@@ -1501,7 +1501,7 @@ export default function GrowthPage() {
                               />
                             )}
                           </div>
-                          <div className='p-3.5'>
+                          <div className='p-3'>
                             <Badge
                               color={CATEGORY_BADGE[idea.category] || 'primary'}
                               className='capitalize'

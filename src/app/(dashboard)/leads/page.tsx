@@ -327,7 +327,7 @@ function MetricCard({
       type='button'
       onClick={onClick}
       className={cn(
-        'rounded-2xl border p-6 text-left transition',
+        'rounded-2xl border p-5 text-left transition',
         toneBg[tone],
         active
           ? 'border-brand-300 shadow-theme-sm dark:border-brand-500/40'
@@ -337,7 +337,7 @@ function MetricCard({
       <span className='type-caption font-medium uppercase text-gray-500 dark:text-gray-400'>
         {label}
       </span>
-      <div className='mt-3 flex items-end justify-between gap-3'>
+      <div className='mt-2 flex items-end justify-between gap-3'>
         <span className='text-title-sm font-semibold text-gray-800 dark:text-white/90'>
           {value}
         </span>
@@ -384,8 +384,8 @@ function FollowUpsPanel({ items }: { items: FollowUpItem[] }) {
   );
 
   return (
-    <div className='mb-6 overflow-hidden rounded-2xl border border-brand-200 bg-white shadow-theme-sm dark:border-brand-500/20 dark:bg-white/3'>
-      <div className='border-b border-brand-100 bg-brand-50/60 px-5 py-5 dark:border-brand-500/15 dark:bg-brand-500/10 sm:px-6'>
+    <div className='mb-4 overflow-hidden rounded-2xl border border-brand-200 bg-white shadow-theme-sm dark:border-brand-500/20 dark:bg-white/3'>
+      <div className='border-b border-brand-100 bg-brand-50/60 px-5 py-4 dark:border-brand-500/15 dark:bg-brand-500/10 sm:px-6'>
         <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
           <div>
             <h3 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
@@ -399,7 +399,7 @@ function FollowUpsPanel({ items }: { items: FollowUpItem[] }) {
         </div>
       </div>
 
-      <div className='grid gap-4 p-4 sm:p-6 lg:grid-cols-3'>
+      <div className='grid gap-4 p-4 sm:p-5 lg:grid-cols-3'>
         {groups.map((group) => {
           const groupItems = grouped[group.key] || [];
           return (
@@ -415,11 +415,11 @@ function FollowUpsPanel({ items }: { items: FollowUpItem[] }) {
               </div>
 
               {groupItems.length === 0 ? (
-                <div className='rounded-(--radius-control) border border-dashed border-gray-200 bg-white/70 px-3 py-5 text-center type-caption text-gray-500 dark:border-white/8 dark:bg-white/3 dark:text-gray-400'>
+                <div className='rounded-(--radius-control) border border-dashed border-gray-200 bg-white/70 px-3 py-4 text-center type-caption text-gray-500 dark:border-white/8 dark:bg-white/3 dark:text-gray-400'>
                   No {group.label.toLowerCase()} follow-ups
                 </div>
               ) : (
-                <div className='space-y-3'>
+                <div className='space-y-2'>
                   {groupItems.slice(0, 4).map((followUp, index) => (
                     <Link
                       key={followUp.conversation_id}
@@ -505,7 +505,7 @@ function StageSelect({
         type='button'
         disabled={disabled}
         onClick={() => setOpen((value) => !value)}
-        className='flex h-10 w-full items-center justify-between gap-2 rounded-(--radius-control) border border-gray-200 bg-white px-3 type-small font-medium outline-none transition hover:bg-gray-50 disabled:opacity-60 dark:border-gray-800 dark:bg-gray-900 dark:hover:bg-white/3'
+        className='flex h-(--control-height-md) w-full items-center justify-between gap-2 rounded-(--radius-control) border border-gray-200 bg-white px-3 type-small font-medium outline-none transition hover:bg-gray-50 disabled:opacity-60 dark:border-gray-800 dark:bg-gray-900 dark:hover:bg-white/3'
         aria-label={`Change stage for ${label}`}
       >
         <span
@@ -598,7 +598,7 @@ function LeadWorklist({
                 <th
                   key={header}
                   className={cn(
-                    'px-5 py-3.5 type-caption font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 sm:px-6',
+                    'px-5 py-2.5 type-caption font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 sm:px-6',
                     header === 'Actions' ? 'text-right' : 'text-left',
                   )}
                 >
@@ -612,7 +612,7 @@ function LeadWorklist({
               <tr>
                 <td
                   colSpan={6}
-                  className='px-5 py-14 text-center type-small text-gray-500 dark:text-gray-400'
+                  className='px-5 py-10 text-center type-small text-gray-500 dark:text-gray-400'
                 >
                   Loading leads
                 </td>
@@ -623,7 +623,7 @@ function LeadWorklist({
               <tr>
                 <td
                   colSpan={6}
-                  className='px-5 py-14 text-center type-small text-gray-500 dark:text-gray-400'
+                  className='px-5 py-10 text-center type-small text-gray-500 dark:text-gray-400'
                 >
                   {searchQ ? 'No leads match this search' : 'No leads found'}
                 </td>
@@ -639,7 +639,7 @@ function LeadWorklist({
                   key={lead.id}
                   className='transition hover:bg-gray-50 dark:hover:bg-white/2'
                 >
-                  <td className='px-5 py-3 sm:px-6'>
+                  <td className='px-5 py-2.5 sm:px-6'>
                     <div className='flex items-center gap-3'>
                       <LeadAvatar lead={lead} label={display.label} />
                       <div className='min-w-0 flex-1'>
@@ -668,7 +668,7 @@ function LeadWorklist({
                       </div>
                     </div>
                   </td>
-                  <td className='px-5 py-3 sm:px-6'>
+                  <td className='px-5 py-2.5 sm:px-6'>
                     <StageSelect
                       status={lead.status}
                       disabled={updatingId === lead.id}
@@ -676,7 +676,7 @@ function LeadWorklist({
                       label={display.label}
                     />
                   </td>
-                  <td className='px-5 py-3 sm:px-6'>
+                  <td className='px-5 py-2.5 sm:px-6'>
                     <span className='inline-flex min-w-0 items-center gap-2 type-small text-gray-700 dark:text-gray-300'>
                       <span className='inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gray-50 dark:bg-white/5'>
                         <Image
@@ -695,7 +695,7 @@ function LeadWorklist({
                       </span>
                     </span>
                   </td>
-                  <td className='px-5 py-3 type-small text-gray-500 dark:text-gray-400 sm:px-6'>
+                  <td className='px-5 py-2.5 type-small text-gray-500 dark:text-gray-400 sm:px-6'>
                     <div className='min-w-0 space-y-0.5'>
                       <div
                         className='flex min-w-0 items-center gap-1.5 text-gray-500 dark:text-gray-400'
@@ -742,10 +742,10 @@ function LeadWorklist({
                       </div>
                     </div>
                   </td>
-                  <td className='px-5 py-3 type-small tabular-nums text-gray-500 dark:text-gray-400 sm:px-6'>
+                  <td className='px-5 py-2.5 type-small tabular-nums text-gray-500 dark:text-gray-400 sm:px-6'>
                     {timeAgo(lead.updated_at)}
                   </td>
-                  <td className='px-5 py-3 sm:px-6'>
+                  <td className='px-5 py-2.5 sm:px-6'>
                     <div className='flex justify-end'>
                       <Link
                         href={`/conversations/${lead.conversation_id}`}
@@ -1027,9 +1027,9 @@ export default function LeadsPage() {
 
   return (
     <RequireAuth>
-      <div className='mx-auto max-w-360 px-4 py-8'>
+      <div className='min-w-0 w-full'>
         <PageBreadcrumb pageTitle='Leads' />
-          <div className='mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
+          <div className='mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
             <div>
               <p className='type-small text-gray-500 dark:text-gray-400'>
                 Manage lead qualification, follow-ups, and pipeline movement from
@@ -1051,7 +1051,7 @@ export default function LeadsPage() {
           </div>
         </div>
 
-        <div className='mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4'>
+        <div className='mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4'>
           <MetricCard
             label='Total leads'
             value={total}
@@ -1092,10 +1092,10 @@ export default function LeadsPage() {
 
         <FollowUpsPanel items={voiceFollowUps} />
 
-        <div className='flex flex-col gap-6'>
-          <div className='flex flex-col gap-6'>
+        <div className='flex flex-col gap-(--layout-section-gap)'>
+          <div className='flex flex-col gap-(--layout-section-gap)'>
             <div className='min-w-0 max-w-full overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3'>
-              <div className='flex flex-col gap-2 border-b border-gray-100 px-5 py-5 dark:border-white/5 sm:flex-row sm:items-center sm:justify-between sm:px-6'>
+              <div className='flex flex-col gap-2 border-b border-gray-100 px-5 py-4 dark:border-white/5 sm:flex-row sm:items-center sm:justify-between sm:px-6'>
                 <h3 className='type-body font-semibold text-gray-800 dark:text-white/90'>
                   Lead pipeline
                 </h3>
@@ -1104,7 +1104,7 @@ export default function LeadsPage() {
                 </div>
               </div>
 
-              <div className='min-w-0 px-5 py-5 sm:px-6'>
+              <div className='min-w-0 px-5 py-4 sm:px-6'>
                 <div className='flex flex-col gap-4 rounded-t-xl border border-b-0 border-gray-200 bg-white px-5 py-4 dark:border-white/5 dark:bg-white/1 lg:flex-row lg:items-center lg:justify-between'>
                   <h4 className='type-card-title font-semibold text-gray-800 dark:text-white/90'>
                     {activeStageTab.label} leads
@@ -1120,7 +1120,7 @@ export default function LeadsPage() {
                           setSearching(!!event.target.value);
                         }}
                         placeholder='Search name, intent, service, or message'
-                        className='h-10 w-full rounded-(--radius-control) border border-gray-300 bg-white py-2 pl-11 pr-9 type-small text-gray-800 shadow-theme-xs outline-none placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-gray-500'
+                        className='h-(--control-height-md) w-full rounded-(--radius-control) border border-gray-300 bg-white py-2 pl-11 pr-9 type-small text-gray-800 shadow-theme-xs outline-none placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-gray-500'
                       />
                       {searchQ && !searching && (
                         <button
@@ -1262,9 +1262,9 @@ export default function LeadsPage() {
             </div>
           </div>
 
-          <div className='flex flex-col gap-6'>
+          <div className='flex flex-col gap-(--layout-section-gap)'>
             <div className='rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/3'>
-              <div className='border-b border-gray-100 px-6 py-5 dark:border-gray-800'>
+              <div className='border-b border-gray-100 px-5 py-4 dark:border-gray-800 sm:px-6'>
                 <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
                   <div>
                     <h3 className='type-body font-semibold text-gray-800 dark:text-white/90'>
@@ -1279,8 +1279,8 @@ export default function LeadsPage() {
                 </div>
               </div>
 
-              <div className='grid gap-4 p-4 sm:p-6 lg:grid-cols-2'>
-                <div className='flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-white/2'>
+              <div className='grid gap-4 p-4 sm:p-5 lg:grid-cols-2'>
+                <div className='flex flex-col gap-3 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-white/2'>
                   <div className='flex items-center gap-2 type-caption font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400'>
                     <Tag className='icon-tiny' />
                     Active keywords
@@ -1312,7 +1312,7 @@ export default function LeadsPage() {
                   </div>
                 </div>
 
-                <div className='flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-white/2'>
+                <div className='flex flex-col gap-3 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-white/2'>
                   <div className='flex items-center gap-2 type-caption font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400'>
                     <Plus className='icon-tiny' />
                     Add a keyword
@@ -1323,10 +1323,10 @@ export default function LeadsPage() {
                       onChange={(event) => setKwInput(event.target.value)}
                       onKeyDown={(event) => event.key === 'Enter' && addKw()}
                       placeholder='e.g. pricing, urgent'
-                      className='h-10 rounded-(--radius-control) bg-white dark:bg-gray-900'
+                      className='h-(--control-height-md) rounded-(--radius-control) bg-white dark:bg-gray-900'
                     />
                     <Button
-                      className='h-10 shrink-0 rounded-(--radius-control) px-5'
+                      className='h-(--control-height-md) shrink-0 rounded-(--radius-control) px-5'
                       onClick={addKw}
                       disabled={!kwInput.trim()}
                     >

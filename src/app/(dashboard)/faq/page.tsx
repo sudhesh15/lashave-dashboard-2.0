@@ -892,7 +892,7 @@ function FaqCard({
       )}
     >
       <div
-        className='flex cursor-pointer items-center gap-3 px-4 py-3.5'
+        className='flex cursor-pointer items-center gap-3 px-4 py-3'
         onClick={() => setOpen((v) => !v)}
       >
         <p className='min-w-0 flex-1 truncate type-small font-semibold text-gray-800 dark:text-white/90'>
@@ -956,7 +956,7 @@ function FaqCard({
       </div>
 
       {open && (
-        <div className='flex flex-col gap-3.5 border-t border-gray-100 px-4 pb-4 pt-3.5 dark:border-gray-800'>
+        <div className='flex flex-col gap-3 border-t border-gray-100 px-4 pb-4 pt-3 dark:border-gray-800'>
           <div>
             <label className='mb-1.5 block type-caption font-medium text-gray-500 dark:text-gray-400'>
               Question
@@ -4179,7 +4179,7 @@ function WorkbenchTab({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        'relative flex min-h-33 flex-col items-start overflow-hidden rounded-xl border p-6 text-left shadow-theme-xs transition-all duration-200',
+        'relative flex min-h-28 flex-col items-start overflow-hidden rounded-xl border p-4 text-left shadow-theme-xs transition-all duration-200',
         active
           ? 'border-brand-300 bg-linear-to-br from-brand-50 via-white to-blue-50 shadow-sm dark:border-brand-500/30 dark:from-brand-500/15 dark:via-gray-900 dark:to-blue-500/10'
           : 'border-gray-200 bg-linear-to-br from-white via-white to-gray-50 hover:border-brand-200 hover:from-brand-50/60 hover:to-blue-50/60 hover:shadow-sm dark:border-gray-800 dark:from-gray-900 dark:via-gray-900 dark:to-white/3 dark:hover:border-brand-500/20 dark:hover:from-brand-500/10 dark:hover:to-blue-500/5',
@@ -4226,11 +4226,11 @@ function WorkbenchTab({
         )}
       </div>
 
-      <span className='relative z-10 mt-4 type-body font-semibold text-gray-800 dark:text-white/90'>
+      <span className='relative z-10 mt-3 type-body font-semibold text-gray-800 dark:text-white/90'>
         {label}
       </span>
 
-      <span className='relative z-10 mt-2 type-small leading-6 text-gray-500 dark:text-gray-400'>
+      <span className='relative z-10 mt-1.5 type-small leading-6 text-gray-500 dark:text-gray-400'>
         {description}
       </span>
     </button>
@@ -4403,8 +4403,8 @@ function KnowledgeWorkbench({
 
   return (
     <section className='faq-workbench-readable overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/3'>
-      <div className='border-b border-gray-100 px-6 py-6 dark:border-gray-800'>
-        <div className='mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between'>
+      <div className='border-b border-gray-100 px-5 py-4 dark:border-gray-800'>
+        <div className='mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between'>
           <div>
             <h2 className='type-h4 font-semibold text-gray-800 dark:text-white/90'>
               Knowledge sources
@@ -4457,7 +4457,7 @@ function KnowledgeWorkbench({
           />
         </div>
       </div>
-      <div className='border-b border-gray-100 bg-gray-50 px-6 py-4 type-body leading-7 text-gray-500 dark:border-gray-800 dark:bg-white/2 dark:text-gray-400'>
+      <div className='border-b border-gray-100 bg-gray-50 px-5 py-3 type-body leading-7 text-gray-500 dark:border-gray-800 dark:bg-white/2 dark:text-gray-400'>
         {view === 'manual' && (
           <>
             <strong className='font-semibold text-gray-800 dark:text-white/90'>
@@ -4517,7 +4517,7 @@ function KnowledgeWorkbench({
       {view === 'catalogue' && documents.length === 0 && documentsLoading && (
         <div
           style={{
-            padding: '40px 24px',
+            padding: '32px 24px',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -4554,7 +4554,7 @@ function KnowledgeWorkbench({
         !websiteScraperStatus && (
           <div
             style={{
-              padding: '40px 24px',
+              padding: '32px 24px',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -4591,7 +4591,7 @@ function KnowledgeWorkbench({
       {view === 'saved' && totalSaved === 0 && savedLoading && (
         <div
           style={{
-            padding: '40px 24px',
+            padding: '32px 24px',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -4763,13 +4763,13 @@ function CatalogueWorkspace({
   }).length;
 
   return (
-    <div className='grid min-h-140 grid-cols-1 items-start lg:grid-cols-[minmax(300px,1fr)_minmax(420px,1.2fr)]'>
+    <div className='grid min-h-128 grid-cols-1 items-start lg:grid-cols-[minmax(300px,1fr)_minmax(420px,1.2fr)]'>
       {/* Documents column */}
       <div
         className='min-w-0 border-t first:border-t-0 lg:border-t-0 lg:border-r'
         style={{ borderColor: th.cardBorder }}
       >
-        <div className='flex flex-wrap items-center justify-between gap-3 p-3.5'>
+        <div className='flex flex-wrap items-center justify-between gap-3 p-3'>
           <div>
             <div style={{ color: th.text, fontSize: 16, fontWeight: 600 }}>
               Uploaded documents
@@ -4808,7 +4808,7 @@ function CatalogueWorkspace({
               >
                 <button
                   onClick={() => onSelect(doc.document_id)}
-                  className='grid min-w-0 cursor-pointer grid-cols-[32px_1fr_auto] items-center gap-3 border-0 bg-transparent px-3.5 py-3.5 text-left'
+                  className='grid min-w-0 cursor-pointer grid-cols-[32px_1fr_auto] items-center gap-3 border-0 bg-transparent px-3 py-3 text-left'
                   style={{ color: th.text }}
                 >
                   <span
@@ -4863,7 +4863,7 @@ function CatalogueWorkspace({
 
           {!documents.length && (
             <div
-              className='p-7 text-center type-small'
+              className='p-5 text-center type-small'
               style={{ color: th.textSub }}
             >
               {loading
@@ -6268,7 +6268,7 @@ function WebsiteReviewPane({
       style={{
         display: 'grid',
         gridTemplateColumns: 'minmax(520px, 1.35fr) minmax(380px, .65fr)',
-        minHeight: 560,
+        minHeight: 520,
       }}
     >
       <div style={{ minWidth: 0, borderRight: `1px solid ${th.cardBorder}` }}>
@@ -6382,7 +6382,7 @@ function WebsiteReviewPane({
 
             <div
               style={{
-                padding: '0 14px 14px',
+                padding: '0 14px 12px',
                 display: 'grid',
                 gridTemplateColumns: '1fr auto',
                 gap: 10,
@@ -6437,7 +6437,7 @@ function WebsiteReviewPane({
 
             <div
               style={{
-                padding: '0 14px 14px',
+                padding: '0 14px 12px',
                 display: 'flex',
                 gap: 10,
                 alignItems: 'center',
@@ -7205,7 +7205,7 @@ function SavedKnowledgeLedger({
   const pagedRows = getPageItems(rows, page, 8);
 
   return (
-    <div style={{ padding: 16 }}>
+    <div style={{ padding: 12 }}>
       <div
         style={{
           display: 'flex',
@@ -7303,7 +7303,7 @@ function SavedKnowledgeLedger({
                 background: th.accentBg,
               }}
             >
-              <th style={{ padding: '11px 12px', width: 32 }}>
+              <th style={{ padding: '9px 12px', width: 32 }}>
                 <input
                   type='checkbox'
                   checked={allSelected}
@@ -7314,12 +7314,12 @@ function SavedKnowledgeLedger({
                   style={{ cursor: 'pointer', accentColor: th.accent }}
                 />
               </th>
-              <th style={{ padding: '11px 12px' }}>Knowledge</th>
-              <th style={{ padding: '11px 12px' }}>Category</th>
-              <th style={{ padding: '11px 12px' }}>Source</th>
-              <th style={{ padding: '11px 12px' }}>Confidence</th>
-              <th style={{ padding: '11px 12px' }}>Embedding</th>
-              <th style={{ padding: '11px 12px', width: 40 }}></th>
+              <th style={{ padding: '9px 12px' }}>Knowledge</th>
+              <th style={{ padding: '9px 12px' }}>Category</th>
+              <th style={{ padding: '9px 12px' }}>Source</th>
+              <th style={{ padding: '9px 12px' }}>Confidence</th>
+              <th style={{ padding: '9px 12px' }}>Embedding</th>
+              <th style={{ padding: '9px 12px', width: 40 }}></th>
             </tr>
           </thead>
           <tbody>
@@ -7328,7 +7328,7 @@ function SavedKnowledgeLedger({
                 key={row.id}
                 style={{ borderTop: `1px solid ${th.cardBorder}` }}
               >
-                <td style={{ padding: '12px' }}>
+                <td style={{ padding: '10px 12px' }}>
                   <input
                     type='checkbox'
                     checked={selected.has(row.id)}
@@ -7345,7 +7345,7 @@ function SavedKnowledgeLedger({
                 </td>
                 <td
                   style={{
-                    padding: '12px',
+                    padding: '10px 12px',
                     color: th.text,
                     fontSize: 13,
                     maxWidth: 420,
@@ -7366,18 +7366,18 @@ function SavedKnowledgeLedger({
                   </div>
                 </td>
                 <td
-                  style={{ padding: '12px', color: th.textSub, fontSize: 12 }}
+                  style={{ padding: '10px 12px', color: th.textSub, fontSize: 12 }}
                 >
                   {row.category}
                 </td>
                 <td
-                  style={{ padding: '12px', color: th.textSub, fontSize: 12 }}
+                  style={{ padding: '10px 12px', color: th.textSub, fontSize: 12 }}
                 >
                   {row.source}
                 </td>
                 <td
                   style={{
-                    padding: '12px',
+                    padding: '10px 12px',
                     color:
                       confidencePct(row.confidence) >= 80
                         ? '#059669'
@@ -7390,7 +7390,7 @@ function SavedKnowledgeLedger({
                 </td>
                 <td
                   style={{
-                    padding: '12px',
+                    padding: '10px 12px',
                     color: row.embed === 'embedded' ? '#059669' : '#d97706',
                     fontSize: 12,
                     fontWeight: 700,
@@ -7422,7 +7422,7 @@ function SavedKnowledgeLedger({
                 <td
                   colSpan={7}
                   style={{
-                    padding: 36,
+                    padding: 28,
                     textAlign: 'center',
                     color: th.textSub,
                     fontSize: 12,
@@ -9380,8 +9380,8 @@ export default function FAQPage() {
         />
       )}
 
-      <div className='relative overflow-x-hidden'>
-        <div className='mx-auto flex max-w-375 flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8'>
+      <div className='min-w-0 w-full'>
+        <div className='flex flex-col gap-(--layout-section-gap)'>
           {/* Header */}
           <div className='flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between'>
             <div>
@@ -9425,7 +9425,7 @@ export default function FAQPage() {
             <button
               type='button'
               onClick={() => setKnowledgeView('saved')}
-              className='rounded-xl border border-brand-100 bg-brand-50 p-6 text-left transition hover:border-brand-200 hover:bg-brand-100/60 dark:border-brand-500/20 dark:bg-brand-500/10 dark:hover:bg-brand-500/15'
+              className='rounded-xl border border-brand-100 bg-brand-50 p-4 text-left transition hover:border-brand-200 hover:bg-brand-100/60 dark:border-brand-500/20 dark:bg-brand-500/10 dark:hover:bg-brand-500/15'
             >
               <div className='flex items-center gap-3'>
                 <div className='flex h-9 w-9 items-center justify-center rounded-(--radius-control) bg-brand-500/15 text-brand-500 dark:bg-brand-500/20 dark:text-brand-400'>
@@ -9435,7 +9435,7 @@ export default function FAQPage() {
                   Total knowledge
                 </span>
               </div>
-              <div className='mt-3 flex items-end justify-between gap-3'>
+              <div className='mt-2 flex items-end justify-between gap-3'>
                 <span className='text-title-sm font-semibold text-gray-800 dark:text-white/90'>
                   {totalKnowledgeCount}
                 </span>
@@ -9446,7 +9446,7 @@ export default function FAQPage() {
             <button
               type='button'
               onClick={() => setKnowledgeView('manual')}
-              className='rounded-xl border border-success-100 bg-success-50 p-6 text-left transition hover:border-success-200 hover:bg-success-100/60 dark:border-success-500/20 dark:bg-success-500/10 dark:hover:bg-success-500/15'
+              className='rounded-xl border border-success-100 bg-success-50 p-4 text-left transition hover:border-success-200 hover:bg-success-100/60 dark:border-success-500/20 dark:bg-success-500/10 dark:hover:bg-success-500/15'
             >
               <div className='flex items-center gap-3'>
                 <div className='flex h-9 w-9 items-center justify-center rounded-(--radius-control) bg-success-500/15 text-success-600 dark:bg-success-500/20 dark:text-success-400'>
@@ -9456,7 +9456,7 @@ export default function FAQPage() {
                   Manual FAQs
                 </span>
               </div>
-              <div className='mt-3 flex items-end justify-between gap-3'>
+              <div className='mt-2 flex items-end justify-between gap-3'>
                 <span className='text-title-sm font-semibold text-gray-800 dark:text-white/90'>
                   {items.length}
                 </span>
@@ -9467,7 +9467,7 @@ export default function FAQPage() {
             <button
               type='button'
               onClick={() => setKnowledgeView('catalogue')}
-              className='rounded-xl border border-warning-100 bg-warning-50 p-6 text-left transition hover:border-warning-200 hover:bg-warning-100/60 dark:border-warning-500/20 dark:bg-warning-500/10 dark:hover:bg-warning-500/15'
+              className='rounded-xl border border-warning-100 bg-warning-50 p-4 text-left transition hover:border-warning-200 hover:bg-warning-100/60 dark:border-warning-500/20 dark:bg-warning-500/10 dark:hover:bg-warning-500/15'
             >
               <div className='flex items-center gap-3'>
                 <div className='flex h-9 w-9 items-center justify-center rounded-(--radius-control) bg-warning-500/15 text-warning-600 dark:bg-warning-500/20 dark:text-warning-400'>
@@ -9477,7 +9477,7 @@ export default function FAQPage() {
                   Uploaded docs
                 </span>
               </div>
-              <div className='mt-3 flex items-end justify-between gap-3'>
+              <div className='mt-2 flex items-end justify-between gap-3'>
                 <span className='text-title-sm font-semibold text-gray-800 dark:text-white/90'>
                   {knowledgeDocuments.length}
                 </span>
@@ -9488,7 +9488,7 @@ export default function FAQPage() {
             <button
               type='button'
               onClick={() => setKnowledgeView('website')}
-              className='rounded-xl border border-purple-100 bg-purple-50 p-6 text-left transition hover:border-purple-200 hover:bg-purple-100/60 dark:border-purple-500/20 dark:bg-purple-500/10 dark:hover:bg-purple-500/15'
+              className='rounded-xl border border-purple-100 bg-purple-50 p-4 text-left transition hover:border-purple-200 hover:bg-purple-100/60 dark:border-purple-500/20 dark:bg-purple-500/10 dark:hover:bg-purple-500/15'
             >
               <div className='flex items-center gap-3'>
                 <div className='flex h-9 w-9 items-center justify-center rounded-(--radius-control) bg-purple-500/15 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400'>
@@ -9498,7 +9498,7 @@ export default function FAQPage() {
                   Website entries
                 </span>
               </div>
-              <div className='mt-3 flex items-end justify-between gap-3'>
+              <div className='mt-2 flex items-end justify-between gap-3'>
                 <span className='text-title-sm font-semibold text-gray-800 dark:text-white/90'>
                   {websiteEntries.length}
                 </span>
@@ -9642,7 +9642,7 @@ export default function FAQPage() {
             onDeleteApprovedEntity={deleteApprovedEntity}
             onBulkDeleteApprovedEntities={bulkDeleteApprovedEntities}
             manualContent={
-              <div className='flex flex-col gap-5 p-4 sm:p-6'>
+              <div className='flex flex-col gap-4 p-4 sm:p-6'>
                 {/* Stats tiles (also act as filter chips) */}
                 {loaded && items.length > 0 && (
                   <div className='grid grid-cols-1 gap-4 sm:grid-cols-3'>
@@ -9672,7 +9672,7 @@ export default function FAQPage() {
                           key={s.l}
                           onClick={() => setFilter(s.f)}
                           className={cn(
-                            'w-full rounded-2xl border bg-white p-6 text-left transition dark:bg-white/3',
+                            'w-full rounded-2xl border bg-white p-4 text-left transition dark:bg-white/3',
                             isSelected
                               ? 'border-brand-300 shadow-theme-sm dark:border-brand-500/40'
                               : 'border-gray-200 hover:border-gray-300 dark:border-gray-800 dark:hover:border-gray-700',
@@ -9681,7 +9681,7 @@ export default function FAQPage() {
                           <p className='text-title-sm font-semibold tabular-nums text-gray-800 dark:text-white/90'>
                             {s.n}
                           </p>
-                          <p className='mt-2 type-small text-gray-500 dark:text-gray-400'>
+                          <p className='mt-1.5 type-small text-gray-500 dark:text-gray-400'>
                             {s.l}
                           </p>
                         </button>
@@ -9739,7 +9739,7 @@ export default function FAQPage() {
                   <select
                     value={sort}
                     onChange={(e) => setSort(e.target.value as SortKey)}
-                    className='h-9 rounded-(--radius-control) border border-gray-300 bg-transparent px-3 type-small text-gray-700 shadow-theme-xs outline-none focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300'
+                    className='h-(--control-height-sm) rounded-(--radius-control) border border-gray-300 bg-transparent px-3 type-small text-gray-700 shadow-theme-xs outline-none focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300'
                   >
                     <option value='updated'>Updated</option>
                     <option value='created'>Created</option>
@@ -9791,7 +9791,7 @@ export default function FAQPage() {
                     id='new-faq-form'
                     className='rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/3'
                   >
-                    <div className='border-b border-gray-100 px-6 py-5 dark:border-gray-800'>
+                    <div className='border-b border-gray-100 px-5 py-4 dark:border-gray-800'>
                       <h2 className='type-body font-medium text-gray-800 dark:text-white/90'>
                         New FAQ entry
                       </h2>
@@ -9801,7 +9801,7 @@ export default function FAQPage() {
                       </p>
                     </div>
 
-                    <div className='flex flex-col gap-3 p-4 sm:p-6'>
+                    <div className='flex flex-col gap-3 p-4'>
                       <Input
                         value={nQ}
                         onChange={(e) => setNQ(e.target.value)}
@@ -9829,7 +9829,7 @@ export default function FAQPage() {
                       <Button
                         onClick={createFaq}
                         disabled={adding || !nQ.trim() || !nA.trim()}
-                        className='mt-1 h-10 w-full rounded-(--radius-control) bg-brand-500 type-small font-semibold text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-400 disabled:opacity-70'
+                        className='mt-1 h-(--control-height-md) w-full rounded-(--radius-control) bg-brand-500 type-small font-semibold text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-400 disabled:opacity-70'
                       >
                         {adding ? 'Saving FAQ...' : 'Save FAQ'}
                       </Button>
@@ -9913,7 +9913,7 @@ export default function FAQPage() {
                   })()}
 
                 {/* FAQ list (paginated) */}
-                <div className='flex flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/3'>
+                <div className='flex flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-3 dark:border-gray-800 dark:bg-white/3'>
                   {loading &&
                     !loaded &&
                     Array.from({ length: 5 }).map((_, i) => (
@@ -9935,7 +9935,7 @@ export default function FAQPage() {
                     ))}
 
                   {!loading && displayed.length === 0 && (
-                    <div className='rounded-2xl border border-dashed border-gray-300 px-8 py-14 text-center dark:border-gray-700'>
+                    <div className='rounded-2xl border border-dashed border-gray-300 px-6 py-8 text-center dark:border-gray-700'>
                       <div className='mx-auto mb-3.5 flex h-14 w-14 items-center justify-center rounded-full bg-gray-100 dark:bg-white/6'>
                         {rawQ ? (
                           <Search
