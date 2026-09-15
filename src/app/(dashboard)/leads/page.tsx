@@ -442,7 +442,7 @@ function FollowUpsPanel({ items }: { items: FollowUpItem[] }) {
                           <Badge
                             color={
                               String(followUp.priority).toUpperCase() ===
-                              'HIGH'
+                                'HIGH'
                                 ? 'error'
                                 : 'warning'
                             }
@@ -852,14 +852,38 @@ export default function LeadsPage() {
   useEffect(() => {
     apiFetch<{ lead_keywords: string[] }>('/admin/settings', { auth: true })
       .then((data) => setKeywords(data.lead_keywords ?? []))
-      .catch(() => {});
+      .catch(() => { });
 
-    apiFetch<{ ok: boolean; followups: FollowUpItem[]; count: number }>(
-      '/admin/growth/followups',
+    apiFetch<{
+      items: {
+        id: number;
+        conversation_id: number;
+        sender_name: string | null;
+        external_user_id: string | null;
+        title: string | null;
+        message: string | null;
+        priority: number;
+      }[];
+      total: number;
+    }>(
+      '/admin/attention?type=followup&status=open&limit=8',
       { auth: true },
     )
-      .then((data) => setVoiceFollowUps(data.followups ?? []))
-      .catch(() => {});
+      .then((data) => {
+        setVoiceFollowUps(
+          data.items.map((item) => ({
+            conversation_id: item.conversation_id,
+            name: item.sender_name || item.external_user_id || item.title,
+            title: item.title,
+            reason: item.message,
+            priority: item.priority >= 90 ? 'HIGH' : 'MEDIUM',
+          })),
+        );
+      })
+      .catch((error: unknown) => {
+        console.error('Follow-up API failed:', error);
+        setErr(getErrorMessage(error, 'Unable to load follow-ups'));
+      })
   }, []);
 
   function addKw() {
@@ -1029,13 +1053,13 @@ export default function LeadsPage() {
     <RequireAuth>
       <div className='min-w-0 w-full'>
         <PageBreadcrumb pageTitle='Leads' />
-          <div className='mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
-            <div>
-              <p className='type-small text-gray-500 dark:text-gray-400'>
-                Manage lead qualification, follow-ups, and pipeline movement from
-                one focused workspace.
-              </p>
-            </div>
+        <div className='mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
+          <div>
+            <p className='type-small text-gray-500 dark:text-gray-400'>
+              Manage lead qualification, follow-ups, and pipeline movement from
+              one focused workspace.
+            </p>
+          </div>
           <div className='flex items-center gap-2'>
             <Button
               variant='outline'
@@ -1174,7 +1198,7 @@ export default function LeadsPage() {
                         {filterStatus === 'all'
                           ? 'Stage'
                           : (STAGE_TABS.find((t) => t.key === filterStatus)
-                              ?.label ?? 'Stage')}
+                            ?.label ?? 'Stage')}
                       </Button>
                       {openFilter === 'stage' && (
                         <div className='absolute right-0 z-20 mt-2 w-56 overflow-hidden rounded-xl border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-800 dark:bg-gray-900'>
