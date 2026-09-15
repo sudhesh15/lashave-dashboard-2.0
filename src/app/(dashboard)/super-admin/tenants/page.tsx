@@ -31,6 +31,19 @@ type TenantDetail = Tenant & {
   users: { id: number; email: string; role: string; is_active: boolean }[];
 };
 
+// Matches the edit form's fields exactly — temperature/max_tokens are
+// kept as strings here since they're bound to text inputs (parsed back
+// to numbers on save).
+type TenantFormState = {
+  name: string;
+  is_active: boolean;
+  ai_enabled: boolean;
+  system_prompt: string;
+  opening_message: string;
+  temperature: string;
+  max_tokens: string;
+};
+
 function timeAgo(iso: string) {
   const s = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
   if (s < 60) return `${s}s ago`;
@@ -51,7 +64,7 @@ function DeleteModal({
   loading: boolean;
 }) {
   return (
-    <Modal isOpen onClose={onCancel} className="max-w-[400px] p-6">
+    <Modal isOpen onClose={onCancel} className="max-w-100 p-6">
       <AvatarText name={tenant.name} className="mx-auto mb-4 h-12 w-12 type-card-title" />
       <h3 className="mb-2 text-center type-small font-bold text-gray-900 dark:text-white/90">
         Delete &quot;{tenant.name}&quot;?
@@ -83,7 +96,7 @@ function EditModal({
   onSave: (updated: Partial<TenantDetail>) => Promise<void>;
   onClose: () => void;
 }) {
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<TenantFormState>({
     name: tenant.name,
     is_active: tenant.is_active,
     ai_enabled: tenant.ai_enabled,
@@ -94,7 +107,8 @@ function EditModal({
   });
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
-  const set = (k: string, v: any) => setForm((f) => ({ ...f, [k]: v }));
+  const set = <K extends keyof TenantFormState,>(k: K, v: TenantFormState[K]) =>
+    setForm((f) => ({ ...f, [k]: v }));
 
   async function save() {
     setErr("");
@@ -110,15 +124,15 @@ function EditModal({
         max_tokens: parseInt(form.max_tokens),
       });
       onClose();
-    } catch (e: any) {
-      setErr(e?.message || "Failed to save");
+    } catch (e: unknown) {
+      setErr(e instanceof Error ? e.message : "Failed to save");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <Modal isOpen onClose={onClose} className="max-w-[520px]" showCloseButton={false}>
+    <Modal isOpen onClose={onClose} className="max-w-130" showCloseButton={false}>
       <div className="flex items-center justify-between border-b border-gray-200 p-6 dark:border-gray-800">
         <div className="flex items-center gap-3">
           <AvatarText name={tenant.name} className="h-9 w-9" />
@@ -129,7 +143,7 @@ function EditModal({
         </div>
         <button
           onClick={onClose}
-          className="flex h-7 w-7 items-center justify-center rounded-[10px] bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-white/5 dark:text-gray-400"
+          className="flex h-7 w-7 items-center justify-center rounded-(--radius-control) bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-white/5 dark:text-gray-400"
         >
           <X className="icon-small" />
         </button>
@@ -152,10 +166,10 @@ function EditModal({
           ).map(({ key, label, color }) => (
             <button
               key={key}
-              onClick={() => set(key, !(form as any)[key])}
+              onClick={() => set(key, !form[key])}
               className={
-                "flex flex-1 items-center justify-center gap-2 rounded-[10px] border py-2 type-caption font-semibold transition-colors " +
-                ((form as any)[key]
+                "flex flex-1 items-center justify-center gap-2 rounded-(--radius-control) border py-2 type-caption font-semibold transition-colors " +
+                (form[key]
                   ? color === "success"
                     ? "border-success-300 bg-success-50 text-success-600 dark:border-success-500/30 dark:bg-success-500/10"
                     : "border-brand-300 bg-brand-50 text-brand-600 dark:border-brand-500/30 dark:bg-brand-500/10"
@@ -165,10 +179,10 @@ function EditModal({
               <span
                 className={
                   "size-2 rounded-full " +
-                  ((form as any)[key] ? (color === "success" ? "bg-success-500" : "bg-brand-500") : "bg-gray-300 dark:bg-gray-600")
+                  (form[key] ? (color === "success" ? "bg-success-500" : "bg-brand-500") : "bg-gray-300 dark:bg-gray-600")
                 }
               />
-              {label}: {(form as any)[key] ? "On" : "Off"}
+              {label}: {form[key] ? "On" : "Off"}
             </button>
           ))}
         </div>
@@ -228,7 +242,7 @@ function EditModal({
               {tenant.users.map((u) => (
                 <div
                   key={u.id}
-                  className="flex items-center justify-between rounded-[10px] border border-gray-200 bg-gray-50 px-3 py-2 dark:border-gray-800 dark:bg-white/[0.03]"
+                  className="flex items-center justify-between rounded-(--radius-control) border border-gray-200 bg-gray-50 px-3 py-2 dark:border-gray-800 dark:bg-white/3"
                 >
                   <span className="font-mono type-caption text-gray-600 dark:text-gray-400">{u.email}</span>
                   <div className="flex items-center gap-2">
@@ -249,7 +263,7 @@ function EditModal({
           <Button variant="outline" className="flex-1" onClick={onClose}>
             Cancel
           </Button>
-          <Button className="flex-[2]" onClick={save} disabled={loading}>
+          <Button className="flex-2" onClick={save} disabled={loading}>
             {loading ? "Saving…" : "Save Changes"}
           </Button>
         </div>
@@ -288,6 +302,10 @@ function TenantsList() {
   }, [load]);
 
   useEffect(() => {
+    // Resets local UI-only state (a flag, warning, or preview value)
+    // when the relevant prop/dependency changes — not deriving render
+    // output from state.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPage(1);
   }, [search]);
 
@@ -296,8 +314,8 @@ function TenantsList() {
     try {
       const d = await apiFetch<TenantDetail>(`/admin/tenants/${tenant.id}`, { auth: true });
       setEditTarget(d);
-    } catch (e: any) {
-      showToast("err", e?.message || "Failed to load tenant");
+    } catch (e: unknown) {
+      showToast("err", e instanceof Error ? e.message : "Failed to load tenant");
     } finally {
       setLoadingEdit(false);
     }
@@ -316,8 +334,8 @@ function TenantsList() {
       setDelTarget(null);
       await load();
       showToast("ok", `"${tenant.name}" deleted`);
-    } catch (e: any) {
-      showToast("err", e?.message || "Failed to delete");
+    } catch (e: unknown) {
+      showToast("err", e instanceof Error ? e.message : "Failed to delete");
       setDelTarget(null);
     } finally {
       setDeleting(false);
@@ -333,11 +351,11 @@ function TenantsList() {
   const activeCount = tenants.filter((t) => t.is_active).length;
 
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="min-w-0 w-full">
       {toast && (
         <div
           className={
-            "fixed bottom-6 left-1/2 z-[200] -translate-x-1/2 whitespace-nowrap rounded-xl border px-5 py-3 type-small font-medium shadow-theme-lg " +
+            "fixed bottom-6 left-1/2 z-200 -translate-x-1/2 whitespace-nowrap rounded-xl border px-5 py-3 type-small font-medium shadow-theme-lg " +
             (toast.type === "ok"
               ? "border-success-200 bg-success-50 text-success-700 dark:border-success-500/30 dark:bg-success-500/10 dark:text-success-400"
               : "border-error-200 bg-error-50 text-error-700 dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-400")
@@ -359,7 +377,7 @@ function TenantsList() {
         <EditModal tenant={editTarget} onSave={(updates) => handleSave(editTarget.id, updates)} onClose={() => setEditTarget(null)} />
       )}
 
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+      <div className="mb-4 flex flex-wrap items-end justify-between gap-4">
         <div>
           <Badge variant="light" color="primary" className="mb-2">
             Super Admin
@@ -376,13 +394,13 @@ function TenantsList() {
         </Button>
       </div>
 
-      <div className="relative mb-5">
+      <div className="relative mb-4">
         <Search className="absolute left-3.5 top-1/2 icon-small -translate-y-1/2 text-gray-400" />
         <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by name or ID…" className="pl-10" />
       </div>
 
       {!loading && tenants.length > 0 && (
-        <div className="mb-5 grid grid-cols-3 gap-3">
+        <div className="mb-4 grid grid-cols-3 gap-3">
           {[
             { label: "Total", value: tenants.length },
             { label: "Active", value: activeCount },
@@ -399,11 +417,11 @@ function TenantsList() {
       {loading ? (
         <div className="space-y-2">
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="h-[72px] animate-pulse rounded-2xl border border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03]" />
+            <div key={i} className="h-18 animate-pulse rounded-2xl border border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-white/3" />
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="rounded-2xl border border-gray-200 bg-gray-50 py-16 text-center type-small text-gray-400 dark:border-gray-800 dark:bg-white/[0.02]">
+        <div className="rounded-2xl border border-gray-200 bg-gray-50 py-10 text-center type-small text-gray-400 dark:border-gray-800 dark:bg-white/2">
           {search ? `No tenants matching "${search}"` : "No tenants yet"}
         </div>
       ) : (
@@ -411,9 +429,9 @@ function TenantsList() {
           {pageItems.map((t) => (
             <div
               key={t.id}
-              className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-gray-200 bg-white p-4 transition-colors hover:border-brand-200 hover:bg-brand-25 dark:border-gray-800 dark:bg-white/[0.03] dark:hover:border-brand-500/30 dark:hover:bg-brand-500/5"
+              className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-gray-200 bg-white p-4 transition-colors hover:border-brand-200 hover:bg-brand-25 dark:border-gray-800 dark:bg-white/3 dark:hover:border-brand-500/30 dark:hover:bg-brand-500/5"
             >
-              <div className="flex items-center gap-3.5">
+              <div className="flex items-center gap-3">
                 <AvatarText name={t.name} className="h-10 w-10" />
                 <div>
                   <div className="type-small font-semibold text-gray-900 dark:text-white/90">{t.name}</div>

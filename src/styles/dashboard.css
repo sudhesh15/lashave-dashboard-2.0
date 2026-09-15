@@ -6,11 +6,93 @@
  *
  * Contains
  * ─────────
- *   1. Responsive layout utilities  (.page-content, .kpi-grid, etc.)
+ *   1. Responsive layout utilities  (.kpi-grid, etc.)
  *   2. All @keyframe animations
  *   3. Reduced-motion overrides
  * ─────────────────────────────────────────────────────────────────
  */
+
+/* ══════════════════════════════════════════════════════════════════
+   0. LAYOUT PRIMITIVES (foundation)
+   Generic, reusable structural classes consumed by
+   `src/components/layout/primitives.tsx` (<Container>, <Grid>, ...).
+   These carry positioning only — no colour, border, or shadow — so
+   any component can opt in without inheriting visual opinions.
+
+   Layout regimes used throughout this file and the primitives:
+     Mobile   : 0–767px
+     Tablet   : 768–1023px
+     Desktop  : 1024px and up — STABLE. A desktop composition must
+                not change again above 1024px, regardless of monitor
+                width or browser zoom (no arbitrary ultra-wide steps).
+                1024px matches the same threshold the sidebar and
+                every other shared grid (.kpi-grid, .channel-strip,
+                .chart-row-*) already use — one desktop boundary for
+                the whole app, not a second one specific to this
+                primitive. This also gives more zoom-in headroom
+                before any reflow happens than a 1200px cutoff would:
+                on an ordinary laptop screen, 110% zoom easily drops
+                the effective CSS viewport into the 1000-1200px range,
+                and that should still read as "desktop."
+══════════════════════════════════════════════════════════════════ */
+
+/* Full-width canvas + a fluid page gutter — the single definition of
+   the dashboard's structural padding. This deliberately has NO
+   max-width: a dashboard is mostly KPI grids, tables, and charts,
+   which should use whatever width the shell's main column actually
+   gives them, not stop at an arbitrary reading-width cap with dead
+   space sitting unused beside them on a wide screen. The gutter
+   itself is `clamp()`-based (see --layout-page-gutter in globals.css)
+   so it scales continuously with viewport width instead of stepping
+   between fixed values at specific breakpoints.
+
+   This used to carry `max-width: var(--layout-content-max)` (later
+   `margin-inline: 0` instead of `auto`, to stop that cap from
+   centering itself and opening a widening gap between the sidebar and
+   the visible content as the viewport grew — confirmed by measuring
+   two screenshots: a ~40px inset at one width vs. ~141px at a wider
+   one). Removing the cap entirely fixes the same problem at the root
+   instead of just stopping it from centering, and — more importantly —
+   means wide screens actually get a wider workspace instead of dead
+   space next to a fixed-width column.
+
+   Pages/components that genuinely want a reading-width cap (a settings
+   form, a block of prose) should opt in explicitly with
+   `--layout-readable-max` (globals.css) rather than inheriting one
+   here — that's deliberately not decided globally, since "does this
+   page need a cap" is a per-page judgment call for the file-by-file
+   pass, not a structural rule. */
+.dashboard-container {
+  width: 100%;
+  padding-inline: var(--layout-page-gutter);
+}
+
+/* Generic fixed-column grid with a distinct, STABLE column count per
+   layout regime. Columns are set via inline custom properties
+   (--grid-cols-mobile / -tablet / -desktop) by the <Grid> primitive.
+   Desktop column count never changes again above 1024px. */
+.layout-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-cols-mobile, 1), minmax(0, 1fr));
+}
+
+@media (min-width: 768px) {
+  .layout-grid {
+    grid-template-columns: repeat(
+      var(--grid-cols-tablet, var(--grid-cols-mobile, 1)),
+      minmax(0, 1fr)
+    );
+  }
+}
+
+@media (min-width: 1024px) {
+  .layout-grid {
+    grid-template-columns: repeat(
+      var(--grid-cols-desktop, var(--grid-cols-tablet, 1)),
+      minmax(0, 1fr)
+    );
+  }
+}
 
 /* ══════════════════════════════════════════════════════════════════
    1. RESPONSIVE LAYOUT UTILITIES
@@ -18,39 +100,12 @@
    are also available as plain classes for one-off overrides.
 ══════════════════════════════════════════════════════════════════ */
 
-/* Centred content column — matches the max-w-6xl in overview page */
-.page-content {
-  position: relative;
-  z-index: 10;
-  width: 100%;
-  max-width: 87.5rem;
-  margin-inline: auto;
-  padding: 2rem 1rem;     /* mobile: 16px side padding            */
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;            /* 24 px between major sections          */
-}
-
-/* Tablet+  */
-@media (min-width: 640px) {
-  .page-content {
-    padding: 2rem 1.5rem;
-  }
-}
-
-/* Desktop+ */
-@media (min-width: 1024px) {
-  .page-content {
-    padding: 2.5rem 2rem;
-  }
-}
-
 /* ── KPI row ── */
 /* Mobile: 2 cols, Tablet: 2 cols, Desktop: 4 cols */
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 0.75rem;
+  gap: var(--layout-grid-gap);
 }
 
 @media (min-width: 1024px) {
@@ -64,7 +119,7 @@
 .chart-row-main {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 0.75rem;
+  gap: var(--layout-grid-gap);
 }
 
 @media (min-width: 1024px) {
@@ -78,7 +133,7 @@
 .chart-row-secondary {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 0.75rem;
+  gap: var(--layout-grid-gap);
 }
 
 @media (min-width: 1024px) {
@@ -213,7 +268,7 @@
 ══════════════════════════════════════════════════════════════════ */
 
 .dash-card {
-  border-radius: 1rem;
+  border-radius: var(--radius-card);
   padding: 1.5rem;
   position: relative;
   overflow: hidden;

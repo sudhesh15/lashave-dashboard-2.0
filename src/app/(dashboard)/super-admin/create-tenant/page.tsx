@@ -50,7 +50,7 @@ function CreateTenantForm() {
   if (!me) return null;
   if (!isSuperAdmin(me.user.role)) {
     return (
-      <div className="mx-auto max-w-lg py-16">
+      <div className="mx-auto max-w-lg py-10">
         <Alert variant="error" title="Access denied" message="You don't have permission to view this page." />
       </div>
     );
@@ -83,8 +83,8 @@ function CreateTenantForm() {
         temperature: "0.2",
         max_tokens: "200",
       });
-    } catch (err: any) {
-      setMsg({ type: "err", text: err.message || "Failed to create tenant" });
+    } catch (err: unknown) {
+      setMsg({ type: "err", text: err instanceof Error ? err.message : "Failed to create tenant" });
     } finally {
       setLoading(false);
     }
@@ -92,7 +92,7 @@ function CreateTenantForm() {
 
   return (
     <div className="mx-auto max-w-xl">
-      <div className="mb-6">
+      <div className="mb-4">
         <Badge variant="light" color="primary" className="mb-2">
           Super Admin
         </Badge>
@@ -102,7 +102,7 @@ function CreateTenantForm() {
         </p>
       </div>
 
-      <form onSubmit={submit} className="space-y-5">
+      <form onSubmit={submit} className="space-y-4">
         <Card>
           <CardContent className="space-y-4 pt-0">
             <p className="type-caption font-semibold uppercase tracking-wide text-gray-400">Identity</p>

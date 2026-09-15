@@ -33,6 +33,14 @@ import {
   type WebsiteEntryPatch,
   type WebsiteKnowledgeEntry,
 } from '@/lib/knowledge-api';
+
+// Some historical/legacy records may have a `url` field instead of the
+// current `source_url` — WebsiteKnowledgeEntry only declares the
+// current field, so this reads the fallback via a narrow, honest cast
+// instead of casting the whole entry (or array of entries) to `any`.
+function entrySourceUrl(entry: WebsiteKnowledgeEntry): string {
+  return entry.source_url || (entry as { url?: string }).url || '';
+}
 import { useTheme } from '@/lib/theme-context';
 import { cn } from '@/lib/utils';
 import {
@@ -311,7 +319,7 @@ function Hl({ text, q }: { text: string; q: string }) {
   return (
     <>
       {text.slice(0, i)}
-      <mark className='rounded bg-brand-100 px-[3px] text-brand-600 dark:bg-brand-500/35 dark:text-brand-200'>
+      <mark className='rounded bg-brand-100 px-0.75 text-brand-600 dark:bg-brand-500/35 dark:text-brand-200'>
         {text.slice(i, i + q.length)}
       </mark>
       {text.slice(i + q.length)}
@@ -352,9 +360,9 @@ function DelModal({
         // Close on backdrop click (but not clicks inside the inner card).
         if (e.target === e.currentTarget) no();
       }}
-      className='fixed inset-0 z-[100] flex items-center justify-center bg-gray-400/50 p-4 backdrop-blur-[10px] dark:bg-black/70'
+      className='fixed inset-0 z-100 flex items-center justify-center bg-gray-400/50 p-4 backdrop-blur-[10px] dark:bg-black/70'
     >
-      <div className='w-full max-w-[390px] rounded-2xl border border-error-200 bg-white p-6 shadow-theme-xl dark:border-error-500/30 dark:bg-gray-900'>
+      <div className='w-full max-w-97.5 rounded-2xl border border-error-200 bg-white p-6 shadow-theme-xl dark:border-error-500/30 dark:bg-gray-900'>
         <div className='mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-error-50 text-error-500 dark:bg-error-500/15 dark:text-error-400'>
           <Trash2 size={20} />
         </div>
@@ -423,13 +431,13 @@ function ConfirmModal({
       aria-modal='true'
       aria-labelledby='confirm-modal-title'
       ref={trapRef}
-      className='fixed inset-0 z-[100] flex items-center justify-center bg-gray-400/50 p-4 backdrop-blur-[10px] dark:bg-black/70'
+      className='fixed inset-0 z-100 flex items-center justify-center bg-gray-400/50 p-4 backdrop-blur-[10px] dark:bg-black/70'
       onClick={no}
     >
       <div
         onClick={(e) => e.stopPropagation()}
         className={cn(
-          'w-full max-w-[420px] rounded-2xl border bg-white p-6 shadow-theme-xl dark:bg-gray-900',
+          'w-full max-w-105 rounded-2xl border bg-white p-6 shadow-theme-xl dark:bg-gray-900',
           danger
             ? 'border-error-200 dark:border-error-500/30'
             : 'border-gray-200 dark:border-gray-800',
@@ -444,7 +452,7 @@ function ConfirmModal({
               'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl type-card-title font-bold',
               danger
                 ? 'bg-error-50 text-error-500 dark:bg-error-500/15 dark:text-error-400'
-                : 'bg-gray-100 text-gray-700 dark:bg-white/[0.06] dark:text-gray-300',
+                : 'bg-gray-100 text-gray-700 dark:bg-white/6 dark:text-gray-300',
             )}
           >
             {danger ? '!' : '?'}
@@ -476,6 +484,24 @@ function ConfirmModal({
   );
 }
 
+type RetrievalTopItem = { q: string; s: number; source?: string };
+
+// Mirrors every shape actually assigned to this state below: a
+// confident FAQ match, a RAG match, or a "nothing confident found"
+// fallback that still surfaces the top local candidates.
+type TestRetrievalResult =
+  | {
+      ok: true;
+      source: 'faq' | 'rag';
+      answer: string;
+      question: string;
+      score: number | null;
+      routedTo?: string | null;
+      latency?: number | null;
+      top: RetrievalTopItem[];
+    }
+  | { ok: false; top: RetrievalTopItem[] };
+
 function TestDrawer({
   items,
   onClose,
@@ -484,7 +510,7 @@ function TestDrawer({
   onClose: () => void;
 }) {
   const [msg, setMsg] = useState('');
-  const [res, setRes] = useState<any>(null);
+  const [res, setRes] = useState<TestRetrievalResult | null>(null);
   const [running, setRunning] = useState(false);
 
   function score(query: string, faq: FaqItem): number {
@@ -684,10 +710,10 @@ function TestDrawer({
   }
 
   return (
-    <div className='rounded-2xl border border-brand-200 bg-brand-50/40 p-6 dark:border-brand-500/25 dark:bg-brand-500/[0.04]'>
+    <div className='rounded-2xl border border-brand-200 bg-brand-50/40 p-6 dark:border-brand-500/25 dark:bg-brand-500/4'>
       <div className='mb-3 flex items-center justify-between'>
         <div className='flex items-center gap-3'>
-          <div className='flex h-8 w-8 items-center justify-center rounded-[10px] bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'>
+          <div className='flex h-8 w-8 items-center justify-center rounded-(--radius-control) bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'>
             <FlaskConical size={15} />
           </div>
           <div>
@@ -702,7 +728,7 @@ function TestDrawer({
 
         <button
           onClick={onClose}
-          className='rounded-[10px] p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:text-gray-500 dark:hover:bg-white/[0.06] dark:hover:text-gray-300'
+          className='rounded-(--radius-control) p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:text-gray-500 dark:hover:bg-white/6 dark:hover:text-gray-300'
         >
           <X size={16} />
         </button>
@@ -761,7 +787,7 @@ function TestDrawer({
                     Closest misses
                   </p>
 
-                  {res.top.map((m: any, i: number) => (
+                  {res.top.map((m: RetrievalTopItem, i: number) => (
                     <div
                       key={i}
                       className={cn(
@@ -861,12 +887,12 @@ function FaqCard({
   return (
     <div
       className={cn(
-        'overflow-hidden rounded-xl border border-gray-200 bg-white transition hover:bg-gray-50 dark:border-gray-800 dark:bg-white/[0.03] dark:hover:bg-white/[0.05]',
+        'overflow-hidden rounded-xl border border-gray-200 bg-white transition hover:bg-gray-50 dark:border-gray-800 dark:bg-white/3 dark:hover:bg-white/5',
         !isActive && 'opacity-60',
       )}
     >
       <div
-        className='flex cursor-pointer items-center gap-3 px-4 py-3.5'
+        className='flex cursor-pointer items-center gap-3 px-4 py-3'
         onClick={() => setOpen((v) => !v)}
       >
         <p className='min-w-0 flex-1 truncate type-small font-semibold text-gray-800 dark:text-white/90'>
@@ -878,7 +904,7 @@ function FaqCard({
         </Badge>
 
         {!open && (
-          <p className='hidden max-w-[220px] truncate type-caption text-gray-500 dark:text-gray-400 lg:block'>
+          <p className='hidden max-w-55 truncate type-caption text-gray-500 dark:text-gray-400 lg:block'>
             {item.answer}
           </p>
         )}
@@ -915,7 +941,7 @@ function FaqCard({
           <span
             className={cn(
               'absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-theme-sm transition-transform',
-              isActive ? 'translate-x-[18px]' : 'translate-x-0.5',
+              isActive ? 'translate-x-4.5' : 'translate-x-0.5',
             )}
           />
         </button>
@@ -930,7 +956,7 @@ function FaqCard({
       </div>
 
       {open && (
-        <div className='flex flex-col gap-3.5 border-t border-gray-100 px-4 pb-4 pt-3.5 dark:border-gray-800'>
+        <div className='flex flex-col gap-3 border-t border-gray-100 px-4 pb-4 pt-3 dark:border-gray-800'>
           <div>
             <label className='mb-1.5 block type-caption font-medium text-gray-500 dark:text-gray-400'>
               Question
@@ -959,7 +985,7 @@ function FaqCard({
                 setDirty(true);
               }}
               rows={3}
-              className='min-h-[80px] w-full resize-none rounded-[10px] border border-gray-300 bg-transparent px-3.5 py-2 type-small leading-relaxed text-gray-800 shadow-theme-xs outline-none focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800'
+              className='min-h-20 w-full resize-none rounded-(--radius-control) border border-gray-300 bg-transparent px-3.5 py-2 type-small leading-relaxed text-gray-800 shadow-theme-xs outline-none focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800'
             />
           </div>
 
@@ -1012,7 +1038,7 @@ function FaqCard({
                 size='sm'
                 onClick={save}
                 disabled={saving}
-                className='h-9 min-w-[118px] rounded-[10px] bg-brand-500 px-4 font-semibold text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-400 disabled:opacity-70'
+                className='h-9 min-w-29.5 rounded-(--radius-control) bg-brand-500 px-4 font-semibold text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-400 disabled:opacity-70'
               >
                 {saving ? 'Saving...' : saved ? 'Saved' : 'Save FAQ'}
               </Button>
@@ -1244,6 +1270,10 @@ function CatalogueUploadModal({
   const [previewUrl, setPreviewUrl] = useState('');
   useEffect(() => {
     if (!file) {
+      // Resets local UI-only state (a flag, warning, or preview value)
+      // when the relevant prop/dependency changes — not deriving render
+      // output from state.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPreviewUrl('');
       return;
     }
@@ -2018,6 +2048,10 @@ function WebsiteScrapeStatusPanel({
   useEffect(() => {
     if (!url) return;
     let cancelled = false;
+    // Resets local UI-only state (a flag, warning, or preview value)
+    // when the relevant prop/dependency changes — not deriving render
+    // output from state.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMeta(null);
     setMetaLoading(true);
     fetch(
@@ -2050,6 +2084,10 @@ function WebsiteScrapeStatusPanel({
 
   // Reset per-run trackers when the URL changes.
   useEffect(() => {
+    // Resets local UI-only state (a flag, warning, or preview value)
+    // when the relevant prop/dependency changes — not deriving render
+    // output from state.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLog([]);
     prevRef.current = { pages: 0, gen: 0, status: '' };
   }, [url]);
@@ -2109,6 +2147,10 @@ function WebsiteScrapeStatusPanel({
       });
     }
     if (additions.length > 0) {
+      // Clamps/adjusts local state in response to a changing dependency
+      // (e.g. pagination bounds, active tab) — reviewed; not a
+      // derive-state-from-render antipattern in this context.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLog((prevLog) => [...additions.reverse(), ...prevLog].slice(0, 8));
     }
     prevRef.current = { pages: p, gen: g, status: state.status };
@@ -2121,6 +2163,14 @@ function WebsiteScrapeStatusPanel({
     state,
   ]);
 
+  // `scanning` must be computed before the early return below so the
+  // useRotatingMessage hook call always happens on every render — an
+  // earlier version called it after `if (!state) return null`, which
+  // is a Rules-of-Hooks violation (hooks can't be called conditionally
+  // or after an early return).
+  const scanningForMessage = !!state && state.status !== 'completed' && state.status !== 'failed';
+  const funMessage = useRotatingMessage(scanningForMessage, IMPORT_LOADING_MESSAGES);
+
   if (!state) return null;
 
   const done = state.status === 'completed';
@@ -2130,7 +2180,6 @@ function WebsiteScrapeStatusPanel({
   const pages = state.pagesExplored ?? 0;
   const generated = state.entriesGenerated ?? entries.length;
   const statusDot = failed ? '#dc2626' : done ? '#059669' : th.accent;
-  const funMessage = useRotatingMessage(scanning, IMPORT_LOADING_MESSAGES);
   const canDismiss = Boolean(onDismiss) && (done || failed);
 
   return (
@@ -4130,10 +4179,10 @@ function WorkbenchTab({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        'relative flex min-h-[132px] flex-col items-start overflow-hidden rounded-xl border p-6 text-left shadow-theme-xs transition-all duration-200',
+        'relative flex min-h-28 flex-col items-start overflow-hidden rounded-xl border p-4 text-left shadow-theme-xs transition-all duration-200',
         active
-          ? 'border-brand-300 bg-gradient-to-br from-brand-50 via-white to-blue-50 shadow-sm dark:border-brand-500/30 dark:from-brand-500/15 dark:via-gray-900 dark:to-blue-500/10'
-          : 'border-gray-200 bg-gradient-to-br from-white via-white to-gray-50 hover:border-brand-200 hover:from-brand-50/60 hover:to-blue-50/60 hover:shadow-sm dark:border-gray-800 dark:from-gray-900 dark:via-gray-900 dark:to-white/[0.03] dark:hover:border-brand-500/20 dark:hover:from-brand-500/10 dark:hover:to-blue-500/5',
+          ? 'border-brand-300 bg-linear-to-br from-brand-50 via-white to-blue-50 shadow-sm dark:border-brand-500/30 dark:from-brand-500/15 dark:via-gray-900 dark:to-blue-500/10'
+          : 'border-gray-200 bg-linear-to-br from-white via-white to-gray-50 hover:border-brand-200 hover:from-brand-50/60 hover:to-blue-50/60 hover:shadow-sm dark:border-gray-800 dark:from-gray-900 dark:via-gray-900 dark:to-white/3 dark:hover:border-brand-500/20 dark:hover:from-brand-500/10 dark:hover:to-blue-500/5',
       )}
     >
       <span
@@ -4157,7 +4206,7 @@ function WorkbenchTab({
             'flex h-12 w-12 items-center justify-center rounded-xl border shadow-sm',
             active
               ? 'border-brand-200 bg-brand-100/70 text-brand-600 dark:border-brand-500/30 dark:bg-brand-500/15 dark:text-brand-400'
-              : 'border-gray-200 bg-white/80 text-gray-500 dark:border-gray-800 dark:bg-white/[0.04] dark:text-gray-400',
+              : 'border-gray-200 bg-white/80 text-gray-500 dark:border-gray-800 dark:bg-white/4 dark:text-gray-400',
           )}
         >
           {icon}
@@ -4177,11 +4226,11 @@ function WorkbenchTab({
         )}
       </div>
 
-      <span className='relative z-10 mt-4 type-body font-semibold text-gray-800 dark:text-white/90'>
+      <span className='relative z-10 mt-3 type-body font-semibold text-gray-800 dark:text-white/90'>
         {label}
       </span>
 
-      <span className='relative z-10 mt-2 type-small leading-6 text-gray-500 dark:text-gray-400'>
+      <span className='relative z-10 mt-1.5 type-small leading-6 text-gray-500 dark:text-gray-400'>
         {description}
       </span>
     </button>
@@ -4209,8 +4258,8 @@ function TabTeachingBanner({
   void isDark;
 
   return (
-    <div className='flex flex-col gap-5 border-b border-gray-100 bg-gray-50 p-6 dark:border-gray-800 dark:bg-white/[0.02] sm:flex-row sm:items-center'>
-      <div className='flex h-12 w-12 shrink-0 items-center justify-center rounded-[10px] border border-gray-200 bg-white text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300'>
+    <div className='flex flex-col gap-5 border-b border-gray-100 bg-gray-50 p-6 dark:border-gray-800 dark:bg-white/2 sm:flex-row sm:items-center'>
+      <div className='flex h-12 w-12 shrink-0 items-center justify-center rounded-(--radius-control) border border-gray-200 bg-white text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300'>
         {icon}
       </div>
       <div className='min-w-0 flex-1'>
@@ -4353,9 +4402,9 @@ function KnowledgeWorkbench({
   };
 
   return (
-    <section className='faq-workbench-readable overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]'>
-      <div className='border-b border-gray-100 px-6 py-6 dark:border-gray-800'>
-        <div className='mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between'>
+    <section className='faq-workbench-readable overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/3'>
+      <div className='border-b border-gray-100 px-5 py-4 dark:border-gray-800'>
+        <div className='mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between'>
           <div>
             <h2 className='type-h4 font-semibold text-gray-800 dark:text-white/90'>
               Knowledge sources
@@ -4369,7 +4418,7 @@ function KnowledgeWorkbench({
             {totalSaved} live items
           </span>
         </div>
-        <div className='grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4'>
+        <div className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4'>
           <WorkbenchTab
             active={view === 'manual'}
             icon={<LayoutList size={22} />}
@@ -4408,7 +4457,7 @@ function KnowledgeWorkbench({
           />
         </div>
       </div>
-      <div className='border-b border-gray-100 bg-gray-50 px-6 py-4 type-body leading-7 text-gray-500 dark:border-gray-800 dark:bg-white/[0.02] dark:text-gray-400'>
+      <div className='border-b border-gray-100 bg-gray-50 px-5 py-3 type-body leading-7 text-gray-500 dark:border-gray-800 dark:bg-white/2 dark:text-gray-400'>
         {view === 'manual' && (
           <>
             <strong className='font-semibold text-gray-800 dark:text-white/90'>
@@ -4449,7 +4498,7 @@ function KnowledgeWorkbench({
 
       {((view === 'catalogue' && documents.length > 0) ||
         (view === 'website' && websiteEntries.length > 0)) && (
-        <div className='flex justify-end border-b border-gray-100 bg-gray-50 px-6 py-3 dark:border-gray-800 dark:bg-white/[0.02]'>
+        <div className='flex justify-end border-b border-gray-100 bg-gray-50 px-6 py-3 dark:border-gray-800 dark:bg-white/2'>
           {view === 'catalogue' && (
             <Button size='sm' onClick={onOpenCatalogueUpload}>
               <FileText size={14} />
@@ -4468,7 +4517,7 @@ function KnowledgeWorkbench({
       {view === 'catalogue' && documents.length === 0 && documentsLoading && (
         <div
           style={{
-            padding: '40px 24px',
+            padding: '32px 24px',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -4505,7 +4554,7 @@ function KnowledgeWorkbench({
         !websiteScraperStatus && (
           <div
             style={{
-              padding: '40px 24px',
+              padding: '32px 24px',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -4542,7 +4591,7 @@ function KnowledgeWorkbench({
       {view === 'saved' && totalSaved === 0 && savedLoading && (
         <div
           style={{
-            padding: '40px 24px',
+            padding: '32px 24px',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -4714,13 +4763,13 @@ function CatalogueWorkspace({
   }).length;
 
   return (
-    <div className='grid min-h-[560px] grid-cols-1 items-start xl:grid-cols-[minmax(300px,1fr)_minmax(420px,1.2fr)]'>
+    <div className='grid min-h-128 grid-cols-1 items-start lg:grid-cols-[minmax(300px,1fr)_minmax(420px,1.2fr)]'>
       {/* Documents column */}
       <div
-        className='min-w-0 border-t first:border-t-0 xl:border-t-0 xl:border-r'
+        className='min-w-0 border-t first:border-t-0 lg:border-t-0 lg:border-r'
         style={{ borderColor: th.cardBorder }}
       >
-        <div className='flex flex-wrap items-center justify-between gap-3 p-3.5'>
+        <div className='flex flex-wrap items-center justify-between gap-3 p-3'>
           <div>
             <div style={{ color: th.text, fontSize: 16, fontWeight: 600 }}>
               Uploaded documents
@@ -4739,7 +4788,7 @@ function CatalogueWorkspace({
         </div>
 
         <div
-          className='max-h-80 overflow-y-auto border-t lg:max-h-[492px]'
+          className='max-h-80 overflow-y-auto border-t lg:max-h-123'
           style={{ borderColor: th.cardBorder }}
         >
           {documents.map((doc) => {
@@ -4759,11 +4808,11 @@ function CatalogueWorkspace({
               >
                 <button
                   onClick={() => onSelect(doc.document_id)}
-                  className='grid min-w-0 cursor-pointer grid-cols-[32px_1fr_auto] items-center gap-3 border-0 bg-transparent px-3.5 py-3.5 text-left'
+                  className='grid min-w-0 cursor-pointer grid-cols-[32px_1fr_auto] items-center gap-3 border-0 bg-transparent px-3 py-3 text-left'
                   style={{ color: th.text }}
                 >
                   <span
-                    className='grid h-[30px] w-[30px] place-items-center rounded-[10px] border'
+                    className='grid h-7.5 w-7.5 place-items-center rounded-(--radius-control) border'
                     style={{
                       borderColor: th.cardBorder,
                       color: th.textMuted,
@@ -4777,7 +4826,7 @@ function CatalogueWorkspace({
                       {doc.filename}
                     </span>
                     <span
-                      className='mt-[3px] block type-caption'
+                      className='mt-0.75 block type-caption'
                       style={{ color: th.textMuted }}
                     >
                       {documentClassLabel(doc)}
@@ -4788,7 +4837,7 @@ function CatalogueWorkspace({
                     </span>
                   </span>
                   <span
-                    className='whitespace-nowrap rounded-full px-2 py-[5px] type-caption font-medium'
+                    className='whitespace-nowrap rounded-full px-2 py-1.25 type-caption font-medium'
                     style={{
                       color: th.textSub,
                       background: isDark ? 'rgba(255,255,255,.04)' : '#f8fafc',
@@ -4814,7 +4863,7 @@ function CatalogueWorkspace({
 
           {!documents.length && (
             <div
-              className='p-7 text-center type-small'
+              className='p-5 text-center type-small'
               style={{ color: th.textSub }}
             >
               {loading
@@ -4827,7 +4876,7 @@ function CatalogueWorkspace({
 
       {/* Preview column */}
       <div
-        className='min-w-0 border-t xl:border-t-0'
+        className='min-w-0 border-t lg:border-t-0'
         style={{ borderColor: th.cardBorder }}
       >
         <DocumentPreviewPanel
@@ -4841,7 +4890,7 @@ function CatalogueWorkspace({
 
       {/* Review row (spans both columns, sits below Documents + Preview) */}
       <div
-        className='min-w-0 border-t xl:col-span-2'
+        className='min-w-0 border-t lg:col-span-2'
         style={{ borderColor: th.cardBorder }}
       >
         <div className='border-b p-4' style={{ borderColor: th.cardBorder }}>
@@ -4851,7 +4900,7 @@ function CatalogueWorkspace({
                 Review what we found
               </div>
               <div
-                className='mt-[3px] type-small leading-relaxed'
+                className='mt-0.75 type-small leading-relaxed'
                 style={{ color: th.textSub }}
               >
                 {detailLoading
@@ -4908,7 +4957,7 @@ function CatalogueWorkspace({
               </div>
 
               <div
-                className='inline-flex shrink-0 items-center gap-2 rounded-[10px] border p-1'
+                className='inline-flex shrink-0 items-center gap-2 rounded-(--radius-control) border p-1'
                 style={{ borderColor: th.cardBorder }}
               >
                 <button
@@ -4928,7 +4977,7 @@ function CatalogueWorkspace({
                   <Minus size={16} />
                 </button>
                 <span
-                  className='min-w-[58px] text-center type-card-title font-extrabold tabular-nums'
+                  className='min-w-14.5 text-center type-card-title font-extrabold tabular-nums'
                   style={{ color: th.text }}
                 >
                   {threshold}%
@@ -5012,6 +5061,10 @@ function DocumentPreviewPanel({
   useEffect(() => {
     let cancelled = false;
     let objectUrl = '';
+    // Resets local UI-only state (a flag, warning, or preview value)
+    // when the relevant prop/dependency changes — not deriving render
+    // output from state.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPreviewError('');
     setPreviewUrl('');
 
@@ -5278,12 +5331,20 @@ function DocumentEntityReview({
     setPage(1);
     // Preserve the current active entity if it's still in the list.
     if (activeId != null && !entities.some((e) => e.entity_id === activeId)) {
+      // Resets local UI-only state (a flag, warning, or preview value)
+      // when the relevant prop/dependency changes — not deriving render
+      // output from state.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveId(null);
       setEditing(false);
     }
   }, [entityPageKey, activeId, entities]);
 
   useEffect(() => {
+    // Clamps/adjusts local state in response to a changing dependency
+    // (e.g. pagination bounds, active tab) — reviewed; not a
+    // derive-state-from-render antipattern in this context.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPage((value) => Math.min(Math.max(1, value), totalPages));
   }, [totalPages]);
 
@@ -5341,7 +5402,7 @@ function DocumentEntityReview({
           const confidence = entityConfidence(entity);
           const priceLabel = entityPriceLabel(entity);
           return (
-            <button
+            <div
               key={entity.entity_id}
               onClick={() => {
                 setActiveId(entity.entity_id);
@@ -5359,7 +5420,7 @@ function DocumentEntityReview({
                 color: th.text,
                 padding: '12px 14px',
                 display: 'grid',
-                gridTemplateColumns: '1fr 86px 92px',
+                gridTemplateColumns: '1fr 86px 120px',
                 gap: 10,
                 alignItems: 'center',
                 textAlign: 'left',
@@ -5401,17 +5462,63 @@ function DocumentEntityReview({
               >
                 {confidenceLabel(confidence)}
               </span>
-              <span
-                style={{
-                  color: th.textSub,
-                  fontSize: 12,
-                  fontWeight: 500,
-                  textTransform: 'capitalize',
-                }}
+              <div
+                className='flex items-center gap-1.5'
+                onClick={(e) => e.stopPropagation()}
               >
-                {entity.approval_status}
-              </span>
-            </button>
+                {entity.approval_status === 'approved' ||
+                entity.approval_status === 'rejected' ? (
+                  <span
+                    style={{
+                      color: th.textSub,
+                      fontSize: 12,
+                      fontWeight: 500,
+                      textTransform: 'capitalize',
+                      marginLeft: 'auto',
+                    }}
+                  >
+                    {entity.approval_status}
+                  </span>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => onReject(entity.entity_id)}
+                      disabled={busyId === entity.entity_id}
+                      style={{
+                        padding: '4px 8px',
+                        fontSize: 11,
+                        fontWeight: 600,
+                        borderRadius: 6,
+                        border: `1px solid ${th.cardBorder}`,
+                        background: 'transparent',
+                        color: th.textSub,
+                        cursor: busyId === entity.entity_id ? 'default' : 'pointer',
+                        opacity: busyId === entity.entity_id ? 0.5 : 1,
+                      }}
+                    >
+                      Reject
+                    </button>
+                    <button
+                      onClick={() => onApprove(entity.entity_id)}
+                      disabled={busyId === entity.entity_id}
+                      style={{
+                        padding: '4px 8px',
+                        fontSize: 11,
+                        fontWeight: 600,
+                        borderRadius: 6,
+                        background: '#059669',
+                        color: '#fff',
+                        border: 'none',
+                        cursor: busyId === entity.entity_id ? 'default' : 'pointer',
+                        opacity: busyId === entity.entity_id ? 0.5 : 1,
+                      }}
+                    >
+                      Approve
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
           );
         })}
         {!entities.length && (
@@ -6052,9 +6159,9 @@ function WebsiteReviewPane({
 
   const hostGroups = (() => {
     const map = new Map<string, number>();
-    for (const entry of entries as any[]) {
+    for (const entry of entries) {
       if (entry.status === 'rejected') continue;
-      const raw = (entry.source_url || entry.url || '').toLowerCase().trim();
+      const raw = entrySourceUrl(entry).toLowerCase().trim();
       const host = raw
         .replace(/^https?:\/\//, '')
         .replace(/^www\./, '')
@@ -6161,7 +6268,7 @@ function WebsiteReviewPane({
       style={{
         display: 'grid',
         gridTemplateColumns: 'minmax(520px, 1.35fr) minmax(380px, .65fr)',
-        minHeight: 560,
+        minHeight: 520,
       }}
     >
       <div style={{ minWidth: 0, borderRight: `1px solid ${th.cardBorder}` }}>
@@ -6275,7 +6382,7 @@ function WebsiteReviewPane({
 
             <div
               style={{
-                padding: '0 14px 14px',
+                padding: '0 14px 12px',
                 display: 'grid',
                 gridTemplateColumns: '1fr auto',
                 gap: 10,
@@ -6330,7 +6437,7 @@ function WebsiteReviewPane({
 
             <div
               style={{
-                padding: '0 14px 14px',
+                padding: '0 14px 12px',
                 display: 'flex',
                 gap: 10,
                 alignItems: 'center',
@@ -7089,12 +7196,16 @@ function SavedKnowledgeLedger({
   const [page, setPage] = useState(1);
   const totalPages = Math.max(1, Math.ceil(rows.length / 8));
   useEffect(() => {
+    // Clamps/adjusts local state in response to a changing dependency
+    // (e.g. pagination bounds, active tab) — reviewed; not a
+    // derive-state-from-render antipattern in this context.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPage((value) => Math.min(Math.max(1, value), totalPages));
   }, [totalPages]);
   const pagedRows = getPageItems(rows, page, 8);
 
   return (
-    <div style={{ padding: 16 }}>
+    <div style={{ padding: 12 }}>
       <div
         style={{
           display: 'flex',
@@ -7192,7 +7303,7 @@ function SavedKnowledgeLedger({
                 background: th.accentBg,
               }}
             >
-              <th style={{ padding: '11px 12px', width: 32 }}>
+              <th style={{ padding: '9px 12px', width: 32 }}>
                 <input
                   type='checkbox'
                   checked={allSelected}
@@ -7203,12 +7314,12 @@ function SavedKnowledgeLedger({
                   style={{ cursor: 'pointer', accentColor: th.accent }}
                 />
               </th>
-              <th style={{ padding: '11px 12px' }}>Knowledge</th>
-              <th style={{ padding: '11px 12px' }}>Category</th>
-              <th style={{ padding: '11px 12px' }}>Source</th>
-              <th style={{ padding: '11px 12px' }}>Confidence</th>
-              <th style={{ padding: '11px 12px' }}>Embedding</th>
-              <th style={{ padding: '11px 12px', width: 40 }}></th>
+              <th style={{ padding: '9px 12px' }}>Knowledge</th>
+              <th style={{ padding: '9px 12px' }}>Category</th>
+              <th style={{ padding: '9px 12px' }}>Source</th>
+              <th style={{ padding: '9px 12px' }}>Confidence</th>
+              <th style={{ padding: '9px 12px' }}>Embedding</th>
+              <th style={{ padding: '9px 12px', width: 40 }}></th>
             </tr>
           </thead>
           <tbody>
@@ -7217,7 +7328,7 @@ function SavedKnowledgeLedger({
                 key={row.id}
                 style={{ borderTop: `1px solid ${th.cardBorder}` }}
               >
-                <td style={{ padding: '12px' }}>
+                <td style={{ padding: '10px 12px' }}>
                   <input
                     type='checkbox'
                     checked={selected.has(row.id)}
@@ -7234,7 +7345,7 @@ function SavedKnowledgeLedger({
                 </td>
                 <td
                   style={{
-                    padding: '12px',
+                    padding: '10px 12px',
                     color: th.text,
                     fontSize: 13,
                     maxWidth: 420,
@@ -7255,18 +7366,18 @@ function SavedKnowledgeLedger({
                   </div>
                 </td>
                 <td
-                  style={{ padding: '12px', color: th.textSub, fontSize: 12 }}
+                  style={{ padding: '10px 12px', color: th.textSub, fontSize: 12 }}
                 >
                   {row.category}
                 </td>
                 <td
-                  style={{ padding: '12px', color: th.textSub, fontSize: 12 }}
+                  style={{ padding: '10px 12px', color: th.textSub, fontSize: 12 }}
                 >
                   {row.source}
                 </td>
                 <td
                   style={{
-                    padding: '12px',
+                    padding: '10px 12px',
                     color:
                       confidencePct(row.confidence) >= 80
                         ? '#059669'
@@ -7279,7 +7390,7 @@ function SavedKnowledgeLedger({
                 </td>
                 <td
                   style={{
-                    padding: '12px',
+                    padding: '10px 12px',
                     color: row.embed === 'embedded' ? '#059669' : '#d97706',
                     fontSize: 12,
                     fontWeight: 700,
@@ -7311,7 +7422,7 @@ function SavedKnowledgeLedger({
                 <td
                   colSpan={7}
                   style={{
-                    padding: 36,
+                    padding: 28,
                     textAlign: 'center',
                     color: th.textSub,
                     fontSize: 12,
@@ -7568,6 +7679,10 @@ export default function FAQPage() {
         target === 'website' ||
         target === 'saved'
       ) {
+        // Clamps/adjusts local state in response to a changing dependency
+        // (e.g. pagination bounds, active tab) — reviewed; not a
+        // derive-state-from-render antipattern in this context.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setCoachTab(target);
         setKnowledgeView(target);
         window.localStorage.removeItem('faq_coach_target');
@@ -7583,6 +7698,10 @@ export default function FAQPage() {
   }, [rawQ]);
 
   useEffect(() => {
+    // Resets local UI-only state (a flag, warning, or preview value)
+    // when the relevant prop/dependency changes — not deriving render
+    // output from state.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setManualPage(1);
   }, [filter, sort, dq]);
 
@@ -7600,9 +7719,9 @@ export default function FAQPage() {
       if (seq !== loadSeqRef.current) return;
       setItems(data.items || []);
       setLoaded(true);
-    } catch (e: any) {
+    } catch (e: unknown) {
       if (seq !== loadSeqRef.current) return;
-      const message = e?.message || 'Failed to load';
+      const message = e instanceof Error ? e.message : 'Failed to load';
       if (message === 'Not authenticated') {
         setItems([]);
         setLoaded(true);
@@ -7615,6 +7734,10 @@ export default function FAQPage() {
   }
 
   useEffect(() => {
+    // Fetch on mount / dependency change — the correct place for a
+    // loading/data flag on an async fetch, not a derive-state-from-render
+    // antipattern.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     load(dq);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dq]);
@@ -7653,8 +7776,8 @@ export default function FAQPage() {
         addFlashTimerRef.current = null;
       }, 2000);
       await load();
-    } catch (e: any) {
-      setErr(e?.message || 'Create failed');
+    } catch (e: unknown) {
+      setErr(e instanceof Error ? e.message : 'Create failed');
     } finally {
       setAdding(false);
     }
@@ -7671,8 +7794,8 @@ export default function FAQPage() {
       });
 
       await load();
-    } catch (e: any) {
-      setErr(e?.message || 'Update failed');
+    } catch (e: unknown) {
+      setErr(e instanceof Error ? e.message : 'Update failed');
     }
   }
 
@@ -7687,8 +7810,8 @@ export default function FAQPage() {
 
       setDelTarget(null);
       await load();
-    } catch (e: any) {
-      setErr(e?.message || 'Delete failed');
+    } catch (e: unknown) {
+      setErr(e instanceof Error ? e.message : 'Delete failed');
       setDelTarget(null);
     }
   }
@@ -7710,8 +7833,8 @@ export default function FAQPage() {
       });
 
       await load();
-    } catch (e: any) {
-      setErr(e?.message || 'Dup failed');
+    } catch (e: unknown) {
+      setErr(e instanceof Error ? e.message : 'Dup failed');
     }
   }
 
@@ -7782,8 +7905,8 @@ export default function FAQPage() {
           await loadKnowledgeDocuments();
           await loadSavedKnowledge();
           flashErr(`Deleted ${name || `document #${id}`}`, 2500);
-        } catch (e: any) {
-          flashErr(e?.message || 'Delete failed');
+        } catch (e: unknown) {
+          flashErr(e instanceof Error ? e.message : 'Delete failed');
         }
       },
     });
@@ -7819,8 +7942,8 @@ export default function FAQPage() {
           await loadSavedKnowledge();
           await loadWebsiteEntries();
           flashErr('Removed from live knowledge', 2500);
-        } catch (e: any) {
-          flashErr(e?.message || 'Remove failed');
+        } catch (e: unknown) {
+          flashErr(e instanceof Error ? e.message : 'Remove failed');
         }
       },
     });
@@ -8034,9 +8157,9 @@ export default function FAQPage() {
     // Block duplicate uploads (case-insensitive filename match against loaded documents)
     const target = file.name.toLowerCase().trim();
     const dup = knowledgeDocuments.find(
-      (d: any) =>
+      (d) =>
         (d.filename || '').toLowerCase().trim() === target ||
-        (d.original_filename || '').toLowerCase().trim() === target,
+        ((d as { original_filename?: string }).original_filename || '').toLowerCase().trim() === target,
     );
     if (dup) {
       setErr(
@@ -8525,9 +8648,9 @@ export default function FAQPage() {
    */
   function uniqueImportedHosts(): string[] {
     const set = new Set<string>();
-    for (const entry of websiteEntries as any[]) {
+    for (const entry of websiteEntries) {
       if (entry.status === 'rejected') continue;
-      const host = normalizeHost(entry.source_url || entry.url || '');
+      const host = normalizeHost(entrySourceUrl(entry));
       if (host) set.add(host);
     }
     return [...set];
@@ -8542,10 +8665,10 @@ export default function FAQPage() {
   async function deleteWebsiteSite(host: string) {
     const normalized = normalizeHost(host);
     if (!normalized) return;
-    const activeEntries = (websiteEntries as any[]).filter(
+    const activeEntries = websiteEntries.filter(
       (entry) =>
         entry.status !== 'rejected' &&
-        normalizeHost(entry.source_url || entry.url || '') === normalized,
+        normalizeHost(entrySourceUrl(entry)) === normalized,
     );
     const ids = activeEntries.map((entry) => entry.id as number);
     if (!ids.length) {
@@ -9029,12 +9152,12 @@ export default function FAQPage() {
     boxShadow: 'none',
   };
 
-  const onFocus = (e: React.FocusEvent<any>) => {
+  const onFocus = (e: React.FocusEvent<HTMLElement>) => {
     e.target.style.borderColor = th.accent;
     e.target.style.boxShadow = `0 0 0 3px ${th.accentSoft}`;
   };
 
-  const onBlur = (e: React.FocusEvent<any>) => {
+  const onBlur = (e: React.FocusEvent<HTMLElement>) => {
     e.target.style.borderColor = th.inputBorder;
     e.target.style.boxShadow = 'none';
   };
@@ -9257,8 +9380,8 @@ export default function FAQPage() {
         />
       )}
 
-      <div className='relative overflow-x-hidden'>
-        <div className='mx-auto flex max-w-[1500px] flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8'>
+      <div className='min-w-0 w-full'>
+        <div className='flex flex-col gap-(--layout-section-gap)'>
           {/* Header */}
           <div className='flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between'>
             <div>
@@ -9298,21 +9421,21 @@ export default function FAQPage() {
               </Button>
             </div>
           </div>
-          <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4'>
+          <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4'>
             <button
               type='button'
               onClick={() => setKnowledgeView('saved')}
-              className='rounded-xl border border-brand-100 bg-brand-50 p-6 text-left transition hover:border-brand-200 hover:bg-brand-100/60 dark:border-brand-500/20 dark:bg-brand-500/10 dark:hover:bg-brand-500/15'
+              className='rounded-xl border border-brand-100 bg-brand-50 p-4 text-left transition hover:border-brand-200 hover:bg-brand-100/60 dark:border-brand-500/20 dark:bg-brand-500/10 dark:hover:bg-brand-500/15'
             >
               <div className='flex items-center gap-3'>
-                <div className='flex h-9 w-9 items-center justify-center rounded-[10px] bg-brand-500/15 text-brand-500 dark:bg-brand-500/20 dark:text-brand-400'>
+                <div className='flex h-9 w-9 items-center justify-center rounded-(--radius-control) bg-brand-500/15 text-brand-500 dark:bg-brand-500/20 dark:text-brand-400'>
                   <Database size={16} />
                 </div>
                 <span className='type-small font-medium text-gray-600 dark:text-gray-400'>
                   Total knowledge
                 </span>
               </div>
-              <div className='mt-3 flex items-end justify-between gap-3'>
+              <div className='mt-2 flex items-end justify-between gap-3'>
                 <span className='text-title-sm font-semibold text-gray-800 dark:text-white/90'>
                   {totalKnowledgeCount}
                 </span>
@@ -9323,17 +9446,17 @@ export default function FAQPage() {
             <button
               type='button'
               onClick={() => setKnowledgeView('manual')}
-              className='rounded-xl border border-success-100 bg-success-50 p-6 text-left transition hover:border-success-200 hover:bg-success-100/60 dark:border-success-500/20 dark:bg-success-500/10 dark:hover:bg-success-500/15'
+              className='rounded-xl border border-success-100 bg-success-50 p-4 text-left transition hover:border-success-200 hover:bg-success-100/60 dark:border-success-500/20 dark:bg-success-500/10 dark:hover:bg-success-500/15'
             >
               <div className='flex items-center gap-3'>
-                <div className='flex h-9 w-9 items-center justify-center rounded-[10px] bg-success-500/15 text-success-600 dark:bg-success-500/20 dark:text-success-400'>
+                <div className='flex h-9 w-9 items-center justify-center rounded-(--radius-control) bg-success-500/15 text-success-600 dark:bg-success-500/20 dark:text-success-400'>
                   <MessageSquare size={16} />
                 </div>
                 <span className='type-small font-medium text-gray-600 dark:text-gray-400'>
                   Manual FAQs
                 </span>
               </div>
-              <div className='mt-3 flex items-end justify-between gap-3'>
+              <div className='mt-2 flex items-end justify-between gap-3'>
                 <span className='text-title-sm font-semibold text-gray-800 dark:text-white/90'>
                   {items.length}
                 </span>
@@ -9344,17 +9467,17 @@ export default function FAQPage() {
             <button
               type='button'
               onClick={() => setKnowledgeView('catalogue')}
-              className='rounded-xl border border-warning-100 bg-warning-50 p-6 text-left transition hover:border-warning-200 hover:bg-warning-100/60 dark:border-warning-500/20 dark:bg-warning-500/10 dark:hover:bg-warning-500/15'
+              className='rounded-xl border border-warning-100 bg-warning-50 p-4 text-left transition hover:border-warning-200 hover:bg-warning-100/60 dark:border-warning-500/20 dark:bg-warning-500/10 dark:hover:bg-warning-500/15'
             >
               <div className='flex items-center gap-3'>
-                <div className='flex h-9 w-9 items-center justify-center rounded-[10px] bg-warning-500/15 text-warning-600 dark:bg-warning-500/20 dark:text-warning-400'>
+                <div className='flex h-9 w-9 items-center justify-center rounded-(--radius-control) bg-warning-500/15 text-warning-600 dark:bg-warning-500/20 dark:text-warning-400'>
                   <FileText size={16} />
                 </div>
                 <span className='type-small font-medium text-gray-600 dark:text-gray-400'>
                   Uploaded docs
                 </span>
               </div>
-              <div className='mt-3 flex items-end justify-between gap-3'>
+              <div className='mt-2 flex items-end justify-between gap-3'>
                 <span className='text-title-sm font-semibold text-gray-800 dark:text-white/90'>
                   {knowledgeDocuments.length}
                 </span>
@@ -9365,17 +9488,17 @@ export default function FAQPage() {
             <button
               type='button'
               onClick={() => setKnowledgeView('website')}
-              className='rounded-xl border border-purple-100 bg-purple-50 p-6 text-left transition hover:border-purple-200 hover:bg-purple-100/60 dark:border-purple-500/20 dark:bg-purple-500/10 dark:hover:bg-purple-500/15'
+              className='rounded-xl border border-purple-100 bg-purple-50 p-4 text-left transition hover:border-purple-200 hover:bg-purple-100/60 dark:border-purple-500/20 dark:bg-purple-500/10 dark:hover:bg-purple-500/15'
             >
               <div className='flex items-center gap-3'>
-                <div className='flex h-9 w-9 items-center justify-center rounded-[10px] bg-purple-500/15 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400'>
+                <div className='flex h-9 w-9 items-center justify-center rounded-(--radius-control) bg-purple-500/15 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400'>
                   <Globe size={16} />
                 </div>
                 <span className='type-small font-medium text-gray-600 dark:text-gray-400'>
                   Website entries
                 </span>
               </div>
-              <div className='mt-3 flex items-end justify-between gap-3'>
+              <div className='mt-2 flex items-end justify-between gap-3'>
                 <span className='text-title-sm font-semibold text-gray-800 dark:text-white/90'>
                   {websiteEntries.length}
                 </span>
@@ -9444,7 +9567,7 @@ export default function FAQPage() {
             <div
               role='status'
               aria-live='polite'
-              className='fixed bottom-6 right-6 z-[90] flex items-center gap-3 rounded-xl border border-success-200 bg-white px-4 py-3 shadow-theme-lg dark:border-success-500/30 dark:bg-gray-900'
+              className='fixed bottom-6 right-6 z-90 flex items-center gap-3 rounded-xl border border-success-200 bg-white px-4 py-3 shadow-theme-lg dark:border-success-500/30 dark:bg-gray-900'
             >
               <CheckCircle2 size={18} className='text-success-500' />
               <span className='type-small font-semibold text-success-700 dark:text-success-400'>
@@ -9519,7 +9642,7 @@ export default function FAQPage() {
             onDeleteApprovedEntity={deleteApprovedEntity}
             onBulkDeleteApprovedEntities={bulkDeleteApprovedEntities}
             manualContent={
-              <div className='flex flex-col gap-5 p-4 sm:p-6'>
+              <div className='flex flex-col gap-4 p-4 sm:p-6'>
                 {/* Stats tiles (also act as filter chips) */}
                 {loaded && items.length > 0 && (
                   <div className='grid grid-cols-1 gap-4 sm:grid-cols-3'>
@@ -9549,7 +9672,7 @@ export default function FAQPage() {
                           key={s.l}
                           onClick={() => setFilter(s.f)}
                           className={cn(
-                            'w-full rounded-2xl border bg-white p-6 text-left transition dark:bg-white/[0.03]',
+                            'w-full rounded-2xl border bg-white p-4 text-left transition dark:bg-white/3',
                             isSelected
                               ? 'border-brand-300 shadow-theme-sm dark:border-brand-500/40'
                               : 'border-gray-200 hover:border-gray-300 dark:border-gray-800 dark:hover:border-gray-700',
@@ -9558,7 +9681,7 @@ export default function FAQPage() {
                           <p className='text-title-sm font-semibold tabular-nums text-gray-800 dark:text-white/90'>
                             {s.n}
                           </p>
-                          <p className='mt-2 type-small text-gray-500 dark:text-gray-400'>
+                          <p className='mt-1.5 type-small text-gray-500 dark:text-gray-400'>
                             {s.l}
                           </p>
                         </button>
@@ -9568,8 +9691,8 @@ export default function FAQPage() {
                 )}
 
                 {/* Manual toolbar: search + sort + Test + Export + New FAQ */}
-                <div className='flex flex-wrap items-center gap-2 rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]'>
-                  <div className='relative min-w-[220px] flex-1'>
+                <div className='flex flex-wrap items-center gap-2 rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/3'>
+                  <div className='relative min-w-55 flex-1'>
                     <Search
                       size={15}
                       className='pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500'
@@ -9616,7 +9739,7 @@ export default function FAQPage() {
                   <select
                     value={sort}
                     onChange={(e) => setSort(e.target.value as SortKey)}
-                    className='h-9 rounded-[10px] border border-gray-300 bg-transparent px-3 type-small text-gray-700 shadow-theme-xs outline-none focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300'
+                    className='h-(--control-height-sm) rounded-(--radius-control) border border-gray-300 bg-transparent px-3 type-small text-gray-700 shadow-theme-xs outline-none focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300'
                   >
                     <option value='updated'>Updated</option>
                     <option value='created'>Created</option>
@@ -9666,9 +9789,9 @@ export default function FAQPage() {
                 {showAdd && (
                   <div
                     id='new-faq-form'
-                    className='rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]'
+                    className='rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/3'
                   >
-                    <div className='border-b border-gray-100 px-6 py-5 dark:border-gray-800'>
+                    <div className='border-b border-gray-100 px-5 py-4 dark:border-gray-800'>
                       <h2 className='type-body font-medium text-gray-800 dark:text-white/90'>
                         New FAQ entry
                       </h2>
@@ -9678,7 +9801,7 @@ export default function FAQPage() {
                       </p>
                     </div>
 
-                    <div className='flex flex-col gap-3 p-4 sm:p-6'>
+                    <div className='flex flex-col gap-3 p-4'>
                       <Input
                         value={nQ}
                         onChange={(e) => setNQ(e.target.value)}
@@ -9689,7 +9812,7 @@ export default function FAQPage() {
                         onChange={(e) => setNA(e.target.value)}
                         rows={3}
                         placeholder='Write the answer your bot will give...'
-                        className='w-full resize-none rounded-[10px] border border-gray-300 bg-transparent px-3.5 py-2 type-small leading-relaxed text-gray-800 shadow-theme-xs outline-none focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800'
+                        className='w-full resize-none rounded-(--radius-control) border border-gray-300 bg-transparent px-3.5 py-2 type-small leading-relaxed text-gray-800 shadow-theme-xs outline-none focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800'
                       />
                       <div className='grid grid-cols-1 gap-3 sm:grid-cols-2'>
                         <Input
@@ -9706,7 +9829,7 @@ export default function FAQPage() {
                       <Button
                         onClick={createFaq}
                         disabled={adding || !nQ.trim() || !nA.trim()}
-                        className='mt-1 h-10 w-full rounded-[10px] bg-brand-500 type-small font-semibold text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-400 disabled:opacity-70'
+                        className='mt-1 h-(--control-height-md) w-full rounded-(--radius-control) bg-brand-500 type-small font-semibold text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-400 disabled:opacity-70'
                       >
                         {adding ? 'Saving FAQ...' : 'Save FAQ'}
                       </Button>
@@ -9728,7 +9851,7 @@ export default function FAQPage() {
                         aria-label='Bulk actions'
                       >
                         <span className='inline-flex items-center gap-2 type-small font-semibold text-brand-600 dark:text-brand-400'>
-                          <span className='inline-grid min-w-[22px] place-items-center rounded-full bg-brand-500 px-1.5 py-0.5 type-caption font-bold text-white tabular-nums'>
+                          <span className='inline-grid min-w-5.5 place-items-center rounded-full bg-brand-500 px-1.5 py-0.5 type-caption font-bold text-white tabular-nums'>
                             {selectedFaqIds.size}
                           </span>
                           {selectedFaqIds.size === 1
@@ -9790,30 +9913,30 @@ export default function FAQPage() {
                   })()}
 
                 {/* FAQ list (paginated) */}
-                <div className='flex flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]'>
+                <div className='flex flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-3 dark:border-gray-800 dark:bg-white/3'>
                   {loading &&
                     !loaded &&
                     Array.from({ length: 5 }).map((_, i) => (
                       <div
                         key={i}
-                        className='flex animate-pulse flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.02]'
+                        className='flex animate-pulse flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/2'
                         aria-hidden
                       >
                         <div
                           className='h-3.5 rounded bg-gray-200 dark:bg-white/10'
                           style={{ width: `${65 + ((i * 7) % 25)}%` }}
                         />
-                        <div className='h-2.5 w-[90%] rounded bg-gray-100 dark:bg-white/[0.06]' />
+                        <div className='h-2.5 w-[90%] rounded bg-gray-100 dark:bg-white/6' />
                         <div
-                          className='h-2.5 rounded bg-gray-100 dark:bg-white/[0.06]'
+                          className='h-2.5 rounded bg-gray-100 dark:bg-white/6'
                           style={{ width: `${45 + ((i * 5) % 30)}%` }}
                         />
                       </div>
                     ))}
 
                   {!loading && displayed.length === 0 && (
-                    <div className='rounded-2xl border border-dashed border-gray-300 px-8 py-14 text-center dark:border-gray-700'>
-                      <div className='mx-auto mb-3.5 flex h-14 w-14 items-center justify-center rounded-full bg-gray-100 dark:bg-white/[0.06]'>
+                    <div className='rounded-2xl border border-dashed border-gray-300 px-6 py-8 text-center dark:border-gray-700'>
+                      <div className='mx-auto mb-3.5 flex h-14 w-14 items-center justify-center rounded-full bg-gray-100 dark:bg-white/6'>
                         {rawQ ? (
                           <Search
                             size={22}
@@ -9833,7 +9956,7 @@ export default function FAQPage() {
                             ? `No ${filter} FAQs yet`
                             : "No FAQs yet - let's add one"}
                       </p>
-                      <p className='mx-auto mt-2 max-w-[380px] type-small leading-relaxed text-gray-400 dark:text-gray-500'>
+                      <p className='mx-auto mt-2 max-w-95 type-small leading-relaxed text-gray-400 dark:text-gray-500'>
                         {rawQ
                           ? 'Try a broader search term, check the filter above, or add this as a new FAQ.'
                           : 'Add FAQs by hand. Best when you already know what customers ask. For anything at scale, try uploading docs or importing from your site.'}
@@ -9914,7 +10037,7 @@ export default function FAQPage() {
                       <button
                         onClick={() => setManualPage((p) => Math.max(1, p - 1))}
                         disabled={currentPage === 1}
-                        className='flex h-8.5 w-8.5 items-center justify-center rounded-[10px] border border-gray-200 bg-white text-gray-500 disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400'
+                        className='flex h-8.5 w-8.5 items-center justify-center rounded-(--radius-control) border border-gray-200 bg-white text-gray-500 disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-800 dark:bg-white/3 dark:text-gray-400'
                       >
                         <ChevronLeft size={15} />
                       </button>
@@ -9945,10 +10068,10 @@ export default function FAQPage() {
                               key={p}
                               onClick={() => setManualPage(p)}
                               className={cn(
-                                'flex h-8.5 min-w-8.5 items-center justify-center rounded-[10px] px-3 type-small font-medium transition',
+                                'flex h-8.5 min-w-8.5 items-center justify-center rounded-(--radius-control) px-3 type-small font-medium transition',
                                 p === currentPage
                                   ? 'bg-brand-500 text-white'
-                                  : 'border border-gray-200 bg-white text-gray-500 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400',
+                                  : 'border border-gray-200 bg-white text-gray-500 dark:border-gray-800 dark:bg-white/3 dark:text-gray-400',
                               )}
                             >
                               {p}
@@ -9962,7 +10085,7 @@ export default function FAQPage() {
                           setManualPage((p) => Math.min(totalPages, p + 1))
                         }
                         disabled={currentPage === totalPages}
-                        className='flex h-8.5 w-8.5 items-center justify-center rounded-[10px] border border-gray-200 bg-white text-gray-500 disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400'
+                        className='flex h-8.5 w-8.5 items-center justify-center rounded-(--radius-control) border border-gray-200 bg-white text-gray-500 disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-800 dark:bg-white/3 dark:text-gray-400'
                       >
                         <ChevronRight size={15} />
                       </button>

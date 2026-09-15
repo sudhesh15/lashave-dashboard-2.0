@@ -157,8 +157,11 @@ const REVIEW_KEYWORDS = [
 ] as const;
 
 type KeywordKey = (typeof REVIEW_KEYWORDS)[number]["key"];
-function friendlyErrorMessage(error: any): string {
-  const raw = error?.message;
+function friendlyErrorMessage(error: unknown): string {
+  const raw =
+    error && typeof error === "object" && "message" in error
+      ? (error as { message?: unknown }).message
+      : undefined;
   if (typeof raw === "string" && raw && raw !== "[object Object]") {
     return raw;
   }
@@ -226,7 +229,7 @@ function Card({
 }) {
   return (
     <div
-      className={`rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] ${className}`}
+      className={`rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/3 ${className}`}
     >
       {children}
     </div>
@@ -251,26 +254,26 @@ function MetricCard({
         ? "bg-warning-50 text-warning-600 dark:bg-warning-500/15 dark:text-orange-400"
         : tone === "error"
           ? "bg-error-50 text-error-600 dark:bg-error-500/15 dark:text-error-500"
-          : "bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400";
+          : "bg-brand-50 text-brand-500 dark:bg-brand-500/12 dark:text-brand-400";
 
   return (
-    <Card className="p-6 md:p-6">
+    <Card className="p-4">
       <span
         className={`inline-flex rounded-full px-3 py-1 type-caption font-medium ${toneClass}`}
       >
         {label}
       </span>
-      <h3 className="mt-5 text-title-sm font-bold text-gray-800 dark:text-white/90">
+      <h3 className="mt-3 text-title-sm font-bold text-gray-800 dark:text-white/90">
         {value}
       </h3>
-      <p className="mt-2 type-small text-gray-500 dark:text-gray-400">{sub}</p>
+      <p className="mt-1 type-small text-gray-500 dark:text-gray-400">{sub}</p>
     </Card>
   );
 }
 
 function ChartHeader({ title, subtitle }: { title: string; subtitle: string }) {
   return (
-    <div className="mb-6">
+    <div className="mb-4">
       <h3 className="type-card-title font-semibold text-gray-800 dark:text-white/90">
         {title}
       </h3>
@@ -334,19 +337,19 @@ function RatingDistributionChart({
   };
 
   return (
-    <Card className="p-6 sm:p-6">
+    <Card className="p-4">
       <ChartHeader
         title="Rating Distribution"
         subtitle="Star mix across the selected Google profile"
       />
-      <div className="grid gap-4 lg:grid-cols-[240px_1fr] lg:items-center">
+      <div className="grid gap-3 lg:grid-cols-[220px_1fr] lg:items-center">
         <ReactApexChart
           options={options}
           series={distribution.map((item) => item.count)}
           type="donut"
-          height={220}
+          height={200}
         />
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           {distribution.map((item, index) => (
             <div key={item.rating}>
               <div className="mb-1 flex justify-between type-small">
@@ -432,7 +435,7 @@ function KeywordSignalChart({
   };
 
   return (
-    <Card className="p-6 sm:p-6">
+    <Card className="p-4">
       <ChartHeader
         title="Review Signals"
         subtitle="Recurring topics found in review text and replies"
@@ -444,10 +447,10 @@ function KeywordSignalChart({
             { name: "Mentions", data: keywordStats.map((item) => item.count) },
           ]}
           type="bar"
-          height={260}
+          height={220}
         />
       ) : (
-        <div className="flex min-h-56 items-center justify-center rounded-xl border border-dashed border-gray-200 type-small text-gray-500 dark:border-gray-800 dark:text-gray-400">
+        <div className="flex min-h-32 items-center justify-center rounded-xl border border-dashed border-gray-200 type-small text-gray-500 dark:border-gray-800 dark:text-gray-400">
           No keyword signals detected
         </div>
       )}
@@ -534,9 +537,9 @@ function ReviewRow({
 
   return (
     <>
-      <tr className="align-top hover:bg-gray-50 dark:hover:bg-white/[0.02]">
-        <td className="px-5 py-4 sm:px-6">
-          <div className="flex items-start gap-3">
+      <tr className="align-top hover:bg-gray-50 dark:hover:bg-white/2">
+        <td className="px-4 py-3 sm:px-5">
+          <div className="flex items-start gap-2.5">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 type-small font-semibold text-gray-700 dark:bg-gray-800 dark:text-gray-300">
               {initials(review.reviewer_name)}
             </div>
@@ -545,9 +548,9 @@ function ReviewRow({
                 <span className="block truncate">
                   {review.reviewer_name || "Google reviewer"}
                 </span>
-                <span className="pointer-events-none absolute left-0 top-full z-50 mt-1 hidden max-w-[280px] group-hover:block">
-                  <span className="absolute -top-1 left-3 h-2 w-2 rotate-45 rounded-[2px] bg-gray-900" />
-                  <span className="relative block rounded-[10px] bg-gray-900 px-3 py-1.5 type-caption font-medium text-white shadow-lg">
+                <span className="pointer-events-none absolute left-0 top-full z-50 mt-1 hidden max-w-70 group-hover:block">
+                  <span className="absolute -top-1 left-3 h-2 w-2 rotate-45 rounded-xs bg-gray-900" />
+                  <span className="relative block rounded-(--radius-control) bg-gray-900 px-3 py-1.5 type-caption font-medium text-white shadow-lg">
                     {review.reviewer_name || "Google reviewer"}
                   </span>
                 </span>
@@ -561,18 +564,18 @@ function ReviewRow({
             </div>
           </div>
         </td>
-        <td className="max-w-[420px] px-5 py-4">
+        <td className="max-w-105 px-4 py-3">
           <p className="line-clamp-3 type-small text-gray-700 dark:text-gray-300">
             {review.comment ||
               `Rated ${rating || "unknown"} stars with no written review.`}
           </p>
           {review.critical_reasons && review.critical_reasons.length > 0 && (
-            <p className="mt-2 type-caption text-gray-500 dark:text-gray-400">
+            <p className="mt-1.5 type-caption text-gray-500 dark:text-gray-400">
               {review.critical_reasons.join(", ")}
             </p>
           )}
         </td>
-        <td className="px-5 py-4">
+        <td className="px-4 py-3">
           <span
             className={`inline-flex rounded-full px-3 py-1 type-caption font-medium ${replied
               ? "bg-success-50 text-success-600 dark:bg-success-500/15 dark:text-success-500"
@@ -588,9 +591,9 @@ function ReviewRow({
                 : "Needs reply"}
           </span>
         </td>
-        <td className="px-5 py-4">
+        <td className="px-4 py-3">
           {replied ? (
-            <p className="max-w-[320px] type-small text-gray-500 dark:text-gray-400">
+            <p className="max-w-80 type-small text-gray-500 dark:text-gray-400">
               {review.reply_text || "Reply published."}
             </p>
           ) : (
@@ -599,7 +602,7 @@ function ReviewRow({
                 type="button"
                 onClick={() => void generateAiSuggestion()}
                 disabled={publishing || aiProcessing}
-                className="inline-flex h-9 items-center gap-2 rounded-[10px] border border-gray-200 bg-white px-3 type-small font-medium text-gray-700 disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                className="inline-flex h-9 items-center gap-2 rounded-(--radius-control) border border-gray-200 bg-white px-3 type-small font-medium text-gray-700 disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
               >
                 {aiProcessing && needsManual ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -616,7 +619,7 @@ function ReviewRow({
                 disabled={
                   publishing || aiProcessing || (needsManual && !reply.trim())
                 }
-                className="inline-flex h-9 items-center gap-2 rounded-[10px] bg-brand-500 px-3 type-small font-medium text-white disabled:opacity-50"
+                className="inline-flex h-9 items-center gap-2 rounded-(--radius-control) bg-brand-500 px-3 type-small font-medium text-white disabled:opacity-50"
               >
                 {publishing || (aiProcessing && !needsManual) ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -633,13 +636,13 @@ function ReviewRow({
         <tr>
           <td
             colSpan={4}
-            className="border-t border-gray-100 px-5 pb-5 dark:border-white/[0.05] sm:px-6"
+            className="border-t border-gray-100 px-4 pb-4 dark:border-white/5 sm:px-5"
           >
             <textarea
               value={reply}
               onChange={(event) => setReply(event.target.value)}
               placeholder="Write a reply or generate an AI draft"
-              className="mt-2 min-h-24 w-full resize-y rounded-[10px] border border-gray-200 bg-white px-3 py-2 type-small text-gray-700 outline-none focus:border-brand-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
+              className="mt-1.5 min-h-24 w-full resize-y rounded-(--radius-control) border border-gray-200 bg-white px-3 py-2 type-small text-gray-700 outline-none focus:border-brand-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
             />
           </td>
         </tr>
@@ -698,17 +701,6 @@ function ReviewsInner() {
   const [error, setError] = useState<string | null>(null);
   const [pendingCriticalCount, setPendingCriticalCount] = useState(0);
   const [needsHumanReviewCount, setNeedsHumanReviewCount] = useState(0);
-
-  const selectedChannel = useMemo(
-    () => channels.find((channel) => channel.id === selectedChannelId) || null,
-    [channels, selectedChannelId],
-  );
-
-  const channelName =
-    selectedChannel?.account_name ||
-    selectedChannel?.display_name ||
-    selectedChannel?.platform_account_id ||
-    "Google Business Profile";
 
   const showMessage = useCallback(
     (message: string, kind: "success" | "error") => {
@@ -802,11 +794,15 @@ function ReviewsInner() {
     intervalRef.current = setInterval(() => {
       void loadReviews();
     }, REVIEW_SYNC_INTERVAL_SEC);
-  }, [loadReviews]);
+  }, [loadReviews, REVIEW_SYNC_INTERVAL_SEC]);
 
   useEffect(() => {
     if (!selectedChannelId) return;
 
+    // Fetch on mount / dependency change — the correct place for a
+    // loading/data flag on an async fetch, not a derive-state-from-render
+    // antipattern.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadReviews();
 
     startAutoPolling();
@@ -1102,8 +1098,8 @@ function ReviewsInner() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mb-6  flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+    <div className="min-w-0 w-full">
+      <div className="mb-4  flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <p className="type-small font-medium text-brand-500 dark:text-brand-400">
             Google Reviews
@@ -1117,13 +1113,13 @@ function ReviewsInner() {
           </p>
         </div>
 
-        <div className="flex  flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="flex  flex-col gap-2 sm:flex-row sm:items-center">
           <div ref={channelMenuRef} className="relative">
             <button
               type="button"
               onClick={() => setChannelMenuOpen((value) => !value)}
               disabled={loadingChannels || channels.length === 0}
-              className="inline-flex h-10 min-w-[240px] items-center justify-between rounded-[10px] border border-gray-200 bg-white px-4 text-left type-small font-medium text-gray-700 disabled:opacity-60 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300"
+              className="inline-flex h-10 min-w-60 items-center justify-between rounded-(--radius-control) border border-gray-200 bg-white px-4 text-left type-small font-medium text-gray-700 disabled:opacity-60 dark:border-gray-800 dark:bg-white/3 dark:text-gray-300"
             >
               {loadingChannels ? (
                 <span>Loading profile</span>
@@ -1151,7 +1147,7 @@ function ReviewsInner() {
             </button>
 
             {channelMenuOpen && channels.length > 1 && (
-              <div className="absolute right-0 top-[calc(100%+8px)] z-20 w-[300px] rounded-xl border border-gray-200 bg-white p-2 shadow-theme-lg dark:border-gray-800 dark:bg-gray-900">
+              <div className="absolute right-0 top-[calc(100%+8px)] z-20 w-75 rounded-xl border border-gray-200 bg-white p-2 shadow-theme-lg dark:border-gray-800 dark:bg-gray-900">
                 {channels.map((channel) => {
                   const active = channel.id === selectedChannelId;
 
@@ -1183,7 +1179,7 @@ function ReviewsInner() {
                         <span className="truncate">{profileName}</span>
                       </span>
 
-                      <span className="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 type-caption text-gray-500 dark:bg-white/[0.06] dark:text-gray-400">
+                      <span className="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 type-caption text-gray-500 dark:bg-white/6 dark:text-gray-400">
                         Reviews
                       </span>
                     </button>
@@ -1212,7 +1208,7 @@ function ReviewsInner() {
               void syncReviews();
             }}
             disabled={!selectedChannelId || loadingReviews}
-            className="inline-flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-[10px] border border-gray-200 bg-white px-4 type-small font-medium text-gray-700 disabled:opacity-60"
+            className="inline-flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-(--radius-control) border border-gray-200 bg-white px-4 type-small font-medium text-gray-700 disabled:opacity-60"
           >
             <RefreshCw
               className={`h-4 w-4 shrink-0 ${loadingReviews ? "animate-spin" : ""
@@ -1225,7 +1221,7 @@ function ReviewsInner() {
       </div>
 
       {success && (
-        <div className="mb-6 flex items-center gap-3 rounded-xl border border-success-200 bg-success-50 px-4 py-3 type-small font-medium text-success-700 dark:border-success-500/20 dark:bg-success-500/10 dark:text-success-500">
+        <div className="mb-4 flex items-center gap-3 rounded-xl border border-success-200 bg-success-50 px-4 py-3 type-small font-medium text-success-700 dark:border-success-500/20 dark:bg-success-500/10 dark:text-success-500">
           <Check className="h-4 w-4" />
           <span className="flex-1">{success}</span>
           <button type="button" onClick={() => setSuccess("")}>
@@ -1235,7 +1231,7 @@ function ReviewsInner() {
       )}
 
       {error && (
-        <div className="mb-6 flex items-start gap-3 rounded-xl border border-error-200 bg-error-50 px-4 py-3 type-small font-medium text-error-700 dark:border-error-500/20 dark:bg-error-500/10 dark:text-error-500">
+        <div className="mb-4 flex items-start gap-3 rounded-xl border border-error-200 bg-error-50 px-4 py-3 type-small font-medium text-error-700 dark:border-error-500/20 dark:bg-error-500/10 dark:text-error-500">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
           <span className="flex-1">{error}</span>
           <button type="button" onClick={() => setError("")}>
@@ -1255,7 +1251,7 @@ function ReviewsInner() {
         </Card>
       ) : (
         <>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 md:gap-6">
+          <div className="grid grid-cols-1 gap-(--layout-card-gap) sm:grid-cols-2 lg:grid-cols-4">
             <MetricCard
               label="Average rating"
               value={stats.total ? stats.average.toFixed(1) : "0.0"}
@@ -1281,7 +1277,7 @@ function ReviewsInner() {
             />
           </div>
 
-          <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
+          <div className="mt-(--layout-section-gap) grid grid-cols-1 gap-(--layout-card-gap) lg:grid-cols-2">
             <RatingDistributionChart
               distribution={stats.distribution}
               isDark={isDark}
@@ -1289,8 +1285,8 @@ function ReviewsInner() {
             <KeywordSignalChart keywordStats={keywordStats} isDark={isDark} />
           </div>
 
-          <div className="mt-6 min-w-0 max-w-full overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-            <div className="flex flex-col gap-2 border-b border-gray-100 px-5 py-5 dark:border-white/[0.05] sm:flex-row sm:items-center sm:justify-between sm:px-6">
+          <div className="mt-(--layout-section-gap) min-w-0 max-w-full overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3">
+            <div className="flex flex-col gap-2 border-b border-gray-100 px-4 py-3 dark:border-white/5 sm:flex-row sm:items-center sm:justify-between sm:px-5">
               <h3 className="type-body font-semibold text-gray-800 dark:text-white/90">
                 Reviews
               </h3>
@@ -1299,20 +1295,20 @@ function ReviewsInner() {
               </div>
             </div>
 
-            <div className="min-w-0 px-5 py-5 sm:px-6">
-              <div className="flex flex-col gap-4 rounded-t-xl border border-b-0 border-gray-200 bg-white px-5 py-4 dark:border-white/[0.05] dark:bg-white/[0.01] lg:flex-row lg:items-center lg:justify-between">
+            <div className="min-w-0 px-4 py-4 sm:px-5">
+              <div className="flex flex-col gap-3 rounded-t-xl border border-b-0 border-gray-200 bg-white px-4 py-3 dark:border-white/5 dark:bg-white/1 lg:flex-row lg:items-center lg:justify-between">
                 <h4 className="type-card-title font-semibold text-gray-800 dark:text-white/90">
                   {activeStatusTab.label} reviews
                 </h4>
-                <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
-                  <div className="relative w-full sm:w-[240px]">
+                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
+                  <div className="relative w-full sm:w-(--control-width-search-sm)">
                     <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400" />
                     <input
                       type="search"
                       value={search}
                       onChange={(event) => setSearch(event.target.value)}
                       placeholder="Search reviewer or text"
-                      className="h-10 w-full rounded-[10px] border border-gray-300 bg-white py-2 pl-11 pr-4 type-small text-gray-800 shadow-theme-xs outline-none placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-gray-500"
+                      className="h-10 w-full rounded-(--radius-control) border border-gray-300 bg-white py-2 pl-11 pr-4 type-small text-gray-800 shadow-theme-xs outline-none placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-gray-500"
                     />
                   </div>
 
@@ -1340,10 +1336,10 @@ function ReviewsInner() {
                                 setStatusFilterOpen(false);
                               }}
                               className={cn(
-                                "flex w-full items-center justify-between rounded-[10px] px-3 py-2 text-left type-small font-medium transition",
+                                "flex w-full items-center justify-between rounded-(--radius-control) px-3 py-2 text-left type-small font-medium transition",
                                 isActive
                                   ? "bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400"
-                                  : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/[0.04]",
+                                  : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/4",
                               )}
                             >
                               <span className="inline-flex items-center gap-2">
@@ -1410,7 +1406,7 @@ function ReviewsInner() {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-3 border-x border-gray-200 bg-white px-5 py-4 empty:hidden dark:border-white/[0.05] dark:bg-white/[0.01]">
+              <div className="flex flex-col gap-3 border-x border-gray-200 bg-white px-5 py-4 empty:hidden dark:border-white/5 dark:bg-white/1">
                 {filter === "critical" && pendingCriticalCount > 0 && (
                   <div className="flex flex-col gap-3 rounded-xl border border-warning-200 bg-warning-50 p-4 dark:border-warning-500/20 dark:bg-warning-500/10 sm:flex-row sm:items-center sm:justify-between">
                     <div>
@@ -1426,7 +1422,7 @@ function ReviewsInner() {
                       type="button"
                       disabled={classifyingReviews}
                       onClick={() => void classifyPendingCriticalReviews()}
-                      className="inline-flex h-10 items-center justify-center gap-2 rounded-[10px] bg-brand-500 px-4 type-small font-medium text-white disabled:opacity-60"
+                      className="inline-flex h-10 items-center justify-center gap-2 rounded-(--radius-control) bg-brand-500 px-4 type-small font-medium text-white disabled:opacity-60"
                     >
                       {classifyingReviews && (
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -1437,22 +1433,22 @@ function ReviewsInner() {
                 )}
               </div>
 
-              <div className="min-w-0 max-w-full overflow-hidden rounded-b-xl border border-gray-200 dark:border-white/[0.05]">
+              <div className="min-w-0 max-w-full overflow-hidden rounded-b-xl border border-gray-200 dark:border-white/5">
                 <div className="w-full overflow-x-auto">
-                  <table className="lashvae-column-dividers min-w-[1160px] table-fixed">
+                  <table className="lashvae-column-dividers min-w-290 table-fixed">
                     <colgroup>
-                      <col className="w-[240px]" />
-                      <col className="w-[440px]" />
-                      <col className="w-[150px]" />
-                      <col className="w-[330px]" />
+                      <col className="w-60" />
+                      <col className="w-110" />
+                      <col className="w-37.5" />
+                      <col className="w-82.5" />
                     </colgroup>
-                    <thead className="border-b border-gray-100 dark:border-white/[0.05]">
+                    <thead className="border-b border-gray-100 dark:border-white/5">
                       <tr>
                         {["Reviewer", "Review", "Status", "Action"].map(
                           (header) => (
                             <th
                               key={header}
-                              className="px-5 py-3 text-left type-body font-medium text-gray-500 dark:text-gray-400"
+                              className="px-4 py-2.5 text-left type-body font-medium text-gray-500 dark:text-gray-400"
                             >
                               {header}
                             </th>
@@ -1460,12 +1456,12 @@ function ReviewsInner() {
                         )}
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+                    <tbody className="divide-y divide-gray-100 dark:divide-white/5">
                       {loadingReviews || loadingCriticalReviews ? (
                         <tr>
                           <td
                             colSpan={4}
-                            className="px-5 py-14 text-center type-small text-gray-500 dark:text-gray-400"
+                            className="px-4 py-8 text-center type-small text-gray-500 dark:text-gray-400"
                           >
                             Loading reviews
                           </td>
@@ -1474,7 +1470,7 @@ function ReviewsInner() {
                         <tr>
                           <td
                             colSpan={4}
-                            className="px-5 py-14 text-center type-small text-gray-500 dark:text-gray-400"
+                            className="px-4 py-8 text-center type-small text-gray-500 dark:text-gray-400"
                           >
                             No reviews match this filter
                           </td>
