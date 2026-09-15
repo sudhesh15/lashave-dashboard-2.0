@@ -749,7 +749,7 @@ export default function ConversationDetailPage() {
                         ? 'Conversation is closed…'
                         : isHandoff
                           ? 'Message as agent…'
-                          : 'AI is handling conversation — click Handoff to reply…'
+                          : 'AI assistant is active — select Handoff to reply personally…'
                     }
                     className={`h-9 min-w-0 flex-1 rounded-full border border-gray-300 bg-transparent px-4 type-caption font-medium text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 ${channelTheme.ring} ${!isHandoff ? 'cursor-not-allowed opacity-60' : ''}`}
                   />
